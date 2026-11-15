@@ -1,0 +1,38 @@
+# Binários e executáveis compilados
+/bin/
+/dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Dependências e diretórios de build de pacotes
+vendor/
+
+# Arquivos de workspace do Go (go.work.sum)
+go.work.sum
+
+# Arquivos de ambiente e segredos locais
+.env
+.env.local
+.env.*.local
+
+# Arquivos de IDEs e Editores (VS Code, GoLand, Vim)
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs e arquivos de banco de dados locais temporários
+*.log
+*.sqlite
+*.db
+
+# Arquivos gerados por sistemas operacionais
+.DS_Store
+Thumbs.db

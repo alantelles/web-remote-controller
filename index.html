@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle 01V96V2 (WebSocket) - Canal 1</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 30px auto; padding: 0 15px; background: #18181b; color: #f4f4f5; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; background: #dc2626; }
+    .badge.online { background: #16a34a; }
+    .card { background: #27272a; padding: 20px; border-radius: 10px; margin-bottom: 18px; }
+    label { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 12px; }
+    input[type="range"] { width: 100%; height: 32px; accent-color: #3b82f6; }
+    .hex-box { background: #09090b; color: #4ade80; font-family: monospace; padding: 12px; border-radius: 6px; font-size: 14px; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h3>Yamaha 01V96V2 — Canal 1</h3>
+    <span id="wsStatus" class="badge">Desconectado</span>
+  </div>
+
+  <!-- SLIDER DE VOLUME (Element 0x1C, Param 0x00, Channel 0x00) -->
+  <div class="card">
+    <label>
+      <span>Volume (Fader)</span>
+      <span id="volLabel">823 (0.0 dB)</span>
+    </label>
+    <input type="range" id="volSlider" min="0" max="1023" value="823">
+  </div>
+
+  <!-- SLIDER DE MUTE / ON (Element 0x1A, Param 0x00, Channel 0x00) -->
+  <div class="card">
+    <label>
+      <span>Canal ON / Mute</span>
+      <span id="muteLabel">1 (ON / Aberto)</span>
+    </label>
+    <input type="range" id="muteSlider" min="0" max="1" step="1" value="1">
+  </div>
+
+  <div class="card">
+    <label><span>Última mensagem SysEx enviada pelo Go:</span></label>
+    <div class="hex-box" id="hexOutput">F0 43 10 3E 0D 01 1C 00 00 00 00 06 37 F7</div>
+  </div>
+
+  <script>
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${proto}//${location.host}/ws`);
+    const statusEl = document.getElementById('wsStatus');
+
+    ws.onopen = () => {
+      statusEl.textContent = 'Conectado';
+      statusEl.classList.add('online');
+    };
+
+    ws.onclose = () => {
+      statusEl.textContent = 'Desconectado';
+      statusEl.classList.remove('online');
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.hex) {
+        document.getElementById('hexOutput').textContent = data.hex;
+      }
+    };
+
+    function sendCommand(element, param, channel, value) {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ element, param, channel, value }));
+      }
+    }
+
+    // Slider de Volume (0x1C)
+    document.getElementById('volSlider').addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      const label = val === 823 ? '823 (0.0 dB)' : val === 0 ? '0 (-∞ dB)' : val;
+      document.getElementById('volLabel').textContent = label;
+      sendCommand(0x1C, 0x00, 0x00, val);
+    });
+
+    // Slider de Mute / ON (0x1A)
+    document.getElementById('muteSlider').addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      document.getElementById('muteLabel').textContent = val === 1 ? '1 (ON / Aberto)' : '0 (OFF / Mutado)';
+      sendCommand(0x1A, 0x00, 0x00, val);
+    });
+  </script>
+</body>
+</html>
