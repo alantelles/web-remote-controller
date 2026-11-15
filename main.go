@@ -49,7 +49,74 @@ var (
 	simRunning  bool
 	simLock     sync.Mutex
 	simStopChan chan struct{}
+
+	// Throttler global compartilhado entre o simulador e as requisições WebSocket
+	throttler = newParamThrottler(20*time.Millisecond, 16*time.Millisecond)
 )
+
+// paramKey identifica unicamente um parâmetro da mesa: (element, param, channel)
+type paramKey struct {
+	element, param, channel byte
+}
+
+// paramEntry armazena o último instante de envio e o último valor enviado
+type paramEntry struct {
+	lastMidi time.Time
+	lastWS   time.Time
+	lastVal  int
+}
+
+// paramThrottler limita a taxa de envio por parâmetro, de forma thread-safe.
+// midiInterval: intervalo mínimo entre envios MIDI para o mesmo parâmetro.
+// wsInterval:   intervalo mínimo entre broadcasts WebSocket para o mesmo parâmetro.
+type paramThrottler struct {
+	midiInterval time.Duration
+	wsInterval   time.Duration
+	mu           sync.Mutex
+	entries      map[paramKey]*paramEntry
+}
+
+func newParamThrottler(midiInterval, wsInterval time.Duration) *paramThrottler {
+	return &paramThrottler{
+		midiInterval: midiInterval,
+		wsInterval:   wsInterval,
+		entries:      make(map[paramKey]*paramEntry),
+	}
+}
+
+// allow retorna (canSendMIDI, canBroadcastWS) para o parâmetro dado e valor atual.
+// Retorna false se o valor não mudou ou se o intervalo mínimo ainda não passou.
+func (t *paramThrottler) allow(element, param, channel byte, value int) (midi bool, ws bool) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	key := paramKey{element, param, channel}
+	now := time.Now()
+	entry, exists := t.entries[key]
+	if !exists {
+		entry = &paramEntry{}
+		t.entries[key] = entry
+	}
+
+	// Sem mudança de valor — descarta ambos
+	if exists && entry.lastVal == value {
+		return false, false
+	}
+
+	midi = now.Sub(entry.lastMidi) >= t.midiInterval
+	ws = now.Sub(entry.lastWS) >= t.wsInterval
+
+	if midi {
+		entry.lastMidi = now
+	}
+	if ws {
+		entry.lastWS = now
+	}
+	if midi || ws {
+		entry.lastVal = value
+	}
+	return
+}
 
 func broadcastWS(msg WSMessage) {
 	clientsLock.Lock()
@@ -169,24 +236,37 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Printf("WS -> SysEx: %s | %s\n", hexStr, targetDesc)
 
-		// Envia para a saída MIDI física
-		midiLock.Lock()
-		if midiOut != nil {
-			if err := midiOut.Send(sysex); err != nil {
-				log.Printf("Erro ao enviar MIDI: %v", err)
-			}
+		// Aplica throttle antes de enviar ao barramento MIDI e ao WebSocket.
+		// Eventos ON/MUTE (0x1A, elemento 0x23 params 0x08-0x0F) são sempre passados
+		// pois são eventos discretos (não contínuos) e não causam saturação.
+		isDiscrete := msg.Element == 0x1A || (msg.Element == 0x23 && msg.Param >= 0x08)
+		canMIDI, canWS := true, true
+		if !isDiscrete {
+			canMIDI, canWS = throttler.allow(msg.Element, msg.Param, msg.Channel, msg.Value)
 		}
-		midiLock.Unlock()
+
+		// Envia para a saída MIDI física
+		if canMIDI {
+			midiLock.Lock()
+			if midiOut != nil {
+				if err := midiOut.Send(sysex); err != nil {
+					log.Printf("Erro ao enviar MIDI: %v", err)
+				}
+			}
+			midiLock.Unlock()
+		}
 
 		// Broadcast para manter sincronizada qualquer outra aba aberta
-		broadcastWS(WSMessage{
-			Type:    "param",
-			Element: msg.Element,
-			Param:   msg.Param,
-			Channel: msg.Channel,
-			Value:   msg.Value,
-			Hex:     hexStr,
-		})
+		if canWS {
+			broadcastWS(WSMessage{
+				Type:    "param",
+				Element: msg.Element,
+				Param:   msg.Param,
+				Channel: msg.Channel,
+				Value:   msg.Value,
+				Hex:     hexStr,
+			})
+		}
 	}
 }
 
@@ -531,26 +611,43 @@ func runFaderLoop(out drivers.Out, stopChan chan struct{}) {
 					sysex := Build01V96SysEx(mix.element, mix.param, byte(ch), st.currentVal)
 					hexStr := fmt.Sprintf("% X", sysex)
 
-					midiLock.Lock()
-					if out != nil {
-						if err := out.Send(sysex); err != nil {
-							log.Printf("Erro ao enviar SysEx MIDI [%s Ch %d]: %v", mix.name, ch+1, err)
+					// Throttle: o simulador pode gerar até 72 fluxos paralelos;
+					// descartamos envios repetidos abaixo do intervalo mínimo por parâmetro.
+					canMIDI, canWS := throttler.allow(mix.element, mix.param, byte(ch), st.currentVal)
+
+					if canMIDI {
+						midiLock.Lock()
+						if out != nil {
+							if err := out.Send(sysex); err != nil {
+								log.Printf("Erro ao enviar SysEx MIDI [%s Ch %d]: %v", mix.name, ch+1, err)
+							}
 						}
+						midiLock.Unlock()
 					}
-					midiLock.Unlock()
 
-					broadcastWS(WSMessage{
-						Type:    "param",
-						Element: mix.element,
-						Param:   mix.param,
-						Channel: byte(ch),
-						Value:   st.currentVal,
-						Hex:     hexStr,
-					})
+					if canWS {
+						broadcastWS(WSMessage{
+							Type:    "param",
+							Element: mix.element,
+							Param:   mix.param,
+							Channel: byte(ch),
+							Value:   st.currentVal,
+							Hex:     hexStr,
+						})
+					}
 
-					dbStr := faderValueToDB(st.currentVal)
-					fmt.Printf("[%s Ch %d] %4d (%8s) | SysEx: %s\n",
-						mix.name, ch+1, st.currentVal, dbStr, hexStr)
+					if canMIDI || canWS {
+						dbStr := faderValueToDB(st.currentVal)
+						sentFlags := ""
+						if canMIDI {
+							sentFlags += "MIDI "
+						}
+						if canWS {
+							sentFlags += "WS"
+						}
+						fmt.Printf("[%s Ch %d] %4d (%8s) [%s]| SysEx: %s\n",
+							mix.name, ch+1, st.currentVal, dbStr, sentFlags, hexStr)
+					}
 				}
 			}
 		}
