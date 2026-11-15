@@ -137,8 +137,37 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		sysex := Build01V96SysEx(msg.Element, msg.Param, msg.Channel, msg.Value)
 		hexStr := fmt.Sprintf("% X", sysex)
 
-		// Log no terminal para conferência
-		fmt.Printf("WS -> SysEx: %s\n", hexStr)
+		// Log detalhado no terminal identificando a saída / destino e parâmetro
+		var targetDesc string
+		chNum := msg.Channel + 1
+		switch msg.Element {
+		case 0x1C:
+			targetDesc = fmt.Sprintf("CH %02d -> MASTER Fader: %d (%s)", chNum, msg.Value, faderValueToDB(msg.Value))
+		case 0x1A:
+			onStr := "MUTE (0)"
+			if msg.Value == 1 {
+				onStr = "ON (1)"
+			}
+			targetDesc = fmt.Sprintf("CH %02d -> MASTER Channel: %s", chNum, onStr)
+		case 0x23:
+			if msg.Param <= 0x07 {
+				auxNum := msg.Param + 1
+				targetDesc = fmt.Sprintf("CH %02d -> AUX %d Send Level: %d (%s)", chNum, auxNum, msg.Value, faderValueToDB(msg.Value))
+			} else if msg.Param >= 0x08 && msg.Param <= 0x0F {
+				auxNum := (msg.Param - 0x08) + 1
+				onStr := "MUTE (0)"
+				if msg.Value == 1 {
+					onStr = "ON (1)"
+				}
+				targetDesc = fmt.Sprintf("CH %02d -> AUX %d Send: %s", chNum, auxNum, onStr)
+			} else {
+				targetDesc = fmt.Sprintf("CH %02d -> Element 0x%02X, Param 0x%02X: %d", chNum, msg.Element, msg.Param, msg.Value)
+			}
+		default:
+			targetDesc = fmt.Sprintf("CH %02d -> Element 0x%02X, Param 0x%02X: %d", chNum, msg.Element, msg.Param, msg.Value)
+		}
+
+		fmt.Printf("WS -> SysEx: %s | %s\n", hexStr, targetDesc)
 
 		// Envia para a saída MIDI física
 		midiLock.Lock()

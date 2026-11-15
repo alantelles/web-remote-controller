@@ -144,6 +144,244 @@
       box-shadow: 0 0 8px currentColor;
     }
 
+    /* BARRA DE SELEÇÃO DE MIXAGEM (MASTER E AUX 1-8 / SENDS ON FADER) */
+    .mix-selector-bar {
+      flex-shrink: 0;
+      background: linear-gradient(180deg, #181c25 0%, #11141b 100%);
+      border-bottom: 2px solid #000;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 3px 8px rgba(0, 0, 0, 0.6);
+      padding: 8px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      z-index: 18;
+    }
+
+    .mix-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .mix-bar-title {
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mix-bar-title::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 6px #38bdf8;
+    }
+
+    .mix-buttons-group {
+      display: inline-flex;
+      background: #0a0c10;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid #232836;
+      gap: 3px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Botão Base de Mix */
+    .btn-mix {
+      position: relative;
+      background: linear-gradient(180deg, #242936 0%, #191c26 100%);
+      border: 1px solid #32384a;
+      border-radius: 5px;
+      color: #94a3b8;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      min-width: 64px;
+      transition: all 0.12s ease-in-out;
+      outline: none;
+      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-mix:hover {
+      background: linear-gradient(180deg, #2e3547 0%, #202431 100%);
+      color: #f1f5f9;
+      border-color: #4b556b;
+      transform: translateY(-1px);
+    }
+
+    .btn-mix:active {
+      transform: translateY(1px);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7);
+    }
+
+    /* LED Indicador no Topo do Botão */
+    .btn-mix .mix-led {
+      width: 14px;
+      height: 4px;
+      border-radius: 2px;
+      background: #1e2330;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+      transition: all 0.15s ease;
+    }
+
+    .btn-mix .mix-key-hint {
+      font-size: 8px;
+      color: #64748b;
+      font-weight: 600;
+      margin-top: -1px;
+    }
+
+    /* BOTÃO MASTER ATIVO (Vermelho / Ruby) */
+    .btn-mix.btn-mix-master.active {
+      background: radial-gradient(circle at 50% 30%, #ef4444 0%, #991b1b 75%, #450a0a 100%);
+      color: #ffffff;
+      border-color: #f87171;
+      box-shadow:
+        0 0 14px rgba(239, 68, 68, 0.6),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    .btn-mix.btn-mix-master.active .mix-led {
+      background: #fef08a;
+      box-shadow: 0 0 8px #fef08a, 0 0 14px #ef4444;
+    }
+
+    .btn-mix.btn-mix-master.active .mix-key-hint {
+      color: #fecaca;
+    }
+
+    /* BOTÕES AUXILIARES ATIVOS (Sends on Fader - Ciano / Âmbar Luminoso) */
+    .btn-mix.btn-mix-aux.active {
+      background: radial-gradient(circle at 50% 30%, #0284c7 0%, #0369a1 60%, #082f49 100%);
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow:
+        0 0 14px rgba(56, 189, 248, 0.55),
+        inset 0 1px 2px rgba(255, 255, 255, 0.5);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    .btn-mix.btn-mix-aux.active .mix-led {
+      background: #67e8f9;
+      box-shadow: 0 0 8px #67e8f9, 0 0 12px #0284c7;
+    }
+
+    .btn-mix.btn-mix-aux.active .mix-key-hint {
+      color: #bae6fd;
+    }
+
+    /* Lado Direito da Barra de Mix */
+    .mix-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mix-active-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #080a0e;
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: 1px solid #1f2533;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+    }
+
+    .mix-active-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mix-active-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 8px #ef4444;
+      animation: pulseActive 2s infinite ease-in-out;
+    }
+
+    .mix-active-dot.is-aux {
+      background: #38bdf8;
+      box-shadow: 0 0 8px #38bdf8;
+    }
+
+    @keyframes pulseActive {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.15); }
+    }
+
+    .mix-active-info-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .mix-active-name {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      color: #f8fafc;
+    }
+
+    .mix-active-route {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .mix-sysex-info {
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-size: 10px;
+      background: #121620;
+      color: #fbbf24;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid #283042;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    /* Indicador de destino no cabeçalho de cada Strip */
+    .ch-mix-dest {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 1px 4px;
+      border-radius: 3px;
+      margin-top: 3px;
+      text-transform: uppercase;
+      transition: all 0.15s ease;
+    }
+
+    .ch-mix-dest.dest-master {
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
     /* Barra de Controle de Canais (Toolbar) */
     .console-toolbar {
       flex-shrink: 0;
@@ -905,6 +1143,77 @@
       </div>
     </header>
 
+    <!-- BARRA DE SELEÇÃO DE MIXAGEM (MASTER E AUX 1 A 8 / SENDS ON FADER) -->
+    <div class="mix-selector-bar">
+      <div class="mix-bar-left">
+        <span class="mix-bar-title">Mixagem / Destino:</span>
+
+        <!-- 9 BOTÕES DE MIXAGEM FÍSICA: MASTER + AUX 1 A AUX 8 -->
+        <div class="mix-buttons-group" id="mixButtonsGroup">
+          <button type="button" class="btn-mix btn-mix-master active" data-mix="MASTER" title="Mix Principal Stereo Out (Teclas: 0 ou M)">
+            <span class="mix-led"></span>
+            <span class="mix-label">MASTER</span>
+            <span class="mix-key-hint">[0 / M]</span>
+          </button>
+          <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX1" title="Mix de Envio Auxiliar 1 (Tecla: 1)">
+            <span class="mix-led"></span>
+            <span class="mix-label">AUX 1</span>
+            <span class="mix-key-hint">[1]</span>
+          </button>
+          <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX2" title="Mix de Envio Auxiliar 2 (Tecla: 2)">
+            <span class="mix-led"></span>
+            <span class="mix-label">AUX 2</span>
+            <span class="mix-key-hint">[2]</span>
+          </button>
+          <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX3" title="Mix de Envio Auxiliar 3 (Tecla: 3)">
+            <span class="mix-led"></span>
+            <span class="mix-label">AUX 3</span>
+            <span class="mix-key-hint">[3]</span>
+          </button>
+          <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX4" title="Mix de Envio Auxiliar 4 (Tecla: 4)">
+            <span class="mix-led"></span>
+            <span class="mix-label">AUX 4</span>
+            <span class="mix-key-hint">[4]</span>
+          </button>
+          <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX5" title="Mix de Envio Auxiliar 5 (Tecla: 5)">
+            <span class="mix-led"></span>
+            <span class="mix-label">AUX 5</span>
+            <span class="mix-key-hint">[5]</span>
+          </button>
+          <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX6" title="Mix de Envio Auxiliar 6 (Tecla: 6)">
+            <span class="mix-led"></span>
+            <span class="mix-label">AUX 6</span>
+            <span class="mix-key-hint">[6]</span>
+          </button>
+          <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX7" title="Mix de Envio Auxiliar 7 (Tecla: 7)">
+            <span class="mix-led"></span>
+            <span class="mix-label">AUX 7</span>
+            <span class="mix-key-hint">[7]</span>
+          </button>
+          <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX8" title="Mix de Envio Auxiliar 8 (Tecla: 8)">
+            <span class="mix-led"></span>
+            <span class="mix-label">AUX 8</span>
+            <span class="mix-key-hint">[8]</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mix-bar-right">
+        <div class="mix-active-display" id="mixActiveDisplay">
+          <div class="mix-active-indicator">
+            <div class="mix-active-dot" id="mixActiveDot"></div>
+            <div class="mix-active-info-col">
+              <span class="mix-active-name" id="mixActiveName">MASTER (STEREO OUT)</span>
+              <span class="mix-active-route" id="mixActiveRoute">Saída Física: Stereo Out L/R</span>
+            </div>
+          </div>
+          <div class="mix-sysex-info" id="mixSysexInfo" title="Parâmetros SysEx enviados pela mixagem atual">
+            Fader: 1CH 00H | Mute: 1AH 00H
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- BARRA DE CONTROLE: SELECT MULTIPLE E FILTROS -->
     <div class="console-toolbar">
       <div class="toolbar-left">
@@ -983,7 +1292,7 @@
 
     <!-- BARRA INFERIOR DE INFORMAÇÕES -->
     <footer class="console-footer-bar">
-      <div>Yamaha 01V96V2 Protocol: Parameter Change (0x1C Fader / 0x1A Channel ON)</div>
+      <div>Yamaha 01V96V2 Protocol: MASTER → 1CH/00H (Fader) · 1AH/00H (ON) &nbsp;|&nbsp; AUX 1-8 → 23H/00-07H (Send) · 23H/08-0FH (ON) &nbsp;|&nbsp; Teclas 0/M=MASTER · 1-8=AUX</div>
       <div id="footerChannelCount">Exibindo 32 canais | Arraste ou use a roda do mouse nos faders | Duplo clique para 0 dB</div>
     </footer>
 
@@ -1049,13 +1358,84 @@
       { db: '∞',   pct: 100 }
     ];
 
-    // Estado dos 32 canais
+    // ==========================================
+    // DEFINIÇÃO DAS MIXAGENS (MASTER E AUX 1-8)
+    // Tabela SysEx Yamaha 01V96V2:
+    // MASTER: Element 1CH (Fader, param 00H), Element 1AH (Mute/ON, param 00H)
+    // AUX 1-8 Send Level: Element 23H (params 00H a 07H para Aux 1 a 8)
+    // AUX 1-8 Send ON:    Element 23H (params 08H a 0FH para Aux 1 a 8)
+    // ==========================================
+    const MIX_TARGETS = {
+      MASTER: {
+        id: 'MASTER',
+        name: 'MASTER',
+        displayName: 'MASTER (STEREO OUT)',
+        route: 'Saída Física: Stereo Out L/R',
+        shortName: 'STEREO',
+        isMaster: true,
+        faderElement: 0x1C,
+        faderParam: 0x00,
+        onElement: 0x1A,
+        onParam: 0x00,
+        sysexInfo: 'Fader: 1CH 00H | Mute: 1AH 00H'
+      },
+      AUX1: { id: 'AUX1', name: 'AUX 1', displayName: 'AUX 1 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 1 Out', shortName: 'AUX 1', isMaster: false, auxIndex: 0, faderElement: 0x23, faderParam: 0x00, onElement: 0x23, onParam: 0x08, sysexInfo: 'Send: 23H 00H | On: 23H 08H' },
+      AUX2: { id: 'AUX2', name: 'AUX 2', displayName: 'AUX 2 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 2 Out', shortName: 'AUX 2', isMaster: false, auxIndex: 1, faderElement: 0x23, faderParam: 0x01, onElement: 0x23, onParam: 0x09, sysexInfo: 'Send: 23H 01H | On: 23H 09H' },
+      AUX3: { id: 'AUX3', name: 'AUX 3', displayName: 'AUX 3 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 3 Out', shortName: 'AUX 3', isMaster: false, auxIndex: 2, faderElement: 0x23, faderParam: 0x02, onElement: 0x23, onParam: 0x0A, sysexInfo: 'Send: 23H 02H | On: 23H 0AH' },
+      AUX4: { id: 'AUX4', name: 'AUX 4', displayName: 'AUX 4 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 4 Out', shortName: 'AUX 4', isMaster: false, auxIndex: 3, faderElement: 0x23, faderParam: 0x03, onElement: 0x23, onParam: 0x0B, sysexInfo: 'Send: 23H 03H | On: 23H 0BH' },
+      AUX5: { id: 'AUX5', name: 'AUX 5', displayName: 'AUX 5 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 5 Out', shortName: 'AUX 5', isMaster: false, auxIndex: 4, faderElement: 0x23, faderParam: 0x04, onElement: 0x23, onParam: 0x0C, sysexInfo: 'Send: 23H 04H | On: 23H 0CH' },
+      AUX6: { id: 'AUX6', name: 'AUX 6', displayName: 'AUX 6 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 6 Out', shortName: 'AUX 6', isMaster: false, auxIndex: 5, faderElement: 0x23, faderParam: 0x05, onElement: 0x23, onParam: 0x0D, sysexInfo: 'Send: 23H 05H | On: 23H 0DH' },
+      AUX7: { id: 'AUX7', name: 'AUX 7', displayName: 'AUX 7 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 7 Out', shortName: 'AUX 7', isMaster: false, auxIndex: 6, faderElement: 0x23, faderParam: 0x06, onElement: 0x23, onParam: 0x0E, sysexInfo: 'Send: 23H 06H | On: 23H 0EH' },
+      AUX8: { id: 'AUX8', name: 'AUX 8', displayName: 'AUX 8 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 8 Out', shortName: 'AUX 8', isMaster: false, auxIndex: 7, faderElement: 0x23, faderParam: 0x07, onElement: 0x23, onParam: 0x0F, sysexInfo: 'Send: 23H 07H | On: 23H 0FH' }
+    };
+
+    let currentMixTarget = 'MASTER';
+
+    // Cria e inicializa o estado de volume e mute independente para cada uma das 9 mixagens
+    const mixData = {};
+    Object.keys(MIX_TARGETS).forEach(key => {
+      mixData[key] = {
+        volumes: Array.from({ length: TOTAL_CHANNELS }, () => (key === 'MASTER' ? NOMINAL_VALUE : 0)),
+        on: Array.from({ length: TOTAL_CHANNELS }, () => 1)
+      };
+    });
+
+    const MIX_DATA_STORAGE_KEY = 'yamaha_01v96_mix_data';
+    let saveMixTimeout = null;
+
+    function saveMixDataDebounced() {
+      clearTimeout(saveMixTimeout);
+      saveMixTimeout = setTimeout(() => {
+        try {
+          localStorage.setItem(MIX_DATA_STORAGE_KEY, JSON.stringify(mixData));
+        } catch (_) {}
+      }, 400);
+    }
+
+    function loadSavedMixData() {
+      try {
+        const raw = localStorage.getItem(MIX_DATA_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') {
+            Object.keys(MIX_TARGETS).forEach(key => {
+              if (parsed[key] && Array.isArray(parsed[key].volumes) && Array.isArray(parsed[key].on)) {
+                mixData[key].volumes = parsed[key].volumes;
+                mixData[key].on = parsed[key].on;
+              }
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('Erro ao restaurar mixData do localStorage:', err);
+      }
+    }
+
+    // Estado de visibilidade dos 32 canais
     const channelsState = Array.from({ length: TOTAL_CHANNELS }, (_, i) => ({
       index: i,
       channelHex: i, // 0x00 a 0x1F
       name: `CH ${String(i + 1).padStart(2, '0')}`,
-      volume: NOMINAL_VALUE, // Padrão 0.0 dB
-      on: 1, // Padrão ON (1 = Aberto, 0 = Mutado)
       visible: true
     }));
 
@@ -1118,22 +1498,48 @@
         }
 
         if (data.type === 'param') {
-          // Element 0x1C = Input Fader
-          if (data.element === 0x1C) {
+          // Element 0x1C = Input Fader (Master Stereo)
+          if (data.element === 0x1C && data.param === 0x00) {
             const ch = data.channel;
             const val = (data.value !== undefined && data.value !== null && !isNaN(data.value)) ? data.value : 0;
             if (ch !== undefined && ch >= 0 && ch < TOTAL_CHANNELS) {
-              // Não sobrescreve se o operador estiver arrastando manualmente este canal no momento
-              if (activeDraggingChannel !== ch) {
+              mixData.MASTER.volumes[ch] = val;
+              if (currentMixTarget === 'MASTER' && activeDraggingChannel !== ch) {
                 updateFaderUI(ch, val);
               }
             }
           }
-          // Element 0x1A = Input Channel ON / MUTE
-          else if (data.element === 0x1A) {
+          // Element 0x1A = Input Channel ON / MUTE (Master Stereo)
+          else if (data.element === 0x1A && data.param === 0x00) {
             const ch = data.channel;
-            if (ch >= 0 && ch < TOTAL_CHANNELS) {
-              setChannelOn(ch, data.value === 1, false);
+            if (ch !== undefined && ch >= 0 && ch < TOTAL_CHANNELS) {
+              mixData.MASTER.on[ch] = data.value;
+              if (currentMixTarget === 'MASTER') {
+                updateChannelOnUI(ch, data.value === 1);
+              }
+            }
+          }
+          // Element 0x23 = Input Aux Send (Nível ou ON para Aux 1 a 8)
+          else if (data.element === 0x23) {
+            const ch = data.channel;
+            if (ch !== undefined && ch >= 0 && ch < TOTAL_CHANNELS) {
+              // Params 0x00 a 0x07 = Envio Aux 1 a Aux 8 (Nível do Fader)
+              if (data.param >= 0x00 && data.param <= 0x07) {
+                const targetKey = 'AUX' + (data.param + 1);
+                const val = (data.value !== undefined && data.value !== null && !isNaN(data.value)) ? data.value : 0;
+                mixData[targetKey].volumes[ch] = val;
+                if (currentMixTarget === targetKey && activeDraggingChannel !== ch) {
+                  updateFaderUI(ch, val);
+                }
+              }
+              // Params 0x08 a 0x0F = Envio Aux 1 a Aux 8 ON / MUTE
+              else if (data.param >= 0x08 && data.param <= 0x0F) {
+                const targetKey = 'AUX' + (data.param - 0x08 + 1);
+                mixData[targetKey].on[ch] = data.value;
+                if (currentMixTarget === targetKey) {
+                  updateChannelOnUI(ch, data.value === 1);
+                }
+              }
             }
           }
         }
@@ -1172,6 +1578,7 @@
       strip.innerHTML = `
         <div class="ch-header">
           <span class="ch-badge">${ch.name}</span>
+          <div class="ch-mix-dest dest-master" id="chMixDest_${ch.index}">STEREO</div>
         </div>
 
         <div class="ch-mute-wrap">
@@ -1239,10 +1646,6 @@
       }
       value = Math.max(0, Math.min(MAX_VALUE, Math.round(value)));
 
-      const ch = channelsState[chIndex];
-      if (!ch) return;
-      ch.volume = value;
-
       const cap = document.getElementById(`faderCap_${chIndex}`);
       const dbReadout = document.getElementById(`dbReadout_${chIndex}`);
       const rawReadout = document.getElementById(`rawReadout_${chIndex}`);
@@ -1260,31 +1663,113 @@
       rawReadout.textContent = value;
     }
 
-    function setChannelVolume(chIndex, value, sendMidi = true) {
-      value = Math.max(0, Math.min(MAX_VALUE, Math.round(value)));
-      updateFaderUI(chIndex, value);
-      if (sendMidi) {
-        sendCommand(0x1C, 0x00, chIndex, value);
+    function updateChannelOnUI(chIndex, isOn) {
+      const btn = document.getElementById(`btnOn_${chIndex}`);
+      if (!btn) return;
+      const target = MIX_TARGETS[currentMixTarget];
+      const onText = target.isMaster ? 'ON' : 'AUX ON';
+      if (isOn) {
+        btn.className = 'btn-yamaha-on is-on';
+        btn.textContent = onText;
+      } else {
+        btn.className = 'btn-yamaha-on is-muted';
+        btn.textContent = 'MUTE';
       }
     }
 
-    function setChannelOn(chIndex, isOn, sendMidi = true) {
-      const ch = channelsState[chIndex];
-      ch.on = isOn ? 1 : 0;
-      const btn = document.getElementById(`btnOn_${chIndex}`);
-      if (btn) {
-        if (ch.on === 1) {
-          btn.className = 'btn-yamaha-on is-on';
-          btn.textContent = 'ON';
-        } else {
-          btn.className = 'btn-yamaha-on is-muted';
-          btn.textContent = 'MUTE';
-        }
-      }
+    // Função para alterar volume de um canal na mixagem ativa
+    function setChannelVolume(chIndex, value, sendMidi = true) {
+      value = Math.max(0, Math.min(MAX_VALUE, Math.round(value)));
+      mixData[currentMixTarget].volumes[chIndex] = value;
+      updateFaderUI(chIndex, value);
+      saveMixDataDebounced();
       if (sendMidi) {
-        sendCommand(0x1A, 0x00, chIndex, ch.on);
+        const target = MIX_TARGETS[currentMixTarget];
+        sendCommand(target.faderElement, target.faderParam, chIndex, value);
       }
     }
+
+    // Função para alterar estado ON/Mute de um canal na mixagem ativa
+    function setChannelOn(chIndex, isOn, sendMidi = true) {
+      const val = isOn ? 1 : 0;
+      mixData[currentMixTarget].on[chIndex] = val;
+      updateChannelOnUI(chIndex, isOn);
+      saveMixDataDebounced();
+      if (sendMidi) {
+        const target = MIX_TARGETS[currentMixTarget];
+        sendCommand(target.onElement, target.onParam, chIndex, val);
+      }
+    }
+
+    // ==========================================
+    // SELEÇÃO E CONTROLE DOS 9 DESTINOS DE MIXAGEM
+    // ==========================================
+    function selectMix(targetId, notify = false) {
+      if (!MIX_TARGETS[targetId]) return;
+      currentMixTarget = targetId;
+      const target = MIX_TARGETS[targetId];
+
+      // 1. Atualiza classes ativas nos 9 botões
+      document.querySelectorAll('.btn-mix').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mix === targetId);
+      });
+
+      // 2. Atualiza exibição de status da mix ativa no display
+      const mixActiveName = document.getElementById('mixActiveName');
+      const mixActiveRoute = document.getElementById('mixActiveRoute');
+      const mixSysexInfo = document.getElementById('mixSysexInfo');
+      const mixActiveDot = document.getElementById('mixActiveDot');
+
+      if (mixActiveName) mixActiveName.textContent = target.displayName;
+      if (mixActiveRoute) mixActiveRoute.textContent = target.route;
+      if (mixSysexInfo) mixSysexInfo.textContent = target.sysexInfo;
+      if (mixActiveDot) {
+        mixActiveDot.classList.toggle('is-aux', !target.isMaster);
+      }
+
+      // 3. Atualiza todos os faders, botões ON e etiquetas dos strips
+      for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        const destPill = document.getElementById(`chMixDest_${i}`);
+        if (destPill) {
+          destPill.textContent = target.shortName;
+          destPill.className = 'ch-mix-dest ' + (target.isMaster ? 'dest-master' : 'dest-aux');
+        }
+
+        const vol = mixData[targetId].volumes[i];
+        const on = mixData[targetId].on[i] === 1;
+
+        updateFaderUI(i, vol);
+        updateChannelOnUI(i, on);
+      }
+
+      // 4. Feedback visual opcional
+      if (notify) {
+        showToast(`Mixagem direcionada para ${target.name} (${target.shortName}) 🎛️`, target.isMaster ? '🔴' : '🎛️');
+      }
+    }
+
+    // Eventos de clique nos 9 botões de mixagem
+    document.querySelectorAll('.btn-mix').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mix = btn.dataset.mix;
+        if (mix && MIX_TARGETS[mix]) {
+          selectMix(mix, true);
+        }
+      });
+    });
+
+    // Teclas de atalho para troca rápida de mixagem: 0 ou M = MASTER, 1 a 8 = AUX 1 a 8
+    document.addEventListener('keydown', (e) => {
+      if (e.target.matches('input, select, textarea')) return;
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+      const key = e.key.toLowerCase();
+      if (key === '0' || key === 'm') {
+        selectMix('MASTER', true);
+      } else if (key >= '1' && key <= '8') {
+        selectMix('AUX' + key, true);
+      }
+    });
 
     // Vincula Eventos para Cada Canal
     for (let i = 0; i < TOTAL_CHANNELS; i++) {
@@ -1293,9 +1778,9 @@
       const cap = document.getElementById(`faderCap_${chIndex}`);
       const btnOn = document.getElementById(`btnOn_${chIndex}`);
 
-      // Botão ON / Mute
+      // Botão ON / Mute da mixagem ativa
       btnOn.addEventListener('click', () => {
-        const nextState = channelsState[chIndex].on === 1 ? 0 : 1;
+        const nextState = mixData[currentMixTarget].on[chIndex] === 1 ? 0 : 1;
         setChannelOn(chIndex, nextState, true);
       });
 
@@ -1356,7 +1841,7 @@
         e.preventDefault();
         const step = e.shiftKey ? 4 : 16;
         const delta = e.deltaY < 0 ? step : -step;
-        setChannelVolume(chIndex, channelsState[chIndex].volume + delta, true);
+        setChannelVolume(chIndex, mixData[currentMixTarget].volumes[chIndex] + delta, true);
       }, { passive: false });
     }
 
@@ -1495,10 +1980,11 @@
       selectedCountBadge.textContent = `${count} de ${TOTAL_CHANNELS} visíveis`;
       footerCount.textContent = `Exibindo ${count} de ${TOTAL_CHANNELS} canais | Arraste ou use a roda do mouse nos faders | Duplo clique para 0 dB`;
 
-      // Atualiza posições dos faders ao ficarem visíveis
+      // Atualiza posições dos faders e botões ON ao ficarem visíveis
       requestAnimationFrame(() => {
         selectedIndices.forEach(idx => {
-          updateFaderUI(idx, channelsState[idx].volume);
+          updateFaderUI(idx, mixData[currentMixTarget].volumes[idx]);
+          updateChannelOnUI(idx, mixData[currentMixTarget].on[idx] === 1);
         });
       });
     }
@@ -1629,10 +2115,11 @@
     });
 
     // ==========================================
-    // AÇÕES MESTRAS DA TOOLBAR
+    // AÇÕES MESTRAS DA TOOLBAR (Mixagem Ativa)
     // ==========================================
     document.getElementById('btnAllZeroDb').addEventListener('click', () => {
-      if (confirm('Deseja ajustar todos os 32 canais para 0.0 dB?')) {
+      const target = MIX_TARGETS[currentMixTarget];
+      if (confirm(`Deseja ajustar todos os 32 canais da mixagem "${target.name}" para 0.0 dB?`)) {
         for (let i = 0; i < TOTAL_CHANNELS; i++) {
           setChannelVolume(i, NOMINAL_VALUE, true);
         }
@@ -1653,12 +2140,13 @@
 
     // Ajusta posições iniciais dos faders e restaura canais salvos no carregamento
     window.addEventListener('load', () => {
-      // 1. Inicializa volumes dos faders
-      for (let i = 0; i < TOTAL_CHANNELS; i++) {
-        updateFaderUI(i, NOMINAL_VALUE);
-      }
+      // 1. Carrega estados de mixagem salvos no navegador (se houver)
+      loadSavedMixData();
 
-      // 2. Carrega visualização salva no navegador (ou padrão Todos se não houver)
+      // 2. Inicializa mixagem Master na interface
+      selectMix('MASTER', false);
+
+      // 3. Carrega visualização salva no navegador (ou padrão Todos se não houver)
       const savedChannels = getSavedVisibleChannels();
       if (savedChannels) {
         updateChannelsVisibility(savedChannels);
@@ -1674,7 +2162,7 @@
     window.addEventListener('resize', () => {
       for (let i = 0; i < TOTAL_CHANNELS; i++) {
         if (channelsState[i].visible) {
-          updateFaderUI(i, channelsState[i].volume);
+          updateFaderUI(i, mixData[currentMixTarget].volumes[i]);
         }
       }
     });
