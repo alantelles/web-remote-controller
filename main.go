@@ -395,21 +395,51 @@ func toggleSimulation() {
 	}
 }
 
-// runFaderLoop executa a movimentação contínua e suave de faders nos canais 1 a 8,
-// enviando as mensagens SysEx da 01V96 na porta MIDI e transmitindo via WebSocket para a tela.
+// mixSimState agrupa os estados de fader dos 8 canais para uma mixagem (MASTER ou AUX N)
+type mixSimState struct {
+	name     string // "MASTER", "AUX1" … "AUX8"
+	element  byte   // 0x1C = Master fader, 0x23 = Aux send
+	param    byte   // 0x00 p/ MASTER, 0x00–0x07 p/ AUX 1–8
+	channels []faderChannelState
+}
+
+// runFaderLoop simula a movimentação contínua e suave de faders em TODAS as 9 mixagens
+// (MASTER + AUX 1–8) de 8 canais cada, enviando SysEx + WebSocket em tempo real.
 func runFaderLoop(out drivers.Out, stopChan chan struct{}) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	const numChannels = 8
-	channels := make([]faderChannelState, numChannels)
 
-	// Inicializa os 8 canais com posições operacionais típicas (próximas de 0.0 dB / 823)
-	for i := 0; i < numChannels; i++ {
-		initVal := 650 + r.Intn(200)
-		channels[i] = faderChannelState{
-			currentVal: initVal,
-			targetVal:  initVal,
-			holdTicks:  r.Intn(15),
+	// Define as 9 mixagens com seus parâmetros SysEx correspondentes
+	mixes := []mixSimState{
+		{name: "MASTER", element: 0x1C, param: 0x00},
+		{name: "AUX1", element: 0x23, param: 0x00},
+		{name: "AUX2", element: 0x23, param: 0x01},
+		{name: "AUX3", element: 0x23, param: 0x02},
+		{name: "AUX4", element: 0x23, param: 0x03},
+		{name: "AUX5", element: 0x23, param: 0x04},
+		{name: "AUX6", element: 0x23, param: 0x05},
+		{name: "AUX7", element: 0x23, param: 0x06},
+		{name: "AUX8", element: 0x23, param: 0x07},
+	}
+
+	// Inicializa os canais de cada mixagem com posições variadas mas realistas
+	for m := range mixes {
+		mixes[m].channels = make([]faderChannelState, numChannels)
+		for ch := 0; ch < numChannels; ch++ {
+			var initVal int
+			if m == 0 {
+				// MASTER: próximo de 0 dB (650–849)
+				initVal = 650 + r.Intn(200)
+			} else {
+				// AUX: posições de send mais variadas (200–800)
+				initVal = 200 + r.Intn(600)
+			}
+			mixes[m].channels[ch] = faderChannelState{
+				currentVal: initVal,
+				targetVal:  initVal,
+				holdTicks:  r.Intn(20),
+			}
 		}
 	}
 
@@ -417,94 +447,111 @@ func runFaderLoop(out drivers.Out, stopChan chan struct{}) {
 	ticker := time.NewTicker(40 * time.Millisecond)
 	defer ticker.Stop()
 
+	// Contador de ticks para escalonar as atualizações das mixagens AUX
+	// (AUX atualiza com menos frequência para não saturar o WebSocket)
+	tick := 0
+
 	for {
 		select {
 		case <-stopChan:
 			return
 		case <-ticker.C:
-			for ch := 0; ch < numChannels; ch++ {
-				st := &channels[ch]
+			tick++
 
-				// Se o fader já está no alvo
-				if st.currentVal == st.targetVal {
-					if st.holdTicks > 0 {
-						st.holdTicks--
-						continue
-					}
-
-					// Probabilidade de iniciar novo ajuste (simula operador alternando entre os faders)
-					if r.Float32() < 0.06 {
-						dice := r.Float32()
-						var newTarget int
-						if dice < 0.05 {
-							// Fade out total (-∞ dB)
-							newTarget = 0
-						} else if dice > 0.95 {
-							// Boost alto (+8.0 a +10.0 dB)
-							newTarget = 980 + r.Intn(44)
-						} else {
-							// Ajustes comuns de mixagem ao redor da posição atual (-150 a +150 pontos)
-							delta := r.Intn(300) - 150
-							newTarget = st.currentVal + delta
-							if newTarget < 250 {
-								newTarget = 250 + r.Intn(150)
-							}
-							if newTarget > 950 {
-								newTarget = 950
-							}
-						}
-						st.targetVal = newTarget
-					}
+			for m := range mixes {
+				// MASTER atualiza todo tick; cada AUX atualiza a cada 2 ticks,
+				// escalonados para não coincidir todos no mesmo instante
+				if m > 0 && (tick%2 != m%2) {
 					continue
 				}
 
-				// Move gradualmente em direção ao target (passo suave de 5 a 12 unidades por ciclo)
-				diff := st.targetVal - st.currentVal
-				step := 5 + r.Intn(8)
-				if diff > 0 {
-					if diff < step {
-						st.currentVal = st.targetVal
+				mix := &mixes[m]
+				for ch := 0; ch < numChannels; ch++ {
+					st := &mix.channels[ch]
+
+					// Se o fader está no alvo, aguarda e sorteia próximo movimento
+					if st.currentVal == st.targetVal {
+						if st.holdTicks > 0 {
+							st.holdTicks--
+							continue
+						}
+						// Probabilidade de movimento varia: MASTER 6%, AUX 4%
+						threshold := float32(0.06)
+						if m > 0 {
+							threshold = 0.04
+						}
+						if r.Float32() < threshold {
+							dice := r.Float32()
+							var newTarget int
+							if dice < 0.05 {
+								newTarget = 0 // fade out
+							} else if dice > 0.95 {
+								newTarget = 900 + r.Intn(124) // boost
+							} else {
+								delta := r.Intn(300) - 150
+								newTarget = st.currentVal + delta
+								minVal := 150
+								if m == 0 {
+									minVal = 250 // MASTER raramente vai muito baixo
+								}
+								if newTarget < minVal {
+									newTarget = minVal + r.Intn(100)
+								}
+								if newTarget > 950 {
+									newTarget = 950
+								}
+							}
+							st.targetVal = newTarget
+						}
+						continue
+					}
+
+					// Movimento suave em direção ao alvo
+					diff := st.targetVal - st.currentVal
+					step := 5 + r.Intn(8)
+					if diff > 0 {
+						if diff < step {
+							st.currentVal = st.targetVal
+						} else {
+							st.currentVal += step
+						}
 					} else {
-						st.currentVal += step
+						if -diff < step {
+							st.currentVal = st.targetVal
+						} else {
+							st.currentVal -= step
+						}
 					}
-				} else {
-					if -diff < step {
-						st.currentVal = st.targetVal
-					} else {
-						st.currentVal -= step
+
+					if st.currentVal == st.targetVal {
+						st.holdTicks = 10 + r.Intn(60)
 					}
-				}
 
-				// Ao atingir o alvo, mantém uma pausa simulando operador soltando o fader
-				if st.currentVal == st.targetVal {
-					st.holdTicks = 12 + r.Intn(60) // 0.5s a 2.5s parado
-				}
+					// Monta e envia SysEx com element e param corretos para cada mixagem
+					sysex := Build01V96SysEx(mix.element, mix.param, byte(ch), st.currentVal)
+					hexStr := fmt.Sprintf("% X", sysex)
 
-				// Element: 0x1C (Input Fader), Param: 0x00, Channel: 0x00 a 0x07 (Ch 1 a 8)
-				sysex := Build01V96SysEx(0x1C, 0x00, byte(ch), st.currentVal)
-				hexStr := fmt.Sprintf("% X", sysex)
-
-				// 1. Envia para a porta MIDI física selecionada
-				midiLock.Lock()
-				if out != nil {
-					if err := out.Send(sysex); err != nil {
-						log.Printf("Erro ao enviar SysEx MIDI no Canal %d: %v", ch+1, err)
+					midiLock.Lock()
+					if out != nil {
+						if err := out.Send(sysex); err != nil {
+							log.Printf("Erro ao enviar SysEx MIDI [%s Ch %d]: %v", mix.name, ch+1, err)
+						}
 					}
+					midiLock.Unlock()
+
+					broadcastWS(WSMessage{
+						Type:    "param",
+						Element: mix.element,
+						Param:   mix.param,
+						Channel: byte(ch),
+						Value:   st.currentVal,
+						Hex:     hexStr,
+					})
+
+					dbStr := faderValueToDB(st.currentVal)
+					fmt.Printf("[%s Ch %d] %4d (%8s) | SysEx: %s\n",
+						mix.name, ch+1, st.currentVal, dbStr, hexStr)
 				}
-				midiLock.Unlock()
-
-				// 2. Transmite via WebSocket para a tela reagir em tempo real
-				broadcastWS(WSMessage{
-					Type:    "param",
-					Element: 0x1C,
-					Param:   0x00,
-					Channel: byte(ch),
-					Value:   st.currentVal,
-					Hex:     hexStr,
-				})
-
-				dbStr := faderValueToDB(st.currentVal)
-				fmt.Printf("[Ch %d] Fader: %4d (%8s) | SysEx: %s\n", ch+1, st.currentVal, dbStr, hexStr)
 			}
 		}
 	}
