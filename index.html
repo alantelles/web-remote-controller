@@ -3,76 +3,950 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Controle 01V96V2 (WebSocket) - Canal 1</title>
+  <title>Yamaha 01V96V2 — Console Remoto</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 30px auto; padding: 0 15px; background: #18181b; color: #f4f4f5; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; background: #dc2626; }
-    .badge.online { background: #16a34a; }
-    .card { background: #27272a; padding: 20px; border-radius: 10px; margin-bottom: 18px; }
-    .midi-badge { font-size: 13px; color: #a1a1aa; margin-top: 4px; }
-    label { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 12px; }
-    input[type="range"] { width: 100%; height: 32px; accent-color: #3b82f6; }
-    .hex-box { background: #09090b; color: #4ade80; font-family: monospace; padding: 12px; border-radius: 6px; font-size: 14px; text-align: center; }
+    :root {
+      --bg-chassis: #0e1014;
+      --bg-surface: #151820;
+      --bg-panel: #1b1e27;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --strip-odd: #181b23;
+      --strip-even: #20242e;
+      --text-main: #f1f5f9;
+      --text-dim: #8e98a8;
+      --text-faint: #5a6475;
+      --amber-on: #ff9800;
+      --amber-glow: rgba(255, 152, 0, 0.75);
+      --amber-bright: #ffc107;
+      --led-green: #10b981;
+      --led-red: #ef4444;
+      --fader-cap-bg: linear-gradient(180deg, #f3f4f6 0%, #e2e5eb 35%, #cbd2dc 50%, #b8c1ce 70%, #dbe0e8 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden; /* Página estritamente fixa */
+      background: var(--bg-chassis);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Layout Principal Fixo */
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Topo: Console Header */
+    .console-header {
+      flex-shrink: 0;
+      background: linear-gradient(180deg, #1f232d 0%, #151820 100%);
+      border-bottom: 1px solid #000;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+      padding: 10px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      z-index: 20;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #f8fafc;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, #ffffff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .brand-tag {
+      font-size: 11px;
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .header-mid {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      max-width: 600px;
+    }
+
+    .sysex-monitor-bar {
+      width: 100%;
+      background: #090a0d;
+      border: 1px solid #232733;
+      border-radius: 6px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+    }
+
+    .sysex-title {
+      color: var(--text-faint);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .sysex-code {
+      color: #38bdf8;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .midi-pill {
+      font-size: 12px;
+      color: #94a3b8;
+      background: #11141a;
+      border: 1px solid #282d3b;
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .midi-pill span.icon {
+      font-size: 13px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .status-badge.online {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    /* Barra de Controle de Canais (Toolbar) */
+    .console-toolbar {
+      flex-shrink: 0;
+      background: #14171f;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 8px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      z-index: 15;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-dim);
+    }
+
+    /* Select Multiple Nativo estilizado */
+    .channel-select-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .native-multi-select {
+      background: #0b0d12;
+      color: #38bdf8;
+      border: 1px solid #2c3242;
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      max-height: 32px;
+      height: 32px;
+      min-width: 140px;
+      cursor: pointer;
+    }
+
+    .native-multi-select:focus {
+      outline: none;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
+    }
+
+    /* Botão Dropdown Customizado para Seleção Múltipla */
+    .btn-multiselect-dropdown {
+      background: #1e2330;
+      color: #f1f5f9;
+      border: 1px solid #333a4c;
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-multiselect-dropdown:hover {
+      background: #282f40;
+      border-color: #4b5563;
+    }
+
+    /* Popover de Seleção com Checkboxes */
+    .dropdown-popover {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 6px;
+      background: #151821;
+      border: 1px solid #333b4d;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      padding: 12px;
+      width: 320px;
+      max-height: 400px;
+      display: none;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    .dropdown-popover.open {
+      display: flex;
+    }
+
+    .popover-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      max-height: 250px;
+      overflow-y: auto;
+      padding: 4px 2px;
+      margin: 8px 0;
+    }
+
+    .popover-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      background: #0e1017;
+      padding: 4px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid #222633;
+    }
+
+    .popover-item:hover {
+      background: #1c202d;
+    }
+
+    .popover-item input {
+      cursor: pointer;
+      accent-color: #38bdf8;
+      margin: 0;
+    }
+
+    /* Botões Rápidos de Bancos */
+    .bank-buttons {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #0d0f14;
+      padding: 3px;
+      border-radius: 6px;
+      border: 1px solid #232733;
+    }
+
+    .btn-bank {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 9px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-bank:hover {
+      background: #1c202a;
+      color: #fff;
+    }
+
+    .btn-bank.active {
+      background: #2563eb;
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-action {
+      background: #1e222d;
+      border: 1px solid #2d3342;
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background 0.15s;
+    }
+
+    .btn-action:hover {
+      background: #292e3d;
+      color: #fff;
+    }
+
+    .btn-action.btn-danger:hover {
+      background: #7f1d1d;
+      border-color: #991b1b;
+      color: #fee2e2;
+    }
+
+    /* Container dos Canais com Rolagem Interna */
+    .channels-viewport {
+      flex: 1;
+      min-height: 0; /* Essencial para flex child scrolling */
+      overflow-x: auto; /* Rolagem interna horizontal */
+      overflow-y: hidden;
+      background: #0b0c10;
+      position: relative;
+      display: flex;
+    }
+
+    .channels-viewport::-webkit-scrollbar {
+      height: 10px;
+    }
+    .channels-viewport::-webkit-scrollbar-track {
+      background: #11131a;
+      border-top: 1px solid #1e222e;
+    }
+    .channels-viewport::-webkit-scrollbar-thumb {
+      background: #2d3345;
+      border-radius: 5px;
+      border: 2px solid #11131a;
+    }
+    .channels-viewport::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+
+    .mixer-rack {
+      display: inline-flex;
+      height: 100%;
+      min-width: 100%;
+      padding: 12px 16px;
+      gap: 2px;
+      background: repeating-linear-gradient(
+        90deg,
+        #12141a 0px,
+        #12141a 80px,
+        #0e1015 80px,
+        #0e1015 160px
+      );
+    }
+
+    /* CANAL STRIP VERTICAL (Estilo Yamaha 01V96V2 da imagem) */
+    .channel-strip {
+      width: 86px;
+      min-width: 86px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--strip-odd);
+      border-left: 1px solid rgba(255, 255, 255, 0.09);
+      border-right: 1px solid rgba(0, 0, 0, 0.7);
+      border-radius: 4px;
+      padding: 8px 4px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 2px 0 6px rgba(0, 0, 0, 0.4);
+      position: relative;
+    }
+
+    .channel-strip:nth-child(even) {
+      background: var(--strip-even);
+    }
+
+    /* Cabeçalho do Canal */
+    .ch-header {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+
+    .ch-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: #090b0e;
+      color: #94a3b8;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #222633;
+    }
+
+    /* BOTÃO ON (Mute) ILUMINADO estilo Yamaha */
+    .ch-mute-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .btn-yamaha-on {
+      width: 66px;
+      height: 34px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.12s ease-in-out;
+      outline: none;
+      position: relative;
+      border: 1px solid #111;
+    }
+
+    /* Estado ON (Aberto / Iluminado em Âmbar) */
+    .btn-yamaha-on.is-on {
+      background: radial-gradient(circle at 50% 35%, #ffe082 0%, #ffb300 45%, #ff8f00 75%, #e65100 100%);
+      color: #261600;
+      border-color: #ffb74d;
+      box-shadow:
+        0 0 16px var(--amber-glow),
+        0 0 6px #ffb300,
+        inset 0 1px 2px rgba(255, 255, 255, 0.8),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+
+    .btn-yamaha-on.is-on:active {
+      transform: scale(0.96);
+      box-shadow:
+        0 0 10px var(--amber-glow),
+        inset 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* Estado MUTADO (Desligado / Apagado) */
+    .btn-yamaha-on.is-muted {
+      background: linear-gradient(180deg, #2a2d38 0%, #1c1e26 100%);
+      color: #64748b;
+      border-color: #15171e;
+      box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.7),
+        0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-yamaha-on.is-muted::after {
+      content: "";
+      position: absolute;
+      top: 5px;
+      right: 6px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 5px #ef4444;
+    }
+
+    /* ÁREA DO FADER VERTICAL COM ESCALA */
+    .fader-section {
+      flex: 1;
+      width: 100%;
+      min-height: 220px;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      position: relative;
+      padding: 24px 2px; /* Espaço para o fader cap não vazar em cima e embaixo */
+    }
+
+    .fader-track-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    /* Marcações de Escala em Decibéis */
+    .scale-ticks {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      pointer-events: none;
+    }
+
+    .scale-tick {
+      position: absolute;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transform: translateY(-50%);
+      font-size: 8px;
+      font-weight: 700;
+      color: #717d91;
+      padding: 0 4px;
+    }
+
+    .scale-tick::before,
+    .scale-tick::after {
+      content: "";
+      display: inline-block;
+      height: 1.5px;
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .scale-tick::before {
+      width: 6px;
+    }
+    .scale-tick::after {
+      width: 6px;
+    }
+
+    /* Linha Zero dB em Destaque */
+    .scale-tick.tick-0db {
+      color: #f8fafc;
+      font-weight: 900;
+    }
+    .scale-tick.tick-0db::before,
+    .scale-tick.tick-0db::after {
+      background: #f8fafc;
+      height: 2px;
+      width: 11px;
+    }
+
+    /* Ranhura Preta do Fader */
+    .fader-slot {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 6px;
+      background: #060709;
+      border-radius: 3px;
+      box-shadow:
+        inset 0 0 4px #000,
+        0 1px 0 rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+
+    /* KNOB / CAP DO FADER (Estilo Yamaha da imagem) */
+    .fader-cap {
+      position: absolute;
+      left: 50%;
+      width: 42px;
+      height: 48px;
+      transform: translate(-50%, -50%); /* Centralizado sobre o ponto */
+      cursor: grab;
+      touch-action: none;
+      z-index: 10;
+      filter: drop-shadow(0 5px 8px rgba(0, 0, 0, 0.75));
+    }
+
+    .fader-cap:active {
+      cursor: grabbing;
+    }
+
+    /* Formato Côncavo e Textura Prateada do Knob */
+    .fader-cap-body {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #a4afbd 0%, #dbe2eb 18%, #ffffff 50%, #d4dce7 82%, #8e99a8 100%);
+      border-radius: 4px;
+      border: 1px solid #5a6270;
+      position: relative;
+      box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.95),
+        inset 0 -2px 3px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      /* Silhueta ergonômica côncava como na foto */
+      clip-path: polygon(
+        0% 0%,
+        18% 5%,
+        50% 7%,
+        82% 5%,
+        100% 0%,
+        100% 100%,
+        82% 95%,
+        50% 93%,
+        18% 95%,
+        0% 100%
+      );
+    }
+
+    /* Linha Preta Marcadora Central */
+    .fader-center-line {
+      width: 100%;
+      height: 3px;
+      background: #111;
+      box-shadow:
+        0 1px 1px rgba(255, 255, 255, 0.7),
+        0 -1px 0 rgba(0, 0, 0, 0.5);
+      z-index: 2;
+    }
+
+    /* Rodapé do Canal (Readouts e Ações) */
+    .ch-footer {
+      width: 100%;
+      margin-top: 10px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ch-db-readout {
+      font-size: 11px;
+      font-weight: 800;
+      color: #38bdf8;
+      background: #090b0e;
+      padding: 3px 6px;
+      border-radius: 4px;
+      width: 100%;
+      text-align: center;
+      border: 1px solid #1e2330;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+    }
+
+    .ch-raw-readout {
+      font-size: 9px;
+      color: var(--text-faint);
+      font-family: ui-monospace, SFMono-Regular, monospace;
+    }
+
+    .ch-quick-actions {
+      display: flex;
+      gap: 3px;
+      width: 100%;
+      margin-top: 2px;
+    }
+
+    .btn-ch-snap {
+      flex: 1;
+      background: #181b24;
+      border: 1px solid #272d3d;
+      color: #94a3b8;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 3px 0;
+      border-radius: 3px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-ch-snap:hover {
+      background: #252b3b;
+      color: #fff;
+    }
+
+    /* Rodapé Inferior do Console (Barra de Status) */
+    .console-footer-bar {
+      flex-shrink: 0;
+      background: #0e1015;
+      border-top: 1px solid #1a1e29;
+      padding: 6px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-faint);
+    }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <div>
-      <h3 style="margin: 0;">Yamaha 01V96V2 — Canal 1</h3>
-      <div id="midiPortBadge" class="midi-badge">Porta MIDI: Identificando...</div>
+  <div class="app-shell">
+    
+    <!-- TOPO: CABEÇALHO DO CONSOLE -->
+    <header class="console-header">
+      <div class="brand-section">
+        <div class="brand-logo">Yamaha 01V96V2</div>
+        <div class="brand-tag">32 CH REMOTE</div>
+      </div>
+
+      <div class="header-mid">
+        <div class="sysex-monitor-bar">
+          <span class="sysex-title">Último SysEx:</span>
+          <span class="sysex-code" id="hexOutput">Aguardando comandos...</span>
+        </div>
+      </div>
+
+      <div class="header-status">
+        <div class="midi-pill">
+          <span class="icon">🎹</span>
+          <span id="midiPortBadge">Identificando porta...</span>
+        </div>
+        <div class="status-badge" id="wsStatusBadge">
+          <div class="status-dot"></div>
+          <span id="wsStatusText">Desconectado</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- BARRA DE CONTROLE: SELECT MULTIPLE E FILTROS -->
+    <div class="console-toolbar">
+      <div class="toolbar-left">
+        <span class="toolbar-label">Exibir Canais:</span>
+
+        <!-- SELECT MULTIPLE NATIVO -->
+        <div class="channel-select-wrap">
+          <select id="channelMultiSelect" multiple class="native-multi-select" title="Segure Ctrl / Cmd para múltiplos">
+            <!-- 32 options geradas dinamicamente via JS -->
+          </select>
+
+          <!-- Botão Dropdown Rápido com Popover -->
+          <button id="btnTogglePopover" class="btn-multiselect-dropdown" type="button">
+            <span id="selectedCountBadge">32 de 32 visíveis</span>
+            <span>▾</span>
+          </button>
+
+          <!-- Popover Interativo com Checkboxes -->
+          <div id="channelDropdownPopover" class="dropdown-popover">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 11px; font-weight: 700; color: #cbd5e1;">Selecionar Canais</span>
+              <span style="font-size: 10px; color: #64748b;">(Clique para alternar)</span>
+            </div>
+            <div class="popover-grid" id="popoverCheckboxGrid">
+              <!-- Gerado via JS -->
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px;">
+              <button class="btn-action" id="btnPopoverAll" type="button">Todos</button>
+              <button class="btn-action" id="btnPopoverNone" type="button">Nenhum</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Atalhos rápidos de bancos -->
+        <div class="bank-buttons">
+          <button class="btn-bank active" data-bank="all" type="button">Todos (1-32)</button>
+          <button class="btn-bank" data-bank="1-8" type="button">CH 1–8</button>
+          <button class="btn-bank" data-bank="9-16" type="button">CH 9–16</button>
+          <button class="btn-bank" data-bank="17-24" type="button">CH 17–24</button>
+          <button class="btn-bank" data-bank="25-32" type="button">CH 25–32</button>
+        </div>
+      </div>
+
+      <div class="toolbar-right">
+        <button class="btn-action" id="btnAllZeroDb" type="button">
+          <span>⚡</span> Todos em 0.0 dB
+        </button>
+        <button class="btn-action" id="btnUnmuteAll" type="button">
+          <span>🔔</span> Desmutar Todos (ON)
+        </button>
+        <button class="btn-action btn-danger" id="btnMuteAll" type="button">
+          <span>🔇</span> Mutar Todos
+        </button>
+      </div>
     </div>
-    <span id="wsStatus" class="badge">Desconectado</span>
-  </div>
 
-  <!-- SLIDER DE VOLUME (Element 0x1C, Param 0x00, Channel 0x00) -->
-  <div class="card">
-    <label>
-      <span>Volume (Fader)</span>
-      <span id="volLabel">823 (0.0 dB)</span>
-    </label>
-    <input type="range" id="volSlider" min="0" max="1023" value="823">
-  </div>
+    <!-- CONTAINER VISUAL DOS CANAIS (ROLAGEM INTERNA HORIZONTAL, PÁGINA FIXA) -->
+    <main class="channels-viewport" id="channelsViewport">
+      <div class="mixer-rack" id="mixerRack">
+        <!-- 32 Channel Strips gerados dinamicamente via JS -->
+      </div>
+    </main>
 
-  <!-- SLIDER DE MUTE / ON (Element 0x1A, Param 0x00, Channel 0x00) -->
-  <div class="card">
-    <label>
-      <span>Canal ON / Mute</span>
-      <span id="muteLabel">1 (ON / Aberto)</span>
-    </label>
-    <input type="range" id="muteSlider" min="0" max="1" step="1" value="1">
-  </div>
+    <!-- BARRA INFERIOR DE INFORMAÇÕES -->
+    <footer class="console-footer-bar">
+      <div>Yamaha 01V96V2 Protocol: Parameter Change (0x1C Fader / 0x1A Channel ON)</div>
+      <div id="footerChannelCount">Exibindo 32 canais | Arraste ou use a roda do mouse nos faders | Duplo clique para 0 dB</div>
+    </footer>
 
-  <div class="card">
-    <label><span>Última mensagem SysEx enviada pelo Go:</span></label>
-    <div class="hex-box" id="hexOutput">F0 43 10 3E 0D 01 1C 00 00 00 00 06 37 F7</div>
   </div>
 
   <script>
+    // ==========================================
+    // ESTADO E CONSTANTES
+    // ==========================================
+    const TOTAL_CHANNELS = 32;
+    const NOMINAL_VALUE = 823; // 0.0 dB na 01V96V2
+    const MAX_VALUE = 1023;    // +10 dB
+    const MIN_VALUE = 0;       // -∞ dB
+
+    // Curva de dB aproximada da Yamaha 01V96V2
+    const DB_BREAKPOINTS = [
+      { val: 1023, db: 10.0 },
+      { val: 823,  db: 0.0 },
+      { val: 710,  db: -5.0 },
+      { val: 595,  db: -10.0 },
+      { val: 480,  db: -15.0 },
+      { val: 365,  db: -20.0 },
+      { val: 245,  db: -30.0 },
+      { val: 140,  db: -40.0 },
+      { val: 65,   db: -50.0 },
+      { val: 20,   db: -70.0 },
+      { val: 0,    db: -Infinity }
+    ];
+
+    function rawToDb(val) {
+      if (val <= 0) return '-∞ dB';
+      if (val === NOMINAL_VALUE) return '0.0 dB';
+      if (val >= MAX_VALUE) return '+10.0 dB';
+
+      for (let i = 0; i < DB_BREAKPOINTS.length - 1; i++) {
+        const p1 = DB_BREAKPOINTS[i];
+        const p2 = DB_BREAKPOINTS[i + 1];
+        if (val <= p1.val && val >= p2.val) {
+          if (p2.db === -Infinity) {
+            return `-${((p1.val - val) * 2).toFixed(1)} dB`;
+          }
+          const ratio = (val - p2.val) / (p1.val - p2.val);
+          const db = p2.db + ratio * (p1.db - p2.db);
+          const sign = db > 0 ? '+' : '';
+          return `${sign}${db.toFixed(1)} dB`;
+        }
+      }
+      return `${val}`;
+    }
+
+    // Escala de posições visuais (% a partir de cima)
+    const SCALE_MARKERS = [
+      { db: '+10', pct: 0 },
+      { db: '+5',  pct: 9.7 },
+      { db: '0',   pct: 19.5, isZero: true },
+      { db: '-5',  pct: 30.5 },
+      { db: '-10', pct: 41.8 },
+      { db: '-15', pct: 53.0 },
+      { db: '-20', pct: 64.3 },
+      { db: '-30', pct: 76.0 },
+      { db: '-40', pct: 86.3 },
+      { db: '-50', pct: 93.6 },
+      { db: '∞',   pct: 100 }
+    ];
+
+    // Estado dos 32 canais
+    const channelsState = Array.from({ length: TOTAL_CHANNELS }, (_, i) => ({
+      index: i,
+      channelHex: i, // 0x00 a 0x1F
+      name: `CH ${String(i + 1).padStart(2, '0')}`,
+      volume: NOMINAL_VALUE, // Padrão 0.0 dB
+      on: 1, // Padrão ON (1 = Aberto, 0 = Mutado)
+      visible: true
+    }));
+
+    // ==========================================
+    // WEBSOCKET & MIDI
+    // ==========================================
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
     const ws = new WebSocket(`${proto}//${location.host}/ws`);
-    const statusEl = document.getElementById('wsStatus');
+    const wsStatusBadge = document.getElementById('wsStatusBadge');
+    const wsStatusText = document.getElementById('wsStatusText');
     const midiPortEl = document.getElementById('midiPortBadge');
+    const hexOutputEl = document.getElementById('hexOutput');
 
     ws.onopen = () => {
-      statusEl.textContent = 'Conectado';
-      statusEl.classList.add('online');
+      wsStatusText.textContent = 'Conectado';
+      wsStatusBadge.classList.add('online');
     };
 
     ws.onclose = () => {
-      statusEl.textContent = 'Desconectado';
-      statusEl.classList.remove('online');
+      wsStatusText.textContent = 'Desconectado';
+      wsStatusBadge.classList.remove('online');
       midiPortEl.textContent = 'Porta MIDI: Desconectado';
     };
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.port) {
-        midiPortEl.textContent = `Porta MIDI: ${data.port}`;
-      }
-      if (data.hex) {
-        document.getElementById('hexOutput').textContent = data.hex;
+      try {
+        const data = JSON.parse(event.data);
+        if (data.port) {
+          midiPortEl.textContent = `Porta: ${data.port}`;
+        }
+        if (data.hex) {
+          hexOutputEl.textContent = data.hex;
+        }
+      } catch (e) {
+        console.error(e);
       }
     };
 
@@ -82,19 +956,367 @@
       }
     }
 
-    // Slider de Volume (0x1C)
-    document.getElementById('volSlider').addEventListener('input', (e) => {
-      const val = parseInt(e.target.value, 10);
-      const label = val === 823 ? '823 (0.0 dB)' : val === 0 ? '0 (-∞ dB)' : val;
-      document.getElementById('volLabel').textContent = label;
-      sendCommand(0x1C, 0x00, 0x00, val);
+    // ==========================================
+    // CRIAÇÃO E RENDERIZAÇÃO DOS CANAIS
+    // ==========================================
+    const mixerRack = document.getElementById('mixerRack');
+    const channelMultiSelect = document.getElementById('channelMultiSelect');
+    const popoverCheckboxGrid = document.getElementById('popoverCheckboxGrid');
+
+    function createChannelStrip(ch) {
+      const strip = document.createElement('div');
+      strip.className = 'channel-strip';
+      strip.id = `channelStrip_${ch.index}`;
+      strip.dataset.index = ch.index;
+
+      // Escala visual de Ticks
+      const ticksHtml = SCALE_MARKERS.map(m => `
+        <div class="scale-tick ${m.isZero ? 'tick-0db' : ''}" style="top: ${m.pct}%;">
+          <span>${m.db}</span>
+          <span>${m.db}</span>
+        </div>
+      `).join('');
+
+      strip.innerHTML = `
+        <div class="ch-header">
+          <span class="ch-badge">${ch.name}</span>
+        </div>
+
+        <div class="ch-mute-wrap">
+          <button type="button" class="btn-yamaha-on is-on" id="btnOn_${ch.index}" title="Alternar Canal ON / MUTE">
+            ON
+          </button>
+        </div>
+
+        <div class="fader-section" id="faderSection_${ch.index}">
+          <div class="fader-track-container" id="trackContainer_${ch.index}">
+            <div class="scale-ticks">${ticksHtml}</div>
+            <div class="fader-slot"></div>
+            <div class="fader-cap" id="faderCap_${ch.index}">
+              <div class="fader-cap-body">
+                <div class="fader-center-line"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ch-footer">
+          <div class="ch-db-readout" id="dbReadout_${ch.index}">0.0 dB</div>
+          <div class="ch-raw-readout" id="rawReadout_${ch.index}">823</div>
+          <div class="ch-quick-actions">
+            <button type="button" class="btn-ch-snap" data-action="0db" data-ch="${ch.index}">0dB</button>
+            <button type="button" class="btn-ch-snap" data-action="inf" data-ch="${ch.index}">-∞</button>
+          </div>
+        </div>
+      `;
+
+      return strip;
+    }
+
+    // Inicializa os 32 canais e os controles de seleção
+    for (let i = 0; i < TOTAL_CHANNELS; i++) {
+      const ch = channelsState[i];
+      // 1. Adiciona Strip ao Rack
+      mixerRack.appendChild(createChannelStrip(ch));
+
+      // 2. Adiciona ao Select Multiple
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = ch.name;
+      opt.selected = true;
+      channelMultiSelect.appendChild(opt);
+
+      // 3. Adiciona ao Popover de Checkboxes
+      const popItem = document.createElement('label');
+      popItem.className = 'popover-item';
+      popItem.innerHTML = `
+        <input type="checkbox" value="${i}" checked id="popCheck_${i}">
+        <span>${ch.name}</span>
+      `;
+      popoverCheckboxGrid.appendChild(popItem);
+    }
+
+    // ==========================================
+    // INTERATIVIDADE DOS FADERS E ON/MUTE
+    // ==========================================
+    function updateFaderUI(chIndex, value) {
+      const ch = channelsState[chIndex];
+      ch.volume = value;
+
+      const cap = document.getElementById(`faderCap_${chIndex}`);
+      const dbReadout = document.getElementById(`dbReadout_${chIndex}`);
+      const rawReadout = document.getElementById(`rawReadout_${chIndex}`);
+
+      if (!cap) return;
+
+      // Normalizado de 0 (baixo) a 1 (cima)
+      const fraction = value / MAX_VALUE;
+      
+      // Topo: 0% (val 1023) / Fundo: 100% (val 0)
+      const topPct = (1 - fraction) * 100;
+      cap.style.top = `${topPct.toFixed(2)}%`;
+
+      dbReadout.textContent = rawToDb(value);
+      rawReadout.textContent = value;
+    }
+
+    function setChannelVolume(chIndex, value, sendMidi = true) {
+      value = Math.max(0, Math.min(MAX_VALUE, Math.round(value)));
+      updateFaderUI(chIndex, value);
+      if (sendMidi) {
+        sendCommand(0x1C, 0x00, chIndex, value);
+      }
+    }
+
+    function setChannelOn(chIndex, isOn, sendMidi = true) {
+      const ch = channelsState[chIndex];
+      ch.on = isOn ? 1 : 0;
+      const btn = document.getElementById(`btnOn_${chIndex}`);
+      if (btn) {
+        if (ch.on === 1) {
+          btn.className = 'btn-yamaha-on is-on';
+          btn.textContent = 'ON';
+        } else {
+          btn.className = 'btn-yamaha-on is-muted';
+          btn.textContent = 'MUTE';
+        }
+      }
+      if (sendMidi) {
+        sendCommand(0x1A, 0x00, chIndex, ch.on);
+      }
+    }
+
+    // Vincula Eventos para Cada Canal
+    for (let i = 0; i < TOTAL_CHANNELS; i++) {
+      const chIndex = i;
+      const trackContainer = document.getElementById(`trackContainer_${chIndex}`);
+      const cap = document.getElementById(`faderCap_${chIndex}`);
+      const btnOn = document.getElementById(`btnOn_${chIndex}`);
+
+      // Botão ON / Mute
+      btnOn.addEventListener('click', () => {
+        const nextState = channelsState[chIndex].on === 1 ? 0 : 1;
+        setChannelOn(chIndex, nextState, true);
+      });
+
+      // Duplo clique no Cap ou Track reseta para 0 dB (823)
+      cap.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        setChannelVolume(chIndex, NOMINAL_VALUE, true);
+      });
+      trackContainer.addEventListener('dblclick', () => {
+        setChannelVolume(chIndex, NOMINAL_VALUE, true);
+      });
+
+      // Pointer Events para arrasto preciso e suave (Mouse / Touch)
+      let isDragging = false;
+
+      function calcValueFromPointer(clientY) {
+        const rect = trackContainer.getBoundingClientRect();
+        const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
+        const fraction = 1 - (y / rect.height);
+        return fraction * MAX_VALUE;
+      }
+
+      trackContainer.addEventListener('pointerdown', (e) => {
+        isDragging = true;
+        trackContainer.setPointerCapture(e.pointerId);
+        const val = calcValueFromPointer(e.clientY);
+        setChannelVolume(chIndex, val, true);
+      });
+
+      trackContainer.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const val = calcValueFromPointer(e.clientY);
+        setChannelVolume(chIndex, val, true);
+      });
+
+      trackContainer.addEventListener('pointerup', (e) => {
+        if (isDragging) {
+          isDragging = false;
+          try { trackContainer.releasePointerCapture(e.pointerId); } catch (_) {}
+        }
+      });
+
+      trackContainer.addEventListener('pointercancel', (e) => {
+        if (isDragging) {
+          isDragging = false;
+          try { trackContainer.releasePointerCapture(e.pointerId); } catch (_) {}
+        }
+      });
+
+      // Roda do mouse no fader para ajuste fino
+      trackContainer.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const step = e.shiftKey ? 4 : 16;
+        const delta = e.deltaY < 0 ? step : -step;
+        setChannelVolume(chIndex, channelsState[chIndex].volume + delta, true);
+      }, { passive: false });
+    }
+
+    // Botões de ação rápida 0dB e -∞ nos canais
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-ch-snap');
+      if (btn) {
+        const ch = parseInt(btn.dataset.ch, 10);
+        const act = btn.dataset.action;
+        if (act === '0db') setChannelVolume(ch, NOMINAL_VALUE, true);
+        if (act === 'inf') setChannelVolume(ch, MIN_VALUE, true);
+      }
     });
 
-    // Slider de Mute / ON (0x1A)
-    document.getElementById('muteSlider').addEventListener('input', (e) => {
-      const val = parseInt(e.target.value, 10);
-      document.getElementById('muteLabel').textContent = val === 1 ? '1 (ON / Aberto)' : '0 (OFF / Mutado)';
-      sendCommand(0x1A, 0x00, 0x00, val);
+    // ==========================================
+    // CONTROLE DE VISIBILIDADE / SELECT MULTIPLE
+    // ==========================================
+    const selectedCountBadge = document.getElementById('selectedCountBadge');
+    const popover = document.getElementById('channelDropdownPopover');
+    const btnTogglePopover = document.getElementById('btnTogglePopover');
+    const footerCount = document.getElementById('footerChannelCount');
+
+    function updateChannelsVisibility(selectedIndices) {
+      let count = 0;
+      for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        const strip = document.getElementById(`channelStrip_${i}`);
+        const isVis = selectedIndices.includes(i);
+        channelsState[i].visible = isVis;
+        strip.style.display = isVis ? 'flex' : 'none';
+        if (isVis) count++;
+      }
+
+      // Sincroniza Select Multiple Nativo
+      Array.from(channelMultiSelect.options).forEach(opt => {
+        opt.selected = selectedIndices.includes(parseInt(opt.value, 10));
+      });
+
+      // Sincroniza Checkboxes do Popover
+      for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        const chk = document.getElementById(`popCheck_${i}`);
+        if (chk) chk.checked = selectedIndices.includes(i);
+      }
+
+      selectedCountBadge.textContent = `${count} de ${TOTAL_CHANNELS} visíveis`;
+      footerCount.textContent = `Exibindo ${count} de ${TOTAL_CHANNELS} canais | Arraste ou use a roda do mouse nos faders | Duplo clique para 0 dB`;
+
+      // Atualiza posições físicas dos faders ao ficarem visíveis
+      requestAnimationFrame(() => {
+        selectedIndices.forEach(idx => {
+          updateFaderUI(idx, channelsState[idx].volume);
+        });
+      });
+    }
+
+    // Evento de alteração no Select Multiple Nativo
+    channelMultiSelect.addEventListener('change', () => {
+      const selected = Array.from(channelMultiSelect.selectedOptions).map(o => parseInt(o.value, 10));
+      updateChannelsVisibility(selected);
+      updateBankButtonsActiveState(selected);
+    });
+
+    // Evento de alteração nos checkboxes do Popover
+    popoverCheckboxGrid.addEventListener('change', (e) => {
+      if (e.target.matches('input[type="checkbox"]')) {
+        const selected = [];
+        for (let i = 0; i < TOTAL_CHANNELS; i++) {
+          const chk = document.getElementById(`popCheck_${i}`);
+          if (chk && chk.checked) selected.push(i);
+        }
+        updateChannelsVisibility(selected);
+        updateBankButtonsActiveState(selected);
+      }
+    });
+
+    // Abrir/fechar Popover
+    btnTogglePopover.addEventListener('click', (e) => {
+      e.stopPropagation();
+      popover.classList.toggle('open');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!popover.contains(e.target) && e.target !== btnTogglePopover) {
+        popover.classList.remove('open');
+      }
+    });
+
+    document.getElementById('btnPopoverAll').addEventListener('click', () => {
+      const all = Array.from({ length: TOTAL_CHANNELS }, (_, i) => i);
+      updateChannelsVisibility(all);
+      updateBankButtonsActiveState(all);
+    });
+
+    document.getElementById('btnPopoverNone').addEventListener('click', () => {
+      updateChannelsVisibility([]);
+      updateBankButtonsActiveState([]);
+    });
+
+    // Botões Rápidos de Bancos
+    const bankButtons = document.querySelectorAll('.btn-bank');
+
+    function getBankIndices(bank) {
+      switch (bank) {
+        case '1-8': return Array.from({ length: 8 }, (_, i) => i);
+        case '9-16': return Array.from({ length: 8 }, (_, i) => i + 8);
+        case '17-24': return Array.from({ length: 8 }, (_, i) => i + 16);
+        case '25-32': return Array.from({ length: 8 }, (_, i) => i + 24);
+        case 'all': default: return Array.from({ length: TOTAL_CHANNELS }, (_, i) => i);
+      }
+    }
+
+    function updateBankButtonsActiveState(selected) {
+      bankButtons.forEach(btn => {
+        const bank = btn.dataset.bank;
+        const bIndices = getBankIndices(bank);
+        const isMatch = bIndices.length === selected.length && bIndices.every(idx => selected.includes(idx));
+        btn.classList.toggle('active', isMatch);
+      });
+    }
+
+    bankButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const bank = btn.dataset.bank;
+        const indices = getBankIndices(bank);
+        updateChannelsVisibility(indices);
+        bankButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // ==========================================
+    // AÇÕES MESTRAS DA TOOLBAR
+    // ==========================================
+    document.getElementById('btnAllZeroDb').addEventListener('click', () => {
+      if (confirm('Deseja ajustar todos os 32 canais para 0.0 dB?')) {
+        for (let i = 0; i < TOTAL_CHANNELS; i++) {
+          setChannelVolume(i, NOMINAL_VALUE, true);
+        }
+      }
+    });
+
+    document.getElementById('btnUnmuteAll').addEventListener('click', () => {
+      for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        setChannelOn(i, 1, true);
+      }
+    });
+
+    document.getElementById('btnMuteAll').addEventListener('click', () => {
+      for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        setChannelOn(i, 0, true);
+      }
+    });
+
+    // Ajusta posições iniciais dos faders no carregamento da tela
+    window.addEventListener('load', () => {
+      for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        updateFaderUI(i, NOMINAL_VALUE);
+      }
+    });
+
+    // Reajusta alturas dos faders caso a janela seja redimensionada
+    window.addEventListener('resize', () => {
+      for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        if (channelsState[i].visible) {
+          updateFaderUI(i, channelsState[i].volume);
+        }
+      }
     });
   </script>
 </body>
