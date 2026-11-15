@@ -1,6 +1,7 @@
 # Binários e executáveis compilados
 /bin/
 /dist/
+midi-console
 *.exe
 *.exe~
 *.dll
