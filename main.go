@@ -21,17 +21,16 @@ import (
 	_ "gitlab.com/gomidi/midi/v2/drivers/rtmididrv"
 )
 
-type ParamCommand struct {
-	Element byte `json:"element"` // ex: 0x1C (Fader), 0x1A (Mute/ON)
-	Param   byte `json:"param"`   // ex: 0x00
-	Channel byte `json:"channel"` // ex: 0x00 (Canal 1)
-	Value   int  `json:"value"`   // ex: 0 a 1023
-}
-
-type WSResponse struct {
-	Type string `json:"type,omitempty"`
-	Port string `json:"port,omitempty"`
-	Hex  string `json:"hex"`
+type WSMessage struct {
+	Type    string `json:"type,omitempty"`    // "init", "param", "simulation_status"
+	Port    string `json:"port,omitempty"`    // Nome da porta MIDI
+	Hex     string `json:"hex,omitempty"`     // SysEx em hexadecimal
+	Element byte   `json:"element"`           // 0x1C (Fader), 0x1A (Mute/ON)
+	Param   byte   `json:"param"`             // 0x00
+	Channel byte   `json:"channel"`           // 0x00 a 0x1F (0 a 31)
+	Value   int    `json:"value"`             // 0 a 1023
+	Running *bool  `json:"running,omitempty"` // status da simulação
+	Action  string `json:"action,omitempty"`  // "toggle_sim"
 }
 
 var (
@@ -41,7 +40,28 @@ var (
 	upgrader     = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
 	}
+
+	// Gerenciamento de conexões WebSocket para Broadcast em tempo real
+	clients     = make(map[*websocket.Conn]bool)
+	clientsLock sync.Mutex
+
+	// Controle da simulação de faders
+	simRunning  bool
+	simLock     sync.Mutex
+	simStopChan chan struct{}
 )
+
+func broadcastWS(msg WSMessage) {
+	clientsLock.Lock()
+	defer clientsLock.Unlock()
+
+	for conn := range clients {
+		if err := conn.WriteJSON(msg); err != nil {
+			conn.Close()
+			delete(clients, conn)
+		}
+	}
+}
 
 // Build01V96SysEx monta a mensagem de 14 bytes da Yamaha 01V96V2
 func Build01V96SysEx(element, param, channel byte, value int) []byte {
@@ -71,34 +91,56 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Erro no upgrade WebSocket: %v", err)
 		return
 	}
-	defer conn.Close()
+	defer func() {
+		clientsLock.Lock()
+		delete(clients, conn)
+		clientsLock.Unlock()
+		conn.Close()
+	}()
+
+	clientsLock.Lock()
+	clients[conn] = true
+	clientsLock.Unlock()
+
 	log.Println("Cliente WebSocket conectado:", r.RemoteAddr)
 
 	midiLock.Lock()
 	pName := midiPortName
 	midiLock.Unlock()
 
-	// Envia informação da porta conectada logo após conectar
-	conn.WriteJSON(WSResponse{
-		Type: "init",
-		Port: pName,
-		Hex:  "Aguardando comandos...",
+	simLock.Lock()
+	runningCopy := simRunning
+	simLock.Unlock()
+
+	// Envia informação inicial (porta e status da simulação)
+	conn.WriteJSON(WSMessage{
+		Type:    "init",
+		Port:    pName,
+		Running: &runningCopy,
+		Hex:     "Conectado ao console Yamaha 01V96V2",
 	})
 
 	for {
-		var cmd ParamCommand
-		if err := conn.ReadJSON(&cmd); err != nil {
+		var msg WSMessage
+		if err := conn.ReadJSON(&msg); err != nil {
 			log.Println("Cliente WebSocket desconectado:", err)
 			break
 		}
 
-		sysex := Build01V96SysEx(cmd.Element, cmd.Param, cmd.Channel, cmd.Value)
+		// Ação de alternar simulação solicitada pela tela
+		if msg.Action == "toggle_sim" {
+			toggleSimulation()
+			continue
+		}
+
+		// Comando de alteração de fader ou mute vindo da tela
+		sysex := Build01V96SysEx(msg.Element, msg.Param, msg.Channel, msg.Value)
 		hexStr := fmt.Sprintf("% X", sysex)
 
 		// Log no terminal para conferência
 		fmt.Printf("WS -> SysEx: %s\n", hexStr)
 
-		// Envia para a saída MIDI
+		// Envia para a saída MIDI física
 		midiLock.Lock()
 		if midiOut != nil {
 			if err := midiOut.Send(sysex); err != nil {
@@ -107,11 +149,14 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		}
 		midiLock.Unlock()
 
-		// Devolve a string hexadecimal formada para exibir na tela
-		conn.WriteJSON(WSResponse{
-			Type: "sysex",
-			Port: pName,
-			Hex:  hexStr,
+		// Broadcast para manter sincronizada qualquer outra aba aberta
+		broadcastWS(WSMessage{
+			Type:    "param",
+			Element: msg.Element,
+			Param:   msg.Param,
+			Channel: msg.Channel,
+			Value:   msg.Value,
+			Hex:     hexStr,
 		})
 	}
 }
@@ -268,21 +313,62 @@ func faderValueToDB(v int) string {
 	return fmt.Sprintf("%d", v)
 }
 
-// runFaderSimulation executa a simulação contínua e realista de movimentação de faders nos canais 1 a 8,
-// enviando as mensagens SysEx da 01V96 diretamente na porta MIDI selecionada sem iniciar o servidor WebSocket.
-func runFaderSimulation(out drivers.Out, portName string) {
-	fmt.Println("\n==============================================================")
-	fmt.Println("  Yamaha 01V96 — Simulador de Operação Real (Faders Ch 1-8)")
-	fmt.Println("==============================================================")
-	fmt.Printf("Porta MIDI Selecionada: %s\n", portName)
-	fmt.Println("Servidor WebSocket: DESATIVADO")
-	fmt.Println("Parâmetro: Element 0x1C (Input Fader), Param 0x00, Canais 0x00..0x07")
-	fmt.Println("Pressione Ctrl+C para encerrar a simulação a qualquer momento.")
-	fmt.Println("--------------------------------------------------------------")
+func startSimulation(out drivers.Out) {
+	simLock.Lock()
+	if simRunning {
+		simLock.Unlock()
+		return
+	}
+	simRunning = true
+	simStopChan = make(chan struct{})
+	simLock.Unlock()
 
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	runningTrue := true
+	broadcastWS(WSMessage{
+		Type:    "simulation_status",
+		Running: &runningTrue,
+	})
+	log.Println("Simulação de faders iniciada (Canais 1 a 8).")
 
+	go runFaderLoop(out, simStopChan)
+}
+
+func stopSimulation() {
+	simLock.Lock()
+	if !simRunning {
+		simLock.Unlock()
+		return
+	}
+	simRunning = false
+	if simStopChan != nil {
+		close(simStopChan)
+		simStopChan = nil
+	}
+	simLock.Unlock()
+
+	runningFalse := false
+	broadcastWS(WSMessage{
+		Type:    "simulation_status",
+		Running: &runningFalse,
+	})
+	log.Println("Simulação de faders pausada.")
+}
+
+func toggleSimulation() {
+	simLock.Lock()
+	running := simRunning
+	simLock.Unlock()
+
+	if running {
+		stopSimulation()
+	} else {
+		startSimulation(midiOut)
+	}
+}
+
+// runFaderLoop executa a movimentação contínua e suave de faders nos canais 1 a 8,
+// enviando as mensagens SysEx da 01V96 na porta MIDI e transmitindo via WebSocket para a tela.
+func runFaderLoop(out drivers.Out, stopChan chan struct{}) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	const numChannels = 8
@@ -298,14 +384,13 @@ func runFaderSimulation(out drivers.Out, portName string) {
 		}
 	}
 
-	// Ciclo de atualização de 40ms (~25 FPS de animação/motor)
+	// Ciclo de atualização de 40ms (~25 FPS)
 	ticker := time.NewTicker(40 * time.Millisecond)
 	defer ticker.Stop()
 
 	for {
 		select {
-		case <-sigChan:
-			fmt.Println("\n[!] Interrupção recebida (Ctrl+C). Finalizando simulação de faders...")
+		case <-stopChan:
 			return
 		case <-ticker.C:
 			for ch := 0; ch < numChannels; ch++ {
@@ -368,8 +453,9 @@ func runFaderSimulation(out drivers.Out, portName string) {
 
 				// Element: 0x1C (Input Fader), Param: 0x00, Channel: 0x00 a 0x07 (Ch 1 a 8)
 				sysex := Build01V96SysEx(0x1C, 0x00, byte(ch), st.currentVal)
+				hexStr := fmt.Sprintf("% X", sysex)
 
-				// Envia para a porta MIDI física selecionada
+				// 1. Envia para a porta MIDI física selecionada
 				midiLock.Lock()
 				if out != nil {
 					if err := out.Send(sysex); err != nil {
@@ -378,8 +464,18 @@ func runFaderSimulation(out drivers.Out, portName string) {
 				}
 				midiLock.Unlock()
 
+				// 2. Transmite via WebSocket para a tela reagir em tempo real
+				broadcastWS(WSMessage{
+					Type:    "param",
+					Element: 0x1C,
+					Param:   0x00,
+					Channel: byte(ch),
+					Value:   st.currentVal,
+					Hex:     hexStr,
+				})
+
 				dbStr := faderValueToDB(st.currentVal)
-				fmt.Printf("[Ch %d] Fader: %4d (%8s) | SysEx: % X\n", ch+1, st.currentVal, dbStr, sysex)
+				fmt.Printf("[Ch %d] Fader: %4d (%8s) | SysEx: %s\n", ch+1, st.currentVal, dbStr, hexStr)
 			}
 		}
 	}
@@ -388,7 +484,7 @@ func runFaderSimulation(out drivers.Out, portName string) {
 func main() {
 	flagPort := flag.String("port", "", "Porta MIDI de saída por índice ou nome (ex: -port 1 ou -port Delta). Deixe vazio para escolher interativamente.")
 	flagAddr := flag.String("addr", ":8080", "Endereço HTTP do servidor")
-	flagSimulate := flag.Bool("simulate", false, "Simula operação real da Yamaha 01V96 enviando dados aleatórios de fader (canais 1 a 8) na porta MIDI selecionada sem subir o servidor WS")
+	flagSimulate := flag.Bool("simulate", false, "Inicia o simulador de operação da Yamaha 01V96 emitindo faders nos canais 1 a 8")
 	flag.BoolVar(flagSimulate, "sim", false, "Atalho para -simulate")
 	flag.Parse()
 
@@ -406,10 +502,9 @@ func main() {
 		log.Println("Rodando em modo simulação (nenhuma porta MIDI física conectada).")
 	}
 
-	// Se o modo de simulação de operação foi ativado, executa o loop de faders e não sobe o WS
+	// Se o modo simulação foi solicitado por linha de comando, inicia os faders
 	if *flagSimulate {
-		runFaderSimulation(midiOut, midiPortName)
-		return
+		startSimulation(midiOut)
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -417,6 +512,16 @@ func main() {
 	})
 	http.HandleFunc("/ws", handleWS)
 
-	log.Printf("Servidor WebSocket rodando em http://localhost%s", *flagAddr)
+	// Captura Ctrl+C para desligamento gracioso
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigChan
+		fmt.Println("\n[!] Encerrando servidor e simulação...")
+		stopSimulation()
+		os.Exit(0)
+	}()
+
+	log.Printf("Servidor Console Web rodando em http://localhost%s", *flagAddr)
 	log.Fatal(http.ListenAndServe(*flagAddr, nil))
 }

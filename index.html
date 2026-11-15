@@ -468,6 +468,26 @@
       color: #fff;
     }
 
+    /* Botão de Simulação 01V96 */
+    .btn-sim {
+      background: #172554;
+      border-color: #2563eb;
+      color: #93c5fd;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+    .btn-sim:hover {
+      background: #1e3a8a;
+      border-color: #3b82f6;
+      color: #ffffff;
+    }
+    .btn-sim.active {
+      background: #14532d;
+      border-color: #22c55e;
+      color: #86efac;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.45);
+    }
+
     /* Toast Notification */
     .toast-notice {
       position: fixed;
@@ -741,6 +761,11 @@
       touch-action: none;
       z-index: 10;
       filter: drop-shadow(0 5px 8px rgba(0, 0, 0, 0.75));
+      transition: top 0.05s ease-out;
+    }
+
+    .fader-cap.is-dragging {
+      transition: none !important;
     }
 
     .fader-cap:active {
@@ -934,6 +959,9 @@
       </div>
 
       <div class="toolbar-right">
+        <button class="btn-action btn-sim" id="btnToggleSim" type="button" title="Alternar simulação em tempo real da Yamaha 01V96">
+          <span id="simIcon">🎲</span> <span id="simStatusText">Simulação 01V96: OFF</span>
+        </button>
         <button class="btn-action" id="btnAllZeroDb" type="button">
           <span>⚡</span> Todos em 0.0 dB
         </button>
@@ -986,7 +1014,7 @@
     ];
 
     function rawToDb(val) {
-      if (val <= 0) return '-∞ dB';
+      if (val === undefined || val === null || isNaN(val) || val <= 0) return '-∞ dB';
       if (val === NOMINAL_VALUE) return '0.0 dB';
       if (val >= MAX_VALUE) return '+10.0 dB';
 
@@ -1051,11 +1079,63 @@
       midiPortEl.textContent = 'Porta MIDI: Desconectado';
     };
 
+    // Elementos do Botão de Simulação 01V96
+    const btnToggleSim = document.getElementById('btnToggleSim');
+    const simIcon = document.getElementById('simIcon');
+    const simStatusText = document.getElementById('simStatusText');
+
+    function updateSimButtonUI(isRunning) {
+      if (!btnToggleSim) return;
+      if (isRunning) {
+        btnToggleSim.classList.add('active');
+        simIcon.textContent = '⚡';
+        simStatusText.textContent = 'Simulação 01V96: ATIVA';
+      } else {
+        btnToggleSim.classList.remove('active');
+        simIcon.textContent = '🎲';
+        simStatusText.textContent = 'Simulação 01V96: OFF';
+      }
+    }
+
+    if (btnToggleSim) {
+      btnToggleSim.addEventListener('click', () => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ action: 'toggle_sim' }));
+        }
+      });
+    }
+
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+
         if (data.port) {
           midiPortEl.textContent = `Porta: ${data.port}`;
+        }
+
+        if (data.running !== undefined) {
+          updateSimButtonUI(data.running);
+        }
+
+        if (data.type === 'param') {
+          // Element 0x1C = Input Fader
+          if (data.element === 0x1C) {
+            const ch = data.channel;
+            const val = (data.value !== undefined && data.value !== null && !isNaN(data.value)) ? data.value : 0;
+            if (ch !== undefined && ch >= 0 && ch < TOTAL_CHANNELS) {
+              // Não sobrescreve se o operador estiver arrastando manualmente este canal no momento
+              if (activeDraggingChannel !== ch) {
+                updateFaderUI(ch, val);
+              }
+            }
+          }
+          // Element 0x1A = Input Channel ON / MUTE
+          else if (data.element === 0x1A) {
+            const ch = data.channel;
+            if (ch >= 0 && ch < TOTAL_CHANNELS) {
+              setChannelOn(ch, data.value === 1, false);
+            }
+          }
         }
       } catch (e) {
         console.error(e);
@@ -1151,8 +1231,16 @@
     // ==========================================
     // INTERATIVIDADE DOS FADERS E ON/MUTE
     // ==========================================
+    let activeDraggingChannel = null;
+
     function updateFaderUI(chIndex, value) {
+      if (value === undefined || value === null || isNaN(value)) {
+        value = 0;
+      }
+      value = Math.max(0, Math.min(MAX_VALUE, Math.round(value)));
+
       const ch = channelsState[chIndex];
+      if (!ch) return;
       ch.volume = value;
 
       const cap = document.getElementById(`faderCap_${chIndex}`);
@@ -1232,6 +1320,8 @@
 
       trackContainer.addEventListener('pointerdown', (e) => {
         isDragging = true;
+        activeDraggingChannel = chIndex;
+        cap.classList.add('is-dragging');
         trackContainer.setPointerCapture(e.pointerId);
         const val = calcValueFromPointer(e.clientY);
         setChannelVolume(chIndex, val, true);
@@ -1246,6 +1336,8 @@
       trackContainer.addEventListener('pointerup', (e) => {
         if (isDragging) {
           isDragging = false;
+          activeDraggingChannel = null;
+          cap.classList.remove('is-dragging');
           try { trackContainer.releasePointerCapture(e.pointerId); } catch (_) {}
         }
       });
@@ -1253,6 +1345,8 @@
       trackContainer.addEventListener('pointercancel', (e) => {
         if (isDragging) {
           isDragging = false;
+          activeDraggingChannel = null;
+          cap.classList.remove('is-dragging');
           try { trackContainer.releasePointerCapture(e.pointerId); } catch (_) {}
         }
       });
