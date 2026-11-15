@@ -5,11 +5,15 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"gitlab.com/gomidi/midi/v2"
@@ -221,9 +225,171 @@ func selectMIDIPort(outs []drivers.Out, flagPort string) drivers.Out {
 	}
 }
 
+// faderChannelState armazena o estado atual e alvo de um fader na simulação
+type faderChannelState struct {
+	currentVal int
+	targetVal  int
+	holdTicks  int
+}
+
+// faderValueToDB converte o valor decimal de 0 a 1023 para uma representação aproximada em dB
+// baseada nos pontos da tabela SysEx da Yamaha 01V96V2
+func faderValueToDB(v int) string {
+	if v <= 0 {
+		return "-∞ dB"
+	}
+	type calPoint struct {
+		val int
+		db  float64
+	}
+	cal := []calPoint{
+		{0, -99.9},
+		{224, -40.0},
+		{464, -20.0},
+		{624, -10.0},
+		{763, -5.0},
+		{823, 0.0},
+		{923, 5.0},
+		{1023, 10.0},
+	}
+	if v >= 1023 {
+		return "+10.0 dB"
+	}
+	for i := 0; i < len(cal)-1; i++ {
+		if v >= cal[i].val && v <= cal[i+1].val {
+			ratio := float64(v-cal[i].val) / float64(cal[i+1].val-cal[i].val)
+			db := cal[i].db + ratio*(cal[i+1].db-cal[i].db)
+			if db > 0 {
+				return fmt.Sprintf("+%.1f dB", db)
+			}
+			return fmt.Sprintf("%.1f dB", db)
+		}
+	}
+	return fmt.Sprintf("%d", v)
+}
+
+// runFaderSimulation executa a simulação contínua e realista de movimentação de faders nos canais 1 a 8,
+// enviando as mensagens SysEx da 01V96 diretamente na porta MIDI selecionada sem iniciar o servidor WebSocket.
+func runFaderSimulation(out drivers.Out, portName string) {
+	fmt.Println("\n==============================================================")
+	fmt.Println("  Yamaha 01V96 — Simulador de Operação Real (Faders Ch 1-8)")
+	fmt.Println("==============================================================")
+	fmt.Printf("Porta MIDI Selecionada: %s\n", portName)
+	fmt.Println("Servidor WebSocket: DESATIVADO")
+	fmt.Println("Parâmetro: Element 0x1C (Input Fader), Param 0x00, Canais 0x00..0x07")
+	fmt.Println("Pressione Ctrl+C para encerrar a simulação a qualquer momento.")
+	fmt.Println("--------------------------------------------------------------")
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	const numChannels = 8
+	channels := make([]faderChannelState, numChannels)
+
+	// Inicializa os 8 canais com posições operacionais típicas (próximas de 0.0 dB / 823)
+	for i := 0; i < numChannels; i++ {
+		initVal := 650 + r.Intn(200)
+		channels[i] = faderChannelState{
+			currentVal: initVal,
+			targetVal:  initVal,
+			holdTicks:  r.Intn(15),
+		}
+	}
+
+	// Ciclo de atualização de 40ms (~25 FPS de animação/motor)
+	ticker := time.NewTicker(40 * time.Millisecond)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-sigChan:
+			fmt.Println("\n[!] Interrupção recebida (Ctrl+C). Finalizando simulação de faders...")
+			return
+		case <-ticker.C:
+			for ch := 0; ch < numChannels; ch++ {
+				st := &channels[ch]
+
+				// Se o fader já está no alvo
+				if st.currentVal == st.targetVal {
+					if st.holdTicks > 0 {
+						st.holdTicks--
+						continue
+					}
+
+					// Probabilidade de iniciar novo ajuste (simula operador alternando entre os faders)
+					if r.Float32() < 0.06 {
+						dice := r.Float32()
+						var newTarget int
+						if dice < 0.05 {
+							// Fade out total (-∞ dB)
+							newTarget = 0
+						} else if dice > 0.95 {
+							// Boost alto (+8.0 a +10.0 dB)
+							newTarget = 980 + r.Intn(44)
+						} else {
+							// Ajustes comuns de mixagem ao redor da posição atual (-150 a +150 pontos)
+							delta := r.Intn(300) - 150
+							newTarget = st.currentVal + delta
+							if newTarget < 250 {
+								newTarget = 250 + r.Intn(150)
+							}
+							if newTarget > 950 {
+								newTarget = 950
+							}
+						}
+						st.targetVal = newTarget
+					}
+					continue
+				}
+
+				// Move gradualmente em direção ao target (passo suave de 5 a 12 unidades por ciclo)
+				diff := st.targetVal - st.currentVal
+				step := 5 + r.Intn(8)
+				if diff > 0 {
+					if diff < step {
+						st.currentVal = st.targetVal
+					} else {
+						st.currentVal += step
+					}
+				} else {
+					if -diff < step {
+						st.currentVal = st.targetVal
+					} else {
+						st.currentVal -= step
+					}
+				}
+
+				// Ao atingir o alvo, mantém uma pausa simulando operador soltando o fader
+				if st.currentVal == st.targetVal {
+					st.holdTicks = 12 + r.Intn(60) // 0.5s a 2.5s parado
+				}
+
+				// Element: 0x1C (Input Fader), Param: 0x00, Channel: 0x00 a 0x07 (Ch 1 a 8)
+				sysex := Build01V96SysEx(0x1C, 0x00, byte(ch), st.currentVal)
+
+				// Envia para a porta MIDI física selecionada
+				midiLock.Lock()
+				if out != nil {
+					if err := out.Send(sysex); err != nil {
+						log.Printf("Erro ao enviar SysEx MIDI no Canal %d: %v", ch+1, err)
+					}
+				}
+				midiLock.Unlock()
+
+				dbStr := faderValueToDB(st.currentVal)
+				fmt.Printf("[Ch %d] Fader: %4d (%8s) | SysEx: % X\n", ch+1, st.currentVal, dbStr, sysex)
+			}
+		}
+	}
+}
+
 func main() {
 	flagPort := flag.String("port", "", "Porta MIDI de saída por índice ou nome (ex: -port 1 ou -port Delta). Deixe vazio para escolher interativamente.")
 	flagAddr := flag.String("addr", ":8080", "Endereço HTTP do servidor")
+	flagSimulate := flag.Bool("simulate", false, "Simula operação real da Yamaha 01V96 enviando dados aleatórios de fader (canais 1 a 8) na porta MIDI selecionada sem subir o servidor WS")
+	flag.BoolVar(flagSimulate, "sim", false, "Atalho para -simulate")
 	flag.Parse()
 
 	defer midi.CloseDriver()
@@ -238,6 +404,12 @@ func main() {
 	} else {
 		midiPortName = "Modo Simulação (sem porta MIDI física)"
 		log.Println("Rodando em modo simulação (nenhuma porta MIDI física conectada).")
+	}
+
+	// Se o modo de simulação de operação foi ativado, executa o loop de faders e não sobe o WS
+	if *flagSimulate {
+		runFaderSimulation(midiOut, midiPortName)
+		return
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
