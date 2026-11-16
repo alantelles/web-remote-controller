@@ -879,6 +879,22 @@
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     }
 
+    .btn-ch-sel.master-sel {
+      width: 66px;
+    }
+
+    .btn-ch-sel.master-sel.active.is-master-red {
+      background: #dc2626;
+      border-color: #f87171;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    }
+
+    .btn-ch-sel.master-sel.active.is-master-blue {
+      background: #2563eb;
+      border-color: #60a5fa;
+      box-shadow: 0 0 10px rgba(37, 99, 235, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    }
+
     /* MODAL DE EFEITOS (FX / CHANNEL STRIP RACK) */
     .fx-modal-card {
       background: #141720;
@@ -947,15 +963,12 @@
     }
 
     .fx-ch-badge {
-      background: #0284c7;
-      color: #fff;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
       padding: 4px 14px;
       border-radius: 4px;
-      letter-spacing: 0.5px;
-      box-shadow: 0 0 8px rgba(2, 132, 199, 0.5);
-      min-width: 160px;
+      letter-spacing: 0.6px;
+      min-width: 170px;
       max-width: 320px;
       text-align: center;
       display: inline-flex;
@@ -965,6 +978,27 @@
       overflow: hidden;
       text-overflow: ellipsis;
       cursor: default;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .fx-ch-badge.type-ch {
+      background: #0284c7;
+      border: 1px solid #38bdf8;
+      box-shadow: 0 0 10px rgba(2, 132, 199, 0.5);
+    }
+
+    .fx-ch-badge.type-master {
+      background: #dc2626;
+      border: 1px solid #f87171;
+      box-shadow: 0 0 12px rgba(220, 38, 38, 0.6);
+    }
+
+    .fx-ch-badge.type-aux {
+      background: #2563eb;
+      border: 1px solid #60a5fa;
+      box-shadow: 0 0 12px rgba(37, 99, 235, 0.6);
     }
 
     .fx-header-title {
@@ -1879,6 +1913,163 @@
       font-size: 11px;
       color: var(--text-faint);
     }
+
+    /* ======================================================== */
+    /* SEÇÃO DO FADER MASTER / SAÍDA DA MIX SELECIONADA         */
+    /* ======================================================== */
+    .console-main-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+      position: relative;
+      background: #090a0e;
+    }
+
+    .master-output-section {
+      flex-shrink: 0;
+      width: 108px;
+      min-width: 108px;
+      height: 100%;
+      background: linear-gradient(180deg, #141722 0%, #0d0f15 100%);
+      border-left: 2px solid #000;
+      box-shadow: -4px 0 18px rgba(0, 0, 0, 0.75);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 6px;
+      position: relative;
+      z-index: 12;
+    }
+
+    .master-output-strip {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #151821;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 8px 4px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 4px 14px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .master-output-header {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .master-section-tag {
+      font-size: 8px;
+      font-weight: 900;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+
+    .master-badge {
+      display: inline-block;
+      width: 88px;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      padding: 3px 4px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      text-align: center;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .master-badge.badge-master {
+      background: rgba(239, 68, 68, 0.18);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+    }
+
+    .master-badge.badge-aux {
+      background: rgba(56, 189, 248, 0.18);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+    }
+
+    /* Botão ON Master */
+    .btn-yamaha-on.master-on.is-master-red {
+      background: radial-gradient(circle at 50% 35%, #fca5a5 0%, #ef4444 45%, #b91c1c 75%, #7f1d1d 100%);
+      color: #ffffff;
+      border-color: #f87171;
+      box-shadow:
+        0 0 16px rgba(239, 68, 68, 0.75),
+        0 0 6px #ef4444,
+        inset 0 1px 2px rgba(255, 255, 255, 0.8),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+    }
+
+    .btn-yamaha-on.master-on.is-aux-blue {
+      background: radial-gradient(circle at 50% 35%, #7dd3fc 0%, #0284c7 45%, #0369a1 75%, #0c4a6e 100%);
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow:
+        0 0 16px rgba(56, 189, 248, 0.75),
+        0 0 6px #38bdf8,
+        inset 0 1px 2px rgba(255, 255, 255, 0.8),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Knob do Fader: Vermelho (Master) */
+    .fader-cap.cap-red .fader-cap-body {
+      background: linear-gradient(90deg, #7f1d1d 0%, #b91c1c 18%, #ef4444 45%, #f87171 52%, #dc2626 80%, #7f1d1d 100%);
+      border-color: #f87171;
+      box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.9),
+        inset 0 -2px 3px rgba(0, 0, 0, 0.6),
+        0 0 14px rgba(239, 68, 68, 0.55);
+    }
+    .fader-cap.cap-red .fader-center-line {
+      background: #ffffff;
+      box-shadow: 0 0 4px #ffffff;
+    }
+
+    /* Knob do Fader: Azul (Auxiliar) */
+    .fader-cap.cap-blue .fader-cap-body {
+      background: linear-gradient(90deg, #0c4a6e 0%, #0369a1 18%, #0ea5e9 45%, #38bdf8 52%, #0284c7 80%, #082f49 100%);
+      border-color: #38bdf8;
+      box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.9),
+        inset 0 -2px 3px rgba(0, 0, 0, 0.6),
+        0 0 14px rgba(56, 189, 248, 0.55);
+    }
+    .fader-cap.cap-blue .fader-center-line {
+      background: #ffffff;
+      box-shadow: 0 0 4px #ffffff;
+    }
+
+    /* Readout de dB Master */
+    .ch-db-readout.db-master-red {
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.09);
+    }
+    .ch-db-readout.db-aux-blue {
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(56, 189, 248, 0.09);
+    }
   </style>
 </head>
 <body>
@@ -2040,12 +2231,61 @@
       </div>
     </div>
 
-    <!-- CONTAINER VISUAL DOS CANAIS (ROLAGEM INTERNA HORIZONTAL, PÁGINA FIXA) -->
-    <main class="channels-viewport" id="channelsViewport">
-      <div class="mixer-rack" id="mixerRack">
-        <!-- 32 Channel Strips gerados dinamicamente via JS -->
-      </div>
-    </main>
+    <!-- CORPO PRINCIPAL DO CONSOLE: CANAIS SCROLLÁVEIS + FADER MASTER DE SAÍDA FIXO À DIREITA -->
+    <div class="console-main-body">
+      <!-- Container com rolagem interna horizontal dos canais 1 a 32 -->
+      <main class="channels-viewport" id="channelsViewport">
+        <div class="mixer-rack" id="mixerRack">
+          <!-- 32 Channel Strips gerados dinamicamente via JS -->
+        </div>
+      </main>
+
+      <!-- FADER MASTER DE SAÍDA DA MIX SELECIONADA (FIXO À DIREITA) -->
+      <aside class="master-output-section" id="masterOutputSection">
+        <div class="master-output-strip" id="masterOutputStrip">
+          <div class="master-output-header">
+            <span class="master-section-tag">OUTPUT MASTER</span>
+            <span class="master-badge badge-master" id="masterBadge" title="Saída Master da Mix Selecionada">STEREO MASTER</span>
+          </div>
+
+          <div class="ch-mute-wrap">
+            <button type="button" class="btn-yamaha-on master-on is-master-red" id="btnMasterOutOn" title="Alternar Mute da Saída Master">
+              ON
+            </button>
+          </div>
+
+          <div class="ch-sel-wrap">
+            <button type="button" class="btn-ch-sel master-sel" id="btnMasterOutSel" title="Abrir Rack de Efeitos da Saída Master (EQ e Compressor)">
+              <span>SEL</span>
+              <span class="ch-sel-badges">
+                <span class="badge-dot dot-eq on" id="masterSelDotEq" title="EQ Ativo"></span>
+                <span class="badge-dot dot-comp on" id="masterSelDotComp" title="Compressor Ativo"></span>
+              </span>
+            </button>
+          </div>
+
+          <div class="fader-section" id="faderSection_masterOut">
+            <div class="fader-track-container" id="trackContainer_masterOut">
+              <div class="scale-ticks" id="scaleTicks_masterOut"></div>
+              <div class="fader-slot"></div>
+              <div class="fader-cap cap-red" id="faderCap_masterOut">
+                <div class="fader-cap-body">
+                  <div class="fader-center-line"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ch-footer">
+            <div class="ch-db-readout db-master-red" id="dbReadout_masterOut">0.0 dB</div>
+            <div class="ch-quick-actions">
+              <button type="button" class="btn-ch-snap" id="btnSnap0db_masterOut" title="Ajustar Saída para 0.0 dB">0dB</button>
+              <button type="button" class="btn-ch-snap" id="btnSnapInf_masterOut" title="Mutar Saída em -∞ dB">-∞</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
 
     <!-- BARRA INFERIOR DE INFORMAÇÕES -->
     <footer class="console-footer-bar">
@@ -2080,7 +2320,7 @@
         <div class="fx-header-title-wrap">
           <div class="fx-ch-nav">
             <button type="button" class="btn-fx-nav" id="btnFxPrevCh" title="Canal Anterior (Alt + ←)">◀</button>
-            <span class="fx-ch-badge" id="fxModalChBadge">CH 01</span>
+            <span class="fx-ch-badge type-ch" id="fxModalChBadge">CH 01</span>
             <button type="button" class="btn-fx-nav" id="btnFxNextCh" title="Próximo Canal (Alt + →)">▶</button>
           </div>
           <span class="fx-header-title">Processamento de Canal (Rack de Efeitos)</span>
@@ -2509,12 +2749,40 @@
 
     let currentMixTarget = 'MASTER';
 
-    // Cria e inicializa o estado de volume e mute independente para cada uma das 9 mixagens
+    function createDefaultEqState() {
+      return {
+        on: 1, // 1 = EQ ON, 0 = Bypass
+        hpf: 0, // HPF 0 = OFF, 1 = ON
+        lpf: 0, // LPF 0 = OFF, 1 = ON
+        low: { gain: 180, freq: 27, q: 17, type: "shelf" },       // 100 Hz, Q 0.70, 0 dB
+        lomid: { gain: 180, freq: 51, q: 20, type: "peaking" },   // 400 Hz, Q 1.0, 0 dB
+        himid: { gain: 180, freq: 79, q: 20, type: "peaking" },   // 2.00 kHz, Q 1.0, 0 dB
+        high: { gain: 180, freq: 107, q: 17, type: "shelf" }      // 10.0 kHz, Q 0.70, 0 dB
+      };
+    }
+
+    function createDefaultCompState() {
+      return {
+        on: 1, // 1 = ON, 0 = Bypass
+        threshold: 108, // -18 dB
+        ratio: 4,       // 4.0:1
+        attack: 10,     // 10 ms
+        release: 20,    // 160 ms
+        knee: 0,        // hard
+        gain: 0         // 0 dB
+      };
+    }
+
+    // Cria e inicializa o estado de volume, mute, EQ e compressor para cada uma das 9 mixagens
     const mixData = {};
     Object.keys(MIX_TARGETS).forEach(key => {
       mixData[key] = {
         volumes: Array.from({ length: TOTAL_CHANNELS }, () => (key === 'MASTER' ? NOMINAL_VALUE : 0)),
-        on: Array.from({ length: TOTAL_CHANNELS }, () => 1)
+        on: Array.from({ length: TOTAL_CHANNELS }, () => 1),
+        masterVolume: NOMINAL_VALUE, // Volume da saída master da mix (823 = 0.0 dB)
+        masterOn: 1,                 // Estado ON da saída master da mix (1 = ON / Aberto)
+        eq: createDefaultEqState(),
+        comp: createDefaultCompState()
       };
     });
 
@@ -2537,9 +2805,13 @@
           const parsed = JSON.parse(raw);
           if (parsed && typeof parsed === 'object') {
             Object.keys(MIX_TARGETS).forEach(key => {
-              if (parsed[key] && Array.isArray(parsed[key].volumes) && Array.isArray(parsed[key].on)) {
-                mixData[key].volumes = parsed[key].volumes;
-                mixData[key].on = parsed[key].on;
+              if (parsed[key]) {
+                if (Array.isArray(parsed[key].volumes)) mixData[key].volumes = parsed[key].volumes;
+                if (Array.isArray(parsed[key].on)) mixData[key].on = parsed[key].on;
+                if (typeof parsed[key].masterVolume === 'number') mixData[key].masterVolume = parsed[key].masterVolume;
+                if (typeof parsed[key].masterOn === 'number') mixData[key].masterOn = parsed[key].masterOn;
+                if (parsed[key].eq) mixData[key].eq = Object.assign(mixData[key].eq, parsed[key].eq);
+                if (parsed[key].comp) mixData[key].comp = Object.assign(mixData[key].comp, parsed[key].comp);
               }
             });
           }
@@ -2689,53 +2961,109 @@
               }
             }
           }
-          // Element 0x20 = Equalizador Paramétrico (EQ)
-          else if (data.element === 0x20) {
-            const ch = data.channel;
-            if (ch !== undefined && ch >= 0 && ch < TOTAL_CHANNELS && typeof eqState !== 'undefined') {
-              const eq = eqState[ch];
-              switch (data.param) {
-                case 0x00: eq.on = data.value; break;
-                case 0x01: eq.low.q = Math.max(0, Math.min(40, 40 - data.value)); break;
-                case 0x02: eq.low.freq = data.value; break;
-                case 0x03: eq.low.gain = data.value; break;
-                case 0x04: eq.lomid.q = Math.max(0, Math.min(40, 40 - data.value)); break;
-                case 0x05: eq.lomid.freq = data.value; break;
-                case 0x06: eq.lomid.gain = data.value; break;
-                case 0x07: eq.himid.q = Math.max(0, Math.min(40, 40 - data.value)); break;
-                case 0x08: eq.himid.freq = data.value; break;
-                case 0x09: eq.himid.gain = data.value; break;
-                case 0x0A: eq.high.q = Math.max(0, Math.min(40, 40 - data.value)); break;
-                case 0x0B: eq.high.freq = data.value; break;
-                case 0x0C: eq.high.gain = data.value; break;
-                case 0x0D: eq.hpf = data.value; eq.low.type = data.value === 1 ? 'hpf' : (eq.low.type === 'hpf' ? 'shelf' : eq.low.type); break;
-                case 0x0E: eq.lpf = data.value; eq.high.type = data.value === 1 ? 'lpf' : (eq.high.type === 'lpf' ? 'shelf' : eq.high.type); break;
-              }
-              if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === ch && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
-                syncEqModalFromState(ch);
-                updateTabStatusDots(ch);
-                requestEqRedraw();
+          // Element 0x20 (Input EQ), 0x35 (Aux Master EQ), 0x50 (Stereo Master EQ)
+          else if (data.element === 0x20 || data.element === 0x35 || data.element === 0x50) {
+            let targetKey = null;
+            if (data.element === 0x20 && data.channel >= 0 && data.channel < TOTAL_CHANNELS) {
+              targetKey = data.channel;
+            } else if (data.element === 0x50) {
+              targetKey = 'MASTER';
+            } else if (data.element === 0x35 && data.channel >= 0 && data.channel < 8) {
+              targetKey = 'AUX' + (data.channel + 1);
+            }
+            if (targetKey !== null && typeof getChannelEq === 'function') {
+              const eq = getChannelEq(targetKey);
+              if (eq) {
+                switch (data.param) {
+                  case 0x00: eq.on = data.value; break;
+                  case 0x01: eq.low.q = Math.max(0, Math.min(40, 40 - data.value)); break;
+                  case 0x02: eq.low.freq = data.value; break;
+                  case 0x03: eq.low.gain = data.value; break;
+                  case 0x04: eq.lomid.q = Math.max(0, Math.min(40, 40 - data.value)); break;
+                  case 0x05: eq.lomid.freq = data.value; break;
+                  case 0x06: eq.lomid.gain = data.value; break;
+                  case 0x07: eq.himid.q = Math.max(0, Math.min(40, 40 - data.value)); break;
+                  case 0x08: eq.himid.freq = data.value; break;
+                  case 0x09: eq.himid.gain = data.value; break;
+                  case 0x0A: eq.high.q = Math.max(0, Math.min(40, 40 - data.value)); break;
+                  case 0x0B: eq.high.freq = data.value; break;
+                  case 0x0C: eq.high.gain = data.value; break;
+                  case 0x0D: eq.hpf = data.value; eq.low.type = data.value === 1 ? 'hpf' : (eq.low.type === 'hpf' ? 'shelf' : eq.low.type); break;
+                  case 0x0E: eq.lpf = data.value; eq.high.type = data.value === 1 ? 'lpf' : (eq.high.type === 'lpf' ? 'shelf' : eq.high.type); break;
+                }
+                if (typeof updateTabStatusDots === 'function') updateTabStatusDots(targetKey);
+                if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === targetKey && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
+                  syncEqModalFromState(targetKey);
+                  requestEqRedraw();
+                }
               }
             }
           }
-          // Element 0x22 = Compressor de Canal (Dynamics 2)
-          else if (data.element === 0x22) {
-            const ch = data.channel;
-            if (ch !== undefined && ch >= 0 && ch < TOTAL_CHANNELS && typeof compState !== 'undefined') {
-              const comp = compState[ch];
-              switch (data.param) {
-                case 0x00: comp.on = data.value; break;
-                case 0x01: comp.threshold = data.value; break;
-                case 0x02: comp.ratio = data.value; break;
-                case 0x03: comp.attack = data.value; break;
-                case 0x04: comp.release = data.value; break;
-                case 0x05: comp.knee = data.value; break;
-                case 0x06: comp.gain = data.value; break;
+          // Element 0x22 (Input Comp), 0x36 (Aux Master Comp), 0x51 (Stereo Master Comp)
+          else if (data.element === 0x22 || data.element === 0x36 || data.element === 0x51) {
+            let targetKey = null;
+            if (data.element === 0x22 && data.channel >= 0 && data.channel < TOTAL_CHANNELS) {
+              targetKey = data.channel;
+            } else if (data.element === 0x51) {
+              targetKey = 'MASTER';
+            } else if (data.element === 0x36 && data.channel >= 0 && data.channel < 8) {
+              targetKey = 'AUX' + (data.channel + 1);
+            }
+            if (targetKey !== null && typeof getChannelComp === 'function') {
+              const comp = getChannelComp(targetKey);
+              if (comp) {
+                switch (data.param) {
+                  case 0x00: comp.on = data.value; break;
+                  case 0x01: comp.threshold = data.value; break;
+                  case 0x02: comp.ratio = data.value; break;
+                  case 0x03: comp.attack = data.value; break;
+                  case 0x04: comp.release = data.value; break;
+                  case 0x05: comp.knee = data.value; break;
+                  case 0x06: comp.gain = data.value; break;
+                }
+                if (typeof updateTabStatusDots === 'function') updateTabStatusDots(targetKey);
+                if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === targetKey && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
+                  syncCompModalFromState(targetKey);
+                  requestCompRedraw();
+                }
               }
-              if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === ch && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
-                syncCompModalFromState(ch);
-                updateTabStatusDots(ch);
-                requestCompRedraw();
+            }
+          }
+          // Element 0x4D = Stereo Out Fader (Master)
+          else if (data.element === 0x4D) {
+            const val = (data.value !== undefined && data.value !== null && !isNaN(data.value)) ? data.value : 0;
+            mixData.MASTER.masterVolume = val;
+            if (currentMixTarget === 'MASTER' && activeDraggingChannel !== 'masterOut') {
+              updateMasterOutputFaderUI(val);
+            }
+          }
+          // Element 0x4B = Stereo Out ON / MUTE (Master)
+          else if (data.element === 0x4B) {
+            mixData.MASTER.masterOn = data.value;
+            if (currentMixTarget === 'MASTER') {
+              updateMasterOutputOnUI(data.value === 1);
+            }
+          }
+          // Element 0x31 = Aux Master Fader (Aux 1 a 8)
+          else if (data.element === 0x31) {
+            const auxIdx = data.channel; // 0..7
+            const targetKey = 'AUX' + (auxIdx + 1);
+            const val = (data.value !== undefined && data.value !== null && !isNaN(data.value)) ? data.value : 0;
+            if (mixData[targetKey]) {
+              mixData[targetKey].masterVolume = val;
+              if (currentMixTarget === targetKey && activeDraggingChannel !== 'masterOut') {
+                updateMasterOutputFaderUI(val);
+              }
+            }
+          }
+          // Element 0x2F = Aux Master ON / MUTE (Aux 1 a 8)
+          else if (data.element === 0x2F) {
+            const auxIdx = data.channel; // 0..7
+            const targetKey = 'AUX' + (auxIdx + 1);
+            if (mixData[targetKey]) {
+              mixData[targetKey].masterOn = data.value;
+              if (currentMixTarget === targetKey) {
+                updateMasterOutputOnUI(data.value === 1);
               }
             }
           }
@@ -2808,7 +3136,6 @@
 
         <div class="ch-footer">
           <div class="ch-db-readout" id="dbReadout_${ch.index}">0.0 dB</div>
-          <div class="ch-raw-readout" id="rawReadout_${ch.index}">823</div>
           <div class="ch-quick-actions">
             <button type="button" class="btn-ch-snap" data-action="0db" data-ch="${ch.index}">0dB</button>
             <button type="button" class="btn-ch-snap" data-action="inf" data-ch="${ch.index}">-∞</button>
@@ -2866,8 +3193,8 @@
       const topPct = (1 - fraction) * 100;
       cap.style.top = `${topPct.toFixed(2)}%`;
 
-      dbReadout.textContent = rawToDb(value);
-      rawReadout.textContent = value;
+      if (dbReadout) dbReadout.textContent = rawToDb(value);
+      if (rawReadout) rawReadout.textContent = value;
     }
 
     function updateChannelOnUI(chIndex, isOn) {
@@ -2952,6 +3279,215 @@
       // 4. Feedback visual opcional
       if (notify) {
         showToast(`Mixagem direcionada para ${target.name} (${target.shortName}) 🎛️`, target.isMaster ? '🔴' : '🎛️');
+      }
+
+      // 5. Atualiza o fader master de saída para a mixagem selecionada (Vermelho se Master, Azul se Auxiliar)
+      updateMasterOutputSectionUI(target);
+    }
+
+    // ==========================================
+    // CONTROLE DO FADER MASTER DE SAÍDA DA MIX SELECIONADA
+    // ==========================================
+    function updateMasterOutputFaderUI(value) {
+      if (value === undefined || value === null || isNaN(value)) {
+        value = 0;
+      }
+      value = Math.max(0, Math.min(MAX_VALUE, Math.round(value)));
+
+      const cap = document.getElementById('faderCap_masterOut');
+      const dbReadout = document.getElementById('dbReadout_masterOut');
+      const rawReadout = document.getElementById('rawReadout_masterOut');
+
+      if (!cap) return;
+
+      const fraction = value / MAX_VALUE;
+      const topPct = (1 - fraction) * 100;
+      cap.style.top = `${topPct.toFixed(2)}%`;
+
+      if (dbReadout) dbReadout.textContent = rawToDb(value);
+      if (rawReadout) rawReadout.textContent = value;
+    }
+
+    function updateMasterOutputOnUI(isOn) {
+      const btn = document.getElementById('btnMasterOutOn');
+      if (!btn) return;
+      const target = MIX_TARGETS[currentMixTarget];
+      const isMaster = target ? target.isMaster : true;
+
+      if (isOn) {
+        btn.textContent = 'ON';
+        btn.className = 'btn-yamaha-on master-on ' + (isMaster ? 'is-master-red' : 'is-aux-blue');
+      } else {
+        btn.textContent = 'MUTE';
+        btn.className = 'btn-yamaha-on master-on is-muted';
+      }
+    }
+
+    function updateMasterOutputSectionUI(target) {
+      const masterBadge = document.getElementById('masterBadge');
+      const faderCap = document.getElementById('faderCap_masterOut');
+      const dbReadout = document.getElementById('dbReadout_masterOut');
+
+      if (!masterBadge || !faderCap || !dbReadout) return;
+
+      if (target.isMaster) {
+        masterBadge.textContent = 'STEREO MASTER';
+        masterBadge.className = 'master-badge badge-master';
+        faderCap.classList.add('cap-red');
+        faderCap.classList.remove('cap-blue');
+        dbReadout.classList.add('db-master-red');
+        dbReadout.classList.remove('db-aux-blue');
+      } else {
+        masterBadge.textContent = `${target.name} MASTER`;
+        masterBadge.className = 'master-badge badge-aux';
+        faderCap.classList.add('cap-blue');
+        faderCap.classList.remove('cap-red');
+        dbReadout.classList.add('db-aux-blue');
+        dbReadout.classList.remove('db-master-red');
+      }
+
+      updateMasterOutputFaderUI(mixData[target.id].masterVolume);
+      updateMasterOutputOnUI(mixData[target.id].masterOn === 1);
+      if (typeof updateOutputSelBadges === 'function') updateOutputSelBadges();
+    }
+
+    function setMasterOutputVolume(value, sendMidi = true) {
+      value = Math.max(0, Math.min(MAX_VALUE, Math.round(value)));
+      mixData[currentMixTarget].masterVolume = value;
+      updateMasterOutputFaderUI(value);
+      saveMixDataDebounced();
+
+      if (sendMidi) {
+        const target = MIX_TARGETS[currentMixTarget];
+        if (target.isMaster) {
+          // Stereo Out Fader: 0x4D, Param 0x00, Channel 0x00 (L/R)
+          sendCommand(0x4D, 0x00, 0x00, value);
+        } else {
+          // Aux Master Fader: 0x31, Param 0x00, Channel auxIndex (0..7)
+          sendCommand(0x31, 0x00, target.auxIndex, value);
+        }
+      }
+    }
+
+    function setMasterOutputOn(isOn, sendMidi = true) {
+      const val = isOn ? 1 : 0;
+      mixData[currentMixTarget].masterOn = val;
+      updateMasterOutputOnUI(isOn);
+      saveMixDataDebounced();
+
+      if (sendMidi) {
+        const target = MIX_TARGETS[currentMixTarget];
+        if (target.isMaster) {
+          // Stereo Out ON: 0x4B, Param 0x00, Channel 0x00
+          sendCommand(0x4B, 0x00, 0x00, val);
+        } else {
+          // Aux Master ON: 0x2F, Param 0x00, Channel auxIndex (0..7)
+          sendCommand(0x2F, 0x00, target.auxIndex, val);
+        }
+      }
+    }
+
+    function initMasterOutputStrip() {
+      const scaleTicksEl = document.getElementById('scaleTicks_masterOut');
+      if (scaleTicksEl) {
+        const ticksHtml = SCALE_MARKERS.map(m => `
+          <div class="scale-tick ${m.isZero ? 'tick-0db' : ''}" style="top: ${m.pct}%;">
+            <span>${m.db}</span>
+            <span>${m.db}</span>
+          </div>
+        `).join('');
+        scaleTicksEl.innerHTML = ticksHtml;
+      }
+
+      const trackContainer = document.getElementById('trackContainer_masterOut');
+      const cap = document.getElementById('faderCap_masterOut');
+      const btnOn = document.getElementById('btnMasterOutOn');
+      const btnMasterSel = document.getElementById('btnMasterOutSel');
+      const btnSnap0db = document.getElementById('btnSnap0db_masterOut');
+      const btnSnapInf = document.getElementById('btnSnapInf_masterOut');
+
+      if (btnMasterSel) {
+        btnMasterSel.addEventListener('click', () => {
+          openFxModal(currentMixTarget);
+        });
+      }
+
+      if (btnOn) {
+        btnOn.addEventListener('click', () => {
+          const nextState = mixData[currentMixTarget].masterOn === 1 ? 0 : 1;
+          setMasterOutputOn(nextState, true);
+        });
+      }
+
+      if (btnSnap0db) {
+        btnSnap0db.addEventListener('click', () => {
+          setMasterOutputVolume(NOMINAL_VALUE, true);
+        });
+      }
+
+      if (btnSnapInf) {
+        btnSnapInf.addEventListener('click', () => {
+          setMasterOutputVolume(MIN_VALUE, true);
+        });
+      }
+
+      if (trackContainer && cap) {
+        cap.addEventListener('dblclick', (e) => {
+          e.stopPropagation();
+          setMasterOutputVolume(NOMINAL_VALUE, true);
+        });
+        trackContainer.addEventListener('dblclick', () => {
+          setMasterOutputVolume(NOMINAL_VALUE, true);
+        });
+
+        let isMasterDragging = false;
+
+        function calcMasterValueFromPointer(clientY) {
+          const rect = trackContainer.getBoundingClientRect();
+          const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
+          const fraction = 1 - (y / rect.height);
+          return fraction * MAX_VALUE;
+        }
+
+        trackContainer.addEventListener('pointerdown', (e) => {
+          isMasterDragging = true;
+          activeDraggingChannel = 'masterOut';
+          cap.classList.add('is-dragging');
+          trackContainer.setPointerCapture(e.pointerId);
+          const val = calcMasterValueFromPointer(e.clientY);
+          setMasterOutputVolume(val, true);
+        });
+
+        trackContainer.addEventListener('pointermove', (e) => {
+          if (!isMasterDragging) return;
+          const val = calcMasterValueFromPointer(e.clientY);
+          setMasterOutputVolume(val, true);
+        });
+
+        trackContainer.addEventListener('pointerup', (e) => {
+          if (isMasterDragging) {
+            isMasterDragging = false;
+            activeDraggingChannel = null;
+            cap.classList.remove('is-dragging');
+            try { trackContainer.releasePointerCapture(e.pointerId); } catch (_) {}
+          }
+        });
+
+        trackContainer.addEventListener('pointercancel', (e) => {
+          if (isMasterDragging) {
+            isMasterDragging = false;
+            activeDraggingChannel = null;
+            cap.classList.remove('is-dragging');
+            try { trackContainer.releasePointerCapture(e.pointerId); } catch (_) {}
+          }
+        });
+
+        trackContainer.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          const step = e.shiftKey ? 4 : 16;
+          const delta = e.deltaY < 0 ? step : -step;
+          setMasterOutputVolume(mixData[currentMixTarget].masterVolume + delta, true);
+        }, { passive: false });
       }
     }
 
@@ -3414,7 +3950,45 @@
       high: { gain: 180, freq: 107, q: 17, type: "shelf" }      // 10.0 kHz, Q 0.70, 0 dB
     }));
 
-    let currentSelectedCh = 0; // Canal selecionado no SEL (0 a 31)
+    let currentSelectedCh = 0; // Canal selecionado no SEL (0 a 31 para inputs, ou 'MASTER', 'AUX1'..'AUX8' para saídas)
+
+    function getChannelEq(target) {
+      if (typeof target === 'number') {
+        return eqState[target];
+      }
+      if (mixData[target] && mixData[target].eq) {
+        return mixData[target].eq;
+      }
+      return mixData.MASTER.eq;
+    }
+
+    function getChannelComp(target) {
+      if (typeof target === 'number') {
+        return compState[target];
+      }
+      if (mixData[target] && mixData[target].comp) {
+        return mixData[target].comp;
+      }
+      return mixData.MASTER.comp;
+    }
+
+    function updateOutputSelBadges() {
+      const eq = getChannelEq(currentMixTarget);
+      const comp = getChannelComp(currentMixTarget);
+      const dotEq = document.getElementById('masterSelDotEq');
+      const dotComp = document.getElementById('masterSelDotComp');
+      if (dotEq) dotEq.classList.toggle('on', eq.on === 1);
+      if (dotComp) dotComp.classList.toggle('on', comp.on === 1);
+
+      const btnMasterSel = document.getElementById('btnMasterOutSel');
+      if (btnMasterSel) {
+        const isMasterSelected = currentSelectedCh === currentMixTarget;
+        btnMasterSel.classList.toggle('active', isMasterSelected);
+        const isMasterRed = MIX_TARGETS[currentMixTarget] ? MIX_TARGETS[currentMixTarget].isMaster : true;
+        btnMasterSel.classList.toggle('is-master-red', isMasterRed);
+        btnMasterSel.classList.toggle('is-master-blue', !isMasterRed);
+      }
+    }
 
     function rawGainToDb(val) {
       const db = (val - 180) / 10;
@@ -3481,23 +4055,65 @@
       });
     }
 
-    function openFxModal(chIndex) {
-      currentSelectedCh = chIndex;
-      const chName = (channelsState[chIndex] && channelsState[chIndex].name) 
-        ? channelsState[chIndex].name 
-        : `CH ${String(chIndex + 1).padStart(2, '0')}`;
-      fxModalChBadge.textContent = chName;
-      fxModalChBadge.title = chName;
+    const ALL_FX_TARGETS = [
+      ...Array.from({ length: TOTAL_CHANNELS }, (_, i) => i),
+      'MASTER',
+      'AUX1', 'AUX2', 'AUX3', 'AUX4', 'AUX5', 'AUX6', 'AUX7', 'AUX8'
+    ];
+
+    function switchFxTab(tabKey) {
+      currentFxTab = tabKey;
+      fxTabButtons.forEach(b => b.classList.toggle('active', b.dataset.tab === tabKey));
+      fxTabPanes.forEach(p => p.classList.toggle('active', p.id === `fxTab_${tabKey}`));
+      if (tabKey === 'eq') {
+        requestEqRedraw();
+      } else if (tabKey === 'comp') {
+        requestCompRedraw();
+      }
+    }
+
+    function openFxModal(target) {
+      currentSelectedCh = target;
+      const tabGateBtn = document.querySelector('[data-tab="gate"]');
+
+      fxModalChBadge.className = 'fx-ch-badge';
+      fxModalChBadge.style.color = '';
+
+      if (typeof target === 'number') {
+        const chName = (channelsState[target] && channelsState[target].name) 
+          ? channelsState[target].name 
+          : `CH ${String(target + 1).padStart(2, '0')}`;
+        fxModalChBadge.textContent = chName;
+        fxModalChBadge.title = chName;
+        fxModalChBadge.classList.add('type-ch');
+        if (tabGateBtn) tabGateBtn.style.display = '';
+      } else if (target === 'MASTER') {
+        fxModalChBadge.textContent = 'STEREO MASTER OUT';
+        fxModalChBadge.title = 'Stereo Master Out';
+        fxModalChBadge.classList.add('type-master');
+        if (tabGateBtn) tabGateBtn.style.display = 'none';
+        if (currentFxTab === 'gate') switchFxTab('eq');
+      } else if (typeof target === 'string' && target.startsWith('AUX')) {
+        const auxNum = target.replace('AUX', '');
+        fxModalChBadge.textContent = `AUX ${auxNum} MASTER OUT`;
+        fxModalChBadge.title = `Aux ${auxNum} Master Out`;
+        fxModalChBadge.classList.add('type-aux');
+        if (tabGateBtn) tabGateBtn.style.display = 'none';
+        if (currentFxTab === 'gate') switchFxTab('eq');
+      }
       
       // Atualiza botões SEL na interface dos canais
       document.querySelectorAll('.btn-ch-sel').forEach(btn => {
-        btn.classList.toggle('active', parseInt(btn.dataset.ch, 10) === chIndex);
+        if (!btn.classList.contains('master-sel')) {
+          btn.classList.toggle('active', parseInt(btn.dataset.ch, 10) === target);
+        }
       });
+      updateOutputSelBadges();
 
-      // Carrega estado do EQ e COMP do canal
-      syncEqModalFromState(chIndex);
-      syncCompModalFromState(chIndex);
-      updateTabStatusDots(chIndex);
+      // Carrega estado do EQ e COMP do canal/saída
+      syncEqModalFromState(target);
+      syncCompModalFromState(target);
+      updateTabStatusDots(target);
       fxModalOverlay.classList.add('open');
       
       if (currentFxTab === 'eq') {
@@ -3509,32 +4125,49 @@
 
     function closeFxModal() {
       fxModalOverlay.classList.remove('open');
+      document.querySelectorAll('.btn-ch-sel').forEach(btn => btn.classList.remove('active'));
     }
 
     const btnFxPrevCh = document.getElementById('btnFxPrevCh');
     const btnFxNextCh = document.getElementById('btnFxNextCh');
 
-    function selectFxChannel(chIndex) {
-      // Navegação circular entre os 32 canais (0 a 31)
-      const targetCh = (chIndex + TOTAL_CHANNELS) % TOTAL_CHANNELS;
-      openFxModal(targetCh);
+    function selectFxChannel(step) {
+      let curIdx = ALL_FX_TARGETS.indexOf(currentSelectedCh);
+      if (curIdx === -1) curIdx = 0;
+      const total = ALL_FX_TARGETS.length;
+      const nextIdx = (curIdx + step + total) % total;
+      const nextTarget = ALL_FX_TARGETS[nextIdx];
+
+      // Se navegou para uma saída e ela difere da mix atualmente exibida no mixer, comuta a visualização
+      if (typeof nextTarget === 'string' && nextTarget !== currentMixTarget) {
+        selectMix(nextTarget, false);
+      }
+
+      openFxModal(nextTarget);
 
       // Centraliza/rola o canal na visualização se estiver visível no mixer
-      const strip = document.getElementById(`channelStrip_${targetCh}`);
-      if (strip && strip.style.display !== 'none') {
-        strip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      if (typeof nextTarget === 'number') {
+        const strip = document.getElementById(`channelStrip_${nextTarget}`);
+        if (strip && strip.style.display !== 'none') {
+          strip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      } else {
+        const masterStrip = document.getElementById('masterOutputStrip');
+        if (masterStrip) {
+          masterStrip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
       }
     }
 
     if (btnFxPrevCh) {
       btnFxPrevCh.addEventListener('click', () => {
-        selectFxChannel(currentSelectedCh - 1);
+        selectFxChannel(-1);
       });
     }
 
     if (btnFxNextCh) {
       btnFxNextCh.addEventListener('click', () => {
-        selectFxChannel(currentSelectedCh + 1);
+        selectFxChannel(1);
       });
     }
 
@@ -3555,32 +4188,22 @@
         if (e.key === 'Escape') {
           closeFxModal();
         } else if (e.altKey && e.key === 'ArrowLeft') {
-          selectFxChannel(currentSelectedCh - 1);
+          selectFxChannel(-1);
         } else if (e.altKey && e.key === 'ArrowRight') {
-          selectFxChannel(currentSelectedCh + 1);
+          selectFxChannel(1);
         }
       }
     });
 
     fxTabButtons.forEach(btn => {
       btn.addEventListener('click', () => {
-        const tabKey = btn.dataset.tab;
-        currentFxTab = tabKey;
-        fxTabButtons.forEach(b => b.classList.remove('active'));
-        fxTabPanes.forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(`fxTab_${tabKey}`).classList.add('active');
-        if (tabKey === 'eq') {
-          requestEqRedraw();
-        } else if (tabKey === 'comp') {
-          requestCompRedraw();
-        }
+        switchFxTab(btn.dataset.tab);
       });
     });
 
-    // Sincroniza controles do modal com o estado do canal
-    function syncEqModalFromState(chIndex) {
-      const eq = eqState[chIndex];
+    // Sincroniza controles do modal com o estado do canal ou saída
+    function syncEqModalFromState(target) {
+      const eq = getChannelEq(target);
 
       // EQ Bypass
       btnEqBypass.classList.toggle('on', eq.on === 1);
@@ -3642,15 +4265,24 @@
       });
     }
 
-    // Envia comandos SysEx de EQ (Element 0x20)
+    // Envia comandos SysEx de EQ (Element 0x20 para CH 1-32, 0x50 para Stereo Master, 0x35 para Aux 1-8)
     function sendEqParam(param, value) {
-      sendCommand(0x20, param, currentSelectedCh, value);
+      if (typeof currentSelectedCh === 'number') {
+        sendCommand(0x20, param, currentSelectedCh, value);
+      } else if (currentSelectedCh === 'MASTER') {
+        sendCommand(0x50, param, 0x00, value);
+        saveMixData();
+      } else if (typeof currentSelectedCh === 'string' && currentSelectedCh.startsWith('AUX')) {
+        const auxIdx = parseInt(currentSelectedCh.replace('AUX', ''), 10) - 1;
+        sendCommand(0x35, param, auxIdx, value);
+        saveMixData();
+      }
       requestEqRedraw();
     }
 
     // Toggle EQ ON / Bypass
     btnEqBypass.addEventListener('click', () => {
-      const eq = eqState[currentSelectedCh];
+      const eq = getChannelEq(currentSelectedCh);
       eq.on = eq.on === 1 ? 0 : 1;
       btnEqBypass.classList.toggle('on', eq.on === 1);
       btnEqBypass.textContent = eq.on === 1 ? 'EQ: ATIVO (ON)' : 'EQ: BYPASS (OFF)';
@@ -3660,7 +4292,7 @@
 
     // Toggle HPF (Banda LOW)
     btnEqHpf.addEventListener('click', () => {
-      const eq = eqState[currentSelectedCh];
+      const eq = getChannelEq(currentSelectedCh);
       eq.hpf = eq.hpf === 1 ? 0 : 1;
       eq.low.type = eq.hpf === 1 ? 'hpf' : 'shelf';
       sendEqParam(0x0D, eq.hpf);
@@ -3670,7 +4302,7 @@
 
     // Toggle LPF (Banda HIGH)
     btnEqLpf.addEventListener('click', () => {
-      const eq = eqState[currentSelectedCh];
+      const eq = getChannelEq(currentSelectedCh);
       eq.lpf = eq.lpf === 1 ? 0 : 1;
       eq.high.type = eq.lpf === 1 ? 'lpf' : 'shelf';
       sendEqParam(0x0E, eq.lpf);
@@ -3680,7 +4312,7 @@
 
     // Reset Flat
     btnEqFlat.addEventListener('click', () => {
-      const eq = eqState[currentSelectedCh];
+      const eq = getChannelEq(currentSelectedCh);
       ['low', 'lomid', 'himid', 'high'].forEach(bKey => {
         eq[bKey].gain = 180;
       });
@@ -3689,12 +4321,13 @@
       sendEqParam(0x06, 180);
       sendEqParam(0x09, 180);
       sendEqParam(0x0C, 180);
-      showToast('EQ do canal zerado (Flat 0.0 dB) ⚡', '⚡');
+      const chLabel = typeof currentSelectedCh === 'number' ? `CH ${currentSelectedCh + 1}` : currentSelectedCh;
+      showToast(`EQ de ${chLabel} zerado (Flat 0.0 dB) ⚡`, '⚡');
     });
 
     // Tipos de Filtro LOW e HIGH
     eqControls.low.type.addEventListener('change', (e) => {
-      const eq = eqState[currentSelectedCh];
+      const eq = getChannelEq(currentSelectedCh);
       eq.low.type = e.target.value;
       eq.hpf = eq.low.type === 'hpf' ? 1 : 0;
       sendEqParam(0x0D, eq.hpf);
@@ -3703,7 +4336,7 @@
     });
 
     eqControls.high.type.addEventListener('change', (e) => {
-      const eq = eqState[currentSelectedCh];
+      const eq = getChannelEq(currentSelectedCh);
       eq.high.type = e.target.value;
       eq.lpf = eq.high.type === 'lpf' ? 1 : 0;
       sendEqParam(0x0E, eq.lpf);
@@ -3718,7 +4351,8 @@
       // Ganho
       ctrl.gain.rng.addEventListener('input', (e) => {
         const val = parseInt(e.target.value, 10);
-        eqState[currentSelectedCh][bKey].gain = val;
+        const eq = getChannelEq(currentSelectedCh);
+        eq[bKey].gain = val;
         ctrl.gain.lbl.textContent = rawGainToDb(val);
         sendEqParam(ctrl.gain.param, val);
       });
@@ -3726,15 +4360,16 @@
       // Frequência
       ctrl.freq.rng.addEventListener('input', (e) => {
         const val = parseInt(e.target.value, 10);
-        eqState[currentSelectedCh][bKey].freq = val;
+        const eq = getChannelEq(currentSelectedCh);
+        eq[bKey].freq = val;
         ctrl.freq.lbl.textContent = EQ_FREQ_VALUES[val] || `${val}`;
         
         // Se HPF estiver ativo e for a banda LOW, atualiza o status do botão HPF
-        if (bKey === 'low' && (eqState[currentSelectedCh].hpf === 1 || eqState[currentSelectedCh].low.type === 'hpf')) {
+        if (bKey === 'low' && (eq.hpf === 1 || eq.low.type === 'hpf')) {
           if (lblHpfStatus) lblHpfStatus.textContent = EQ_FREQ_VALUES[val];
         }
         // Se LPF estiver ativo e for a banda HIGH, atualiza o status do botão LPF
-        if (bKey === 'high' && (eqState[currentSelectedCh].lpf === 1 || eqState[currentSelectedCh].high.type === 'lpf')) {
+        if (bKey === 'high' && (eq.lpf === 1 || eq.high.type === 'lpf')) {
           if (lblLpfStatus) lblLpfStatus.textContent = EQ_FREQ_VALUES[val];
         }
 
@@ -3744,7 +4379,8 @@
       // Q (Largura de Banda)
       ctrl.q.rng.addEventListener('input', (e) => {
         const val = parseInt(e.target.value, 10);
-        eqState[currentSelectedCh][bKey].q = val;
+        const eq = getChannelEq(currentSelectedCh);
+        eq[bKey].q = val;
         ctrl.q.lbl.textContent = formatQDisplay(val);
         // Na tabela de parâmetros SysEx da 01V96 (Tabela 4), 0x00 = Q 10.0 e 0x28 (40) = Q 0.10.
         // O slider da UI vai naturalmente de 0 (0.10 largo) a 40 (10 estreito), então enviamos (40 - val):
@@ -3759,7 +4395,7 @@
       const ctx = eqCanvas.getContext('2d');
       const w = eqCanvas.width;
       const h = eqCanvas.height;
-      const eq = eqState[currentSelectedCh];
+      const eq = getChannelEq(currentSelectedCh);
 
       ctx.clearRect(0, 0, w, h);
 
@@ -4046,18 +4682,22 @@
       if (compDot && typeof compState !== 'undefined' && compState[ch]) compDot.classList.toggle('on', compState[ch].on === 1);
     }
 
-    function updateTabStatusDots(chIndex) {
-      const eq = eqState[chIndex];
-      const comp = compState[chIndex];
+    function updateTabStatusDots(target) {
+      const eq = getChannelEq(target);
+      const comp = getChannelComp(target);
       const dotEq = document.getElementById('dot_eq');
       const dotComp = document.getElementById('dot_comp');
       if (dotEq) dotEq.classList.toggle('dot-on', eq && eq.on === 1);
       if (dotComp) dotComp.classList.toggle('dot-on', comp && comp.on === 1);
-      updateChannelStripFxBadges(chIndex);
+      if (typeof target === 'number') {
+        updateChannelStripFxBadges(target);
+      } else {
+        updateOutputSelBadges();
+      }
     }
 
-    function syncCompModalFromState(chIndex) {
-      const comp = compState[chIndex];
+    function syncCompModalFromState(target) {
+      const comp = getChannelComp(target);
 
       // Compressor Bypass
       btnCompBypass.classList.toggle('on', comp.on === 1);
@@ -4088,8 +4728,18 @@
       compControls.gain.lbl.textContent = rawGainToCompDb(comp.gain);
     }
 
+    // Envia comandos SysEx de Compressor (Element 0x22 para CH 1-32, 0x51 para Stereo Master, 0x36 para Aux 1-8)
     function sendCompParam(param, value) {
-      sendCommand(0x22, param, currentSelectedCh, value);
+      if (typeof currentSelectedCh === 'number') {
+        sendCommand(0x22, param, currentSelectedCh, value);
+      } else if (currentSelectedCh === 'MASTER') {
+        sendCommand(0x51, param, 0x00, value);
+        saveMixData();
+      } else if (typeof currentSelectedCh === 'string' && currentSelectedCh.startsWith('AUX')) {
+        const auxIdx = parseInt(currentSelectedCh.replace('AUX', ''), 10) - 1;
+        sendCommand(0x36, param, auxIdx, value);
+        saveMixData();
+      }
       requestCompRedraw();
     }
 
@@ -4110,7 +4760,7 @@
       const ctx = compCanvas.getContext('2d');
       const w = compCanvas.width;
       const h = compCanvas.height;
-      const comp = compState[currentSelectedCh];
+      const comp = getChannelComp(currentSelectedCh);
 
       ctx.clearRect(0, 0, w, h);
 
@@ -4272,7 +4922,8 @@
     // Função para atualizar medidor de Gain Reduction quando houver telemetria real de áudio
     function updateCompGainReduction(grDb) {
       if (!compGrFill || !lblCompGrVal) return;
-      if (grDb <= 0 || compState[currentSelectedCh].on === 0) {
+      const comp = getChannelComp(currentSelectedCh);
+      if (grDb <= 0 || (comp && comp.on === 0)) {
         compGrFill.style.height = '0%';
         lblCompGrVal.textContent = '0.0 dB';
         compGrFill.dataset.live = '';
@@ -4286,7 +4937,7 @@
 
     // Toggle COMP ON / Bypass
     btnCompBypass.addEventListener('click', () => {
-      const comp = compState[currentSelectedCh];
+      const comp = getChannelComp(currentSelectedCh);
       comp.on = comp.on === 1 ? 0 : 1;
       btnCompBypass.classList.toggle('on', comp.on === 1);
       btnCompBypass.textContent = comp.on === 1 ? 'COMP: ATIVO (ON)' : 'COMP: BYPASS (OFF)';
@@ -4297,7 +4948,7 @@
     // Reset Padrão do Compressor
     btnCompReset.addEventListener('click', () => {
       const def = COMP_PRESETS.default;
-      const comp = compState[currentSelectedCh];
+      const comp = getChannelComp(currentSelectedCh);
       comp.threshold = def.threshold;
       comp.ratio = def.ratio;
       comp.attack = def.attack;
@@ -4313,7 +4964,8 @@
       sendCompParam(0x05, def.knee);
       sendCompParam(0x06, def.gain);
       compPresetSelect.value = 'default';
-      showToast('Compressor restaurado para o padrão ⚡', '⚡');
+      const chLabel = typeof currentSelectedCh === 'number' ? `CH ${currentSelectedCh + 1}` : currentSelectedCh;
+      showToast(`Compressor de ${chLabel} restaurado para o padrão ⚡`, '⚡');
     });
 
     // Seleção de Presets de Compressão
@@ -4322,7 +4974,7 @@
       const p = COMP_PRESETS[presetKey];
       if (!p) return;
 
-      const comp = compState[currentSelectedCh];
+      const comp = getChannelComp(currentSelectedCh);
       comp.threshold = p.threshold;
       comp.ratio = p.ratio;
       comp.attack = p.attack;
@@ -4343,42 +4995,48 @@
     // Sliders de Parâmetros do Compressor
     compControls.threshold.rng.addEventListener('input', (e) => {
       const val = parseInt(e.target.value, 10);
-      compState[currentSelectedCh].threshold = val;
+      const comp = getChannelComp(currentSelectedCh);
+      comp.threshold = val;
       compControls.threshold.lbl.textContent = rawThresholdToDb(val);
       sendCompParam(0x01, val);
     });
 
     compControls.ratio.rng.addEventListener('input', (e) => {
       const val = parseInt(e.target.value, 10);
-      compState[currentSelectedCh].ratio = val;
+      const comp = getChannelComp(currentSelectedCh);
+      comp.ratio = val;
       compControls.ratio.lbl.textContent = COMP_RATIO_VALUES[val] || `${val}:1`;
       sendCompParam(0x02, val);
     });
 
     compControls.attack.rng.addEventListener('input', (e) => {
       const val = parseInt(e.target.value, 10);
-      compState[currentSelectedCh].attack = val;
+      const comp = getChannelComp(currentSelectedCh);
+      comp.attack = val;
       compControls.attack.lbl.textContent = `${val} ms`;
       sendCompParam(0x03, val);
     });
 
     compControls.release.rng.addEventListener('input', (e) => {
       const val = parseInt(e.target.value, 10);
-      compState[currentSelectedCh].release = val;
+      const comp = getChannelComp(currentSelectedCh);
+      comp.release = val;
       compControls.release.lbl.textContent = COMP_RELEASE_VALUES[val] || `${val} ms`;
       sendCompParam(0x04, val);
     });
 
     compControls.knee.rng.addEventListener('input', (e) => {
       const val = parseInt(e.target.value, 10);
-      compState[currentSelectedCh].knee = val;
+      const comp = getChannelComp(currentSelectedCh);
+      comp.knee = val;
       compControls.knee.lbl.textContent = COMP_KNEE_VALUES[val] || `${val}`;
       sendCompParam(0x05, val);
     });
 
     compControls.gain.rng.addEventListener('input', (e) => {
       const val = parseInt(e.target.value, 10);
-      compState[currentSelectedCh].gain = val;
+      const comp = getChannelComp(currentSelectedCh);
+      comp.gain = val;
       compControls.gain.lbl.textContent = rawGainToCompDb(val);
       sendCompParam(0x06, val);
     });
@@ -4394,6 +5052,9 @@
 
     // Ajusta posições iniciais dos faders e restaura canais salvos no carregamento
     window.addEventListener('load', () => {
+      // 0. Inicializa o fader master de saída da mixagem
+      initMasterOutputStrip();
+
       // 1. Carrega estados de mixagem salvos no navegador (se houver)
       loadSavedMixData();
 
@@ -4424,6 +5085,7 @@
           updateFaderUI(i, mixData[currentMixTarget].volumes[i]);
         }
       }
+      updateMasterOutputFaderUI(mixData[currentMixTarget].masterVolume);
     });
   </script>
 </body>

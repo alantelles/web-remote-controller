@@ -537,6 +537,33 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		// Log detalhado no terminal identificando a saída / destino e parâmetro
 		var targetDesc string
 		chNum := msg.Channel + 1
+		eqParamNames := map[byte]string{
+			0x00: "EQ ON/OFF",
+			0x01: "LOW Q/Type",
+			0x02: "LOW Freq",
+			0x03: "LOW Gain",
+			0x04: "LO-MID Q",
+			0x05: "LO-MID Freq",
+			0x06: "LO-MID Gain",
+			0x07: "HI-MID Q",
+			0x08: "HI-MID Freq",
+			0x09: "HI-MID Gain",
+			0x0A: "HIGH Q/Type",
+			0x0B: "HIGH Freq",
+			0x0C: "HIGH Gain",
+			0x0D: "HPF ON/OFF",
+			0x0E: "LPF ON/OFF",
+		}
+		compParamNames := map[byte]string{
+			0x00: "COMP ON/OFF",
+			0x01: "Threshold",
+			0x02: "Ratio",
+			0x03: "Attack",
+			0x04: "Release",
+			0x05: "Knee",
+			0x06: "Gain (Out Gain)",
+		}
+
 		switch msg.Element {
 		case 0x1C:
 			targetDesc = fmt.Sprintf("CH %02d -> MASTER Fader: %d (%s)", chNum, msg.Value, faderValueToDB(msg.Value))
@@ -561,43 +588,61 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 				targetDesc = fmt.Sprintf("CH %02d -> Element 0x%02X, Param 0x%02X: %d", chNum, msg.Element, msg.Param, msg.Value)
 			}
 		case 0x20:
-			eqParamNames := map[byte]string{
-				0x00: "EQ ON/OFF",
-				0x01: "LOW Q/Type",
-				0x02: "LOW Freq",
-				0x03: "LOW Gain",
-				0x04: "LO-MID Q",
-				0x05: "LO-MID Freq",
-				0x06: "LO-MID Gain",
-				0x07: "HI-MID Q",
-				0x08: "HI-MID Freq",
-				0x09: "HI-MID Gain",
-				0x0A: "HIGH Q/Type",
-				0x0B: "HIGH Freq",
-				0x0C: "HIGH Gain",
-				0x0D: "HPF ON/OFF",
-				0x0E: "LPF ON/OFF",
-			}
 			pName, ok := eqParamNames[msg.Param]
 			if !ok {
 				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
 			}
 			targetDesc = fmt.Sprintf("CH %02d -> EQ %s: %d", chNum, pName, msg.Value)
 		case 0x22:
-			compParamNames := map[byte]string{
-				0x00: "COMP ON/OFF",
-				0x01: "Threshold",
-				0x02: "Ratio",
-				0x03: "Attack",
-				0x04: "Release",
-				0x05: "Knee",
-				0x06: "Gain (Out Gain)",
-			}
 			pName, ok := compParamNames[msg.Param]
 			if !ok {
 				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
 			}
 			targetDesc = fmt.Sprintf("CH %02d -> COMP %s: %d", chNum, pName, msg.Value)
+		case 0x4D:
+			targetDesc = fmt.Sprintf("STEREO MASTER Out Fader: %d (%s)", msg.Value, faderValueToDB(msg.Value))
+		case 0x4B:
+			onStr := "MUTE (0)"
+			if msg.Value == 1 {
+				onStr = "ON (1)"
+			}
+			targetDesc = fmt.Sprintf("STEREO MASTER Out: %s", onStr)
+		case 0x31:
+			auxNum := msg.Channel + 1
+			targetDesc = fmt.Sprintf("AUX %d MASTER Fader: %d (%s)", auxNum, msg.Value, faderValueToDB(msg.Value))
+		case 0x2F:
+			auxNum := msg.Channel + 1
+			onStr := "MUTE (0)"
+			if msg.Value == 1 {
+				onStr = "ON (1)"
+			}
+			targetDesc = fmt.Sprintf("AUX %d MASTER Out: %s", auxNum, onStr)
+		case 0x35:
+			auxNum := msg.Channel + 1
+			pName, ok := eqParamNames[msg.Param]
+			if !ok {
+				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
+			}
+			targetDesc = fmt.Sprintf("AUX %d MASTER Out -> EQ %s: %d", auxNum, pName, msg.Value)
+		case 0x36:
+			auxNum := msg.Channel + 1
+			pName, ok := compParamNames[msg.Param]
+			if !ok {
+				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
+			}
+			targetDesc = fmt.Sprintf("AUX %d MASTER Out -> COMP %s: %d", auxNum, pName, msg.Value)
+		case 0x50:
+			pName, ok := eqParamNames[msg.Param]
+			if !ok {
+				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
+			}
+			targetDesc = fmt.Sprintf("STEREO MASTER Out -> EQ %s: %d", pName, msg.Value)
+		case 0x51:
+			pName, ok := compParamNames[msg.Param]
+			if !ok {
+				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
+			}
+			targetDesc = fmt.Sprintf("STEREO MASTER Out -> COMP %s: %d", pName, msg.Value)
 		default:
 			targetDesc = fmt.Sprintf("CH %02d -> Element 0x%02X, Param 0x%02X: %d", chNum, msg.Element, msg.Param, msg.Value)
 		}
@@ -607,9 +652,10 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		// Aplica throttle antes de enviar ao barramento MIDI e ao WebSocket.
 		// Eventos ON/MUTE/Bypass discretos passam direto sem throttling
 		isDiscrete := msg.Element == 0x1A ||
+			msg.Element == 0x4B || msg.Element == 0x2F ||
 			(msg.Element == 0x23 && msg.Param >= 0x08) ||
-			(msg.Element == 0x20 && (msg.Param == 0x00 || msg.Param == 0x0D || msg.Param == 0x0E)) ||
-			(msg.Element == 0x22 && msg.Param == 0x00)
+			((msg.Element == 0x20 || msg.Element == 0x35 || msg.Element == 0x50) && (msg.Param == 0x00 || msg.Param == 0x0D || msg.Param == 0x0E)) ||
+			((msg.Element == 0x22 || msg.Element == 0x36 || msg.Element == 0x51) && msg.Param == 0x00)
 		canMIDI, canWS := true, true
 		if !isDiscrete {
 			canMIDI, canWS = throttler.allow(msg.Element, msg.Param, msg.Channel, msg.Value)
