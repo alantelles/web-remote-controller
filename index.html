@@ -144,6 +144,62 @@
       box-shadow: 0 0 8px currentColor;
     }
 
+    .user-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #e2e8f0;
+      background: #11141a;
+      border: 1px solid #282d3b;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .user-pill .user-name {
+      font-weight: 600;
+      color: #f1f5f9;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .user-role-badge {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      text-transform: uppercase;
+    }
+
+    .btn-logout {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      background: #1b202c;
+      border: 1px solid #333d52;
+      padding: 2px 8px;
+      border-radius: 12px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      margin-left: 2px;
+    }
+
+    .btn-logout:hover {
+      background: #2a3346;
+      color: #f87171;
+      border-color: #f87171;
+    }
+
     /* BARRA DE SELEÇÃO DE MIXAGEM (MASTER E AUX 1-8 / SENDS ON FADER) */
     .mix-selector-bar {
       flex-shrink: 0;
@@ -845,6 +901,42 @@
       display: flex;
       align-items: center;
       gap: 12px;
+    }
+
+    .fx-ch-nav {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #0d1017;
+      padding: 3px 6px;
+      border-radius: 6px;
+      border: 1px solid #232a3d;
+    }
+
+    .btn-fx-nav {
+      background: #1a202d;
+      border: 1px solid #2d374d;
+      color: #94a3b8;
+      font-size: 11px;
+      width: 26px;
+      height: 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .btn-fx-nav:hover {
+      background: #283248;
+      color: #38bdf8;
+      border-color: #38bdf8;
+    }
+
+    .btn-fx-nav:active {
+      transform: scale(0.92);
     }
 
     .fx-ch-badge {
@@ -1784,6 +1876,12 @@
           <div class="status-dot"></div>
           <span id="wsStatusText">Desconectado</span>
         </div>
+        <div class="user-pill" id="userPill">
+          <span>👤</span>
+          <span class="user-name" id="userDisplayName">Carregando...</span>
+          <span class="user-role-badge" id="userRoleBadge">ADMIN</span>
+          <a href="/logout" class="btn-logout" title="Sair da aplicação">Sair ↪</a>
+        </div>
       </div>
     </header>
 
@@ -1894,6 +1992,8 @@
         <!-- Atalhos rápidos de bancos -->
         <div class="bank-buttons">
           <button class="btn-bank active" data-bank="all" type="button">Todos (1-32)</button>
+          <button class="btn-bank" data-bank="1-16" type="button">CH 1–16</button>
+          <button class="btn-bank" data-bank="17-32" type="button">CH 17–32</button>
           <button class="btn-bank" data-bank="1-8" type="button">CH 1–8</button>
           <button class="btn-bank" data-bank="9-16" type="button">CH 9–16</button>
           <button class="btn-bank" data-bank="17-24" type="button">CH 17–24</button>
@@ -1965,7 +2065,11 @@
     <div class="fx-modal-card">
       <div class="fx-modal-header">
         <div class="fx-header-title-wrap">
-          <span class="fx-ch-badge" id="fxModalChBadge">CH 01</span>
+          <div class="fx-ch-nav">
+            <button type="button" class="btn-fx-nav" id="btnFxPrevCh" title="Canal Anterior (Alt + ←)">◀</button>
+            <span class="fx-ch-badge" id="fxModalChBadge">CH 01</span>
+            <button type="button" class="btn-fx-nav" id="btnFxNextCh" title="Próximo Canal (Alt + →)">▶</button>
+          </div>
           <span class="fx-header-title">Processamento de Canal (Rack de Efeitos)</span>
         </div>
         <button type="button" class="btn-fx-close" id="btnFxClose" title="Fechar (Esc)">&times;</button>
@@ -2441,6 +2545,29 @@
     }));
 
     // ==========================================
+    // USUÁRIO E SESSÃO
+    // ==========================================
+    async function loadCurrentUser() {
+      try {
+        const res = await fetch('/api/me');
+        if (res.status === 401) {
+          window.location.href = '/login?error=session';
+          return;
+        }
+        if (res.ok) {
+          const user = await res.json();
+          const nameEl = document.getElementById('userDisplayName');
+          const roleEl = document.getElementById('userRoleBadge');
+          if (nameEl) nameEl.textContent = user.name || user.username;
+          if (roleEl) roleEl.textContent = user.role || 'ADMIN';
+        }
+      } catch (err) {
+        console.warn('Erro ao carregar dados do usuário:', err);
+      }
+    }
+    loadCurrentUser();
+
+    // ==========================================
     // WEBSOCKET & MIDI
     // ==========================================
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -2458,6 +2585,12 @@
       wsStatusText.textContent = 'Desconectado';
       wsStatusBadge.classList.remove('online');
       midiPortEl.textContent = 'Porta MIDI: Desconectado';
+      // Verifica se a sessão expirou
+      fetch('/api/me').then(res => {
+        if (res.status === 401) {
+          window.location.href = '/login?error=session';
+        }
+      }).catch(() => {});
     };
 
     // Elementos do Botão de Simulação 01V96
@@ -3088,6 +3221,12 @@
       const current = getCurrentVisibleIndices();
       if (isSameSelection(current, all)) return;
 
+      if (isStandardPreset(current)) {
+        updateChannelsVisibility(all);
+        updateBankButtonsActiveState(all);
+        return;
+      }
+
       confirmChangePreset('Todos os Canais (1-32)', () => {
         updateChannelsVisibility(all);
         updateBankButtonsActiveState(all);
@@ -3107,9 +3246,12 @@
 
     // Botões Rápidos de Bancos
     const bankButtons = document.querySelectorAll('.btn-bank');
+    const STANDARD_BANKS = ['all', '1-16', '17-32', '1-8', '9-16', '17-24', '25-32'];
 
     function getBankIndices(bank) {
       switch (bank) {
+        case '1-16': return Array.from({ length: 16 }, (_, i) => i);
+        case '17-32': return Array.from({ length: 16 }, (_, i) => i + 16);
         case '1-8': return Array.from({ length: 8 }, (_, i) => i);
         case '9-16': return Array.from({ length: 8 }, (_, i) => i + 8);
         case '17-24': return Array.from({ length: 8 }, (_, i) => i + 16);
@@ -3120,12 +3262,18 @@
 
     function getBankLabel(bank) {
       switch (bank) {
+        case '1-16': return 'CH 1–16';
+        case '17-32': return 'CH 17–32';
         case '1-8': return 'CH 1–8';
         case '9-16': return 'CH 9–16';
         case '17-24': return 'CH 17–24';
         case '25-32': return 'CH 25–32';
         case 'all': default: return 'Todos (1-32)';
       }
+    }
+
+    function isStandardPreset(indices) {
+      return STANDARD_BANKS.some(bKey => isSameSelection(indices, getBankIndices(bKey)));
     }
 
     function updateBankButtonsActiveState(selected) {
@@ -3148,7 +3296,15 @@
           return;
         }
 
-        // Alerta de que vai perder o que tem no momento na tela
+        // Se a visualização atual já é um preset padrão (ex: trocar de página de canais na mesa),
+        // não precisa do diálogo de alerta, troca diretamente!
+        if (isStandardPreset(currentIndices)) {
+          updateChannelsVisibility(targetIndices);
+          updateBankButtonsActiveState(targetIndices);
+          return;
+        }
+
+        // Só alerta se o usuário estava com uma seleção customizada na tela
         const bankLabel = getBankLabel(bank);
         confirmChangePreset(bankLabel, () => {
           updateChannelsVisibility(targetIndices);
@@ -3338,10 +3494,43 @@
       fxModalOverlay.classList.remove('open');
     }
 
+    const btnFxPrevCh = document.getElementById('btnFxPrevCh');
+    const btnFxNextCh = document.getElementById('btnFxNextCh');
+
+    function selectFxChannel(chIndex) {
+      // Navegação circular entre os 32 canais (0 a 31)
+      const targetCh = (chIndex + TOTAL_CHANNELS) % TOTAL_CHANNELS;
+      openFxModal(targetCh);
+
+      // Centraliza/rola o canal na visualização se estiver visível no mixer
+      const strip = document.getElementById(`channelStrip_${targetCh}`);
+      if (strip && strip.style.display !== 'none') {
+        strip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+
+    if (btnFxPrevCh) {
+      btnFxPrevCh.addEventListener('click', () => {
+        selectFxChannel(currentSelectedCh - 1);
+      });
+    }
+
+    if (btnFxNextCh) {
+      btnFxNextCh.addEventListener('click', () => {
+        selectFxChannel(currentSelectedCh + 1);
+      });
+    }
+
     btnFxClose.addEventListener('click', closeFxModal);
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && fxModalOverlay.classList.contains('open')) {
-        closeFxModal();
+      if (fxModalOverlay.classList.contains('open')) {
+        if (e.key === 'Escape') {
+          closeFxModal();
+        } else if (e.altKey && e.key === 'ArrowLeft') {
+          selectFxChannel(currentSelectedCh - 1);
+        } else if (e.altKey && e.key === 'ArrowRight') {
+          selectFxChannel(currentSelectedCh + 1);
+        }
       }
     });
 

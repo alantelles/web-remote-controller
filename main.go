@@ -2,6 +2,10 @@ package main
 
 import (
 	"bufio"
+	crand "crypto/rand"
+	"encoding/csv"
+	"encoding/hex"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -152,7 +156,333 @@ func Build01V96SysEx(element, param, channel byte, value int) []byte {
 	}
 }
 
+// ==========================================
+// AUTENTICAÇÃO E GERENCIAMENTO DE USUÁRIOS
+// ==========================================
+
+const sessionCookieName = "remote_session"
+const sessionDuration = 24 * time.Hour
+
+var (
+	usersCSVFile = "usuarios.csv"
+	usersLock    sync.RWMutex
+)
+
+type User struct {
+	Name     string `json:"name"`
+	Username string `json:"username"`
+	Password string `json:"-"`
+	Role     string `json:"role"`
+}
+
+type Session struct {
+	Token     string
+	User      User
+	CreatedAt time.Time
+	ExpiresAt time.Time
+}
+
+var (
+	sessions     = make(map[string]*Session)
+	sessionsLock sync.RWMutex
+)
+
+func setUsersCSVFile(path string) {
+	usersLock.Lock()
+	defer usersLock.Unlock()
+	if strings.TrimSpace(path) != "" {
+		usersCSVFile = strings.TrimSpace(path)
+	}
+}
+
+func getUsersCSVFile() string {
+	usersLock.RLock()
+	defer usersLock.RUnlock()
+	return usersCSVFile
+}
+
+// ensureUsersCSV garante que o arquivo de usuários exista; se não existir, cria um novo com usuário padrão.
+func ensureUsersCSV() {
+	filePath := getUsersCSVFile()
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		defaultContent := "nome,usuario,senha,papel\nAdministrador,admin,admin,ADMIN\n"
+		if err := os.WriteFile(filePath, []byte(defaultContent), 0644); err != nil {
+			log.Printf("Aviso: Falha ao inicializar %s: %v", filePath, err)
+		} else {
+			log.Printf("Arquivo '%s' criado com sucesso com usuário padrão (admin / admin / papel: ADMIN)", filePath)
+		}
+	}
+}
+
+// loadUsers lê o arquivo CSV de usuários diretamente a cada verificação para refletir alterações sem reiniciar o servidor.
+func loadUsers() ([]User, error) {
+	filePath := getUsersCSVFile()
+	ensureUsersCSV()
+
+	f, err := os.Open(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("não foi possível abrir %s: %w", filePath, err)
+	}
+	defer f.Close()
+
+	reader := csv.NewReader(f)
+	reader.FieldsPerRecord = -1
+	reader.TrimLeadingSpace = true
+
+	records, err := reader.ReadAll()
+	if err != nil {
+		return nil, fmt.Errorf("erro ao processar %s: %w", filePath, err)
+	}
+
+	var users []User
+	for i, record := range records {
+		if len(record) < 4 {
+			continue
+		}
+		name := strings.TrimSpace(record[0])
+		username := strings.TrimSpace(record[1])
+		password := strings.TrimSpace(record[2])
+		role := strings.TrimSpace(record[3])
+
+		// Ignora linha de cabeçalho caso exista
+		if i == 0 {
+			uLower := strings.ToLower(username)
+			rLower := strings.ToLower(role)
+			if (uLower == "usuario" || uLower == "usuário" || uLower == "username" || uLower == "user") &&
+				(rLower == "papel" || rLower == "role" || rLower == "permissao" || rLower == "permissão") {
+				continue
+			}
+		}
+
+		if username == "" || password == "" {
+			continue
+		}
+
+		if role == "" {
+			role = "ADMIN"
+		}
+
+		users = append(users, User{
+			Name:     name,
+			Username: username,
+			Password: password,
+			Role:     role,
+		})
+	}
+
+	return users, nil
+}
+
+// authenticateUser valida o usuário e a senha contra o users.csv
+func authenticateUser(username, password string) (*User, error) {
+	users, err := loadUsers()
+	if err != nil {
+		return nil, err
+	}
+
+	username = strings.TrimSpace(username)
+	for _, u := range users {
+		if strings.EqualFold(u.Username, username) && u.Password == password {
+			return &u, nil
+		}
+	}
+	return nil, fmt.Errorf("usuário ou senha incorretos")
+}
+
+func createSession(user User) string {
+	b := make([]byte, 32)
+	if _, err := crand.Read(b); err != nil {
+		return fmt.Sprintf("%d-%s", time.Now().UnixNano(), user.Username)
+	}
+	token := hex.EncodeToString(b)
+
+	sessionsLock.Lock()
+	sessions[token] = &Session{
+		Token:     token,
+		User:      user,
+		CreatedAt: time.Now(),
+		ExpiresAt: time.Now().Add(sessionDuration),
+	}
+	sessionsLock.Unlock()
+
+	return token
+}
+
+func getSession(token string) *Session {
+	if token == "" {
+		return nil
+	}
+	sessionsLock.RLock()
+	sess, exists := sessions[token]
+	sessionsLock.RUnlock()
+
+	if !exists {
+		return nil
+	}
+
+	if time.Now().After(sess.ExpiresAt) {
+		sessionsLock.Lock()
+		delete(sessions, token)
+		sessionsLock.Unlock()
+		return nil
+	}
+
+	return sess
+}
+
+func deleteSession(token string) {
+	if token == "" {
+		return
+	}
+	sessionsLock.Lock()
+	delete(sessions, token)
+	sessionsLock.Unlock()
+}
+
+func getSessionFromRequest(r *http.Request) *Session {
+	cookie, err := r.Cookie(sessionCookieName)
+	if err != nil || cookie.Value == "" {
+		return nil
+	}
+	return getSession(cookie.Value)
+}
+
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func handleLogin(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		if sess := getSessionFromRequest(r); sess != nil {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+		http.ServeFile(w, r, "login.html")
+		return
+	}
+
+	if r.Method == http.MethodPost {
+		var username, password string
+		contentType := r.Header.Get("Content-Type")
+		isJSON := strings.Contains(contentType, "application/json")
+
+		if isJSON {
+			var req LoginRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusBadRequest)
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"success": false,
+					"error":   "Requisição inválida",
+				})
+				return
+			}
+			username = req.Username
+			password = req.Password
+		} else {
+			if err := r.ParseForm(); err != nil {
+				http.Redirect(w, r, "/login?error=invalid", http.StatusSeeOther)
+				return
+			}
+			username = r.FormValue("username")
+			password = r.FormValue("password")
+		}
+
+		user, err := authenticateUser(username, password)
+		if err != nil {
+			log.Printf("Tentativa de login falhou para '%s': %v", username, err)
+			if isJSON {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"success": false,
+					"error":   "Usuário ou senha incorretos",
+				})
+				return
+			}
+			http.Redirect(w, r, "/login?error=invalid", http.StatusSeeOther)
+			return
+		}
+
+		token := createSession(*user)
+		http.SetCookie(w, &http.Cookie{
+			Name:     sessionCookieName,
+			Value:    token,
+			Path:     "/",
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+			MaxAge:   int(sessionDuration.Seconds()),
+		})
+
+		log.Printf("Usuário autenticado com sucesso: %s (%s, Papel: %s)", user.Name, user.Username, user.Role)
+
+		if isJSON {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"success":  true,
+				"redirect": "/",
+				"user": map[string]string{
+					"name":     user.Name,
+					"username": user.Username,
+					"role":     user.Role,
+				},
+			})
+			return
+		}
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+}
+
+func handleLogout(w http.ResponseWriter, r *http.Request) {
+	if cookie, err := r.Cookie(sessionCookieName); err == nil && cookie.Value != "" {
+		deleteSession(cookie.Value)
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     sessionCookieName,
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		MaxAge:   -1,
+	})
+
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
+func handleMe(w http.ResponseWriter, r *http.Request) {
+	sess := getSessionFromRequest(r)
+	if sess == nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"authenticated": false,
+			"error":         "Não autenticado",
+		})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"authenticated": true,
+		"name":          sess.User.Name,
+		"username":      sess.User.Username,
+		"role":          sess.User.Role,
+	})
+}
+
 func handleWS(w http.ResponseWriter, r *http.Request) {
+	sess := getSessionFromRequest(r)
+	if sess == nil {
+		log.Printf("Tentativa de conexão WebSocket não autorizada de %s rejeitada", r.RemoteAddr)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("Erro no upgrade WebSocket: %v", err)
@@ -169,7 +499,7 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 	clients[conn] = true
 	clientsLock.Unlock()
 
-	log.Println("Cliente WebSocket conectado:", r.RemoteAddr)
+	log.Printf("Cliente WebSocket conectado: %s (Usuário: %s)", r.RemoteAddr, sess.User.Username)
 
 	midiLock.Lock()
 	pName := midiPortName
@@ -699,7 +1029,22 @@ func main() {
 	flagAddr := flag.String("addr", ":8080", "Endereço HTTP do servidor")
 	flagSimulate := flag.Bool("simulate", false, "Inicia o simulador de operação da Yamaha 01V96 emitindo faders nos canais 1 a 8")
 	flag.BoolVar(flagSimulate, "sim", false, "Atalho para -simulate")
+	flagUsers := flag.String("users", "usuarios.csv", "Caminho do arquivo CSV de credenciais de usuários (padrão: usuarios.csv)")
+	flag.StringVar(flagUsers, "users-file", "usuarios.csv", "Atalho para -users")
 	flag.Parse()
+
+	// Configura e valida o arquivo de credenciais
+	setUsersCSVFile(*flagUsers)
+	ensureUsersCSV()
+
+	initialUsers, err := loadUsers()
+	if err != nil {
+		log.Fatalf("[ERRO FATAL] Falha ao processar arquivo de credenciais '%s': %v", getUsersCSVFile(), err)
+	}
+	if len(initialUsers) == 0 {
+		log.Fatalf("[ERRO FATAL] Nenhum usuário disponível no arquivo '%s'. A aplicação não pode ser iniciada sem usuários cadastrados.", getUsersCSVFile())
+	}
+	log.Printf("Sistema de autenticação pronto: %d usuário(s) ativo(s) a partir de '%s'", len(initialUsers), getUsersCSVFile())
 
 	defer midi.CloseDriver()
 
@@ -720,7 +1065,20 @@ func main() {
 		startSimulation(midiOut)
 	}
 
+	http.HandleFunc("/login", handleLogin)
+	http.HandleFunc("/logout", handleLogout)
+	http.HandleFunc("/api/me", handleMe)
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		sess := getSessionFromRequest(r)
+		if sess == nil {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
 		http.ServeFile(w, r, "index.html")
 	})
 	http.HandleFunc("/ws", handleWS)
