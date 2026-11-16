@@ -1093,6 +1093,6 @@ func main() {
 		os.Exit(0)
 	}()
 
-	log.Printf("Servidor Console Web rodando em http://localhost%s", *flagAddr)
+	log.Printf("Servidor Console Web rodando em http://%s", *flagAddr)
 	log.Fatal(http.ListenAndServe(*flagAddr, nil))
 }

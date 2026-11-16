@@ -419,6 +419,9 @@
 
     /* Indicador de destino no cabeçalho de cada Strip */
     .ch-mix-dest {
+      display: inline-block;
+      width: 66px;
+      max-width: 66px;
       font-size: 9px;
       font-weight: 800;
       letter-spacing: 0.5px;
@@ -430,6 +433,10 @@
       margin-top: 3px;
       text-transform: uppercase;
       transition: all 0.15s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
     }
 
     .ch-mix-dest.dest-master {
@@ -942,12 +949,22 @@
     .fx-ch-badge {
       background: #0284c7;
       color: #fff;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 800;
-      padding: 3px 10px;
+      padding: 4px 14px;
       border-radius: 4px;
       letter-spacing: 0.5px;
       box-shadow: 0 0 8px rgba(2, 132, 199, 0.5);
+      min-width: 160px;
+      max-width: 320px;
+      text-align: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: default;
     }
 
     .fx-header-title {
@@ -1560,14 +1577,22 @@
 
     .ch-badge {
       display: inline-block;
+      width: 66px;
+      max-width: 66px;
       font-size: 11px;
       font-weight: 800;
       letter-spacing: 0.5px;
       background: #090b0e;
       color: #94a3b8;
-      padding: 2px 8px;
+      padding: 3px 4px;
       border-radius: 4px;
       border: 1px solid #222633;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+      cursor: default;
+      transition: all 0.15s ease;
     }
 
     /* BOTÃO ON (Mute) ILUMINADO estilo Yamaha */
@@ -1864,7 +1889,7 @@
     <header class="console-header">
       <div class="brand-section">
         <div class="brand-logo">Yamaha 01V96V2</div>
-        <div class="brand-tag">32 CH REMOTE</div>
+        <div class="brand-tag">REMOTE CONTROL</div>
       </div>
 
       <div class="header-status">
@@ -1888,54 +1913,45 @@
     <!-- BARRA DE SELEÇÃO DE MIXAGEM (MASTER E AUX 1 A 8 / SENDS ON FADER) -->
     <div class="mix-selector-bar">
       <div class="mix-bar-left">
-        <span class="mix-bar-title">Mixagem / Destino:</span>
+        <span class="mix-bar-title">MIX:</span>
 
         <!-- 9 BOTÕES DE MIXAGEM FÍSICA: MASTER + AUX 1 A AUX 8 -->
         <div class="mix-buttons-group" id="mixButtonsGroup">
           <button type="button" class="btn-mix btn-mix-master active" data-mix="MASTER" title="Mix Principal Stereo Out (Teclas: 0 ou M)">
             <span class="mix-led"></span>
             <span class="mix-label">MASTER</span>
-            <span class="mix-key-hint">[0 / M]</span>
           </button>
           <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX1" title="Mix de Envio Auxiliar 1 (Tecla: 1)">
             <span class="mix-led"></span>
             <span class="mix-label">AUX 1</span>
-            <span class="mix-key-hint">[1]</span>
           </button>
           <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX2" title="Mix de Envio Auxiliar 2 (Tecla: 2)">
             <span class="mix-led"></span>
             <span class="mix-label">AUX 2</span>
-            <span class="mix-key-hint">[2]</span>
           </button>
           <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX3" title="Mix de Envio Auxiliar 3 (Tecla: 3)">
             <span class="mix-led"></span>
             <span class="mix-label">AUX 3</span>
-            <span class="mix-key-hint">[3]</span>
           </button>
           <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX4" title="Mix de Envio Auxiliar 4 (Tecla: 4)">
             <span class="mix-led"></span>
             <span class="mix-label">AUX 4</span>
-            <span class="mix-key-hint">[4]</span>
           </button>
           <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX5" title="Mix de Envio Auxiliar 5 (Tecla: 5)">
             <span class="mix-led"></span>
             <span class="mix-label">AUX 5</span>
-            <span class="mix-key-hint">[5]</span>
           </button>
           <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX6" title="Mix de Envio Auxiliar 6 (Tecla: 6)">
             <span class="mix-led"></span>
             <span class="mix-label">AUX 6</span>
-            <span class="mix-key-hint">[6]</span>
           </button>
           <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX7" title="Mix de Envio Auxiliar 7 (Tecla: 7)">
             <span class="mix-led"></span>
             <span class="mix-label">AUX 7</span>
-            <span class="mix-key-hint">[7]</span>
           </button>
           <button type="button" class="btn-mix btn-mix-aux" data-mix="AUX8" title="Mix de Envio Auxiliar 8 (Tecla: 8)">
             <span class="mix-led"></span>
             <span class="mix-label">AUX 8</span>
-            <span class="mix-key-hint">[8]</span>
           </button>
         </div>
       </div>
@@ -1948,9 +1964,6 @@
               <span class="mix-active-name" id="mixActiveName">MASTER (STEREO OUT)</span>
               <span class="mix-active-route" id="mixActiveRoute">Saída Física: Stereo Out L/R</span>
             </div>
-          </div>
-          <div class="mix-sysex-info" id="mixSysexInfo" title="Parâmetros SysEx enviados pela mixagem atual">
-            Fader: 1CH 00H | Mute: 1AH 00H
           </div>
         </div>
       </div>
@@ -2476,7 +2489,7 @@
         name: 'MASTER',
         displayName: 'MASTER (STEREO OUT)',
         route: 'Saída Física: Stereo Out L/R',
-        shortName: 'STEREO',
+        shortName: 'MASTER',
         isMaster: true,
         faderElement: 0x1C,
         faderParam: 0x00,
@@ -2761,8 +2774,8 @@
 
       strip.innerHTML = `
         <div class="ch-header">
-          <span class="ch-badge">${ch.name}</span>
-          <div class="ch-mix-dest dest-master" id="chMixDest_${ch.index}">STEREO</div>
+          <span class="ch-badge" id="chBadge_${ch.index}" title="${ch.name}">${ch.name}</span>
+          <div class="ch-mix-dest dest-master" id="chMixDest_${ch.index}">MASTER</div>
         </div>
 
         <div class="ch-mute-wrap">
@@ -3470,7 +3483,11 @@
 
     function openFxModal(chIndex) {
       currentSelectedCh = chIndex;
-      fxModalChBadge.textContent = `CH ${String(chIndex + 1).padStart(2, '0')}`;
+      const chName = (channelsState[chIndex] && channelsState[chIndex].name) 
+        ? channelsState[chIndex].name 
+        : `CH ${String(chIndex + 1).padStart(2, '0')}`;
+      fxModalChBadge.textContent = chName;
+      fxModalChBadge.title = chName;
       
       // Atualiza botões SEL na interface dos canais
       document.querySelectorAll('.btn-ch-sel').forEach(btn => {
@@ -3522,6 +3539,17 @@
     }
 
     btnFxClose.addEventListener('click', closeFxModal);
+
+    // Fecha o diálogo de efeitos ao clicar fora (no overlay de fundo)
+    fxModalOverlay.addEventListener('mousedown', (e) => {
+      fxModalOverlay._mouseDownOnBackdrop = (e.target === fxModalOverlay);
+    });
+    fxModalOverlay.addEventListener('click', (e) => {
+      if (e.target === fxModalOverlay && fxModalOverlay._mouseDownOnBackdrop) {
+        closeFxModal();
+      }
+      fxModalOverlay._mouseDownOnBackdrop = false;
+    });
     document.addEventListener('keydown', (e) => {
       if (fxModalOverlay.classList.contains('open')) {
         if (e.key === 'Escape') {
