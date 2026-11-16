@@ -588,8 +588,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.78);
-      backdrop-filter: blur(4px);
+      background: rgba(5, 7, 12, 0.85);
       display: none;
       align-items: center;
       justify-content: center;
@@ -773,8 +772,34 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 5px;
       transition: all 0.15s ease;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .ch-sel-badges {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .badge-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #334155;
+      display: inline-block;
+      transition: all 0.15s;
+    }
+
+    .badge-dot.dot-eq.on {
+      background: #38bdf8;
+      box-shadow: 0 0 5px #38bdf8;
+    }
+
+    .badge-dot.dot-comp.on {
+      background: #f59e0b;
+      box-shadow: 0 0 5px #f59e0b;
     }
 
     .btn-ch-sel:hover {
@@ -1155,7 +1180,219 @@
     .band-lomid .eq-range-input { accent-color: #f59e0b; }
     .band-himid .eq-range-input { accent-color: #10b981; }
     .band-high .eq-range-input { accent-color: #06b6d4; }
-      to { transform: translateY(0); opacity: 1; }
+
+    .fx-tab-status-dot.dot-on {
+      background: #10b981;
+      box-shadow: 0 0 7px #10b981;
+    }
+
+    .fx-tab-btn.active .fx-tab-status-dot.dot-on {
+      background: #34d399;
+      box-shadow: 0 0 9px #34d399;
+    }
+
+    /* COMPRESSOR DE CANAL */
+    .comp-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .comp-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #161a24;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #262d3d;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .comp-switch-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn-comp-bypass {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      border: 1px solid #333d4e;
+      background: #1e2433;
+      color: #94a3b8;
+      transition: all 0.15s;
+    }
+
+    .btn-comp-bypass.on {
+      background: #f59e0b;
+      color: #451a03;
+      border-color: #fbbf24;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+    }
+
+    .comp-preset-select {
+      background: #0b0e14;
+      color: #cbd5e1;
+      border: 1px solid #2c3547;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .comp-preset-select:hover {
+      border-color: #4f5f7a;
+    }
+
+    .btn-comp-reset {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid #374151;
+      background: #1f2937;
+      color: #cbd5e1;
+      transition: all 0.15s;
+    }
+    .btn-comp-reset:hover {
+      background: #374151;
+      color: #fff;
+    }
+
+    /* Gráfico Visual do Compressor & Medidor de Gain Reduction */
+    .comp-display-card {
+      background: #0b0d12;
+      border: 1px solid #232938;
+      border-radius: 8px;
+      height: 170px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: stretch;
+    }
+
+    .comp-curve-canvas {
+      flex: 1;
+      height: 100%;
+      display: block;
+    }
+
+    .comp-gr-meter-wrap {
+      width: 72px;
+      background: #0e1118;
+      border-left: 1px solid #232938;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 6px;
+      justify-content: space-between;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .comp-gr-title {
+      font-size: 8px;
+      font-weight: 900;
+      color: #f43f5e;
+      letter-spacing: 0.5px;
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .comp-gr-val-badge {
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-weight: 800;
+      color: #f43f5e;
+    }
+
+    .comp-gr-track {
+      width: 14px;
+      flex: 1;
+      background: #06080c;
+      border-radius: 3px;
+      margin: 6px 0;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #1f2533;
+    }
+
+    .comp-gr-fill {
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: linear-gradient(180deg, #f59e0b 0%, #ef4444 100%);
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+      transition: height 0.08s ease-out;
+      height: 0%;
+    }
+
+    /* Grade de Controles do Compressor */
+    .comp-controls-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .comp-controls-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .comp-param-card {
+      background: #151922;
+      border: 1px solid #252d3d;
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .comp-param-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #252b3b;
+      padding-bottom: 6px;
+    }
+
+    .comp-param-title {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      color: #cbd5e1;
+    }
+
+    .comp-param-val {
+      color: #f59e0b;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .comp-range-input {
+      width: 100%;
+      height: 6px;
+      accent-color: #f59e0b;
+      background: #0b0d13;
+      border-radius: 3px;
+      cursor: pointer;
+      outline: none;
     }
 
     /* Container dos Canais com Rolagem Interna */
@@ -1736,16 +1973,16 @@
 
       <!-- Abas dos Efeitos -->
       <div class="fx-tabs-nav">
-        <button type="button" class="fx-tab-btn active" data-tab="eq">
-          <div class="fx-tab-status-dot"></div>
+        <button type="button" class="fx-tab-btn active" data-tab="eq" id="tabBtn_eq">
+          <div class="fx-tab-status-dot dot-on" id="dot_eq"></div>
           <span>EQUALIZADOR</span>
         </button>
-        <button type="button" class="fx-tab-btn" data-tab="comp">
-          <div class="fx-tab-status-dot"></div>
+        <button type="button" class="fx-tab-btn" data-tab="comp" id="tabBtn_comp">
+          <div class="fx-tab-status-dot dot-on" id="dot_comp"></div>
           <span>COMPRESSOR</span>
         </button>
-        <button type="button" class="fx-tab-btn" data-tab="gate">
-          <div class="fx-tab-status-dot"></div>
+        <button type="button" class="fx-tab-btn" data-tab="gate" id="tabBtn_gate">
+          <div class="fx-tab-status-dot" id="dot_gate"></div>
           <span>GATE</span>
         </button>
       </div>
@@ -1906,13 +2143,138 @@
           </div>
         </div>
 
-        <!-- ABA: COMPRESSOR (Placeholder) -->
+        <!-- ABA: COMPRESSOR -->
         <div class="fx-tab-pane" id="fxTab_comp">
-          <div class="fx-placeholder-box">
-            <div class="fx-placeholder-icon">🎚️</div>
-            <div class="fx-placeholder-title">COMPRESSOR DE CANAL</div>
-            <div class="fx-placeholder-desc">
-              Em Breve. Threshold, Ratio, Attack, Release, Knee e Make-up Gain para a dinâmica deste canal.
+          <div class="comp-container">
+            <!-- Barra Superior do Compressor -->
+            <div class="comp-top-bar">
+              <div class="comp-switch-group">
+                <button type="button" class="btn-comp-bypass on" id="btnCompBypass">COMP: ATIVO (ON)</button>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="font-size: 11px; font-weight: 700; color: #94a3b8;">Preset:</span>
+                  <select class="comp-preset-select" id="compPresetSelect">
+                    <option value="default" selected>Padrão (Standard)</option>
+                    <option value="vocal">Voz / Vocal Suave</option>
+                    <option value="drums">Bateria / Punch</option>
+                    <option value="bass">Contrabaixo / Bass</option>
+                    <option value="limiter">Peak Limiter (Proteção)</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" class="btn-comp-reset" id="btnCompReset" title="Restaurar valores padrão da Yamaha 01V96">Reset Padrão</button>
+              </div>
+            </div>
+
+            <!-- Gráfico Visual da Curva de Compressão & Medidor de GR -->
+            <div class="comp-display-card">
+              <canvas id="compCanvas" class="comp-curve-canvas" width="700" height="170"></canvas>
+              <div class="comp-gr-meter-wrap">
+                <div class="comp-gr-title">GAIN<br>REDUCTION</div>
+                <div class="comp-gr-track">
+                  <div class="comp-gr-fill" id="compGrFill"></div>
+                </div>
+                <div class="comp-gr-val-badge" id="lbl_compGrVal">0.0 dB</div>
+              </div>
+            </div>
+
+            <!-- Grade de Parâmetros do Compressor (Threshold, Ratio, Attack, Release, Knee, Gain) -->
+            <div class="comp-controls-grid">
+              <!-- THRESHOLD -->
+              <div class="comp-param-card">
+                <div class="comp-param-header">
+                  <span class="comp-param-title">THRESHOLD (LIMIAR)</span>
+                  <span class="comp-param-val" id="lbl_compThreshold">-20.0 dB</span>
+                </div>
+                <div class="eq-ctrl-row">
+                  <input type="range" class="comp-range-input" id="rng_compThreshold" min="0" max="540" value="340">
+                  <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-top: 2px;">
+                    <span>-54.0 dB</span>
+                    <span>-20.0 dB</span>
+                    <span>0.0 dB</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- RATIO -->
+              <div class="comp-param-card">
+                <div class="comp-param-header">
+                  <span class="comp-param-title">RATIO (TAXA)</span>
+                  <span class="comp-param-val" id="lbl_compRatio">4.0:1</span>
+                </div>
+                <div class="eq-ctrl-row">
+                  <input type="range" class="comp-range-input" id="rng_compRatio" min="0" max="15" value="7">
+                  <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-top: 2px;">
+                    <span>1.0:1</span>
+                    <span>4.0:1</span>
+                    <span>∞:1</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ATTACK -->
+              <div class="comp-param-card">
+                <div class="comp-param-header">
+                  <span class="comp-param-title">ATTACK (ATAQUE)</span>
+                  <span class="comp-param-val" id="lbl_compAttack">20 ms</span>
+                </div>
+                <div class="eq-ctrl-row">
+                  <input type="range" class="comp-range-input" id="rng_compAttack" min="0" max="120" value="20">
+                  <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-top: 2px;">
+                    <span>0 ms</span>
+                    <span>50 ms</span>
+                    <span>120 ms</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- RELEASE -->
+              <div class="comp-param-card">
+                <div class="comp-param-header">
+                  <span class="comp-param-title">RELEASE (LIBERAÇÃO)</span>
+                  <span class="comp-param-val" id="lbl_compRelease">250 ms</span>
+                </div>
+                <div class="eq-ctrl-row">
+                  <input type="range" class="comp-range-input" id="rng_compRelease" min="0" max="43" value="18">
+                  <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-top: 2px;">
+                    <span>5 ms</span>
+                    <span>250 ms</span>
+                    <span>42.3 s</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- KNEE -->
+              <div class="comp-param-card">
+                <div class="comp-param-header">
+                  <span class="comp-param-title">KNEE (JOELHO)</span>
+                  <span class="comp-param-val" id="lbl_compKnee">HARD</span>
+                </div>
+                <div class="eq-ctrl-row">
+                  <input type="range" class="comp-range-input" id="rng_compKnee" min="0" max="5" value="0">
+                  <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-top: 2px;">
+                    <span>HARD</span>
+                    <span>Knee 2</span>
+                    <span>Knee 5 (Soft)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- OUT GAIN / MAKE-UP -->
+              <div class="comp-param-card">
+                <div class="comp-param-header">
+                  <span class="comp-param-title">GAIN (MAKE-UP GAIN)</span>
+                  <span class="comp-param-val" id="lbl_compGain">+0.0 dB</span>
+                </div>
+                <div class="eq-ctrl-row">
+                  <input type="range" class="comp-range-input" id="rng_compGain" min="0" max="180" value="0">
+                  <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-top: 2px;">
+                    <span>0.0 dB</span>
+                    <span>+9.0 dB</span>
+                    <span>+18.0 dB</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -2205,7 +2567,29 @@
               }
               if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === ch && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
                 syncEqModalFromState(ch);
+                updateTabStatusDots(ch);
                 requestEqRedraw();
+              }
+            }
+          }
+          // Element 0x22 = Compressor de Canal (Dynamics 2)
+          else if (data.element === 0x22) {
+            const ch = data.channel;
+            if (ch !== undefined && ch >= 0 && ch < TOTAL_CHANNELS && typeof compState !== 'undefined') {
+              const comp = compState[ch];
+              switch (data.param) {
+                case 0x00: comp.on = data.value; break;
+                case 0x01: comp.threshold = data.value; break;
+                case 0x02: comp.ratio = data.value; break;
+                case 0x03: comp.attack = data.value; break;
+                case 0x04: comp.release = data.value; break;
+                case 0x05: comp.knee = data.value; break;
+                case 0x06: comp.gain = data.value; break;
+              }
+              if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === ch && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
+                syncCompModalFromState(ch);
+                updateTabStatusDots(ch);
+                requestCompRedraw();
               }
             }
           }
@@ -2256,7 +2640,11 @@
 
         <div class="ch-sel-wrap">
           <button type="button" class="btn-ch-sel" id="btnSel_${ch.index}" data-ch="${ch.index}" title="Abrir Rack de Efeitos (EQ, Comp, Gate)">
-            SEL
+            <span>SEL</span>
+            <span class="ch-sel-badges">
+              <span class="badge-dot dot-eq on" id="selDotEq_${ch.index}" title="EQ Ativo"></span>
+              <span class="badge-dot dot-comp on" id="selDotComp_${ch.index}" title="Compressor Ativo"></span>
+            </span>
           </button>
         </div>
 
@@ -2907,9 +3295,15 @@
       }
     };
 
+    // Abas de Efeitos (EQ, COMP, GATE)
+    let currentFxTab = 'eq';
+    const fxTabButtons = document.querySelectorAll('.fx-tab-btn');
+    const fxTabPanes = document.querySelectorAll('.fx-tab-pane');
+
     // Renderização do Canvas em Alta Performance com requestAnimationFrame
     let eqRedrawQueued = false;
     function requestEqRedraw() {
+      if (currentFxTab !== 'eq' || !fxModalOverlay.classList.contains('open')) return;
       if (eqRedrawQueued) return;
       eqRedrawQueued = true;
       requestAnimationFrame(() => {
@@ -2927,10 +3321,17 @@
         btn.classList.toggle('active', parseInt(btn.dataset.ch, 10) === chIndex);
       });
 
-      // Carrega estado do EQ do canal
+      // Carrega estado do EQ e COMP do canal
       syncEqModalFromState(chIndex);
+      syncCompModalFromState(chIndex);
+      updateTabStatusDots(chIndex);
       fxModalOverlay.classList.add('open');
-      requestEqRedraw();
+      
+      if (currentFxTab === 'eq') {
+        requestEqRedraw();
+      } else if (currentFxTab === 'comp') {
+        requestCompRedraw();
+      }
     }
 
     function closeFxModal() {
@@ -2944,19 +3345,18 @@
       }
     });
 
-    // Abas de Efeitos (EQ, COMP, GATE)
-    const fxTabButtons = document.querySelectorAll('.fx-tab-btn');
-    const fxTabPanes = document.querySelectorAll('.fx-tab-pane');
-
     fxTabButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         const tabKey = btn.dataset.tab;
+        currentFxTab = tabKey;
         fxTabButtons.forEach(b => b.classList.remove('active'));
         fxTabPanes.forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById(`fxTab_${tabKey}`).classList.add('active');
         if (tabKey === 'eq') {
           requestEqRedraw();
+        } else if (tabKey === 'comp') {
+          requestCompRedraw();
         }
       });
     });
@@ -3037,6 +3437,7 @@
       eq.on = eq.on === 1 ? 0 : 1;
       btnEqBypass.classList.toggle('on', eq.on === 1);
       btnEqBypass.textContent = eq.on === 1 ? 'EQ: ATIVO (ON)' : 'EQ: BYPASS (OFF)';
+      updateTabStatusDots(currentSelectedCh);
       sendEqParam(0x00, eq.on);
     });
 
@@ -3350,6 +3751,421 @@
       });
     }
 
+    // ==========================================
+    // RACK DE EFEITOS: COMPRESSOR DE CANAL (01V96)
+    // ==========================================
+    const COMP_RATIO_VALUES = [
+      "1.0:1", "1.1:1", "1.3:1", "1.5:1", "1.7:1", "2.0:1", "2.5:1",
+      "3.0:1", "3.5:1", "4.0:1", "5.0:1", "6.0:1", "8.0:1", "10:1", "20:1", "∞:1"
+    ];
+
+    const COMP_RATIO_NUMBERS = [
+      1.0, 1.1, 1.3, 1.5, 1.7, 2.0, 2.5,
+      3.0, 3.5, 4.0, 5.0, 6.0, 8.0, 10.0, 20.0, 1000.0
+    ];
+
+    const COMP_RELEASE_VALUES = [
+      "5 ms", "10 ms", "15 ms", "20 ms", "25 ms", "30 ms", "40 ms", "50 ms",
+      "60 ms", "70 ms", "80 ms", "90 ms", "100 ms", "120 ms", "140 ms", "160 ms",
+      "180 ms", "200 ms", "250 ms", "300 ms", "350 ms", "400 ms", "450 ms", "500 ms",
+      "600 ms", "700 ms", "800 ms", "900 ms", "1.00 s", "1.20 s", "1.40 s", "1.60 s",
+      "1.80 s", "2.00 s", "2.50 s", "3.00 s", "4.00 s", "5.00 s", "7.00 s", "10.0 s",
+      "15.0 s", "20.0 s", "30.0 s", "42.3 s"
+    ];
+
+    const COMP_KNEE_VALUES = ["HARD", "1 (Soft)", "2 (Soft)", "3 (Soft)", "4 (Soft)", "5 (Soft)"];
+
+    // Presets pré-definidos para agilizar a mixagem
+    const COMP_PRESETS = {
+      default: { threshold: 340, ratio: 7, attack: 20, release: 18, knee: 0, gain: 0 },
+      vocal:   { threshold: 300, ratio: 6, attack: 15, release: 17, knee: 2, gain: 30 },
+      drums:   { threshold: 380, ratio: 9, attack: 30, release: 12, knee: 0, gain: 20 },
+      bass:    { threshold: 320, ratio: 7, attack: 25, release: 19, knee: 1, gain: 25 },
+      limiter: { threshold: 480, ratio: 15, attack: 1, release: 12, knee: 0, gain: 0 }
+    };
+
+    // Estado do Compressor para todos os 32 canais
+    const compState = Array.from({ length: TOTAL_CHANNELS }, () => ({
+      on: 1,           // 1 = Ativo (ON), 0 = Bypass (OFF)
+      threshold: 340,  // -20.0 dB (0 = -54.0 dB, 540 = 0.0 dB)
+      ratio: 7,        // 4.0:1 (Índice de 0 a 15)
+      attack: 20,      // 20 ms (0 a 120 ms)
+      release: 18,     // 250 ms (Índice na tabela de release)
+      knee: 0,         // HARD (0 a 5)
+      gain: 0          // +0.0 dB (0 a 180, 0.1 dB step)
+    }));
+
+    // Elementos DOM do Compressor
+    const btnCompBypass = document.getElementById('btnCompBypass');
+    const compPresetSelect = document.getElementById('compPresetSelect');
+    const btnCompReset = document.getElementById('btnCompReset');
+    const compCanvas = document.getElementById('compCanvas');
+    const compGrFill = document.getElementById('compGrFill');
+    const lblCompGrVal = document.getElementById('lbl_compGrVal');
+
+    const compControls = {
+      threshold: { rng: document.getElementById('rng_compThreshold'), lbl: document.getElementById('lbl_compThreshold'), param: 0x01 },
+      ratio:     { rng: document.getElementById('rng_compRatio'),     lbl: document.getElementById('lbl_compRatio'),     param: 0x02 },
+      attack:    { rng: document.getElementById('rng_compAttack'),    lbl: document.getElementById('lbl_compAttack'),    param: 0x03 },
+      release:   { rng: document.getElementById('rng_compRelease'),   lbl: document.getElementById('lbl_compRelease'),   param: 0x04 },
+      knee:      { rng: document.getElementById('rng_compKnee'),      lbl: document.getElementById('lbl_compKnee'),      param: 0x05 },
+      gain:      { rng: document.getElementById('rng_compGain'),      lbl: document.getElementById('lbl_compGain'),      param: 0x06 }
+    };
+
+    function rawThresholdToDb(val) {
+      const db = (val - 540) / 10;
+      return `${db.toFixed(1)} dB`;
+    }
+
+    function rawGainToCompDb(val) {
+      const db = val / 10;
+      return `+${db.toFixed(1)} dB`;
+    }
+
+    function updateChannelStripFxBadges(ch) {
+      const eqDot = document.getElementById(`selDotEq_${ch}`);
+      const compDot = document.getElementById(`selDotComp_${ch}`);
+      if (eqDot && typeof eqState !== 'undefined' && eqState[ch]) eqDot.classList.toggle('on', eqState[ch].on === 1);
+      if (compDot && typeof compState !== 'undefined' && compState[ch]) compDot.classList.toggle('on', compState[ch].on === 1);
+    }
+
+    function updateTabStatusDots(chIndex) {
+      const eq = eqState[chIndex];
+      const comp = compState[chIndex];
+      const dotEq = document.getElementById('dot_eq');
+      const dotComp = document.getElementById('dot_comp');
+      if (dotEq) dotEq.classList.toggle('dot-on', eq && eq.on === 1);
+      if (dotComp) dotComp.classList.toggle('dot-on', comp && comp.on === 1);
+      updateChannelStripFxBadges(chIndex);
+    }
+
+    function syncCompModalFromState(chIndex) {
+      const comp = compState[chIndex];
+
+      // Compressor Bypass
+      btnCompBypass.classList.toggle('on', comp.on === 1);
+      btnCompBypass.textContent = comp.on === 1 ? 'COMP: ATIVO (ON)' : 'COMP: BYPASS (OFF)';
+
+      // Threshold
+      compControls.threshold.rng.value = comp.threshold;
+      compControls.threshold.lbl.textContent = rawThresholdToDb(comp.threshold);
+
+      // Ratio
+      compControls.ratio.rng.value = comp.ratio;
+      compControls.ratio.lbl.textContent = COMP_RATIO_VALUES[comp.ratio] || `${comp.ratio}:1`;
+
+      // Attack
+      compControls.attack.rng.value = comp.attack;
+      compControls.attack.lbl.textContent = `${comp.attack} ms`;
+
+      // Release
+      compControls.release.rng.value = comp.release;
+      compControls.release.lbl.textContent = COMP_RELEASE_VALUES[comp.release] || `${comp.release} ms`;
+
+      // Knee
+      compControls.knee.rng.value = comp.knee;
+      compControls.knee.lbl.textContent = COMP_KNEE_VALUES[comp.knee] || `${comp.knee}`;
+
+      // Gain
+      compControls.gain.rng.value = comp.gain;
+      compControls.gain.lbl.textContent = rawGainToCompDb(comp.gain);
+    }
+
+    function sendCompParam(param, value) {
+      sendCommand(0x22, param, currentSelectedCh, value);
+      requestCompRedraw();
+    }
+
+    let compRedrawQueued = false;
+    function requestCompRedraw() {
+      if (currentFxTab !== 'comp' || !fxModalOverlay.classList.contains('open')) return;
+      if (compRedrawQueued) return;
+      compRedrawQueued = true;
+      requestAnimationFrame(() => {
+        compRedrawQueued = false;
+        drawCompCurve();
+      });
+    }
+
+    // Curva de Transferência e Compressão Dinâmica no Canvas
+    function drawCompCurve() {
+      if (!compCanvas) return;
+      const ctx = compCanvas.getContext('2d');
+      const w = compCanvas.width;
+      const h = compCanvas.height;
+      const comp = compState[currentSelectedCh];
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Margens para grade e rótulos
+      const padL = 38;
+      const padR = 20;
+      const padT = 16;
+      const padB = 26;
+      const pw = w - padL - padR;
+      const ph = h - padT - padB;
+
+      function inDbToX(db) {
+        return padL + ((db - (-60)) / 60) * pw;
+      }
+      function outDbToY(db) {
+        return padT + ph - ((db - (-60)) / 60) * ph;
+      }
+
+      // Grade de referência em dB
+      const dBs = [-60, -50, -40, -30, -20, -10, 0];
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      ctx.fillStyle = '#64748b';
+      ctx.font = '9px monospace';
+
+      dBs.forEach(db => {
+        const x = inDbToX(db);
+        const y = outDbToY(db);
+
+        // Linha vertical
+        ctx.beginPath();
+        ctx.moveTo(x, padT);
+        ctx.lineTo(x, padT + ph);
+        ctx.stroke();
+
+        ctx.textAlign = 'center';
+        ctx.fillText(db === 0 ? '0' : `${db}`, x, h - 10);
+
+        // Linha horizontal
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(padL + pw, y);
+        ctx.stroke();
+
+        ctx.textAlign = 'right';
+        ctx.fillText(db === 0 ? '0' : `${db}`, padL - 6, y + 3);
+      });
+
+      // Títulos dos eixos
+      ctx.fillStyle = '#475569';
+      ctx.font = '8px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('IN (dB)', padL + pw, h - 10);
+      ctx.textAlign = 'left';
+      ctx.fillText('OUT', 4, padT + 8);
+
+      // Linha 1:1 de ganho unitário
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(inDbToX(-60), outDbToY(-60));
+      ctx.lineTo(inDbToX(0), outDbToY(0));
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      if (comp.on === 0) {
+        // Modo BYPASS: Apenas aviso e sem atenuação
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('COMPRESSOR BYPASS (DESATIVADO)', padL + pw / 2, padT + ph / 2);
+
+        if (compGrFill) compGrFill.style.height = '0%';
+        if (lblCompGrVal) lblCompGrVal.textContent = '0.0 dB';
+        return;
+      }
+
+      // Parâmetros de Compressão
+      const thresholdDb = (comp.threshold - 540) / 10;
+      const ratio = COMP_RATIO_NUMBERS[comp.ratio] || 4.0;
+      const makeupDb = comp.gain / 10;
+      const kneeK = comp.knee;
+      const kneeWidth = kneeK * 4; // Largura suave do joelho (0 a 20 dB)
+
+      function compTransfer(inDb) {
+        let outDb = inDb;
+        if (kneeWidth <= 0 || kneeK === 0) {
+          if (inDb > thresholdDb) {
+            outDb = thresholdDb + (inDb - thresholdDb) / ratio;
+          }
+        } else {
+          const lower = thresholdDb - kneeWidth / 2;
+          const upper = thresholdDb + kneeWidth / 2;
+          if (inDb > upper) {
+            outDb = thresholdDb + (inDb - thresholdDb) / ratio;
+          } else if (inDb > lower) {
+            const delta = inDb - lower;
+            outDb = inDb + ((1 / ratio - 1) * (delta * delta)) / (2 * kneeWidth);
+          }
+        }
+        return Math.min(0, outDb + makeupDb);
+      }
+
+      // Amostras da curva
+      const curvePoints = [];
+      for (let db = -60; db <= 0.001; db += 0.5) {
+        const out = compTransfer(db);
+        curvePoints.push({
+          x: inDbToX(db),
+          y: outDbToY(out)
+        });
+      }
+
+      // Área sombreada de Gain Reduction
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.12)';
+      ctx.beginPath();
+      ctx.moveTo(inDbToX(-60), outDbToY(-60));
+      curvePoints.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.lineTo(inDbToX(0), outDbToY(0));
+      ctx.closePath();
+      ctx.fill();
+
+      // Curva dinâmica do compressor
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      curvePoints.forEach((p, idx) => {
+        if (idx === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+
+      // Ponto do Threshold
+      const thX = inDbToX(thresholdDb);
+      const thY = outDbToY(compTransfer(thresholdDb));
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(thX, Math.max(padT, Math.min(padT + ph, thY)), 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Rótulo numérico flutuante sobre o Threshold
+      ctx.fillStyle = '#fde68a';
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'center';
+      const labelY = thY > padT + 22 ? thY - 9 : thY + 16;
+      ctx.fillText(`${thresholdDb.toFixed(1)}dB`, thX, labelY);
+
+      // O medidor de Gain Reduction reflete telemetria viva de áudio (permanece em 0.0 dB em repouso)
+      if (compGrFill && !compGrFill.dataset.live) {
+        compGrFill.style.height = '0%';
+        if (lblCompGrVal) lblCompGrVal.textContent = '0.0 dB';
+      }
+    }
+
+    // Função para atualizar medidor de Gain Reduction quando houver telemetria real de áudio
+    function updateCompGainReduction(grDb) {
+      if (!compGrFill || !lblCompGrVal) return;
+      if (grDb <= 0 || compState[currentSelectedCh].on === 0) {
+        compGrFill.style.height = '0%';
+        lblCompGrVal.textContent = '0.0 dB';
+        compGrFill.dataset.live = '';
+      } else {
+        compGrFill.dataset.live = 'true';
+        const pct = Math.min(100, (grDb / 24) * 100);
+        compGrFill.style.height = `${pct}%`;
+        lblCompGrVal.textContent = `-${grDb.toFixed(1)} dB`;
+      }
+    }
+
+    // Toggle COMP ON / Bypass
+    btnCompBypass.addEventListener('click', () => {
+      const comp = compState[currentSelectedCh];
+      comp.on = comp.on === 1 ? 0 : 1;
+      btnCompBypass.classList.toggle('on', comp.on === 1);
+      btnCompBypass.textContent = comp.on === 1 ? 'COMP: ATIVO (ON)' : 'COMP: BYPASS (OFF)';
+      updateTabStatusDots(currentSelectedCh);
+      sendCompParam(0x00, comp.on);
+    });
+
+    // Reset Padrão do Compressor
+    btnCompReset.addEventListener('click', () => {
+      const def = COMP_PRESETS.default;
+      const comp = compState[currentSelectedCh];
+      comp.threshold = def.threshold;
+      comp.ratio = def.ratio;
+      comp.attack = def.attack;
+      comp.release = def.release;
+      comp.knee = def.knee;
+      comp.gain = def.gain;
+
+      syncCompModalFromState(currentSelectedCh);
+      sendCompParam(0x01, def.threshold);
+      sendCompParam(0x02, def.ratio);
+      sendCompParam(0x03, def.attack);
+      sendCompParam(0x04, def.release);
+      sendCompParam(0x05, def.knee);
+      sendCompParam(0x06, def.gain);
+      compPresetSelect.value = 'default';
+      showToast('Compressor restaurado para o padrão ⚡', '⚡');
+    });
+
+    // Seleção de Presets de Compressão
+    compPresetSelect.addEventListener('change', (e) => {
+      const presetKey = e.target.value;
+      const p = COMP_PRESETS[presetKey];
+      if (!p) return;
+
+      const comp = compState[currentSelectedCh];
+      comp.threshold = p.threshold;
+      comp.ratio = p.ratio;
+      comp.attack = p.attack;
+      comp.release = p.release;
+      comp.knee = p.knee;
+      comp.gain = p.gain;
+
+      syncCompModalFromState(currentSelectedCh);
+      sendCompParam(0x01, p.threshold);
+      sendCompParam(0x02, p.ratio);
+      sendCompParam(0x03, p.attack);
+      sendCompParam(0x04, p.release);
+      sendCompParam(0x05, p.knee);
+      sendCompParam(0x06, p.gain);
+      showToast(`Preset "${e.target.options[e.target.selectedIndex].text}" aplicado! 🎚️`, '🎚️');
+    });
+
+    // Sliders de Parâmetros do Compressor
+    compControls.threshold.rng.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      compState[currentSelectedCh].threshold = val;
+      compControls.threshold.lbl.textContent = rawThresholdToDb(val);
+      sendCompParam(0x01, val);
+    });
+
+    compControls.ratio.rng.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      compState[currentSelectedCh].ratio = val;
+      compControls.ratio.lbl.textContent = COMP_RATIO_VALUES[val] || `${val}:1`;
+      sendCompParam(0x02, val);
+    });
+
+    compControls.attack.rng.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      compState[currentSelectedCh].attack = val;
+      compControls.attack.lbl.textContent = `${val} ms`;
+      sendCompParam(0x03, val);
+    });
+
+    compControls.release.rng.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      compState[currentSelectedCh].release = val;
+      compControls.release.lbl.textContent = COMP_RELEASE_VALUES[val] || `${val} ms`;
+      sendCompParam(0x04, val);
+    });
+
+    compControls.knee.rng.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      compState[currentSelectedCh].knee = val;
+      compControls.knee.lbl.textContent = COMP_KNEE_VALUES[val] || `${val}`;
+      sendCompParam(0x05, val);
+    });
+
+    compControls.gain.rng.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      compState[currentSelectedCh].gain = val;
+      compControls.gain.lbl.textContent = rawGainToCompDb(val);
+      sendCompParam(0x06, val);
+    });
+
     // Evento de clique no botão SEL dos canais
     mixerRack.addEventListener('click', (e) => {
       const btnSel = e.target.closest('.btn-ch-sel');
@@ -3376,6 +4192,11 @@
         const all = Array.from({ length: TOTAL_CHANNELS }, (_, i) => i);
         updateChannelsVisibility(all);
         updateBankButtonsActiveState(all);
+      }
+
+      // 4. Inicializa os badges de FX (EQ e COMP) em todos os canais
+      for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        updateChannelStripFxBadges(i);
       }
     });
 

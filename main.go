@@ -253,6 +253,21 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
 			}
 			targetDesc = fmt.Sprintf("CH %02d -> EQ %s: %d", chNum, pName, msg.Value)
+		case 0x22:
+			compParamNames := map[byte]string{
+				0x00: "COMP ON/OFF",
+				0x01: "Threshold",
+				0x02: "Ratio",
+				0x03: "Attack",
+				0x04: "Release",
+				0x05: "Knee",
+				0x06: "Gain (Out Gain)",
+			}
+			pName, ok := compParamNames[msg.Param]
+			if !ok {
+				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
+			}
+			targetDesc = fmt.Sprintf("CH %02d -> COMP %s: %d", chNum, pName, msg.Value)
 		default:
 			targetDesc = fmt.Sprintf("CH %02d -> Element 0x%02X, Param 0x%02X: %d", chNum, msg.Element, msg.Param, msg.Value)
 		}
@@ -263,7 +278,8 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		// Eventos ON/MUTE/Bypass discretos passam direto sem throttling
 		isDiscrete := msg.Element == 0x1A ||
 			(msg.Element == 0x23 && msg.Param >= 0x08) ||
-			(msg.Element == 0x20 && (msg.Param == 0x00 || msg.Param == 0x0D || msg.Param == 0x0E))
+			(msg.Element == 0x20 && (msg.Param == 0x00 || msg.Param == 0x0D || msg.Param == 0x0E)) ||
+			(msg.Element == 0x22 && msg.Param == 0x00)
 		canMIDI, canWS := true, true
 		if !isDiscrete {
 			canMIDI, canWS = throttler.allow(msg.Element, msg.Param, msg.Channel, msg.Value)
