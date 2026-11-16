@@ -230,6 +230,29 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 			} else {
 				targetDesc = fmt.Sprintf("CH %02d -> Element 0x%02X, Param 0x%02X: %d", chNum, msg.Element, msg.Param, msg.Value)
 			}
+		case 0x20:
+			eqParamNames := map[byte]string{
+				0x00: "EQ ON/OFF",
+				0x01: "LOW Q/Type",
+				0x02: "LOW Freq",
+				0x03: "LOW Gain",
+				0x04: "LO-MID Q",
+				0x05: "LO-MID Freq",
+				0x06: "LO-MID Gain",
+				0x07: "HI-MID Q",
+				0x08: "HI-MID Freq",
+				0x09: "HI-MID Gain",
+				0x0A: "HIGH Q/Type",
+				0x0B: "HIGH Freq",
+				0x0C: "HIGH Gain",
+				0x0D: "HPF ON/OFF",
+				0x0E: "LPF ON/OFF",
+			}
+			pName, ok := eqParamNames[msg.Param]
+			if !ok {
+				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
+			}
+			targetDesc = fmt.Sprintf("CH %02d -> EQ %s: %d", chNum, pName, msg.Value)
 		default:
 			targetDesc = fmt.Sprintf("CH %02d -> Element 0x%02X, Param 0x%02X: %d", chNum, msg.Element, msg.Param, msg.Value)
 		}
@@ -237,9 +260,10 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("WS -> SysEx: %s | %s\n", hexStr, targetDesc)
 
 		// Aplica throttle antes de enviar ao barramento MIDI e ao WebSocket.
-		// Eventos ON/MUTE (0x1A, elemento 0x23 params 0x08-0x0F) são sempre passados
-		// pois são eventos discretos (não contínuos) e não causam saturação.
-		isDiscrete := msg.Element == 0x1A || (msg.Element == 0x23 && msg.Param >= 0x08)
+		// Eventos ON/MUTE/Bypass discretos passam direto sem throttling
+		isDiscrete := msg.Element == 0x1A ||
+			(msg.Element == 0x23 && msg.Param >= 0x08) ||
+			(msg.Element == 0x20 && (msg.Param == 0x00 || msg.Param == 0x0D || msg.Param == 0x0E))
 		canMIDI, canWS := true, true
 		if !isDiscrete {
 			canMIDI, canWS = throttler.allow(msg.Element, msg.Param, msg.Channel, msg.Value)

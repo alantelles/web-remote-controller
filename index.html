@@ -751,6 +751,413 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
+    /* Botão SEL no Canal */
+    .ch-sel-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    .btn-ch-sel {
+      width: 66px;
+      height: 22px;
+      background: #1e2430;
+      color: #94a3b8;
+      border: 1px solid #333d4f;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-ch-sel:hover {
+      background: #2b3547;
+      color: #e2e8f0;
+      border-color: #4f5f7a;
+    }
+
+    .btn-ch-sel.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    /* MODAL DE EFEITOS (FX / CHANNEL STRIP RACK) */
+    .fx-modal-card {
+      background: #141720;
+      border: 1px solid #2e3547;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(2, 132, 199, 0.2);
+      width: 820px;
+      max-width: 95vw;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+
+    .fx-modal-header {
+      background: linear-gradient(180deg, #1f2533 0%, #151922 100%);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #283042;
+      flex-shrink: 0;
+    }
+
+    .fx-header-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .fx-ch-badge {
+      background: #0284c7;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 8px rgba(2, 132, 199, 0.5);
+    }
+
+    .fx-header-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #f8fafc;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-fx-close {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #94a3b8;
+      font-size: 18px;
+      line-height: 1;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .btn-fx-close:hover {
+      background: #262c3b;
+      color: #f8fafc;
+      border-color: #3e485e;
+    }
+
+    /* Abas de Módulos (EQ, COMP, GATE) */
+    .fx-tabs-nav {
+      background: #0d0f15;
+      padding: 8px 18px 0 18px;
+      display: flex;
+      gap: 6px;
+      border-bottom: 1px solid #232836;
+      flex-shrink: 0;
+    }
+
+    .fx-tab-btn {
+      background: #171b26;
+      color: #94a3b8;
+      border: 1px solid #262c3d;
+      border-bottom: none;
+      padding: 8px 20px;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .fx-tab-btn:hover {
+      background: #202636;
+      color: #f1f5f9;
+    }
+
+    .fx-tab-btn.active {
+      background: #1a202c;
+      color: #38bdf8;
+      border-color: #38bdf8;
+      border-bottom: 1px solid #1a202c;
+      box-shadow: inset 0 2px 0 #38bdf8;
+      margin-bottom: -1px;
+    }
+
+    .fx-tab-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #475569;
+    }
+
+    .fx-tab-btn.active .fx-tab-status-dot {
+      background: #38bdf8;
+      box-shadow: 0 0 6px #38bdf8;
+    }
+
+    /* Conteúdo das Abas */
+    .fx-modal-body {
+      padding: 18px;
+      overflow-y: auto;
+      flex: 1;
+      background: #10131a;
+    }
+
+    .fx-tab-pane {
+      display: none;
+    }
+
+    .fx-tab-pane.active {
+      display: block;
+    }
+
+    /* Placeholder "Em Breve" para Comp e Gate */
+    .fx-placeholder-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      background: #141722;
+      border: 2px dashed #283042;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .fx-placeholder-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      color: #475569;
+    }
+
+    .fx-placeholder-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #cbd5e1;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .fx-placeholder-desc {
+      font-size: 13px;
+      color: #64748b;
+      max-width: 420px;
+      line-height: 1.5;
+    }
+
+    /* EQUALIZADOR PARAMÉTRICO 4-BANDAS */
+    .eq-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .eq-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #161a24;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #262d3d;
+    }
+
+    .eq-switch-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-eq-bypass {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      border: 1px solid #333d4e;
+      background: #1e2433;
+      color: #94a3b8;
+      transition: all 0.15s;
+    }
+
+    .btn-eq-bypass.on {
+      background: #10b981;
+      color: #064e3b;
+      border-color: #34d399;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    }
+
+    .btn-filter-toggle {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid #2c3547;
+      background: #171c26;
+      color: #94a3b8;
+      transition: all 0.15s;
+    }
+
+    .btn-filter-toggle.active {
+      background: #0284c7;
+      color: #fff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+    }
+
+    .btn-eq-flat {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid #374151;
+      background: #1f2937;
+      color: #cbd5e1;
+      transition: all 0.15s;
+    }
+    .btn-eq-flat:hover {
+      background: #374151;
+      color: #fff;
+    }
+
+    /* Gráfico Visual de Curva de EQ */
+    .eq-curve-card {
+      background: #0b0d12;
+      border: 1px solid #232938;
+      border-radius: 8px;
+      height: 150px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+    }
+
+    .eq-curve-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Grade de 4 Bandas (LOW, LO-MID, HI-MID, HIGH) */
+    .eq-bands-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .eq-band-card {
+      background: #151922;
+      border: 1px solid #252d3d;
+      border-radius: 8px;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      position: relative;
+    }
+
+    .eq-band-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #252b3b;
+      padding-bottom: 6px;
+    }
+
+    .eq-band-title {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .band-low .eq-band-title { color: #f43f5e; }
+    .band-lomid .eq-band-title { color: #f59e0b; }
+    .band-himid .eq-band-title { color: #10b981; }
+    .band-high .eq-band-title { color: #06b6d4; }
+
+    .eq-band-mode-select {
+      background: #0b0e14;
+      color: #cbd5e1;
+      border: 1px solid #2c3547;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 4px;
+      cursor: pointer;
+    }
+
+    /* Controles de cada banda (Ganho, Freq, Q) */
+    .eq-ctrl-group {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .eq-ctrl-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .eq-ctrl-label-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+
+    .eq-ctrl-val {
+      color: #38bdf8;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-weight: 800;
+    }
+
+    .eq-range-input {
+      width: 100%;
+      height: 6px;
+      accent-color: #0284c7;
+      background: #0b0d13;
+      border-radius: 3px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .band-low .eq-range-input { accent-color: #f43f5e; }
+    .band-lomid .eq-range-input { accent-color: #f59e0b; }
+    .band-himid .eq-range-input { accent-color: #10b981; }
+    .band-high .eq-range-input { accent-color: #06b6d4; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
     /* Container dos Canais com Rolagem Interna */
     .channels-viewport {
       flex: 1;
@@ -1298,6 +1705,238 @@
 
   </div>
 
+  
+  <!-- MODAL DE CONFIRMAÇÃO DE MUDANÇA DE VISUALIZAÇÃO PADRÃO -->
+  <div id="confirmModalOverlay" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon">⚠️</div>
+        <div class="modal-title">Substituir Visualização na Tela</div>
+      </div>
+      <div class="modal-body" id="confirmModalMessage">
+        Mudar para a visualização padrão substituirá os canais visíveis no momento.<br><br>Deseja realmente trocar?
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-modal btn-modal-cancel" id="btnModalCancel">Cancelar</button>
+        <button type="button" class="btn-modal btn-modal-confirm" id="btnModalConfirm">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL RACK DE EFEITOS (EQ, COMP, GATE) -->
+  <div id="fxModalOverlay" class="modal-overlay">
+    <div class="fx-modal-card">
+      <div class="fx-modal-header">
+        <div class="fx-header-title-wrap">
+          <span class="fx-ch-badge" id="fxModalChBadge">CH 01</span>
+          <span class="fx-header-title">Processamento de Canal (Rack de Efeitos)</span>
+        </div>
+        <button type="button" class="btn-fx-close" id="btnFxClose" title="Fechar (Esc)">&times;</button>
+      </div>
+
+      <!-- Abas dos Efeitos -->
+      <div class="fx-tabs-nav">
+        <button type="button" class="fx-tab-btn active" data-tab="eq">
+          <div class="fx-tab-status-dot"></div>
+          <span>EQUALIZADOR</span>
+        </button>
+        <button type="button" class="fx-tab-btn" data-tab="comp">
+          <div class="fx-tab-status-dot"></div>
+          <span>COMPRESSOR</span>
+        </button>
+        <button type="button" class="fx-tab-btn" data-tab="gate">
+          <div class="fx-tab-status-dot"></div>
+          <span>GATE</span>
+        </button>
+      </div>
+
+      <div class="fx-modal-body">
+        <!-- ABA: EQUALIZADOR -->
+        <div class="fx-tab-pane active" id="fxTab_eq">
+          <div class="eq-container">
+            <!-- Barra superior do EQ -->
+            <div class="eq-top-bar">
+              <div class="eq-switch-group">
+                <button type="button" class="btn-eq-bypass on" id="btnEqBypass">EQ: ATIVO (ON)</button>
+                <button type="button" class="btn-filter-toggle" id="btnEqHpf" title="Ativar/Desativar Filtro Passa-Altas (Corte Grave na banda LOW)">HPF: <span id="lbl_hpfStatus">OFF</span></button>
+                <button type="button" class="btn-filter-toggle" id="btnEqLpf" title="Ativar/Desativar Filtro Passa-Baixas (Corte Agudo na banda HIGH)">LPF: <span id="lbl_lpfStatus">OFF</span></button>
+              </div>
+              <button type="button" class="btn-eq-flat" id="btnEqFlat" title="Zerar todos os ganhos das 4 bandas">Reset Flat (0 dB)</button>
+            </div>
+
+            <!-- Gráfico da Curva de Equalização -->
+            <div class="eq-curve-card">
+              <canvas id="eqCanvas" class="eq-curve-canvas" width="780" height="150"></canvas>
+            </div>
+
+            <!-- As 4 Bandas Paramétricas (LOW, LO-MID, HI-MID, HIGH) -->
+            <div class="eq-bands-grid">
+              <!-- BANDA LOW -->
+              <div class="eq-band-card band-low">
+                <div class="eq-band-header">
+                  <span class="eq-band-title">LOW</span>
+                  <select class="eq-band-mode-select" id="eqLowType">
+                    <option value="peaking">PEAKING</option>
+                    <option value="shelf" selected>L.SHELF</option>
+                    <option value="hpf">HPF</option>
+                  </select>
+                </div>
+                <div class="eq-ctrl-group">
+                  <div class="eq-ctrl-row">
+                    <div class="eq-ctrl-label-wrap">
+                      <span id="lbl_lowGainTitle">GANHO</span>
+                      <span class="eq-ctrl-val" id="lbl_lowGain">0.0 dB</span>
+                    </div>
+                    <input type="range" class="eq-range-input" id="rng_lowGain" min="0" max="360" value="180">
+                  </div>
+                  <div class="eq-ctrl-row">
+                    <div class="eq-ctrl-label-wrap">
+                      <span id="lbl_lowFreqTitle">FREQ</span>
+                      <span class="eq-ctrl-val" id="lbl_lowFreq">100 Hz</span>
+                    </div>
+                    <input type="range" class="eq-range-input" id="rng_lowFreq" min="0" max="119" value="27">
+                  </div>
+                  <div class="eq-ctrl-row">
+                    <div class="eq-ctrl-label-wrap">
+                      <span>Q / LARG</span>
+                      <span class="eq-ctrl-val" id="lbl_lowQ">7</span>
+                    </div>
+                    <input type="range" class="eq-range-input" id="rng_lowQ" min="0" max="40" value="17">
+                  </div>
+                </div>
+              </div>
+
+              <!-- BANDA LO-MID -->
+              <div class="eq-band-card band-lomid">
+                <div class="eq-band-header">
+                  <span class="eq-band-title">LO-MID</span>
+                  <span style="font-size: 10px; color: #64748b; font-weight: 700;">PEAKING</span>
+                </div>
+                <div class="eq-ctrl-group">
+                  <div class="eq-ctrl-row">
+                    <div class="eq-ctrl-label-wrap">
+                      <span>GANHO</span>
+                      <span class="eq-ctrl-val" id="lbl_lomidGain">0.0 dB</span>
+                    </div>
+                    <input type="range" class="eq-range-input" id="rng_lomidGain" min="0" max="360" value="180">
+                  </div>
+                  <div class="eq-ctrl-row">
+                    <div class="eq-ctrl-label-wrap">
+                      <span>FREQ</span>
+                      <span class="eq-ctrl-val" id="lbl_lomidFreq">400 Hz</span>
+                    </div>
+                    <input type="range" class="eq-range-input" id="rng_lomidFreq" min="0" max="119" value="51">
+                  </div>
+                  <div class="eq-ctrl-row">
+                    <div class="eq-ctrl-label-wrap">
+                      <span>Q / LARG</span>
+                      <span class="eq-ctrl-val" id="lbl_lomidQ">10</span>
+                    </div>
+                    <input type="range" class="eq-range-input" id="rng_lomidQ" min="0" max="40" value="20">
+                  </div>
+                </div>
+              </div>
+
+              <!-- BANDA HI-MID -->
+              <div class="eq-band-card band-himid">
+                <div class="eq-band-header">
+                  <span class="eq-band-title">HI-MID</span>
+                  <span style="font-size: 10px; color: #64748b; font-weight: 700;">PEAKING</span>
+                </div>
+                <div class="eq-ctrl-group">
+                  <div class="eq-ctrl-row">
+                    <div class="eq-ctrl-label-wrap">
+                      <span>GANHO</span>
+                      <span class="eq-ctrl-val" id="lbl_himidGain">0.0 dB</span>
+                    </div>
+                    <input type="range" class="eq-range-input" id="rng_himidGain" min="0" max="360" value="180">
+                  </div>
+                  <div class="eq-ctrl-row">
+                    <div class="eq-ctrl-label-wrap">
+                      <span>FREQ</span>
+                      <span class="eq-ctrl-val" id="lbl_himidFreq">2.00 kHz</span>
+                    </div>
+                    <input type="range" class="eq-range-input" id="rng_himidFreq" min="0" max="119" value="79">
+                  </div>
+                  <div class="eq-ctrl-row">
+                    <div class="eq-ctrl-label-wrap">
+                      <span>Q / LARG</span>
+                      <span class="eq-ctrl-val" id="lbl_himidQ">10</span>
+                    </div>
+                    <input type="range" class="eq-range-input" id="rng_himidQ" min="0" max="40" value="20">
+                  </div>
+                </div>
+              </div>
+
+              <!-- BANDA HIGH -->
+              <div class="eq-band-card band-high">
+                <div class="eq-band-header">
+                  <span class="eq-band-title">HIGH</span>
+                  <select class="eq-band-mode-select" id="eqHighType">
+                    <option value="peaking">PEAKING</option>
+                    <option value="shelf" selected>H.SHELF</option>
+                    <option value="lpf">LPF</option>
+                  </select>
+                </div>
+                <div class="eq-ctrl-group">
+                  <div class="eq-ctrl-row">
+                    <div class="eq-ctrl-label-wrap">
+                      <span id="lbl_highGainTitle">GANHO</span>
+                      <span class="eq-ctrl-val" id="lbl_highGain">0.0 dB</span>
+                    </div>
+                    <input type="range" class="eq-range-input" id="rng_highGain" min="0" max="360" value="180">
+                  </div>
+                  <div class="eq-ctrl-row">
+                    <div class="eq-ctrl-label-wrap">
+                      <span id="lbl_highFreqTitle">FREQ</span>
+                      <span class="eq-ctrl-val" id="lbl_highFreq">10.0 kHz</span>
+                    </div>
+                    <input type="range" class="eq-range-input" id="rng_highFreq" min="0" max="119" value="107">
+                  </div>
+                  <div class="eq-ctrl-row">
+                    <div class="eq-ctrl-label-wrap">
+                      <span>Q / LARG</span>
+                      <span class="eq-ctrl-val" id="lbl_highQ">7</span>
+                    </div>
+                    <input type="range" class="eq-range-input" id="rng_highQ" min="0" max="40" value="17">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA: COMPRESSOR (Placeholder) -->
+        <div class="fx-tab-pane" id="fxTab_comp">
+          <div class="fx-placeholder-box">
+            <div class="fx-placeholder-icon">🎚️</div>
+            <div class="fx-placeholder-title">COMPRESSOR DE CANAL</div>
+            <div class="fx-placeholder-desc">
+              Em Breve. Threshold, Ratio, Attack, Release, Knee e Make-up Gain para a dinâmica deste canal.
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA: GATE (Placeholder) -->
+        <div class="fx-tab-pane" id="fxTab_gate">
+          <div class="fx-placeholder-box">
+            <div class="fx-placeholder-icon">🚪</div>
+            <div class="fx-placeholder-title">GATE / EXPANDER</div>
+            <div class="fx-placeholder-desc">
+              Em Breve. Threshold, Range, Attack, Hold e Decay para controle de ruído de fundo deste canal.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toastNotice" class="toast-notice">
+    <span id="toastIcon">💾</span>
+    <span id="toastText">Visualização salva com sucesso!</span>
+  </div>
+
   <script>
     // ==========================================
     // ESTADO E CONSTANTES
@@ -1542,6 +2181,34 @@
               }
             }
           }
+          // Element 0x20 = Equalizador Paramétrico (EQ)
+          else if (data.element === 0x20) {
+            const ch = data.channel;
+            if (ch !== undefined && ch >= 0 && ch < TOTAL_CHANNELS && typeof eqState !== 'undefined') {
+              const eq = eqState[ch];
+              switch (data.param) {
+                case 0x00: eq.on = data.value; break;
+                case 0x01: eq.low.q = Math.max(0, Math.min(40, 40 - data.value)); break;
+                case 0x02: eq.low.freq = data.value; break;
+                case 0x03: eq.low.gain = data.value; break;
+                case 0x04: eq.lomid.q = Math.max(0, Math.min(40, 40 - data.value)); break;
+                case 0x05: eq.lomid.freq = data.value; break;
+                case 0x06: eq.lomid.gain = data.value; break;
+                case 0x07: eq.himid.q = Math.max(0, Math.min(40, 40 - data.value)); break;
+                case 0x08: eq.himid.freq = data.value; break;
+                case 0x09: eq.himid.gain = data.value; break;
+                case 0x0A: eq.high.q = Math.max(0, Math.min(40, 40 - data.value)); break;
+                case 0x0B: eq.high.freq = data.value; break;
+                case 0x0C: eq.high.gain = data.value; break;
+                case 0x0D: eq.hpf = data.value; eq.low.type = data.value === 1 ? 'hpf' : (eq.low.type === 'hpf' ? 'shelf' : eq.low.type); break;
+                case 0x0E: eq.lpf = data.value; eq.high.type = data.value === 1 ? 'lpf' : (eq.high.type === 'lpf' ? 'shelf' : eq.high.type); break;
+              }
+              if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === ch && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
+                syncEqModalFromState(ch);
+                requestEqRedraw();
+              }
+            }
+          }
         }
       } catch (e) {
         console.error(e);
@@ -1584,6 +2251,12 @@
         <div class="ch-mute-wrap">
           <button type="button" class="btn-yamaha-on is-on" id="btnOn_${ch.index}" title="Alternar Canal ON / MUTE">
             ON
+          </button>
+        </div>
+
+        <div class="ch-sel-wrap">
+          <button type="button" class="btn-ch-sel" id="btnSel_${ch.index}" data-ch="${ch.index}" title="Abrir Rack de Efeitos (EQ, Comp, Gate)">
+            SEL
           </button>
         </div>
 
@@ -2138,6 +2811,554 @@
       }
     });
 
+    // ==========================================
+    // RACK DE EFEITOS & EQUALIZADOR PARAMÉTRICO
+    // ==========================================
+    const EQ_FREQ_VALUES = [
+      "21.2 Hz", "22.4 Hz", "23.6 Hz", "25.0 Hz", "26.5 Hz", "28.0 Hz", "30.0 Hz", "31.5 Hz", "33.5 Hz", "35.5 Hz", "37.5 Hz", "40.0 Hz",
+      "42.5 Hz", "45.0 Hz", "47.5 Hz", "50.0 Hz", "53.0 Hz", "56.0 Hz", "60.0 Hz", "63.0 Hz", "67.0 Hz", "71.0 Hz", "75.0 Hz", "80.0 Hz",
+      "85 Hz", "90 Hz", "95 Hz", "100 Hz", "106 Hz", "112 Hz", "118 Hz", "125 Hz", "132 Hz", "140 Hz", "150 Hz", "160 Hz",
+      "170 Hz", "180 Hz", "190 Hz", "200 Hz", "212 Hz", "224 Hz", "236 Hz", "250 Hz", "265 Hz", "280 Hz", "300 Hz", "315 Hz",
+      "335 Hz", "355 Hz", "375 Hz", "400 Hz", "425 Hz", "450 Hz", "475 Hz", "500 Hz", "530 Hz", "560 Hz", "600 Hz", "630 Hz",
+      "670 Hz", "710 Hz", "750 Hz", "800 Hz", "850 Hz", "900 Hz", "950 Hz", "1.00 kHz", "1.06 kHz", "1.12 kHz", "1.18 kHz", "1.25 kHz",
+      "1.32 kHz", "1.40 kHz", "1.50 kHz", "1.60 kHz", "1.70 kHz", "1.80 kHz", "1.90 kHz", "2.00 kHz", "2.12 kHz", "2.24 kHz", "2.36 kHz", "2.50 kHz",
+      "2.65 kHz", "2.80 kHz", "3.00 kHz", "3.15 kHz", "3.35 kHz", "3.55 kHz", "3.75 kHz", "4.00 kHz", "4.25 kHz", "4.50 kHz", "4.75 kHz", "5.00 kHz",
+      "5.30 kHz", "5.60 kHz", "6.00 kHz", "6.30 kHz", "6.70 kHz", "7.10 kHz", "7.50 kHz", "8.00 kHz", "8.50 kHz", "9.00 kHz", "9.50 kHz", "10.0 kHz",
+      "10.6 kHz", "11.2 kHz", "11.8 kHz", "12.5 kHz", "13.2 kHz", "14.0 kHz", "15.0 kHz", "16.0 kHz", "17.0 kHz", "18.0 kHz", "19.0 kHz", "20.0 kHz"
+    ];
+
+    const EQ_Q_VALUES = [
+      "0.10", "0.11", "0.12", "0.14", "0.16", "0.18", "0.20", "0.22", "0.25", "0.28",
+      "0.32", "0.36", "0.40", "0.45", "0.50", "0.56", "0.63", "0.70", "0.80", "0.90",
+      "1.0", "1.1", "1.2", "1.4", "1.6", "1.8", "2.0", "2.2", "2.5", "2.8",
+      "3.2", "3.5", "4.0", "4.5", "5.0", "5.6", "6.3", "7.0", "8.0", "9.0", "10"
+    ];
+
+    // Exibição visual de Q multiplicada por 10 (ex: 0.10 -> 1, 0.70 -> 7, 1.0 -> 10, 10 -> 100)
+    const EQ_Q_DISPLAY_VALUES = [
+      "1", "1.1", "1.2", "1.4", "1.6", "1.8", "2", "2.2", "2.5", "2.8",
+      "3.2", "3.6", "4", "4.5", "5", "5.6", "6.3", "7", "8", "9",
+      "10", "11", "12", "14", "16", "18", "20", "22", "25", "28",
+      "32", "35", "40", "45", "50", "56", "63", "70", "80", "90", "100"
+    ];
+
+    function formatQDisplay(qIdx) {
+      return EQ_Q_DISPLAY_VALUES[qIdx] || `${qIdx}`;
+    }
+
+    // Estrutura de Estado de EQ para os 32 canais
+    const eqState = Array.from({ length: TOTAL_CHANNELS }, () => ({
+      on: 1, // 1 = EQ ON, 0 = Bypass
+      hpf: 0, // HPF 0 = OFF, 1 = ON
+      lpf: 0, // LPF 0 = OFF, 1 = ON
+      low: { gain: 180, freq: 27, q: 17, type: "shelf" },       // 100 Hz, Q 0.70, 0 dB
+      lomid: { gain: 180, freq: 51, q: 20, type: "peaking" },   // 400 Hz, Q 1.0, 0 dB
+      himid: { gain: 180, freq: 79, q: 20, type: "peaking" },   // 2.00 kHz, Q 1.0, 0 dB
+      high: { gain: 180, freq: 107, q: 17, type: "shelf" }      // 10.0 kHz, Q 0.70, 0 dB
+    }));
+
+    let currentSelectedCh = 0; // Canal selecionado no SEL (0 a 31)
+
+    function rawGainToDb(val) {
+      const db = (val - 180) / 10;
+      const sign = db > 0 ? "+" : "";
+      return `${sign}${db.toFixed(1)} dB`;
+    }
+
+    // Modal de Efeitos DOM Elements
+    const fxModalOverlay = document.getElementById('fxModalOverlay');
+    const fxModalChBadge = document.getElementById('fxModalChBadge');
+    const btnFxClose = document.getElementById('btnFxClose');
+    const btnEqBypass = document.getElementById('btnEqBypass');
+    const btnEqHpf = document.getElementById('btnEqHpf');
+    const btnEqLpf = document.getElementById('btnEqLpf');
+    const lblHpfStatus = document.getElementById('lbl_hpfStatus');
+    const lblLpfStatus = document.getElementById('lbl_lpfStatus');
+    const lblLowGainTitle = document.getElementById('lbl_lowGainTitle');
+    const lblLowFreqTitle = document.getElementById('lbl_lowFreqTitle');
+    const lblHighGainTitle = document.getElementById('lbl_highGainTitle');
+    const lblHighFreqTitle = document.getElementById('lbl_highFreqTitle');
+    const btnEqFlat = document.getElementById('btnEqFlat');
+    const eqCanvas = document.getElementById('eqCanvas');
+
+    // Elementos de Controle das Bandas
+    const eqControls = {
+      low: {
+        type: document.getElementById('eqLowType'),
+        gain: { rng: document.getElementById('rng_lowGain'), lbl: document.getElementById('lbl_lowGain'), param: 0x03 },
+        freq: { rng: document.getElementById('rng_lowFreq'), lbl: document.getElementById('lbl_lowFreq'), param: 0x02 },
+        q:    { rng: document.getElementById('rng_lowQ'),    lbl: document.getElementById('lbl_lowQ'),    param: 0x01 }
+      },
+      lomid: {
+        gain: { rng: document.getElementById('rng_lomidGain'), lbl: document.getElementById('lbl_lomidGain'), param: 0x06 },
+        freq: { rng: document.getElementById('rng_lomidFreq'), lbl: document.getElementById('lbl_lomidFreq'), param: 0x05 },
+        q:    { rng: document.getElementById('rng_lomidQ'),    lbl: document.getElementById('lbl_lomidQ'),    param: 0x04 }
+      },
+      himid: {
+        gain: { rng: document.getElementById('rng_himidGain'), lbl: document.getElementById('lbl_himidGain'), param: 0x09 },
+        freq: { rng: document.getElementById('rng_himidFreq'), lbl: document.getElementById('lbl_himidFreq'), param: 0x08 },
+        q:    { rng: document.getElementById('rng_himidQ'),    lbl: document.getElementById('lbl_himidQ'),    param: 0x07 }
+      },
+      high: {
+        type: document.getElementById('eqHighType'),
+        gain: { rng: document.getElementById('rng_highGain'), lbl: document.getElementById('lbl_highGain'), param: 0x0C },
+        freq: { rng: document.getElementById('rng_highFreq'), lbl: document.getElementById('lbl_highFreq'), param: 0x0B },
+        q:    { rng: document.getElementById('rng_highQ'),    lbl: document.getElementById('lbl_highQ'),    param: 0x0A }
+      }
+    };
+
+    // Renderização do Canvas em Alta Performance com requestAnimationFrame
+    let eqRedrawQueued = false;
+    function requestEqRedraw() {
+      if (eqRedrawQueued) return;
+      eqRedrawQueued = true;
+      requestAnimationFrame(() => {
+        eqRedrawQueued = false;
+        drawEqCurve();
+      });
+    }
+
+    function openFxModal(chIndex) {
+      currentSelectedCh = chIndex;
+      fxModalChBadge.textContent = `CH ${String(chIndex + 1).padStart(2, '0')}`;
+      
+      // Atualiza botões SEL na interface dos canais
+      document.querySelectorAll('.btn-ch-sel').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.ch, 10) === chIndex);
+      });
+
+      // Carrega estado do EQ do canal
+      syncEqModalFromState(chIndex);
+      fxModalOverlay.classList.add('open');
+      requestEqRedraw();
+    }
+
+    function closeFxModal() {
+      fxModalOverlay.classList.remove('open');
+    }
+
+    btnFxClose.addEventListener('click', closeFxModal);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && fxModalOverlay.classList.contains('open')) {
+        closeFxModal();
+      }
+    });
+
+    // Abas de Efeitos (EQ, COMP, GATE)
+    const fxTabButtons = document.querySelectorAll('.fx-tab-btn');
+    const fxTabPanes = document.querySelectorAll('.fx-tab-pane');
+
+    fxTabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabKey = btn.dataset.tab;
+        fxTabButtons.forEach(b => b.classList.remove('active'));
+        fxTabPanes.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(`fxTab_${tabKey}`).classList.add('active');
+        if (tabKey === 'eq') {
+          requestEqRedraw();
+        }
+      });
+    });
+
+    // Sincroniza controles do modal com o estado do canal
+    function syncEqModalFromState(chIndex) {
+      const eq = eqState[chIndex];
+
+      // EQ Bypass
+      btnEqBypass.classList.toggle('on', eq.on === 1);
+      btnEqBypass.textContent = eq.on === 1 ? 'EQ: ATIVO (ON)' : 'EQ: BYPASS (OFF)';
+
+      // Sincroniza HPF (Banda LOW)
+      const isHpfActive = eq.hpf === 1 || eq.low.type === 'hpf';
+      btnEqHpf.classList.toggle('active', isHpfActive);
+      if (lblHpfStatus) {
+        lblHpfStatus.textContent = isHpfActive ? EQ_FREQ_VALUES[eq.low.freq] : 'OFF';
+      }
+      if (lblLowGainTitle) {
+        lblLowGainTitle.textContent = isHpfActive ? 'CORTE HPF' : 'GANHO';
+      }
+      if (lblLowFreqTitle) {
+        lblLowFreqTitle.textContent = isHpfActive ? 'FREQ (HPF)' : 'FREQ';
+      }
+      eqControls.low.gain.rng.disabled = isHpfActive;
+      eqControls.low.gain.rng.style.opacity = isHpfActive ? '0.35' : '1';
+
+      // Sincroniza LPF (Banda HIGH)
+      const isLpfActive = eq.lpf === 1 || eq.high.type === 'lpf';
+      btnEqLpf.classList.toggle('active', isLpfActive);
+      if (lblLpfStatus) {
+        lblLpfStatus.textContent = isLpfActive ? EQ_FREQ_VALUES[eq.high.freq] : 'OFF';
+      }
+      if (lblHighGainTitle) {
+        lblHighGainTitle.textContent = isLpfActive ? 'CORTE LPF' : 'GANHO';
+      }
+      if (lblHighFreqTitle) {
+        lblHighFreqTitle.textContent = isLpfActive ? 'FREQ (LPF)' : 'FREQ';
+      }
+      eqControls.high.gain.rng.disabled = isLpfActive;
+      eqControls.high.gain.rng.style.opacity = isLpfActive ? '0.35' : '1';
+
+      // Low & High Types
+      eqControls.low.type.value = eq.low.type;
+      eqControls.high.type.value = eq.high.type;
+
+      // Bandas
+      ['low', 'lomid', 'himid', 'high'].forEach(bKey => {
+        const bState = eq[bKey];
+        const ctrl = eqControls[bKey];
+
+        ctrl.gain.rng.value = bState.gain;
+        if (bKey === 'low' && isHpfActive) {
+          ctrl.gain.lbl.textContent = 'CORTE ATIVO';
+        } else if (bKey === 'high' && isLpfActive) {
+          ctrl.gain.lbl.textContent = 'CORTE ATIVO';
+        } else {
+          ctrl.gain.lbl.textContent = rawGainToDb(bState.gain);
+        }
+
+        ctrl.freq.rng.value = bState.freq;
+        ctrl.freq.lbl.textContent = EQ_FREQ_VALUES[bState.freq] || `${bState.freq}`;
+
+        ctrl.q.rng.value = bState.q;
+        ctrl.q.lbl.textContent = formatQDisplay(bState.q);
+      });
+    }
+
+    // Envia comandos SysEx de EQ (Element 0x20)
+    function sendEqParam(param, value) {
+      sendCommand(0x20, param, currentSelectedCh, value);
+      requestEqRedraw();
+    }
+
+    // Toggle EQ ON / Bypass
+    btnEqBypass.addEventListener('click', () => {
+      const eq = eqState[currentSelectedCh];
+      eq.on = eq.on === 1 ? 0 : 1;
+      btnEqBypass.classList.toggle('on', eq.on === 1);
+      btnEqBypass.textContent = eq.on === 1 ? 'EQ: ATIVO (ON)' : 'EQ: BYPASS (OFF)';
+      sendEqParam(0x00, eq.on);
+    });
+
+    // Toggle HPF (Banda LOW)
+    btnEqHpf.addEventListener('click', () => {
+      const eq = eqState[currentSelectedCh];
+      eq.hpf = eq.hpf === 1 ? 0 : 1;
+      eq.low.type = eq.hpf === 1 ? 'hpf' : 'shelf';
+      sendEqParam(0x0D, eq.hpf);
+      syncEqModalFromState(currentSelectedCh);
+      requestEqRedraw();
+    });
+
+    // Toggle LPF (Banda HIGH)
+    btnEqLpf.addEventListener('click', () => {
+      const eq = eqState[currentSelectedCh];
+      eq.lpf = eq.lpf === 1 ? 0 : 1;
+      eq.high.type = eq.lpf === 1 ? 'lpf' : 'shelf';
+      sendEqParam(0x0E, eq.lpf);
+      syncEqModalFromState(currentSelectedCh);
+      requestEqRedraw();
+    });
+
+    // Reset Flat
+    btnEqFlat.addEventListener('click', () => {
+      const eq = eqState[currentSelectedCh];
+      ['low', 'lomid', 'himid', 'high'].forEach(bKey => {
+        eq[bKey].gain = 180;
+      });
+      syncEqModalFromState(currentSelectedCh);
+      sendEqParam(0x03, 180);
+      sendEqParam(0x06, 180);
+      sendEqParam(0x09, 180);
+      sendEqParam(0x0C, 180);
+      showToast('EQ do canal zerado (Flat 0.0 dB) ⚡', '⚡');
+    });
+
+    // Tipos de Filtro LOW e HIGH
+    eqControls.low.type.addEventListener('change', (e) => {
+      const eq = eqState[currentSelectedCh];
+      eq.low.type = e.target.value;
+      eq.hpf = eq.low.type === 'hpf' ? 1 : 0;
+      sendEqParam(0x0D, eq.hpf);
+      syncEqModalFromState(currentSelectedCh);
+      requestEqRedraw();
+    });
+
+    eqControls.high.type.addEventListener('change', (e) => {
+      const eq = eqState[currentSelectedCh];
+      eq.high.type = e.target.value;
+      eq.lpf = eq.high.type === 'lpf' ? 1 : 0;
+      sendEqParam(0x0E, eq.lpf);
+      syncEqModalFromState(currentSelectedCh);
+      requestEqRedraw();
+    });
+
+    // Eventos de sliders de Ganho, Frequência e Q para cada banda
+    ['low', 'lomid', 'himid', 'high'].forEach(bKey => {
+      const ctrl = eqControls[bKey];
+
+      // Ganho
+      ctrl.gain.rng.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        eqState[currentSelectedCh][bKey].gain = val;
+        ctrl.gain.lbl.textContent = rawGainToDb(val);
+        sendEqParam(ctrl.gain.param, val);
+      });
+
+      // Frequência
+      ctrl.freq.rng.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        eqState[currentSelectedCh][bKey].freq = val;
+        ctrl.freq.lbl.textContent = EQ_FREQ_VALUES[val] || `${val}`;
+        
+        // Se HPF estiver ativo e for a banda LOW, atualiza o status do botão HPF
+        if (bKey === 'low' && (eqState[currentSelectedCh].hpf === 1 || eqState[currentSelectedCh].low.type === 'hpf')) {
+          if (lblHpfStatus) lblHpfStatus.textContent = EQ_FREQ_VALUES[val];
+        }
+        // Se LPF estiver ativo e for a banda HIGH, atualiza o status do botão LPF
+        if (bKey === 'high' && (eqState[currentSelectedCh].lpf === 1 || eqState[currentSelectedCh].high.type === 'lpf')) {
+          if (lblLpfStatus) lblLpfStatus.textContent = EQ_FREQ_VALUES[val];
+        }
+
+        sendEqParam(ctrl.freq.param, val);
+      });
+
+      // Q (Largura de Banda)
+      ctrl.q.rng.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        eqState[currentSelectedCh][bKey].q = val;
+        ctrl.q.lbl.textContent = formatQDisplay(val);
+        // Na tabela de parâmetros SysEx da 01V96 (Tabela 4), 0x00 = Q 10.0 e 0x28 (40) = Q 0.10.
+        // O slider da UI vai naturalmente de 0 (0.10 largo) a 40 (10 estreito), então enviamos (40 - val):
+        const midiVal = 40 - val;
+        sendEqParam(ctrl.q.param, midiVal);
+      });
+    });
+
+    // Desenho dinâmico e otimizado da Curva de Equalização no Canvas (Passo 5px, Q hiper-responsivo)
+    function drawEqCurve() {
+      if (!eqCanvas) return;
+      const ctx = eqCanvas.getContext('2d');
+      const w = eqCanvas.width;
+      const h = eqCanvas.height;
+      const eq = eqState[currentSelectedCh];
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Linhas de Grade de Frequência e dB
+      const zeroY = h / 2;
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, zeroY);
+      ctx.lineTo(w, zeroY);
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '9px monospace';
+      ctx.fillText('0 dB', 6, zeroY - 3);
+      ctx.fillText('+18 dB', 6, 14);
+      ctx.fillText('-18 dB', 6, h - 6);
+
+      // Marcações de Freq (50Hz, 100Hz, 500Hz, 1kHz, 5kHz, 10kHz)
+      const freqMarkers = [
+        { label: '50Hz', x: 0.12 * w },
+        { label: '100Hz', x: 0.23 * w },
+        { label: '500Hz', x: 0.47 * w },
+        { label: '1kHz', x: 0.58 * w },
+        { label: '5kHz', x: 0.81 * w },
+        { label: '10kHz', x: 0.90 * w }
+      ];
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      freqMarkers.forEach(m => {
+        ctx.beginPath();
+        ctx.moveTo(m.x, 0);
+        ctx.lineTo(m.x, h);
+        ctx.stroke();
+        ctx.fillText(m.label, m.x + 3, h - 6);
+      });
+
+      if (eq.on === 0) {
+        // Modo Bypass: linha tracejada cinza flat
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(0, zeroY);
+        ctx.lineTo(w, zeroY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillText('EQ BYPASS (DESATIVADO)', w / 2 - 80, zeroY - 10);
+        return;
+      }
+
+      // Parâmetros das 4 bandas pré-calculados
+      const lowB = eq.low;
+      const lomidB = eq.lomid;
+      const himidB = eq.himid;
+      const highB = eq.high;
+
+      const isHpfActive = eq.hpf === 1 || lowB.type === 'hpf';
+      const isLpfActive = eq.lpf === 1 || highB.type === 'lpf';
+
+      const lowNormX = lowB.freq / 119;
+      const lomidNormX = lomidB.freq / 119;
+      const himidNormX = himidB.freq / 119;
+      const highNormX = highB.freq / 119;
+
+      const lowGainDb = (lowB.gain - 180) / 10;
+      const lomidGainDb = (lomidB.gain - 180) / 10;
+      const himidGainDb = (himidB.gain - 180) / 10;
+      const highGainDb = (highB.gain - 180) / 10;
+
+      // Q com escala hiper-visível (exagerada):
+      // Q=10.0 resulta em largura fina cirúrgica (~0.18 oitavas); Q=0.10 abre amplamente (~8.5 oitavas)
+      const lowQVal = parseFloat(EQ_Q_VALUES[lowB.q]) || 0.70;
+      const lomidQVal = parseFloat(EQ_Q_VALUES[lomidB.q]) || 1.0;
+      const himidQVal = parseFloat(EQ_Q_VALUES[himidB.q]) || 1.0;
+      const highQVal = parseFloat(EQ_Q_VALUES[highB.q]) || 0.70;
+
+      const lowBW = 1.3 / Math.pow(lowQVal, 0.85);
+      const lomidBW = 1.3 / Math.pow(lomidQVal, 0.85);
+      const himidBW = 1.3 / Math.pow(himidQVal, 0.85);
+      const highBW = 1.3 / Math.pow(highQVal, 0.85);
+
+      // Amostragem em passos de 5px (apenas ~155 iterações em vez de 780, 100% fluido a 60fps)
+      const points = [];
+      const stepPx = 5;
+
+      for (let px = 0; px <= w; px += stepPx) {
+        const normX = px / w;
+        let totalDb = 0;
+
+        // BANDA LOW (HPF / Shelf / Peaking)
+        if (isHpfActive) {
+          // Corte HPF na frequência exata selecionada no LOW
+          if (normX < lowNormX) {
+            const octBelow = (lowNormX - normX) * 10;
+            totalDb -= (octBelow * 18 + 3);
+          }
+        } else if (lowB.type === 'shelf') {
+          if (normX <= lowNormX) {
+            totalDb += lowGainDb;
+          } else {
+            const deltaOct = (normX - lowNormX) * 10;
+            const shelfFalloff = 1 / (1 + Math.pow(deltaOct / 0.85, 2));
+            totalDb += lowGainDb * shelfFalloff;
+          }
+        } else {
+          // Peaking com Q exagerado
+          const deltaOct = (normX - lowNormX) * 10;
+          const ratio = deltaOct / (lowBW * 0.5);
+          totalDb += lowGainDb / (1 + ratio * ratio);
+        }
+
+        // BANDA LO-MID (Peaking com Q exagerado)
+        {
+          const deltaOct = (normX - lomidNormX) * 10;
+          const ratio = deltaOct / (lomidBW * 0.5);
+          totalDb += lomidGainDb / (1 + ratio * ratio);
+        }
+
+        // BANDA HI-MID (Peaking com Q exagerado)
+        {
+          const deltaOct = (normX - himidNormX) * 10;
+          const ratio = deltaOct / (himidBW * 0.5);
+          totalDb += himidGainDb / (1 + ratio * ratio);
+        }
+
+        // BANDA HIGH (LPF / Shelf / Peaking)
+        if (isLpfActive) {
+          // Corte LPF na frequência exata selecionada no HIGH
+          if (normX > highNormX) {
+            const octAbove = (normX - highNormX) * 10;
+            totalDb -= (octAbove * 18 + 3);
+          }
+        } else if (highB.type === 'shelf') {
+          if (normX >= highNormX) {
+            totalDb += highGainDb;
+          } else {
+            const deltaOct = (highNormX - normX) * 10;
+            const shelfFalloff = 1 / (1 + Math.pow(deltaOct / 0.85, 2));
+            totalDb += highGainDb * shelfFalloff;
+          }
+        } else {
+          // Peaking com Q exagerado
+          const deltaOct = (normX - highNormX) * 10;
+          const ratio = deltaOct / (highBW * 0.5);
+          totalDb += highGainDb / (1 + ratio * ratio);
+        }
+
+        // Limita a curva visual
+        totalDb = Math.max(-24, Math.min(24, totalDb));
+        const y = zeroY - (totalDb / 18) * (h / 2 - 14);
+        points.push({ x: px, y: Math.max(8, Math.min(h - 8, y)) });
+      }
+
+      // Preenchimento gradiente sob a curva
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, 'rgba(56, 189, 248, 0.32)');
+      grad.addColorStop(0.5, 'rgba(56, 189, 248, 0.08)');
+      grad.addColorStop(1, 'rgba(2, 132, 199, 0.01)');
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, zeroY);
+      points.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.lineTo(points[points.length - 1].x, zeroY);
+      ctx.closePath();
+      ctx.fill();
+
+      // Linha principal da resposta em frequência
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      points.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.stroke();
+
+      // Marcadores / Pontos das 4 bandas
+      const bandColors = {
+        low: '#f43f5e',
+        lomid: '#f59e0b',
+        himid: '#10b981',
+        high: '#06b6d4'
+      };
+
+      ['low', 'lomid', 'himid', 'high'].forEach(bKey => {
+        const b = eq[bKey];
+        const bx = (b.freq / 119) * w;
+        let by = zeroY;
+
+        if (bKey === 'low' && isHpfActive) {
+          by = zeroY + 12;
+        } else if (bKey === 'high' && isLpfActive) {
+          by = zeroY + 12;
+        } else {
+          const gainDb = (b.gain - 180) / 10;
+          by = zeroY - (gainDb / 18) * (h / 2 - 14);
+        }
+
+        ctx.fillStyle = bandColors[bKey];
+        ctx.beginPath();
+        ctx.arc(bx, Math.max(10, Math.min(h - 10, by)), 5.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+    }
+
+    // Evento de clique no botão SEL dos canais
+    mixerRack.addEventListener('click', (e) => {
+      const btnSel = e.target.closest('.btn-ch-sel');
+      if (btnSel) {
+        const ch = parseInt(btnSel.dataset.ch, 10);
+        openFxModal(ch);
+      }
+    });
+
     // Ajusta posições iniciais dos faders e restaura canais salvos no carregamento
     window.addEventListener('load', () => {
       // 1. Carrega estados de mixagem salvos no navegador (se houver)
@@ -2167,28 +3388,5 @@
       }
     });
   </script>
-
-  <!-- MODAL DE CONFIRMAÇÃO DE MUDANÇA DE VISUALIZAÇÃO PADRÃO -->
-  <div id="confirmModalOverlay" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-icon">⚠️</div>
-        <div class="modal-title">Substituir Visualização na Tela</div>
-      </div>
-      <div class="modal-body" id="confirmModalMessage">
-        Mudar para a visualização padrão substituirá os canais visíveis no momento.<br><br>Deseja realmente trocar?
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn-modal btn-modal-cancel" id="btnModalCancel">Cancelar</button>
-        <button type="button" class="btn-modal btn-modal-confirm" id="btnModalConfirm">Confirmar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- TOAST NOTIFICATION -->
-  <div id="toastNotice" class="toast-notice">
-    <span id="toastIcon">💾</span>
-    <span id="toastText">Visualização salva com sucesso!</span>
-  </div>
 </body>
 </html>
