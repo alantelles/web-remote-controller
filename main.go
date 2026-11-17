@@ -675,6 +675,14 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 			0x05: "Knee",
 			0x06: "Gain (Out Gain)",
 		}
+		gateParamNames := map[byte]string{
+			0x00: "GATE ON/OFF",
+			0x01: "Threshold",
+			0x02: "Range",
+			0x03: "Attack",
+			0x04: "Hold",
+			0x05: "Decay",
+		}
 
 		switch msg.Element {
 		case 0x1C:
@@ -711,6 +719,12 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
 			}
 			targetDesc = fmt.Sprintf("CH %02d -> COMP %s: %d", chNum, pName, msg.Value)
+		case 0x21:
+			pName, ok := gateParamNames[msg.Param]
+			if !ok {
+				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
+			}
+			targetDesc = fmt.Sprintf("CH %02d -> GATE %s: %d", chNum, pName, msg.Value)
 		case 0x4D:
 			targetDesc = fmt.Sprintf("STEREO MASTER Out Fader: %d (%s)", msg.Value, faderValueToDB(msg.Value))
 		case 0x4B:
@@ -767,7 +781,8 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 			msg.Element == 0x4B || msg.Element == 0x2F ||
 			(msg.Element == 0x23 && msg.Param >= 0x08) ||
 			((msg.Element == 0x20 || msg.Element == 0x35 || msg.Element == 0x50) && (msg.Param == 0x00 || msg.Param == 0x0D || msg.Param == 0x0E)) ||
-			((msg.Element == 0x22 || msg.Element == 0x36 || msg.Element == 0x51) && msg.Param == 0x00)
+			((msg.Element == 0x22 || msg.Element == 0x36 || msg.Element == 0x51) && msg.Param == 0x00) ||
+			(msg.Element == 0x21 && msg.Param == 0x00)
 		canMIDI, canWS := true, true
 		if !isDiscrete {
 			canMIDI, canWS = throttler.allow(msg.Element, msg.Param, msg.Channel, msg.Value)

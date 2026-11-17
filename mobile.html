@@ -918,6 +918,541 @@
       transition: opacity 0.25s ease;
     }
 
+    /* ==========================================
+       MODAL DE RACK DE EQUALIZADOR PARAMÉTRICO
+       ========================================== */
+    .eq-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 180;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+      touch-action: pan-y;
+    }
+
+    .eq-modal-backdrop.open {
+      display: flex;
+    }
+
+    .eq-modal-container {
+      background: #131722;
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      color: var(--text-main);
+    }
+
+    .eq-modal-header {
+      background: #171b26;
+      border-bottom: 1px solid var(--border-strong);
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .eq-header-ch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .eq-ch-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .btn-fx-step {
+      height: 32px;
+      width: 32px;
+      flex-shrink: 0;
+      border-radius: 6px;
+      background: #1e2433;
+      border: 1px solid #333d54;
+      color: #94a3b8;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .btn-fx-step:active {
+      background: #2b354b;
+      color: #38bdf8;
+      border-color: #38bdf8;
+    }
+
+    .eq-ch-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #38bdf8;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .eq-header-tools {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .btn-fx-desktop {
+      height: 32px;
+      padding: 0 8px;
+      border-radius: 6px;
+      background: #152238;
+      border: 1px solid #0284c7;
+      color: #38bdf8;
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .btn-fx-desktop:active {
+      background: #0284c7;
+      color: #fff;
+    }
+
+    /* Barra de Abas do Rack (EQ, COMP, GATE) */
+    .fx-rack-tabs-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      background: #0f1218;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-fx-tab {
+      height: 28px;
+      background: transparent;
+      border: none;
+      border-radius: 5px;
+      color: var(--text-dim);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-fx-tab:active {
+      background: #1c212d;
+    }
+
+    .btn-fx-tab.active {
+      background: #1e293b;
+      color: #38bdf8;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .tab-status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #475569;
+      transition: background 0.15s ease;
+    }
+
+    .tab-status-dot.on {
+      background: #10b981;
+      box-shadow: 0 0 5px rgba(16, 185, 129, 0.7);
+    }
+
+    /* Panes do Rack */
+    .fx-tab-pane {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .fx-tab-pane.active {
+      display: flex;
+    }
+
+    /* Ações específicas do EQ */
+    .eq-actions-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 12px;
+      background: #11141c;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .btn-eq-toggle {
+      height: 30px;
+      padding: 0 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #2b1115;
+      color: #f87171;
+      border: 1px solid #7f1d1d;
+      transition: all 0.15s ease;
+    }
+
+    .btn-eq-toggle.is-on {
+      background: #064e3b;
+      color: #34d399;
+      border-color: #059669;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-eq-flat {
+      height: 30px;
+      padding: 0 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #1f2535;
+      color: #cbd5e1;
+      border: 1px solid #333d54;
+      cursor: pointer;
+    }
+
+    .btn-eq-flat:active {
+      background: #283145;
+    }
+
+    .btn-eq-close {
+      height: 32px;
+      width: 32px;
+      border-radius: 6px;
+      background: #222736;
+      color: var(--text-dim);
+      border: 1px solid var(--border-subtle);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-eq-close:active {
+      background: #2d3448;
+    }
+
+    /* Card informativo de efeitos (COMP / GATE) */
+    .fx-placeholder-card {
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+      background: #0c0e14;
+    }
+
+    .fx-placeholder-badge {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: #1e293b;
+      color: #38bdf8;
+      letter-spacing: 0.5px;
+    }
+
+    .fx-placeholder-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+
+    .fx-placeholder-desc {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.5;
+      max-width: 320px;
+    }
+
+    .btn-open-desktop-fx {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      border: 1px solid #38bdf8;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+      cursor: pointer;
+      width: 100%;
+      max-width: 290px;
+      margin-top: 6px;
+    }
+
+    .btn-open-desktop-fx:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+    }
+
+    /* Gráfico de Resposta em Frequência (Canvas) */
+    .eq-canvas-wrapper {
+      width: 100%;
+      background: #080a0f;
+      border-bottom: 1px solid var(--border-strong);
+      padding: 6px 8px;
+      position: relative;
+    }
+
+    #eqCanvasMobile,
+    #compCanvasMobile,
+    #gateCanvasMobile {
+      width: 100%;
+      height: 125px;
+      display: block;
+      border-radius: 6px;
+      background: #06080d;
+    }
+
+    /* Seletor de Bandas (4 botões em linha) */
+    .eq-bands-selector {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      padding: 8px 12px 6px 12px;
+      background: #10131b;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .btn-band-tab {
+      background: #161a24;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 8px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-band-tab:active {
+      transform: scale(0.98);
+    }
+
+    .btn-band-tab .band-name {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+    }
+
+    .btn-band-tab .band-badge {
+      font-size: 9px;
+      font-family: var(--font-mono);
+      color: var(--text-faint);
+    }
+
+    .btn-band-tab.active {
+      background: #192538;
+      border-color: #38bdf8;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+    }
+
+    .btn-band-tab.active .band-name {
+      color: #38bdf8;
+    }
+
+    .btn-band-tab.active .band-badge {
+      color: #7dd3fc;
+    }
+
+    /* Container Único da Banda Selecionada */
+    .eq-band-controls-card {
+      margin: 10px 12px 24px 12px;
+      background: #171b26;
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .band-type-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .band-type-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .band-type-select {
+      background: #0d1017;
+      color: #38bdf8;
+      border: 1px solid #2e374d;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .band-type-static {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      background: #0d1017;
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid #232b3d;
+    }
+
+    /* Linhas de Parâmetros (Freq, Gain, Q) */
+    .param-control-block {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: opacity 0.2s ease;
+    }
+
+    .param-control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .param-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .param-value-badge {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 800;
+      color: #38bdf8;
+      background: #0b0e14;
+      border: 1px solid #1e2536;
+      padding: 2px 8px;
+      border-radius: 5px;
+      min-width: 76px;
+      text-align: center;
+    }
+
+    .param-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .param-slider {
+      flex: 1;
+      height: 36px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      outline: none;
+      cursor: pointer;
+      touch-action: pan-y;
+    }
+
+    .param-slider::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 10px;
+      background: #080a0f;
+      border-radius: 5px;
+      border: 1px solid #232838;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    .param-slider::-moz-range-track {
+      width: 100%;
+      height: 10px;
+      background: #080a0f;
+      border-radius: 5px;
+      border: 1px solid #232838;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .param-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 34px;
+      width: 28px;
+      margin-top: -12px;
+      border-radius: 6px;
+      background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 45%, #64748b 55%, #e2e8f0 100%);
+      border: 1px solid #000;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+      cursor: grab;
+    }
+    .param-slider::-moz-range-thumb {
+      height: 34px;
+      width: 28px;
+      border-radius: 6px;
+      background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 45%, #64748b 55%, #e2e8f0 100%);
+      border: 1px solid #000;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+      cursor: grab;
+    }
+
+    .param-disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
     .toast-msg.show {
       opacity: 1;
     }
@@ -1082,6 +1617,7 @@
         </div>
         <div class="card-top-buttons">
           <button class="btn-ch-mute is-on" id="masterMuteBtn" type="button">ON</button>
+          <button class="btn-ch-sel" id="masterSelBtn" type="button">SEL</button>
         </div>
       </div>
       <div class="card-row-slider">
@@ -1098,6 +1634,311 @@
 
     <!-- Cards 2 a 33: Canais de Entrada gerados dinamicamente via JS -->
   </main>
+
+  <!-- ==========================================
+       MODAL DE RACK DE PROCESSAMENTO (EQ, COMP, GATE)
+       ========================================== -->
+  <div class="eq-modal-backdrop" id="eqModalBackdrop">
+    <div class="eq-modal-container">
+      <!-- Cabeçalho do Rack com Navegação Prev/Next de Canais -->
+      <div class="eq-modal-header">
+        <div class="eq-header-ch-row">
+          <div class="eq-ch-nav">
+            <button class="btn-fx-step" id="btnFxPrevCh" type="button" title="Canal Anterior (Alt + ←)">◀</button>
+            <div class="eq-ch-tag">
+              <span>🎛️</span>
+              <span id="eqModalChannelName">CH 01</span>
+            </div>
+            <button class="btn-fx-step" id="btnFxNextCh" type="button" title="Próximo Canal (Alt + →)">▶</button>
+          </div>
+          <div class="eq-header-tools">
+            <a id="btnFxOpenDesktop" href="/?view=desktop" class="btn-fx-desktop" target="_blank" title="Abrir Rack Completo na Versão Desktop">🖥️ PC</a>
+            <button class="btn-eq-close" id="btnEqClose" type="button" title="Fechar Processamento">✕</button>
+          </div>
+        </div>
+
+        <!-- Barra de Abas dos Módulos (EQ, COMP, GATE) -->
+        <div class="fx-rack-tabs-bar">
+          <button class="btn-fx-tab active" data-tab="eq" id="tabBtn_eq" type="button">
+            <span class="tab-status-dot on" id="dot_tab_eq"></span>
+            <span>EQUALIZADOR</span>
+          </button>
+          <button class="btn-fx-tab" data-tab="comp" id="tabBtn_comp" type="button">
+            <span class="tab-status-dot" id="dot_tab_comp"></span>
+            <span>COMPRESSOR</span>
+          </button>
+          <button class="btn-fx-tab" data-tab="gate" id="tabBtn_gate" type="button">
+            <span class="tab-status-dot" id="dot_tab_gate"></span>
+            <span>GATE</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ABA 1: EQUALIZADOR PARAMÉTRICO -->
+      <div class="fx-tab-pane active" id="pane_eq">
+        <!-- Ações do EQ (ON / FLAT) -->
+        <div class="eq-actions-bar">
+          <button class="btn-eq-toggle is-on" id="btnEqToggleOn" type="button">EQ: ON</button>
+          <button class="btn-eq-flat" id="btnEqFlat" type="button">⚡ FLAT</button>
+        </div>
+
+        <!-- Gráfico de Resposta em Frequência (Canvas) -->
+        <div class="eq-canvas-wrapper">
+          <canvas id="eqCanvasMobile" width="600" height="200"></canvas>
+        </div>
+
+        <!-- Seletor de Bandas (4 botões em linha) -->
+        <div class="eq-bands-selector" id="eqBandsSelector">
+          <button class="btn-band-tab active" data-band="low" type="button">
+            <span class="band-name">LOW</span>
+            <span class="band-badge" id="badge_low">100Hz 0dB</span>
+          </button>
+          <button class="btn-band-tab" data-band="lomid" type="button">
+            <span class="band-name">LO-MID</span>
+            <span class="band-badge" id="badge_lomid">400Hz 0dB</span>
+          </button>
+          <button class="btn-band-tab" data-band="himid" type="button">
+            <span class="band-name">HI-MID</span>
+            <span class="band-badge" id="badge_himid">2.0k 0dB</span>
+          </button>
+          <button class="btn-band-tab" data-band="high" type="button">
+            <span class="band-name">HIGH</span>
+            <span class="band-badge" id="badge_high">10k 0dB</span>
+          </button>
+        </div>
+
+        <!-- Container Único da Banda Selecionada -->
+        <div class="eq-band-controls-card">
+          <!-- Linha de Tipo de Filtro -->
+          <div class="band-type-row" id="eqTypeRow">
+            <span class="band-type-label">Tipo de Filtro</span>
+            <select class="band-type-select" id="eqTypeSelect">
+              <option value="peaking">Peaking (Sino)</option>
+              <option value="shelf">Shelving</option>
+              <option value="hpf">HPF (Corte Passa-Altas)</option>
+            </select>
+            <span class="band-type-static" id="eqTypeStatic" style="display: none;">Peaking (Paramétrico)</span>
+          </div>
+
+          <!-- Frequência -->
+          <div class="param-control-block" id="blockFreq">
+            <div class="param-control-header">
+              <span class="param-title">Frequência</span>
+              <span class="param-value-badge" id="lblEqFreq">100 Hz</span>
+            </div>
+            <div class="param-slider-row">
+              <input type="range" class="param-slider" id="rngEqFreq" min="0" max="119" value="27">
+            </div>
+          </div>
+
+          <!-- Ganho -->
+          <div class="param-control-block" id="blockGain">
+            <div class="param-control-header">
+              <span class="param-title">Ganho</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="param-value-badge" id="lblEqGain">0.0 dB</span>
+                <button class="btn-quick-val" id="btnZeroEqGain" type="button" title="Zerar ganho desta banda">0 dB</button>
+              </div>
+            </div>
+            <div class="param-slider-row">
+              <input type="range" class="param-slider" id="rngEqGain" min="0" max="360" value="180">
+            </div>
+          </div>
+
+          <!-- Q (Largura de Banda) -->
+          <div class="param-control-block" id="blockQ">
+            <div class="param-control-header">
+              <span class="param-title">Q (Largura de Banda)</span>
+              <span class="param-value-badge" id="lblEqQ">0.70</span>
+            </div>
+            <div class="param-slider-row">
+              <input type="range" class="param-slider" id="rngEqQ" min="0" max="40" value="17">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABA 2: COMPRESSOR DE CANAL -->
+      <div class="fx-tab-pane" id="pane_comp">
+        <!-- Ações do Compressor (ON / RESET / PRESET) -->
+        <div class="eq-actions-bar">
+          <button class="btn-eq-toggle is-on" id="btnCompToggleOn" type="button">COMP: ON</button>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <select class="band-type-select" id="compPresetSelectMobile">
+              <option value="default" selected>Padrão</option>
+              <option value="vocal">Vocal</option>
+              <option value="drums">Bateria</option>
+              <option value="bass">Baixo</option>
+              <option value="limiter">Limiter</option>
+            </select>
+            <button class="btn-eq-flat" id="btnCompResetMobile" type="button" title="Restaurar parâmetros padrão do Compressor">⚡ RESET</button>
+          </div>
+        </div>
+
+        <!-- Gráfico Curva de Transferência (Canvas) -->
+        <div class="eq-canvas-wrapper">
+          <canvas id="compCanvasMobile" width="600" height="170"></canvas>
+        </div>
+
+        <!-- Controles do Compressor -->
+        <div class="eq-band-controls-card">
+          <!-- THRESHOLD -->
+          <div class="param-control-block">
+            <div class="param-control-header">
+              <span class="param-title">Threshold (Limiar)</span>
+              <span class="param-value-badge" id="lblCompThresholdMobile">-20.0 dB</span>
+            </div>
+            <div class="param-slider-row">
+              <input type="range" class="param-slider" id="rngCompThresholdMobile" min="0" max="540" value="340">
+            </div>
+          </div>
+
+          <!-- RATIO -->
+          <div class="param-control-block">
+            <div class="param-control-header">
+              <span class="param-title">Ratio (Taxa)</span>
+              <span class="param-value-badge" id="lblCompRatioMobile">4.0:1</span>
+            </div>
+            <div class="param-slider-row">
+              <input type="range" class="param-slider" id="rngCompRatioMobile" min="0" max="15" value="7">
+            </div>
+          </div>
+
+          <!-- ATTACK -->
+          <div class="param-control-block">
+            <div class="param-control-header">
+              <span class="param-title">Attack (Ataque)</span>
+              <span class="param-value-badge" id="lblCompAttackMobile">20 ms</span>
+            </div>
+            <div class="param-slider-row">
+              <input type="range" class="param-slider" id="rngCompAttackMobile" min="0" max="120" value="20">
+            </div>
+          </div>
+
+          <!-- RELEASE -->
+          <div class="param-control-block">
+            <div class="param-control-header">
+              <span class="param-title">Release (Liberação)</span>
+              <span class="param-value-badge" id="lblCompReleaseMobile">250 ms</span>
+            </div>
+            <div class="param-slider-row">
+              <input type="range" class="param-slider" id="rngCompReleaseMobile" min="0" max="43" value="18">
+            </div>
+          </div>
+
+          <!-- KNEE -->
+          <div class="param-control-block">
+            <div class="param-control-header">
+              <span class="param-title">Knee (Joelho)</span>
+              <span class="param-value-badge" id="lblCompKneeMobile">HARD</span>
+            </div>
+            <div class="param-slider-row">
+              <input type="range" class="param-slider" id="rngCompKneeMobile" min="0" max="5" value="0">
+            </div>
+          </div>
+
+          <!-- OUT GAIN (MAKE-UP) -->
+          <div class="param-control-block">
+            <div class="param-control-header">
+              <span class="param-title">Gain (Make-up)</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="param-value-badge" id="lblCompGainMobile">+0.0 dB</span>
+                <button class="btn-quick-val" id="btnZeroCompGainMobile" type="button" title="Zerar Make-up Gain">0 dB</button>
+              </div>
+            </div>
+            <div class="param-slider-row">
+              <input type="range" class="param-slider" id="rngCompGainMobile" min="0" max="180" value="0">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABA 3: GATE DE RUÍDO (Input Channels 1..32) -->
+      <div class="fx-tab-pane" id="pane_gate">
+        <!-- Ações do Gate (ON / RESET / PRESET) -->
+        <div class="eq-actions-bar">
+          <button class="btn-eq-toggle is-on" id="btnGateToggleOn" type="button">GATE: ON</button>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <select class="band-type-select" id="gatePresetSelectMobile">
+              <option value="default" selected>Padrão</option>
+              <option value="kick">Bumbo</option>
+              <option value="snare">Caixa</option>
+              <option value="tom">Tons</option>
+              <option value="vocal">Vocal</option>
+            </select>
+            <button class="btn-eq-flat" id="btnGateResetMobile" type="button" title="Restaurar parâmetros padrão do Noise Gate">⚡ RESET</button>
+          </div>
+        </div>
+
+        <!-- Gráfico Curva de Transferência (Canvas) -->
+        <div class="eq-canvas-wrapper">
+          <canvas id="gateCanvasMobile" width="600" height="170"></canvas>
+        </div>
+
+        <!-- Controles do Noise Gate -->
+        <div class="eq-band-controls-card">
+          <!-- THRESHOLD -->
+          <div class="param-control-block">
+            <div class="param-control-header">
+              <span class="param-title">Threshold (Limiar)</span>
+              <span class="param-value-badge" id="lblGateThresholdMobile">-20.0 dB</span>
+            </div>
+            <div class="param-slider-row">
+              <input type="range" class="param-slider" id="rngGateThresholdMobile" min="0" max="540" value="340">
+            </div>
+          </div>
+
+          <!-- RANGE -->
+          <div class="param-control-block">
+            <div class="param-control-header">
+              <span class="param-title">Range (Atenuação)</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="param-value-badge" id="lblGateRangeMobile">-∞ dB</span>
+                <button class="btn-quick-val" id="btnMinGateRangeMobile" type="button" title="Atenuação Infinita (-∞)">-∞</button>
+                <button class="btn-quick-val" id="btnZeroGateRangeMobile" type="button" title="Sem Atenuação (0 dB)">0 dB</button>
+              </div>
+            </div>
+            <div class="param-slider-row">
+              <input type="range" class="param-slider" id="rngGateRangeMobile" min="0" max="70" value="0">
+            </div>
+          </div>
+
+          <!-- ATTACK -->
+          <div class="param-control-block">
+            <div class="param-control-header">
+              <span class="param-title">Attack (Ataque)</span>
+              <span class="param-value-badge" id="lblGateAttackMobile">1 ms</span>
+            </div>
+            <div class="param-slider-row">
+              <input type="range" class="param-slider" id="rngGateAttackMobile" min="0" max="120" value="1">
+            </div>
+          </div>
+
+          <!-- HOLD -->
+          <div class="param-control-block">
+            <div class="param-control-header">
+              <span class="param-title">Hold (Sustentação)</span>
+              <span class="param-value-badge" id="lblGateHoldMobile">20 ms</span>
+            </div>
+            <div class="param-slider-row">
+              <input type="range" class="param-slider" id="rngGateHoldMobile" min="0" max="120" value="20">
+            </div>
+          </div>
+
+          <!-- DECAY -->
+          <div class="param-control-block">
+            <div class="param-control-header">
+              <span class="param-title">Decay (Decaimento)</span>
+              <span class="param-value-badge" id="lblGateDecayMobile">250 ms</span>
+            </div>
+            <div class="param-slider-row">
+              <input type="range" class="param-slider" id="rngGateDecayMobile" min="0" max="43" value="18">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="toast-msg" id="toastMsg">Salvo com sucesso!</div>
 
@@ -1180,6 +2021,7 @@
       mutes: {}, // 1 = ON, 0 = MUTED
       eqOn: new Array(TOTAL_CHANNELS).fill(false),
       compOn: new Array(TOTAL_CHANNELS).fill(false),
+      gateOn: new Array(TOTAL_CHANNELS).fill(false),
       masterFaders: { MASTER: NOMINAL_VALUE },
       masterMutes: { MASTER: 1 },
       visibleChannels: new Set(Array.from({ length: TOTAL_CHANNELS }, (_, i) => i))
@@ -1194,6 +2036,259 @@
         state.masterMutes[mix] = 1;
       }
     });
+
+    // ==========================================
+    // TABELAS E ESTADO DO EQUALIZADOR PARAMÉTRICO
+    // ==========================================
+    const EQ_FREQ_VALUES = [
+      "21.2 Hz", "22.4 Hz", "23.6 Hz", "25.0 Hz", "26.5 Hz", "28.0 Hz", "30.0 Hz", "31.5 Hz", "33.5 Hz", "35.5 Hz", "37.5 Hz", "40.0 Hz",
+      "42.5 Hz", "45.0 Hz", "47.5 Hz", "50.0 Hz", "53.0 Hz", "56.0 Hz", "60.0 Hz", "63.0 Hz", "67.0 Hz", "71.0 Hz", "75.0 Hz", "80.0 Hz",
+      "85 Hz", "90 Hz", "95 Hz", "100 Hz", "106 Hz", "112 Hz", "118 Hz", "125 Hz", "132 Hz", "140 Hz", "150 Hz", "160 Hz",
+      "170 Hz", "180 Hz", "190 Hz", "200 Hz", "212 Hz", "224 Hz", "236 Hz", "250 Hz", "265 Hz", "280 Hz", "300 Hz", "315 Hz",
+      "335 Hz", "355 Hz", "375 Hz", "400 Hz", "425 Hz", "450 Hz", "475 Hz", "500 Hz", "530 Hz", "560 Hz", "600 Hz", "630 Hz",
+      "670 Hz", "710 Hz", "750 Hz", "800 Hz", "850 Hz", "900 Hz", "950 Hz", "1.00 kHz", "1.06 kHz", "1.12 kHz", "1.18 kHz", "1.25 kHz",
+      "1.32 kHz", "1.40 kHz", "1.50 kHz", "1.60 kHz", "1.70 kHz", "1.80 kHz", "1.90 kHz", "2.00 kHz", "2.12 kHz", "2.24 kHz", "2.36 kHz", "2.50 kHz",
+      "2.65 kHz", "2.80 kHz", "3.00 kHz", "3.15 kHz", "3.35 kHz", "3.55 kHz", "3.75 kHz", "4.00 kHz", "4.25 kHz", "4.50 kHz", "4.75 kHz", "5.00 kHz",
+      "5.30 kHz", "5.60 kHz", "6.00 kHz", "6.30 kHz", "6.70 kHz", "7.10 kHz", "7.50 kHz", "8.00 kHz", "8.50 kHz", "9.00 kHz", "9.50 kHz", "10.0 kHz",
+      "10.6 kHz", "11.2 kHz", "11.8 kHz", "12.5 kHz", "13.2 kHz", "14.0 kHz", "15.0 kHz", "16.0 kHz", "17.0 kHz", "18.0 kHz", "19.0 kHz", "20.0 kHz"
+    ];
+
+    const EQ_Q_VALUES = [
+      "0.10", "0.11", "0.12", "0.14", "0.16", "0.18", "0.20", "0.22", "0.25", "0.28",
+      "0.32", "0.36", "0.40", "0.45", "0.50", "0.56", "0.63", "0.70", "0.80", "0.90",
+      "1.0", "1.1", "1.2", "1.4", "1.6", "1.8", "2.0", "2.2", "2.5", "2.8",
+      "3.2", "3.5", "4.0", "4.5", "5.0", "5.6", "6.3", "7.0", "8.0", "9.0", "10"
+    ];
+
+    const EQ_Q_DISPLAY_VALUES = [
+      "1", "1.1", "1.2", "1.4", "1.6", "1.8", "2", "2.2", "2.5", "2.8",
+      "3.2", "3.6", "4", "4.5", "5", "5.6", "6.3", "7", "8", "9",
+      "10", "11", "12", "14", "16", "18", "20", "22", "25", "28",
+      "32", "35", "40", "45", "50", "56", "63", "70", "80", "90", "100"
+    ];
+
+    function formatQDisplay(qIdx) {
+      return EQ_Q_DISPLAY_VALUES[qIdx] || `${qIdx}`;
+    }
+
+    function rawGainToDb(val) {
+      const db = (val - 180) / 10;
+      const sign = db > 0 ? "+" : "";
+      return `${sign}${db.toFixed(1)} dB`;
+    }
+
+    const BAND_CONFIGS = {
+      low: {
+        paramGain: 0x03,
+        paramFreq: 0x02,
+        paramQ: 0x01,
+        hasFilterType: true,
+        filterParam: 0x0D,
+        typeKey: 'hpf',
+        filterOptions: [
+          { val: 'peaking', label: 'Peaking (Sino)' },
+          { val: 'shelf', label: 'Shelving' },
+          { val: 'hpf', label: 'HPF (Passa-Altas)' }
+        ]
+      },
+      lomid: {
+        paramGain: 0x06,
+        paramFreq: 0x05,
+        paramQ: 0x04,
+        hasFilterType: false
+      },
+      himid: {
+        paramGain: 0x09,
+        paramFreq: 0x08,
+        paramQ: 0x07,
+        hasFilterType: false
+      },
+      high: {
+        paramGain: 0x0C,
+        paramFreq: 0x0B,
+        paramQ: 0x0A,
+        hasFilterType: true,
+        filterParam: 0x0E,
+        typeKey: 'lpf',
+        filterOptions: [
+          { val: 'peaking', label: 'Peaking (Sino)' },
+          { val: 'shelf', label: 'Shelving' },
+          { val: 'lpf', label: 'LPF (Passa-Baixas)' }
+        ]
+      }
+    };
+
+    const eqState = Array.from({ length: TOTAL_CHANNELS }, () => ({
+      on: 1,
+      hpf: 0,
+      lpf: 0,
+      low: { gain: 180, freq: 27, q: 17, type: "shelf" },
+      lomid: { gain: 180, freq: 51, q: 20, type: "peaking" },
+      himid: { gain: 180, freq: 79, q: 20, type: "peaking" },
+      high: { gain: 180, freq: 107, q: 17, type: "shelf" }
+    }));
+
+    const mixEqState = {};
+    ['MASTER', 'AUX1', 'AUX2', 'AUX3', 'AUX4', 'AUX5', 'AUX6', 'AUX7', 'AUX8'].forEach(k => {
+      mixEqState[k] = {
+        on: 1,
+        hpf: 0,
+        lpf: 0,
+        low: { gain: 180, freq: 27, q: 17, type: "shelf" },
+        lomid: { gain: 180, freq: 51, q: 20, type: "peaking" },
+        himid: { gain: 180, freq: 79, q: 20, type: "peaking" },
+        high: { gain: 180, freq: 107, q: 17, type: "shelf" }
+      };
+    });
+
+    function getEqData(target) {
+      if (typeof target === 'number') return eqState[target];
+      if (mixEqState[target]) return mixEqState[target];
+      return mixEqState['MASTER'];
+    }
+
+    // ==========================================
+    // TABELAS E ESTADO DO COMPRESSOR (01V96)
+    // ==========================================
+    const COMP_RATIO_VALUES = [
+      "1.0:1", "1.1:1", "1.3:1", "1.5:1", "1.7:1", "2.0:1", "2.5:1",
+      "3.0:1", "3.5:1", "4.0:1", "5.0:1", "6.0:1", "8.0:1", "10:1", "20:1", "∞:1"
+    ];
+
+    const COMP_RATIO_NUMBERS = [
+      1.0, 1.1, 1.3, 1.5, 1.7, 2.0, 2.5,
+      3.0, 3.5, 4.0, 5.0, 6.0, 8.0, 10.0, 20.0, 1000.0
+    ];
+
+    const COMP_RELEASE_VALUES = [
+      "5 ms", "10 ms", "15 ms", "20 ms", "25 ms", "30 ms", "40 ms", "50 ms",
+      "60 ms", "70 ms", "80 ms", "90 ms", "100 ms", "120 ms", "140 ms", "160 ms",
+      "180 ms", "200 ms", "250 ms", "300 ms", "350 ms", "400 ms", "450 ms", "500 ms",
+      "600 ms", "700 ms", "800 ms", "900 ms", "1.00 s", "1.20 s", "1.40 s", "1.60 s",
+      "1.80 s", "2.00 s", "2.50 s", "3.00 s", "4.00 s", "5.00 s", "7.00 s", "10.0 s",
+      "15.0 s", "20.0 s", "30.0 s", "42.3 s"
+    ];
+
+    const COMP_KNEE_VALUES = ["HARD", "1 (Soft)", "2 (Soft)", "3 (Soft)", "4 (Soft)", "5 (Soft)"];
+
+    const COMP_PRESETS = {
+      default: { threshold: 340, ratio: 7, attack: 20, release: 18, knee: 0, gain: 0 },
+      vocal:   { threshold: 300, ratio: 6, attack: 15, release: 17, knee: 2, gain: 30 },
+      drums:   { threshold: 380, ratio: 9, attack: 30, release: 12, knee: 0, gain: 20 },
+      bass:    { threshold: 320, ratio: 7, attack: 25, release: 19, knee: 1, gain: 25 },
+      limiter: { threshold: 480, ratio: 15, attack: 1, release: 12, knee: 0, gain: 0 }
+    };
+
+    // Estado do Compressor dos 32 canais de entrada
+    const compState = Array.from({ length: TOTAL_CHANNELS }, () => ({
+      on: 1,
+      threshold: 340, // -20.0 dB
+      ratio: 7,       // 4.0:1
+      attack: 20,     // 20 ms
+      release: 18,    // 250 ms
+      knee: 0,        // HARD
+      gain: 0         // +0.0 dB
+    }));
+
+    // Estado do Compressor das Saídas (Master Stereo e Aux 1..8)
+    const mixCompState = {};
+    ['MASTER', 'AUX1', 'AUX2', 'AUX3', 'AUX4', 'AUX5', 'AUX6', 'AUX7', 'AUX8'].forEach(k => {
+      mixCompState[k] = {
+        on: 1,
+        threshold: 340,
+        ratio: 7,
+        attack: 20,
+        release: 18,
+        knee: 0,
+        gain: 0
+      };
+    });
+
+    function getChannelComp(target) {
+      if (typeof target === 'number') {
+        return compState[target] || compState[0];
+      }
+      if (mixCompState[target]) {
+        return mixCompState[target];
+      }
+      return mixCompState['MASTER'];
+    }
+
+    function getCompOn(target) {
+      const comp = getChannelComp(target);
+      return comp ? comp.on : 1;
+    }
+
+    // ==========================================
+    // TABELAS E ESTADO DO NOISE GATE (01V96)
+    // ==========================================
+    const GATE_DECAY_VALUES = COMP_RELEASE_VALUES;
+
+    const GATE_PRESETS = {
+      default: { threshold: 340, range: 0, attack: 1, hold: 20, decay: 18 },
+      kick:    { threshold: 380, range: 0, attack: 1, hold: 10, decay: 12 },
+      snare:   { threshold: 360, range: 10, attack: 1, hold: 15, decay: 14 },
+      tom:     { threshold: 340, range: 0, attack: 2, hold: 25, decay: 17 },
+      vocal:   { threshold: 260, range: 25, attack: 5, hold: 30, decay: 20 }
+    };
+
+    // Estado do Noise Gate dos 32 canais de entrada (Gate existe apenas para inputs 1..32)
+    const gateState = Array.from({ length: TOTAL_CHANNELS }, () => ({
+      on: 0,          // 0 = Bypass (OFF), 1 = Ativo (ON)
+      threshold: 340, // -20.0 dB
+      range: 0,       // -∞ dB (0 a 70)
+      attack: 1,      // 1 ms (0 a 120 ms)
+      hold: 20,       // 20 ms (0 a 120 ms)
+      decay: 18       // 250 ms (0 a 43)
+    }));
+
+    function getChannelGate(target) {
+      if (typeof target === 'number') {
+        return gateState[target] || gateState[0];
+      }
+      return null;
+    }
+
+    function getGateOn(target) {
+      const gate = getChannelGate(target);
+      return gate ? gate.on : 0;
+    }
+
+    function rawThresholdToDb(val) {
+      const db = (val - 540) / 10;
+      return `${db.toFixed(1)} dB`;
+    }
+
+    function rawCompGainToDb(val) {
+      const db = val / 10;
+      return `+${db.toFixed(1)} dB`;
+    }
+
+    function rawGateRangeToDb(val) {
+      if (val <= 0) return '-∞ dB';
+      const db = val - 70;
+      if (db === 0) return '0 dB';
+      return `${db} dB`;
+    }
+
+    function sendCompParam(param, value, isThrottled = false) {
+      if (typeof currentEqTarget === 'number') {
+        sendCommand(0x22, param, currentEqTarget, value, isThrottled);
+      } else if (currentEqTarget === 'MASTER') {
+        sendCommand(0x51, param, 0x00, value, isThrottled);
+      } else if (typeof currentEqTarget === 'string' && currentEqTarget.startsWith('AUX')) {
+        const auxIdx = parseInt(currentEqTarget.replace('AUX', ''), 10) - 1;
+        sendCommand(0x36, param, auxIdx, value, isThrottled);
+      }
+      requestCompRedrawMobile();
+    }
+
+    function sendGateParam(param, value, isThrottled = false) {
+      if (typeof currentEqTarget === 'number') {
+        sendCommand(0x21, param, currentEqTarget, value, isThrottled);
+      }
+      requestGateRedrawMobile();
+    }
 
     // ==========================================
     // COMUNICAÇÃO WEBSOCKET E THROTTLING
@@ -1308,6 +2403,26 @@
         if (st.stereo_master) {
           state.masterFaders['MASTER'] = st.stereo_master.fader;
           state.masterMutes['MASTER'] = st.stereo_master.on;
+          if (st.stereo_master.eq && mixEqState['MASTER']) {
+            const meq = mixEqState['MASTER'];
+            meq.on = st.stereo_master.eq.on;
+            meq.low.gain = st.stereo_master.eq.low.gain;
+            meq.low.freq = st.stereo_master.eq.low.freq;
+            meq.low.q = st.stereo_master.eq.low.q;
+            meq.lomid.gain = st.stereo_master.eq.low_mid.gain;
+            meq.lomid.freq = st.stereo_master.eq.low_mid.freq;
+            meq.lomid.q = st.stereo_master.eq.low_mid.q;
+            meq.himid.gain = st.stereo_master.eq.hi_mid.gain;
+            meq.himid.freq = st.stereo_master.eq.hi_mid.freq;
+            meq.himid.q = st.stereo_master.eq.hi_mid.q;
+            meq.high.gain = st.stereo_master.eq.high.gain;
+            meq.high.freq = st.stereo_master.eq.high.freq;
+            meq.high.q = st.stereo_master.eq.high.q;
+            meq.hpf = st.stereo_master.eq.hpf_on;
+            meq.lpf = st.stereo_master.eq.lpf_on;
+            meq.low.type = st.stereo_master.eq.hpf_on === 1 ? 'hpf' : 'shelf';
+            meq.high.type = st.stereo_master.eq.lpf_on === 1 ? 'lpf' : 'shelf';
+          }
         }
 
         // Aux Masters 1 a 8
@@ -1317,6 +2432,26 @@
             if (state.masterFaders[auxKey] !== undefined) {
               state.masterFaders[auxKey] = aux.fader;
               state.masterMutes[auxKey] = aux.on;
+            }
+            if (aux.eq && mixEqState[auxKey]) {
+              const aeq = mixEqState[auxKey];
+              aeq.on = aux.eq.on;
+              aeq.low.gain = aux.eq.low.gain;
+              aeq.low.freq = aux.eq.low.freq;
+              aeq.low.q = aux.eq.low.q;
+              aeq.lomid.gain = aux.eq.low_mid.gain;
+              aeq.lomid.freq = aux.eq.low_mid.freq;
+              aeq.lomid.q = aux.eq.low_mid.q;
+              aeq.himid.gain = aux.eq.hi_mid.gain;
+              aeq.himid.freq = aux.eq.hi_mid.freq;
+              aeq.himid.q = aux.eq.hi_mid.q;
+              aeq.high.gain = aux.eq.high.gain;
+              aeq.high.freq = aux.eq.high.freq;
+              aeq.high.q = aux.eq.high.q;
+              aeq.hpf = aux.eq.hpf_on;
+              aeq.lpf = aux.eq.lpf_on;
+              aeq.low.type = aux.eq.hpf_on === 1 ? 'hpf' : 'shelf';
+              aeq.high.type = aux.eq.lpf_on === 1 ? 'lpf' : 'shelf';
             }
           });
         }
@@ -1332,6 +2467,48 @@
               state.faders.MASTER[i] = inp.fader;
               state.mutes.MASTER[i] = inp.on;
 
+              if (inp.eq && eqState[i]) {
+                eqState[i].on = inp.eq.on;
+                eqState[i].low.gain = inp.eq.low.gain;
+                eqState[i].low.freq = inp.eq.low.freq;
+                eqState[i].low.q = inp.eq.low.q;
+                eqState[i].lomid.gain = inp.eq.low_mid.gain;
+                eqState[i].lomid.freq = inp.eq.low_mid.freq;
+                eqState[i].lomid.q = inp.eq.low_mid.q;
+                eqState[i].himid.gain = inp.eq.hi_mid.gain;
+                eqState[i].himid.freq = inp.eq.hi_mid.freq;
+                eqState[i].himid.q = inp.eq.hi_mid.q;
+                eqState[i].high.gain = inp.eq.high.gain;
+                eqState[i].high.freq = inp.eq.high.freq;
+                eqState[i].high.q = inp.eq.high.q;
+                eqState[i].hpf = inp.eq.hpf_on;
+                eqState[i].lpf = inp.eq.lpf_on;
+                eqState[i].low.type = inp.eq.hpf_on === 1 ? 'hpf' : 'shelf';
+                eqState[i].high.type = inp.eq.lpf_on === 1 ? 'lpf' : 'shelf';
+                state.eqOn[i] = (inp.eq.on === 1);
+              }
+
+              if (inp.comp && compState[i]) {
+                compState[i].on = inp.comp.on;
+                if (inp.comp.threshold !== undefined) compState[i].threshold = inp.comp.threshold;
+                if (inp.comp.ratio !== undefined) compState[i].ratio = inp.comp.ratio;
+                if (inp.comp.attack !== undefined) compState[i].attack = inp.comp.attack;
+                if (inp.comp.release !== undefined) compState[i].release = inp.comp.release;
+                if (inp.comp.knee !== undefined) compState[i].knee = inp.comp.knee;
+                if (inp.comp.gain !== undefined) compState[i].gain = inp.comp.gain;
+                state.compOn[i] = (inp.comp.on === 1);
+              }
+
+              if (inp.gate && gateState[i]) {
+                gateState[i].on = inp.gate.on;
+                if (inp.gate.threshold !== undefined) gateState[i].threshold = inp.gate.threshold;
+                if (inp.gate.range !== undefined) gateState[i].range = inp.gate.range;
+                if (inp.gate.attack !== undefined) gateState[i].attack = inp.gate.attack;
+                if (inp.gate.hold !== undefined) gateState[i].hold = inp.gate.hold;
+                if (inp.gate.decay !== undefined) gateState[i].decay = inp.gate.decay;
+                state.gateOn[i] = (inp.gate.on === 1);
+              }
+
               if (Array.isArray(inp.aux_sends)) {
                 inp.aux_sends.forEach(send => {
                   const auxKey = 'AUX' + send.aux;
@@ -1341,6 +2518,8 @@
                   }
                 });
               }
+
+              updateSelButtonGlow(i);
             }
           });
         }
@@ -1349,6 +2528,21 @@
           updateChannelUI(ch);
         }
         updateMasterFaderCard();
+        updateMasterSelGlow();
+
+        if (isEqModalOpen) {
+          if (currentRackTab === 'eq') {
+            syncEqModalUI();
+            switchEqBand(currentEqBand);
+            requestEqRedrawMobile();
+          } else if (currentRackTab === 'comp') {
+            syncCompModalUI();
+            requestCompRedrawMobile();
+          } else if (currentRackTab === 'gate') {
+            syncGateModalUI();
+            requestGateRedrawMobile();
+          }
+        }
       } catch (err) {
         console.warn('Falha ao sincronizar mobile:', err);
       }
@@ -1424,17 +2618,125 @@
         return;
       }
 
-      // Input EQ ON/OFF
-      if (el === 0x20 && param === 0x00 && ch < TOTAL_CHANNELS) {
-        state.eqOn[ch] = (val === 1);
-        updateSelButtonGlow(ch);
+      // Element 0x20 (Input EQ), 0x50 (Stereo Master EQ), 0x35 (Aux Master EQ)
+      if (el === 0x20 || el === 0x50 || el === 0x35) {
+        let targetKey = null;
+        if (el === 0x20 && ch < TOTAL_CHANNELS) {
+          targetKey = ch;
+        } else if (el === 0x50) {
+          targetKey = 'MASTER';
+        } else if (el === 0x35 && ch < 8) {
+          targetKey = 'AUX' + (ch + 1);
+        }
+
+        if (targetKey !== null) {
+          const eq = getEqData(targetKey);
+          if (eq) {
+            switch (param) {
+              case 0x00:
+                eq.on = val;
+                if (typeof targetKey === 'number') {
+                  state.eqOn[targetKey] = (val === 1);
+                  updateSelButtonGlow(targetKey);
+                } else if (targetKey === currentMix) {
+                  updateMasterSelGlow();
+                }
+                break;
+              case 0x01: eq.low.q = Math.max(0, Math.min(40, 40 - val)); break;
+              case 0x02: eq.low.freq = val; break;
+              case 0x03: eq.low.gain = val; break;
+              case 0x04: eq.lomid.q = Math.max(0, Math.min(40, 40 - val)); break;
+              case 0x05: eq.lomid.freq = val; break;
+              case 0x06: eq.lomid.gain = val; break;
+              case 0x07: eq.himid.q = Math.max(0, Math.min(40, 40 - val)); break;
+              case 0x08: eq.himid.freq = val; break;
+              case 0x09: eq.himid.gain = val; break;
+              case 0x0A: eq.high.q = Math.max(0, Math.min(40, 40 - val)); break;
+              case 0x0B: eq.high.freq = val; break;
+              case 0x0C: eq.high.gain = val; break;
+              case 0x0D:
+                eq.hpf = val;
+                eq.low.type = (val === 1 ? 'hpf' : (eq.low.type === 'hpf' ? 'shelf' : eq.low.type));
+                break;
+              case 0x0E:
+                eq.lpf = val;
+                eq.high.type = (val === 1 ? 'lpf' : (eq.high.type === 'lpf' ? 'shelf' : eq.high.type));
+                break;
+            }
+
+            if (isEqModalOpen && currentEqTarget === targetKey) {
+              syncEqModalUI();
+              switchEqBand(currentEqBand);
+              requestEqRedrawMobile();
+            }
+          }
+        }
         return;
       }
 
-      // Input COMP ON/OFF
-      if (el === 0x22 && param === 0x00 && ch < TOTAL_CHANNELS) {
-        state.compOn[ch] = (val === 1);
-        updateSelButtonGlow(ch);
+      // Element 0x22 (Input COMP), 0x51 (Stereo Master COMP), 0x36 (Aux Master COMP)
+      if (el === 0x22 || el === 0x51 || el === 0x36) {
+        let targetKey = null;
+        if (el === 0x22 && ch < TOTAL_CHANNELS) {
+          targetKey = ch;
+        } else if (el === 0x51) {
+          targetKey = 'MASTER';
+        } else if (el === 0x36 && ch < 8) {
+          targetKey = 'AUX' + (ch + 1);
+        }
+
+        if (targetKey !== null) {
+          const comp = getChannelComp(targetKey);
+          if (comp) {
+            switch (param) {
+              case 0x00:
+                comp.on = val;
+                if (typeof targetKey === 'number') {
+                  state.compOn[targetKey] = (val === 1);
+                  updateSelButtonGlow(targetKey);
+                } else if (targetKey === currentMix) {
+                  updateMasterSelGlow();
+                }
+                break;
+              case 0x01: comp.threshold = val; break;
+              case 0x02: comp.ratio = val; break;
+              case 0x03: comp.attack = val; break;
+              case 0x04: comp.release = val; break;
+              case 0x05: comp.knee = val; break;
+              case 0x06: comp.gain = val; break;
+            }
+
+            if (isEqModalOpen && currentEqTarget === targetKey) {
+              syncCompModalUI();
+              requestCompRedrawMobile();
+            }
+          }
+        }
+        return;
+      }
+
+      // Element 0x21 (Input NOISE GATE - Canais 1 a 32)
+      if (el === 0x21 && ch < TOTAL_CHANNELS) {
+        const gate = gateState[ch];
+        if (gate) {
+          switch (param) {
+            case 0x00:
+              gate.on = val;
+              state.gateOn[ch] = (val === 1);
+              updateSelButtonGlow(ch);
+              break;
+            case 0x01: gate.threshold = val; break;
+            case 0x02: gate.range = val; break;
+            case 0x03: gate.attack = val; break;
+            case 0x04: gate.hold = val; break;
+            case 0x05: gate.decay = val; break;
+          }
+
+          if (isEqModalOpen && currentEqTarget === ch) {
+            syncGateModalUI();
+            requestGateRedrawMobile();
+          }
+        }
         return;
       }
     }
@@ -1505,10 +2807,11 @@
           sendCommand(target.onElement, target.onParam, ch, newVal, false);
         });
 
-        // Evento SEL (Seleciona canal e destaca brilho)
+        // Evento SEL (Seleciona canal e abre rack de EQ)
         const selBtn = card.querySelector(`#selBtn_${ch}`);
         selBtn.addEventListener('click', () => {
           setSelectedChannel(ch);
+          openEqModal(ch);
         });
 
         // Botões de Atalho 0 dB e -inf dB
@@ -1557,8 +2860,24 @@
     function updateSelButtonGlow(ch) {
       const btn = document.getElementById(`selBtn_${ch}`);
       if (!btn) return;
-      // Brilha se EQ ou Compressor estiver ligado
-      const hasFx = (state.eqOn[ch] || state.compOn[ch]);
+      // Brilha se EQ, Compressor ou Gate estiver ligado
+      const eq = eqState[ch];
+      const comp = compState[ch];
+      const gate = gateState[ch];
+      const hasFx = (eq && eq.on === 1) || (comp && comp.on === 1) || (gate && gate.on === 1);
+      if (hasFx) {
+        btn.classList.add('fx-active');
+      } else {
+        btn.classList.remove('fx-active');
+      }
+    }
+
+    function updateMasterSelGlow() {
+      const btn = document.getElementById('masterSelBtn');
+      if (!btn) return;
+      const eq = mixEqState[currentMix];
+      const comp = mixCompState[currentMix];
+      const hasFx = (eq && eq.on === 1) || (comp && comp.on === 1);
       if (hasFx) {
         btn.classList.add('fx-active');
       } else {
@@ -1575,6 +2894,17 @@
           else btn.classList.remove('selected');
         }
       }
+      const masterSel = document.getElementById('masterSelBtn');
+      if (masterSel) masterSel.classList.remove('selected');
+    }
+
+    function setSelectedMaster() {
+      for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        const btn = document.getElementById(`selBtn_${i}`);
+        if (btn) btn.classList.remove('selected');
+      }
+      const masterSel = document.getElementById('masterSelBtn');
+      if (masterSel) masterSel.classList.add('selected');
     }
 
     // ==========================================
@@ -1676,6 +3006,14 @@
       infBtn.addEventListener('click', () => {
         setMasterFaderVal(MIN_VALUE);
       });
+
+      const masterSelBtn = document.getElementById('masterSelBtn');
+      if (masterSelBtn) {
+        masterSelBtn.addEventListener('click', () => {
+          setSelectedMaster();
+          openEqModal(currentMix);
+        });
+      }
     }
 
     function setMasterFaderVal(val) {
@@ -1720,6 +3058,7 @@
       }
 
       updateMasterMuteUI(state.masterMutes[currentMix]);
+      updateMasterSelGlow();
     }
 
     function updateMasterMuteUI(onVal) {
@@ -1761,6 +3100,11 @@
       // Atualiza card do Master e o badge compacto de saída
       updateMasterFaderCard();
       updateCompactBadge();
+      updateMasterSelGlow();
+
+      if (isEqModalOpen && typeof currentEqTarget === 'string') {
+        openEqModal(currentMix);
+      }
 
       // Atualiza todos os canais visíveis
       for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
@@ -2005,6 +3349,1489 @@
     }
 
     // ==========================================
+    // RACK DE PROCESSAMENTO: EQUALIZADOR PARAMÉTRICO
+    // ==========================================
+    let isEqModalOpen = false;
+    let currentEqTarget = 0; // number 0..31 ou string 'MASTER' / 'AUX1'..'AUX8'
+    let currentEqBand = 'low'; // 'low', 'lomid', 'himid', 'high'
+    let eqRedrawQueuedMobile = false;
+
+    function sendEqParam(param, value, isThrottled = false) {
+      if (typeof currentEqTarget === 'number') {
+        sendCommand(0x20, param, currentEqTarget, value, isThrottled);
+      } else if (currentEqTarget === 'MASTER') {
+        sendCommand(0x50, param, 0x00, value, isThrottled);
+      } else if (typeof currentEqTarget === 'string' && currentEqTarget.startsWith('AUX')) {
+        const auxIdx = parseInt(currentEqTarget.replace('AUX', ''), 10) - 1;
+        sendCommand(0x35, param, auxIdx, value, isThrottled);
+      }
+      requestEqRedrawMobile();
+    }
+
+    function resizeEqCanvas() {
+      const canvas = document.getElementById('eqCanvasMobile');
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.round(rect.width || 360);
+      const h = Math.round(rect.height || 125);
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+    }
+
+    function requestEqRedrawMobile() {
+      if (!isEqModalOpen) return;
+      if (eqRedrawQueuedMobile) return;
+      eqRedrawQueuedMobile = true;
+      requestAnimationFrame(() => {
+        eqRedrawQueuedMobile = false;
+        drawEqCurveMobile();
+      });
+    }
+
+    function drawEqCurveMobile() {
+      const canvas = document.getElementById('eqCanvasMobile');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+
+      const zeroY = h / 2;
+
+      // Grade horizontal de dB
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.lineWidth = 1;
+
+      const yPlus12 = zeroY - (12 / 18) * (h / 2 - 10);
+      const yMinus12 = zeroY + (12 / 18) * (h / 2 - 10);
+
+      ctx.beginPath();
+      ctx.moveTo(0, yPlus12); ctx.lineTo(w, yPlus12);
+      ctx.moveTo(0, yMinus12); ctx.lineTo(w, yMinus12);
+      ctx.stroke();
+
+      // Linha 0.0 dB
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+      ctx.beginPath();
+      ctx.moveTo(0, zeroY); ctx.lineTo(w, zeroY);
+      ctx.stroke();
+
+      // Linhas verticais de frequência
+      const x100 = (27 / 119) * w;
+      const x1k = (67 / 119) * w;
+      const x10k = (107 / 119) * w;
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.beginPath();
+      ctx.moveTo(x100, 0); ctx.lineTo(x100, h);
+      ctx.moveTo(x1k, 0); ctx.lineTo(x1k, h);
+      ctx.moveTo(x10k, 0); ctx.lineTo(x10k, h);
+      ctx.stroke();
+
+      // Rótulos
+      ctx.fillStyle = 'rgba(148, 163, 184, 0.45)';
+      ctx.font = '9px system-ui, sans-serif';
+      ctx.fillText('100Hz', x100 + 3, h - 4);
+      ctx.fillText('1kHz', x1k + 3, h - 4);
+      ctx.fillText('10kHz', x10k + 3, h - 4);
+      ctx.fillText('0dB', 4, zeroY - 3);
+
+      const eq = getEqData(currentEqTarget);
+      if (!eq) {
+        ctx.restore();
+        return;
+      }
+
+      if (eq.on === 0) {
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(0, zeroY);
+        ctx.lineTo(w, zeroY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 11px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('EQ BYPASS (DESATIVADO)', w / 2, zeroY - 8);
+        ctx.restore();
+        return;
+      }
+
+      const lowB = eq.low;
+      const lomidB = eq.lomid;
+      const himidB = eq.himid;
+      const highB = eq.high;
+
+      const isHpfActive = eq.hpf === 1 || lowB.type === 'hpf';
+      const isLpfActive = eq.lpf === 1 || highB.type === 'lpf';
+
+      const lowNormX = lowB.freq / 119;
+      const lomidNormX = lomidB.freq / 119;
+      const himidNormX = himidB.freq / 119;
+      const highNormX = highB.freq / 119;
+
+      const lowGainDb = (lowB.gain - 180) / 10;
+      const lomidGainDb = (lomidB.gain - 180) / 10;
+      const himidGainDb = (himidB.gain - 180) / 10;
+      const highGainDb = (highB.gain - 180) / 10;
+
+      const lowQVal = parseFloat(EQ_Q_VALUES[lowB.q]) || 0.70;
+      const lomidQVal = parseFloat(EQ_Q_VALUES[lomidB.q]) || 1.0;
+      const himidQVal = parseFloat(EQ_Q_VALUES[himidB.q]) || 1.0;
+      const highQVal = parseFloat(EQ_Q_VALUES[highB.q]) || 0.70;
+
+      const lowBW = 1.3 / Math.pow(lowQVal, 0.85);
+      const lomidBW = 1.3 / Math.pow(lomidQVal, 0.85);
+      const himidBW = 1.3 / Math.pow(himidQVal, 0.85);
+      const highBW = 1.3 / Math.pow(highQVal, 0.85);
+
+      const points = [];
+      const stepPx = 4;
+
+      for (let px = 0; px <= w; px += stepPx) {
+        const normX = px / w;
+        let totalDb = 0;
+
+        // BANDA LOW
+        if (isHpfActive) {
+          if (normX < lowNormX) {
+            const octBelow = (lowNormX - normX) * 10;
+            totalDb -= (octBelow * 18 + 3);
+          }
+        } else if (lowB.type === 'shelf') {
+          if (normX <= lowNormX) {
+            totalDb += lowGainDb;
+          } else {
+            const deltaOct = (normX - lowNormX) * 10;
+            const shelfFalloff = 1 / (1 + Math.pow(deltaOct / 0.85, 2));
+            totalDb += lowGainDb * shelfFalloff;
+          }
+        } else {
+          const deltaOct = (normX - lowNormX) * 10;
+          const ratio = deltaOct / (lowBW * 0.5);
+          totalDb += lowGainDb / (1 + ratio * ratio);
+        }
+
+        // BANDA LO-MID
+        {
+          const deltaOct = (normX - lomidNormX) * 10;
+          const ratio = deltaOct / (lomidBW * 0.5);
+          totalDb += lomidGainDb / (1 + ratio * ratio);
+        }
+
+        // BANDA HI-MID
+        {
+          const deltaOct = (normX - himidNormX) * 10;
+          const ratio = deltaOct / (himidBW * 0.5);
+          totalDb += himidGainDb / (1 + ratio * ratio);
+        }
+
+        // BANDA HIGH
+        if (isLpfActive) {
+          if (normX > highNormX) {
+            const octAbove = (normX - highNormX) * 10;
+            totalDb -= (octAbove * 18 + 3);
+          }
+        } else if (highB.type === 'shelf') {
+          if (normX >= highNormX) {
+            totalDb += highGainDb;
+          } else {
+            const deltaOct = (highNormX - normX) * 10;
+            const shelfFalloff = 1 / (1 + Math.pow(deltaOct / 0.85, 2));
+            totalDb += highGainDb * shelfFalloff;
+          }
+        } else {
+          const deltaOct = (normX - highNormX) * 10;
+          const ratio = deltaOct / (highBW * 0.5);
+          totalDb += highGainDb / (1 + ratio * ratio);
+        }
+
+        totalDb = Math.max(-24, Math.min(24, totalDb));
+        const y = zeroY - (totalDb / 18) * (h / 2 - 10);
+        points.push({ x: px, y: Math.max(4, Math.min(h - 4, y)) });
+      }
+
+      // Preenchimento gradiente
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, 'rgba(56, 189, 248, 0.32)');
+      grad.addColorStop(0.5, 'rgba(56, 189, 248, 0.08)');
+      grad.addColorStop(1, 'rgba(2, 132, 199, 0.01)');
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, zeroY);
+      points.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.lineTo(points[points.length - 1].x, zeroY);
+      ctx.closePath();
+      ctx.fill();
+
+      // Linha de contorno da curva
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      points.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.stroke();
+
+      // Pontos das 4 bandas
+      const bandColors = {
+        low: '#f43f5e',
+        lomid: '#f59e0b',
+        himid: '#10b981',
+        high: '#06b6d4'
+      };
+
+      ['low', 'lomid', 'himid', 'high'].forEach(bKey => {
+        const b = eq[bKey];
+        const bx = (b.freq / 119) * w;
+        let by = zeroY;
+
+        if (bKey === 'low' && isHpfActive) {
+          by = zeroY + 12;
+        } else if (bKey === 'high' && isLpfActive) {
+          by = zeroY + 12;
+        } else {
+          const gainDb = (b.gain - 180) / 10;
+          by = zeroY - (gainDb / 18) * (h / 2 - 10);
+        }
+
+        const isCurrent = (bKey === currentEqBand);
+        const radius = isCurrent ? 6 : 4;
+
+        ctx.fillStyle = bandColors[bKey];
+        ctx.beginPath();
+        ctx.arc(bx, Math.max(6, Math.min(h - 6, by)), radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = isCurrent ? '#ffffff' : 'rgba(255, 255, 255, 0.7)';
+        ctx.lineWidth = isCurrent ? 2 : 1;
+        ctx.stroke();
+
+        if (isCurrent) {
+          ctx.strokeStyle = bandColors[bKey];
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(bx, Math.max(6, Math.min(h - 6, by)), radius + 3, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      });
+
+      ctx.restore();
+    }
+
+    // ==========================================
+    // CANVASES E INTERFACE DO COMPRESSOR E GATE
+    // ==========================================
+    function resizeCompCanvas() {
+      const canvas = document.getElementById('compCanvasMobile');
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.round(rect.width || 360);
+      const h = Math.round(rect.height || 125);
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+    }
+
+    function resizeGateCanvas() {
+      const canvas = document.getElementById('gateCanvasMobile');
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.round(rect.width || 360);
+      const h = Math.round(rect.height || 125);
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+    }
+
+    let compRedrawQueuedMobile = false;
+    function requestCompRedrawMobile() {
+      if (!isEqModalOpen || currentRackTab !== 'comp') return;
+      if (compRedrawQueuedMobile) return;
+      compRedrawQueuedMobile = true;
+      requestAnimationFrame(() => {
+        compRedrawQueuedMobile = false;
+        drawCompCurveMobile();
+      });
+    }
+
+    let gateRedrawQueuedMobile = false;
+    function requestGateRedrawMobile() {
+      if (!isEqModalOpen || currentRackTab !== 'gate') return;
+      if (gateRedrawQueuedMobile) return;
+      gateRedrawQueuedMobile = true;
+      requestAnimationFrame(() => {
+        gateRedrawQueuedMobile = false;
+        drawGateCurveMobile();
+      });
+    }
+
+    function drawCompCurveMobile() {
+      const canvas = document.getElementById('compCanvasMobile');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+
+      const padL = 36;
+      const padR = 16;
+      const padT = 14;
+      const padB = 24;
+      const pw = w - padL - padR;
+      const ph = h - padT - padB;
+
+      function inDbToX(db) {
+        return padL + ((db - (-60)) / 60) * pw;
+      }
+      function outDbToY(db) {
+        return padT + ph - ((db - (-60)) / 60) * ph;
+      }
+
+      // Grade de referência em dB
+      const dBs = [-60, -50, -40, -30, -20, -10, 0];
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      ctx.fillStyle = '#64748b';
+      ctx.font = '9px monospace';
+
+      dBs.forEach(db => {
+        const x = inDbToX(db);
+        const y = outDbToY(db);
+
+        ctx.beginPath();
+        ctx.moveTo(x, padT);
+        ctx.lineTo(x, padT + ph);
+        ctx.stroke();
+
+        ctx.textAlign = 'center';
+        ctx.fillText(db === 0 ? '0' : `${db}`, x, h - 8);
+
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(padL + pw, y);
+        ctx.stroke();
+
+        ctx.textAlign = 'right';
+        ctx.fillText(db === 0 ? '0' : `${db}`, padL - 5, y + 3);
+      });
+
+      // Títulos dos eixos
+      ctx.fillStyle = '#475569';
+      ctx.font = '8px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('IN (dB)', padL + pw, h - 8);
+      ctx.textAlign = 'left';
+      ctx.fillText('OUT', 4, padT + 8);
+
+      // Linha 1:1 de ganho unitário
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(inDbToX(-60), outDbToY(-60));
+      ctx.lineTo(inDbToX(0), outDbToY(0));
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const comp = getChannelComp(currentEqTarget);
+      if (!comp || comp.on === 0) {
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('COMPRESSOR BYPASS (DESATIVADO)', padL + pw / 2, padT + ph / 2);
+        ctx.restore();
+        return;
+      }
+
+      const thresholdDb = (comp.threshold - 540) / 10;
+      const ratio = COMP_RATIO_NUMBERS[comp.ratio] || 4.0;
+      const makeupDb = comp.gain / 10;
+      const kneeK = comp.knee;
+      const kneeWidth = kneeK * 4;
+
+      function compTransfer(inDb) {
+        let outDb = inDb;
+        if (kneeWidth <= 0 || kneeK === 0) {
+          if (inDb > thresholdDb) {
+            outDb = thresholdDb + (inDb - thresholdDb) / ratio;
+          }
+        } else {
+          const lower = thresholdDb - kneeWidth / 2;
+          const upper = thresholdDb + kneeWidth / 2;
+          if (inDb > upper) {
+            outDb = thresholdDb + (inDb - thresholdDb) / ratio;
+          } else if (inDb > lower) {
+            const delta = inDb - lower;
+            outDb = inDb + ((1 / ratio - 1) * (delta * delta)) / (2 * kneeWidth);
+          }
+        }
+        return Math.min(0, outDb + makeupDb);
+      }
+
+      const curvePoints = [];
+      for (let db = -60; db <= 0.001; db += 0.5) {
+        const out = compTransfer(db);
+        curvePoints.push({
+          x: inDbToX(db),
+          y: outDbToY(out)
+        });
+      }
+
+      // Área sombreada de Gain Reduction
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.12)';
+      ctx.beginPath();
+      ctx.moveTo(inDbToX(-60), outDbToY(-60));
+      curvePoints.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.lineTo(inDbToX(0), outDbToY(0));
+      ctx.closePath();
+      ctx.fill();
+
+      // Curva dinâmica do compressor
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      curvePoints.forEach((p, idx) => {
+        if (idx === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+
+      // Ponto do Threshold
+      const thX = inDbToX(thresholdDb);
+      const thY = outDbToY(compTransfer(thresholdDb));
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(thX, Math.max(padT, Math.min(padT + ph, thY)), 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Rótulo numérico flutuante sobre o Threshold
+      ctx.fillStyle = '#fde68a';
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'center';
+      const labelY = thY > padT + 20 ? thY - 8 : thY + 15;
+      ctx.fillText(`${thresholdDb.toFixed(1)}dB`, thX, labelY);
+
+      ctx.restore();
+    }
+
+    function drawGateCurveMobile() {
+      const canvas = document.getElementById('gateCanvasMobile');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+
+      const padL = 36;
+      const padR = 16;
+      const padT = 14;
+      const padB = 24;
+      const pw = w - padL - padR;
+      const ph = h - padT - padB;
+
+      function inDbToX(db) {
+        return padL + ((db - (-60)) / 60) * pw;
+      }
+      function outDbToY(db) {
+        return padT + ph - ((db - (-60)) / 60) * ph;
+      }
+
+      // Grade de referência em dB
+      const dBs = [-60, -50, -40, -30, -20, -10, 0];
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      ctx.fillStyle = '#64748b';
+      ctx.font = '9px monospace';
+
+      dBs.forEach(db => {
+        const x = inDbToX(db);
+        const y = outDbToY(db);
+
+        ctx.beginPath();
+        ctx.moveTo(x, padT);
+        ctx.lineTo(x, padT + ph);
+        ctx.stroke();
+
+        ctx.textAlign = 'center';
+        ctx.fillText(db === 0 ? '0' : `${db}`, x, h - 8);
+
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(padL + pw, y);
+        ctx.stroke();
+
+        ctx.textAlign = 'right';
+        ctx.fillText(db === 0 ? '0' : `${db}`, padL - 5, y + 3);
+      });
+
+      // Títulos dos eixos
+      ctx.fillStyle = '#475569';
+      ctx.font = '8px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('IN (dB)', padL + pw, h - 8);
+      ctx.textAlign = 'left';
+      ctx.fillText('OUT', 4, padT + 8);
+
+      // Linha 1:1 de ganho unitário
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(inDbToX(-60), outDbToY(-60));
+      ctx.lineTo(inDbToX(0), outDbToY(0));
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const gate = getChannelGate(currentEqTarget);
+      if (!gate || gate.on === 0 || typeof currentEqTarget !== 'number') {
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('GATE BYPASS (DESATIVADO)', padL + pw / 2, padT + ph / 2);
+        ctx.restore();
+        return;
+      }
+
+      const thDb = (gate.threshold - 540) / 10;
+      const rangeAtten = gate.range === 0 ? 999 : (70 - gate.range);
+
+      function gateTransfer(inDb) {
+        if (inDb >= thDb) {
+          return inDb;
+        }
+        const closedDb = inDb - rangeAtten;
+        return Math.max(-60, closedDb);
+      }
+
+      const curvePoints = [];
+      for (let db = -60; db <= 0.001; db += 0.5) {
+        const out = gateTransfer(db);
+        curvePoints.push({
+          x: inDbToX(db),
+          y: outDbToY(out)
+        });
+      }
+
+      // Área sombreada de atenuação
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.1)';
+      ctx.beginPath();
+      ctx.moveTo(inDbToX(-60), outDbToY(-60));
+      curvePoints.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.lineTo(inDbToX(0), outDbToY(0));
+      ctx.closePath();
+      ctx.fill();
+
+      // Curva dinâmica do Gate
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      curvePoints.forEach((p, idx) => {
+        if (idx === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+
+      // Ponto do Threshold
+      const thX = inDbToX(thDb);
+      const thY = outDbToY(gateTransfer(thDb));
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(thX, Math.max(padT, Math.min(padT + ph, thY)), 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Rótulo numérico flutuante sobre o Threshold
+      ctx.fillStyle = '#bae6fd';
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'center';
+      const labelY = thY > padT + 20 ? thY - 8 : thY + 15;
+      ctx.fillText(`${thDb.toFixed(1)}dB`, thX, labelY);
+
+      ctx.restore();
+    }
+
+    function syncCompModalUI() {
+      const comp = getChannelComp(currentEqTarget);
+      if (!comp) return;
+
+      const btnToggle = document.getElementById('btnCompToggleOn');
+      if (btnToggle) {
+        btnToggle.classList.toggle('is-on', comp.on === 1);
+        btnToggle.innerText = comp.on === 1 ? 'COMP: ON' : 'BYPASS';
+      }
+
+      const dotComp = document.getElementById('dot_tab_comp');
+      if (dotComp) dotComp.classList.toggle('on', comp.on === 1);
+
+      const rngTh = document.getElementById('rngCompThresholdMobile');
+      const lblTh = document.getElementById('lblCompThresholdMobile');
+      if (rngTh) rngTh.value = comp.threshold;
+      if (lblTh) lblTh.textContent = rawThresholdToDb(comp.threshold);
+
+      const rngRatio = document.getElementById('rngCompRatioMobile');
+      const lblRatio = document.getElementById('lblCompRatioMobile');
+      if (rngRatio) rngRatio.value = comp.ratio;
+      if (lblRatio) lblRatio.textContent = COMP_RATIO_VALUES[comp.ratio] || `${comp.ratio}:1`;
+
+      const rngAttack = document.getElementById('rngCompAttackMobile');
+      const lblAttack = document.getElementById('lblCompAttackMobile');
+      if (rngAttack) rngAttack.value = comp.attack;
+      if (lblAttack) lblAttack.textContent = `${comp.attack} ms`;
+
+      const rngRelease = document.getElementById('rngCompReleaseMobile');
+      const lblRelease = document.getElementById('lblCompReleaseMobile');
+      if (rngRelease) rngRelease.value = comp.release;
+      if (lblRelease) lblRelease.textContent = COMP_RELEASE_VALUES[comp.release] || `${comp.release} ms`;
+
+      const rngKnee = document.getElementById('rngCompKneeMobile');
+      const lblKnee = document.getElementById('lblCompKneeMobile');
+      if (rngKnee) rngKnee.value = comp.knee;
+      if (lblKnee) lblKnee.textContent = COMP_KNEE_VALUES[comp.knee] || `${comp.knee}`;
+
+      const rngGain = document.getElementById('rngCompGainMobile');
+      const lblGain = document.getElementById('lblCompGainMobile');
+      if (rngGain) rngGain.value = comp.gain;
+      if (lblGain) lblGain.textContent = rawCompGainToDb(comp.gain);
+    }
+
+    function syncGateModalUI() {
+      const gate = getChannelGate(currentEqTarget);
+      if (!gate) return;
+
+      const btnToggle = document.getElementById('btnGateToggleOn');
+      if (btnToggle) {
+        btnToggle.classList.toggle('is-on', gate.on === 1);
+        btnToggle.innerText = gate.on === 1 ? 'GATE: ON' : 'BYPASS';
+      }
+
+      const dotGate = document.getElementById('dot_tab_gate');
+      if (dotGate) dotGate.classList.toggle('on', gate.on === 1);
+
+      const rngTh = document.getElementById('rngGateThresholdMobile');
+      const lblTh = document.getElementById('lblGateThresholdMobile');
+      if (rngTh) rngTh.value = gate.threshold;
+      if (lblTh) lblTh.textContent = rawThresholdToDb(gate.threshold);
+
+      const rngRange = document.getElementById('rngGateRangeMobile');
+      const lblRange = document.getElementById('lblGateRangeMobile');
+      if (rngRange) rngRange.value = gate.range;
+      if (lblRange) lblRange.textContent = rawGateRangeToDb(gate.range);
+
+      const rngAttack = document.getElementById('rngGateAttackMobile');
+      const lblAttack = document.getElementById('lblGateAttackMobile');
+      if (rngAttack) rngAttack.value = gate.attack;
+      if (lblAttack) lblAttack.textContent = `${gate.attack} ms`;
+
+      const rngHold = document.getElementById('rngGateHoldMobile');
+      const lblHold = document.getElementById('lblGateHoldMobile');
+      if (rngHold) rngHold.value = gate.hold;
+      if (lblHold) lblHold.textContent = `${gate.hold} ms`;
+
+      const rngDecay = document.getElementById('rngGateDecayMobile');
+      const lblDecay = document.getElementById('lblGateDecayMobile');
+      if (rngDecay) rngDecay.value = gate.decay;
+      if (lblDecay) lblDecay.textContent = GATE_DECAY_VALUES[gate.decay] || `${gate.decay} ms`;
+    }
+
+    // ==========================================
+    // NAVEGAÇÃO DE CANAIS (PREV / NEXT) E ABAS DO RACK
+    // ==========================================
+    const ALL_FX_TARGETS = [
+      ...Array.from({ length: TOTAL_CHANNELS }, (_, i) => i),
+      'MASTER',
+      'AUX1', 'AUX2', 'AUX3', 'AUX4', 'AUX5', 'AUX6', 'AUX7', 'AUX8'
+    ];
+
+    let currentRackTab = 'eq';
+
+    function switchRackTab(tabKey) {
+      currentRackTab = tabKey;
+      document.querySelectorAll('.btn-fx-tab').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-tab') === tabKey);
+      });
+      document.querySelectorAll('.fx-tab-pane').forEach(p => {
+        p.classList.toggle('active', p.id === `pane_${tabKey}`);
+      });
+
+      updateDesktopFxLinks();
+
+      if (tabKey === 'eq') {
+        resizeEqCanvas();
+        syncEqModalUI();
+        switchEqBand(currentEqBand);
+        requestEqRedrawMobile();
+      } else if (tabKey === 'comp') {
+        resizeCompCanvas();
+        syncCompModalUI();
+        requestCompRedrawMobile();
+      } else if (tabKey === 'gate') {
+        resizeGateCanvas();
+        syncGateModalUI();
+        requestGateRedrawMobile();
+      }
+    }
+
+    function updateDesktopFxLinks() {
+      const desktopHref = `/?view=desktop&fx=${currentEqTarget}&tab=${currentRackTab}`;
+      const headerDesktopBtn = document.getElementById('btnFxOpenDesktop');
+      if (headerDesktopBtn) headerDesktopBtn.href = desktopHref;
+
+      const compDesktopBtn = document.getElementById('btnOpenCompDesktop');
+      if (compDesktopBtn) compDesktopBtn.href = `/?view=desktop&fx=${currentEqTarget}&tab=comp`;
+
+      const gateDesktopBtn = document.getElementById('btnOpenGateDesktop');
+      if (gateDesktopBtn) gateDesktopBtn.href = `/?view=desktop&fx=${currentEqTarget}&tab=gate`;
+    }
+
+    function selectFxChannel(step) {
+      let curIdx = ALL_FX_TARGETS.indexOf(currentEqTarget);
+      if (curIdx === -1) curIdx = 0;
+      const total = ALL_FX_TARGETS.length;
+      const nextIdx = (curIdx + step + total) % total;
+      const nextTarget = ALL_FX_TARGETS[nextIdx];
+
+      // Otimização: durante a navegação dentro do modal, atualizamos apenas os dados do modal.
+      // O scroll e a sincronização do mixer de fundo só ocorrem ao fechar o modal.
+      openEqModal(nextTarget);
+    }
+
+    function openEqModal(target) {
+      currentEqTarget = target;
+      isEqModalOpen = true;
+
+      const backdrop = document.getElementById('eqModalBackdrop');
+      const titleEl = document.getElementById('eqModalChannelName');
+
+      let titleStr = '';
+      if (typeof target === 'number') {
+        const card = document.getElementById(`channelCard_${target}`);
+        const nameSpan = card ? card.querySelector('.channel-name-tag span:last-child') : null;
+        const name = nameSpan ? nameSpan.innerText : `Canal ${target + 1}`;
+        titleStr = `CH ${String(target + 1).padStart(2, '0')} - ${name}`;
+      } else if (target === 'MASTER') {
+        titleStr = 'STEREO MASTER OUT';
+      } else if (typeof target === 'string' && target.startsWith('AUX')) {
+        const num = target.replace('AUX', '');
+        titleStr = `AUX ${num} MASTER OUT`;
+      }
+      if (titleEl) titleEl.innerText = titleStr;
+
+      // Oculta aba GATE se for saída Master ou Aux (Gate só existe para inputs 1..32)
+      const gateTab = document.getElementById('tabBtn_gate');
+      if (gateTab) gateTab.style.display = (typeof target === 'number') ? 'flex' : 'none';
+      if (currentRackTab === 'gate' && typeof target !== 'number') switchRackTab('eq');
+
+      // Atualiza status dots das abas (verde se ativo)
+      const eq = getEqData(target);
+      const dotEq = document.getElementById('dot_tab_eq');
+      if (dotEq) dotEq.classList.toggle('on', eq && eq.on === 1);
+
+      const isCompOn = getCompOn(target) === 1;
+      const dotComp = document.getElementById('dot_tab_comp');
+      if (dotComp) dotComp.classList.toggle('on', isCompOn);
+
+      const isGateOn = getGateOn(target) === 1;
+      const dotGate = document.getElementById('dot_tab_gate');
+      if (dotGate) dotGate.classList.toggle('on', isGateOn);
+
+      const btnCompToggle = document.getElementById('btnCompToggleOn');
+      if (btnCompToggle) {
+        if (isCompOn) {
+          btnCompToggle.classList.add('is-on');
+          btnCompToggle.innerText = 'COMP: ON';
+        } else {
+          btnCompToggle.classList.remove('is-on');
+          btnCompToggle.innerText = 'BYPASS';
+        }
+      }
+
+      const btnGateToggle = document.getElementById('btnGateToggleOn');
+      if (btnGateToggle) {
+        if (isGateOn) {
+          btnGateToggle.classList.add('is-on');
+          btnGateToggle.innerText = 'GATE: ON';
+        } else {
+          btnGateToggle.classList.remove('is-on');
+          btnGateToggle.innerText = 'BYPASS';
+        }
+      }
+
+      updateDesktopFxLinks();
+
+      backdrop.classList.add('open');
+
+      if (currentRackTab === 'eq') {
+        resizeEqCanvas();
+        syncEqModalUI();
+        switchEqBand(currentEqBand);
+        requestEqRedrawMobile();
+      } else if (currentRackTab === 'comp') {
+        resizeCompCanvas();
+        syncCompModalUI();
+        requestCompRedrawMobile();
+      } else if (currentRackTab === 'gate') {
+        resizeGateCanvas();
+        syncGateModalUI();
+        requestGateRedrawMobile();
+      }
+    }
+
+    function closeEqModal() {
+      isEqModalOpen = false;
+      const backdrop = document.getElementById('eqModalBackdrop');
+      if (backdrop) backdrop.classList.remove('open');
+
+      // Ao fechar o modal, sincroniza o fader selecionado no mixer e posiciona suavemente
+      if (typeof currentEqTarget === 'number') {
+        setSelectedChannel(currentEqTarget);
+        const card = document.getElementById(`channelCard_${currentEqTarget}`);
+        if (card && card.style.display !== 'none') {
+          card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      } else {
+        setSelectedMaster();
+        if (currentEqTarget !== currentMix) {
+          setMixTarget(currentEqTarget);
+        }
+        const masterCard = document.getElementById('masterFaderCard');
+        if (masterCard && masterCard.style.display !== 'none') {
+          masterCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    }
+
+    function syncEqModalUI() {
+      const eq = getEqData(currentEqTarget);
+      if (!eq) return;
+
+      const btnToggle = document.getElementById('btnEqToggleOn');
+      if (btnToggle) {
+        if (eq.on === 1) {
+          btnToggle.classList.add('is-on');
+          btnToggle.innerText = 'EQ: ON';
+        } else {
+          btnToggle.classList.remove('is-on');
+          btnToggle.innerText = 'BYPASS';
+        }
+      }
+
+      ['low', 'lomid', 'himid', 'high'].forEach(bKey => {
+        const b = eq[bKey];
+        const badge = document.getElementById(`badge_${bKey}`);
+        if (badge) {
+          const fStr = EQ_FREQ_VALUES[b.freq].replace(' Hz', 'Hz').replace(' kHz', 'k');
+          if (bKey === 'low' && (eq.hpf === 1 || b.type === 'hpf')) {
+            badge.innerText = `HPF ${fStr}`;
+          } else if (bKey === 'high' && (eq.lpf === 1 || b.type === 'lpf')) {
+            badge.innerText = `LPF ${fStr}`;
+          } else {
+            const gStr = rawGainToDb(b.gain);
+            badge.innerText = `${fStr} ${gStr}`;
+          }
+        }
+      });
+    }
+
+    function switchEqBand(bandKey) {
+      currentEqBand = bandKey;
+      const eq = getEqData(currentEqTarget);
+      if (!eq) return;
+      const b = eq[bandKey];
+      const cfg = BAND_CONFIGS[bandKey];
+
+      document.querySelectorAll('#eqBandsSelector .btn-band-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-band') === bandKey);
+      });
+
+      const typeSelect = document.getElementById('eqTypeSelect');
+      const typeStatic = document.getElementById('eqTypeStatic');
+      const blockGain = document.getElementById('blockGain');
+      const blockQ = document.getElementById('blockQ');
+
+      if (cfg.hasFilterType) {
+        typeSelect.style.display = 'block';
+        typeStatic.style.display = 'none';
+        typeSelect.innerHTML = cfg.filterOptions.map(opt => `<option value="${opt.val}">${opt.label}</option>`).join('');
+        const activeType = b.type || (cfg.typeKey === 'hpf' && eq.hpf === 1 ? 'hpf' : (cfg.typeKey === 'lpf' && eq.lpf === 1 ? 'lpf' : 'peaking'));
+        typeSelect.value = activeType;
+      } else {
+        typeSelect.style.display = 'none';
+        typeStatic.style.display = 'block';
+      }
+
+      const isFilterCut = (bandKey === 'low' && (eq.hpf === 1 || b.type === 'hpf')) ||
+                          (bandKey === 'high' && (eq.lpf === 1 || b.type === 'lpf'));
+
+      if (isFilterCut) {
+        blockGain.style.opacity = '0.35';
+        blockGain.style.pointerEvents = 'none';
+        blockQ.style.opacity = '0.35';
+        blockQ.style.pointerEvents = 'none';
+      } else {
+        blockGain.style.opacity = '1';
+        blockGain.style.pointerEvents = 'auto';
+        blockQ.style.opacity = '1';
+        blockQ.style.pointerEvents = 'auto';
+      }
+
+      const rngFreq = document.getElementById('rngEqFreq');
+      const lblFreq = document.getElementById('lblEqFreq');
+      rngFreq.value = b.freq;
+      lblFreq.innerText = EQ_FREQ_VALUES[b.freq];
+
+      const rngGain = document.getElementById('rngEqGain');
+      const lblGain = document.getElementById('lblEqGain');
+      rngGain.value = b.gain;
+      lblGain.innerText = rawGainToDb(b.gain);
+
+      const rngQ = document.getElementById('rngEqQ');
+      const lblQ = document.getElementById('lblEqQ');
+      rngQ.value = b.q;
+      lblQ.innerText = formatQDisplay(b.q);
+
+      syncEqModalUI();
+      requestEqRedrawMobile();
+    }
+
+    function initEqModal() {
+      // Navegação Prev / Next de canais
+      const btnPrev = document.getElementById('btnFxPrevCh');
+      const btnNext = document.getElementById('btnFxNextCh');
+      if (btnPrev) btnPrev.addEventListener('click', () => selectFxChannel(-1));
+      if (btnNext) btnNext.addEventListener('click', () => selectFxChannel(1));
+
+      // Alternância de abas do Rack (EQ, COMP, GATE)
+      document.querySelectorAll('.btn-fx-tab').forEach(b => {
+        b.addEventListener('click', () => {
+          switchRackTab(b.getAttribute('data-tab'));
+        });
+      });
+
+      // Alternância de abas de bandas no EQ (LOW, LO-MID, HI-MID, HIGH)
+      document.querySelectorAll('#eqBandsSelector .btn-band-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const band = btn.getAttribute('data-band');
+          switchEqBand(band);
+        });
+      });
+
+      // Fechar modal
+      document.getElementById('btnEqClose').addEventListener('click', closeEqModal);
+      document.getElementById('eqModalBackdrop').addEventListener('click', (e) => {
+        if (e.target.id === 'eqModalBackdrop') closeEqModal();
+      });
+
+      // Toggle EQ ON / Bypass
+      document.getElementById('btnEqToggleOn').addEventListener('click', () => {
+        const eq = getEqData(currentEqTarget);
+        eq.on = eq.on === 1 ? 0 : 1;
+        sendEqParam(0x00, eq.on, false);
+        if (typeof currentEqTarget === 'number') {
+          state.eqOn[currentEqTarget] = (eq.on === 1);
+          updateSelButtonGlow(currentEqTarget);
+        } else if (currentEqTarget === currentMix) {
+          updateMasterSelGlow();
+        }
+        syncEqModalUI();
+        requestEqRedrawMobile();
+      });
+
+      // ==========================================
+      // EVENTOS DO COMPRESSOR MOBILE
+      // ==========================================
+      const btnCompToggle = document.getElementById('btnCompToggleOn');
+      if (btnCompToggle) {
+        btnCompToggle.addEventListener('click', () => {
+          const comp = getChannelComp(currentEqTarget);
+          if (!comp) return;
+          const newVal = comp.on === 1 ? 0 : 1;
+          comp.on = newVal;
+          if (typeof currentEqTarget === 'number') {
+            state.compOn[currentEqTarget] = (newVal === 1);
+            updateSelButtonGlow(currentEqTarget);
+          } else if (currentEqTarget === currentMix) {
+            updateMasterSelGlow();
+          }
+          sendCompParam(0x00, newVal, false);
+          syncCompModalUI();
+          requestCompRedrawMobile();
+        });
+      }
+
+      const compPresetSelect = document.getElementById('compPresetSelectMobile');
+      if (compPresetSelect) {
+        compPresetSelect.addEventListener('change', (e) => {
+          const preset = COMP_PRESETS[e.target.value];
+          if (!preset) return;
+          const comp = getChannelComp(currentEqTarget);
+          if (!comp) return;
+          comp.threshold = preset.threshold;
+          comp.ratio = preset.ratio;
+          comp.attack = preset.attack;
+          comp.release = preset.release;
+          comp.knee = preset.knee;
+          comp.gain = preset.gain;
+
+          sendCompParam(0x01, preset.threshold, false);
+          sendCompParam(0x02, preset.ratio, false);
+          sendCompParam(0x03, preset.attack, false);
+          sendCompParam(0x04, preset.release, false);
+          sendCompParam(0x05, preset.knee, false);
+          sendCompParam(0x06, preset.gain, false);
+
+          syncCompModalUI();
+          requestCompRedrawMobile();
+          showToast(`Preset Comp "${e.target.options[e.target.selectedIndex].text}" aplicado! ⚡`);
+        });
+      }
+
+      const btnCompReset = document.getElementById('btnCompResetMobile');
+      if (btnCompReset) {
+        btnCompReset.addEventListener('click', () => {
+          const preset = COMP_PRESETS.default;
+          const comp = getChannelComp(currentEqTarget);
+          if (!comp) return;
+          comp.threshold = preset.threshold;
+          comp.ratio = preset.ratio;
+          comp.attack = preset.attack;
+          comp.release = preset.release;
+          comp.knee = preset.knee;
+          comp.gain = preset.gain;
+
+          sendCompParam(0x01, preset.threshold, false);
+          sendCompParam(0x02, preset.ratio, false);
+          sendCompParam(0x03, preset.attack, false);
+          sendCompParam(0x04, preset.release, false);
+          sendCompParam(0x05, preset.knee, false);
+          sendCompParam(0x06, preset.gain, false);
+
+          if (compPresetSelect) compPresetSelect.value = 'default';
+          syncCompModalUI();
+          requestCompRedrawMobile();
+          showToast('Compressor restaurado para o padrão! ⚡');
+        });
+      }
+
+      // Sliders Compressor
+      const rngCompTh = document.getElementById('rngCompThresholdMobile');
+      if (rngCompTh) {
+        rngCompTh.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          const comp = getChannelComp(currentEqTarget);
+          if (comp) comp.threshold = val;
+          const lbl = document.getElementById('lblCompThresholdMobile');
+          if (lbl) lbl.textContent = rawThresholdToDb(val);
+          sendCompParam(0x01, val, true);
+        });
+        rngCompTh.addEventListener('change', (e) => {
+          sendCompParam(0x01, parseInt(e.target.value, 10), false);
+        });
+      }
+
+      const rngCompRatio = document.getElementById('rngCompRatioMobile');
+      if (rngCompRatio) {
+        rngCompRatio.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          const comp = getChannelComp(currentEqTarget);
+          if (comp) comp.ratio = val;
+          const lbl = document.getElementById('lblCompRatioMobile');
+          if (lbl) lbl.textContent = COMP_RATIO_VALUES[val] || `${val}:1`;
+          sendCompParam(0x02, val, true);
+        });
+        rngCompRatio.addEventListener('change', (e) => {
+          sendCompParam(0x02, parseInt(e.target.value, 10), false);
+        });
+      }
+
+      const rngCompAttack = document.getElementById('rngCompAttackMobile');
+      if (rngCompAttack) {
+        rngCompAttack.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          const comp = getChannelComp(currentEqTarget);
+          if (comp) comp.attack = val;
+          const lbl = document.getElementById('lblCompAttackMobile');
+          if (lbl) lbl.textContent = `${val} ms`;
+          sendCompParam(0x03, val, true);
+        });
+        rngCompAttack.addEventListener('change', (e) => {
+          sendCompParam(0x03, parseInt(e.target.value, 10), false);
+        });
+      }
+
+      const rngCompRelease = document.getElementById('rngCompReleaseMobile');
+      if (rngCompRelease) {
+        rngCompRelease.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          const comp = getChannelComp(currentEqTarget);
+          if (comp) comp.release = val;
+          const lbl = document.getElementById('lblCompReleaseMobile');
+          if (lbl) lbl.textContent = COMP_RELEASE_VALUES[val] || `${val} ms`;
+          sendCompParam(0x04, val, true);
+        });
+        rngCompRelease.addEventListener('change', (e) => {
+          sendCompParam(0x04, parseInt(e.target.value, 10), false);
+        });
+      }
+
+      const rngCompKnee = document.getElementById('rngCompKneeMobile');
+      if (rngCompKnee) {
+        rngCompKnee.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          const comp = getChannelComp(currentEqTarget);
+          if (comp) comp.knee = val;
+          const lbl = document.getElementById('lblCompKneeMobile');
+          if (lbl) lbl.textContent = COMP_KNEE_VALUES[val] || `${val}`;
+          sendCompParam(0x05, val, true);
+        });
+        rngCompKnee.addEventListener('change', (e) => {
+          sendCompParam(0x05, parseInt(e.target.value, 10), false);
+        });
+      }
+
+      const rngCompGain = document.getElementById('rngCompGainMobile');
+      if (rngCompGain) {
+        rngCompGain.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          const comp = getChannelComp(currentEqTarget);
+          if (comp) comp.gain = val;
+          const lbl = document.getElementById('lblCompGainMobile');
+          if (lbl) lbl.textContent = rawCompGainToDb(val);
+          sendCompParam(0x06, val, true);
+        });
+        rngCompGain.addEventListener('change', (e) => {
+          sendCompParam(0x06, parseInt(e.target.value, 10), false);
+        });
+      }
+
+      const btnZeroCompGain = document.getElementById('btnZeroCompGainMobile');
+      if (btnZeroCompGain) {
+        btnZeroCompGain.addEventListener('click', () => {
+          const comp = getChannelComp(currentEqTarget);
+          if (comp) comp.gain = 0;
+          if (rngCompGain) rngCompGain.value = 0;
+          const lbl = document.getElementById('lblCompGainMobile');
+          if (lbl) lbl.textContent = '+0.0 dB';
+          sendCompParam(0x06, 0, false);
+        });
+      }
+
+      // ==========================================
+      // EVENTOS DO NOISE GATE MOBILE
+      // ==========================================
+      const btnGateToggle = document.getElementById('btnGateToggleOn');
+      if (btnGateToggle) {
+        btnGateToggle.addEventListener('click', () => {
+          const gate = getChannelGate(currentEqTarget);
+          if (!gate) return;
+          const newVal = gate.on === 1 ? 0 : 1;
+          gate.on = newVal;
+          if (typeof currentEqTarget === 'number') {
+            state.gateOn[currentEqTarget] = (newVal === 1);
+            updateSelButtonGlow(currentEqTarget);
+          }
+          sendGateParam(0x00, newVal, false);
+          syncGateModalUI();
+          requestGateRedrawMobile();
+        });
+      }
+
+      const gatePresetSelect = document.getElementById('gatePresetSelectMobile');
+      if (gatePresetSelect) {
+        gatePresetSelect.addEventListener('change', (e) => {
+          const preset = GATE_PRESETS[e.target.value];
+          if (!preset) return;
+          const gate = getChannelGate(currentEqTarget);
+          if (!gate) return;
+          gate.threshold = preset.threshold;
+          gate.range = preset.range;
+          gate.attack = preset.attack;
+          gate.hold = preset.hold;
+          gate.decay = preset.decay;
+
+          sendGateParam(0x01, preset.threshold, false);
+          sendGateParam(0x02, preset.range, false);
+          sendGateParam(0x03, preset.attack, false);
+          sendGateParam(0x04, preset.hold, false);
+          sendGateParam(0x05, preset.decay, false);
+
+          syncGateModalUI();
+          requestGateRedrawMobile();
+          showToast(`Preset Gate "${e.target.options[e.target.selectedIndex].text}" aplicado! ⚡`);
+        });
+      }
+
+      const btnGateReset = document.getElementById('btnGateResetMobile');
+      if (btnGateReset) {
+        btnGateReset.addEventListener('click', () => {
+          const preset = GATE_PRESETS.default;
+          const gate = getChannelGate(currentEqTarget);
+          if (!gate) return;
+          gate.threshold = preset.threshold;
+          gate.range = preset.range;
+          gate.attack = preset.attack;
+          gate.hold = preset.hold;
+          gate.decay = preset.decay;
+
+          sendGateParam(0x01, preset.threshold, false);
+          sendGateParam(0x02, preset.range, false);
+          sendGateParam(0x03, preset.attack, false);
+          sendGateParam(0x04, preset.hold, false);
+          sendGateParam(0x05, preset.decay, false);
+
+          if (gatePresetSelect) gatePresetSelect.value = 'default';
+          syncGateModalUI();
+          requestGateRedrawMobile();
+          showToast('Noise Gate restaurado para o padrão! ⚡');
+        });
+      }
+
+      // Sliders Gate
+      const rngGateTh = document.getElementById('rngGateThresholdMobile');
+      if (rngGateTh) {
+        rngGateTh.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          const gate = getChannelGate(currentEqTarget);
+          if (gate) gate.threshold = val;
+          const lbl = document.getElementById('lblGateThresholdMobile');
+          if (lbl) lbl.textContent = rawThresholdToDb(val);
+          sendGateParam(0x01, val, true);
+        });
+        rngGateTh.addEventListener('change', (e) => {
+          sendGateParam(0x01, parseInt(e.target.value, 10), false);
+        });
+      }
+
+      const rngGateRange = document.getElementById('rngGateRangeMobile');
+      if (rngGateRange) {
+        rngGateRange.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          const gate = getChannelGate(currentEqTarget);
+          if (gate) gate.range = val;
+          const lbl = document.getElementById('lblGateRangeMobile');
+          if (lbl) lbl.textContent = rawGateRangeToDb(val);
+          sendGateParam(0x02, val, true);
+        });
+        rngGateRange.addEventListener('change', (e) => {
+          sendGateParam(0x02, parseInt(e.target.value, 10), false);
+        });
+      }
+
+      const rngGateAttack = document.getElementById('rngGateAttackMobile');
+      if (rngGateAttack) {
+        rngGateAttack.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          const gate = getChannelGate(currentEqTarget);
+          if (gate) gate.attack = val;
+          const lbl = document.getElementById('lblGateAttackMobile');
+          if (lbl) lbl.textContent = `${val} ms`;
+          sendGateParam(0x03, val, true);
+        });
+        rngGateAttack.addEventListener('change', (e) => {
+          sendGateParam(0x03, parseInt(e.target.value, 10), false);
+        });
+      }
+
+      const rngGateHold = document.getElementById('rngGateHoldMobile');
+      if (rngGateHold) {
+        rngGateHold.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          const gate = getChannelGate(currentEqTarget);
+          if (gate) gate.hold = val;
+          const lbl = document.getElementById('lblGateHoldMobile');
+          if (lbl) lbl.textContent = `${val} ms`;
+          sendGateParam(0x04, val, true);
+        });
+        rngGateHold.addEventListener('change', (e) => {
+          sendGateParam(0x04, parseInt(e.target.value, 10), false);
+        });
+      }
+
+      const rngGateDecay = document.getElementById('rngGateDecayMobile');
+      if (rngGateDecay) {
+        rngGateDecay.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          const gate = getChannelGate(currentEqTarget);
+          if (gate) gate.decay = val;
+          const lbl = document.getElementById('lblGateDecayMobile');
+          if (lbl) lbl.textContent = GATE_DECAY_VALUES[val] || `${val} ms`;
+          sendGateParam(0x05, val, true);
+        });
+        rngGateDecay.addEventListener('change', (e) => {
+          sendGateParam(0x05, parseInt(e.target.value, 10), false);
+        });
+      }
+
+      const btnMinGateRange = document.getElementById('btnMinGateRangeMobile');
+      if (btnMinGateRange) {
+        btnMinGateRange.addEventListener('click', () => {
+          const gate = getChannelGate(currentEqTarget);
+          if (gate) gate.range = 0;
+          if (rngGateRange) rngGateRange.value = 0;
+          const lbl = document.getElementById('lblGateRangeMobile');
+          if (lbl) lbl.textContent = '-∞ dB';
+          sendGateParam(0x02, 0, false);
+        });
+      }
+
+      const btnZeroGateRange = document.getElementById('btnZeroGateRangeMobile');
+      if (btnZeroGateRange) {
+        btnZeroGateRange.addEventListener('click', () => {
+          const gate = getChannelGate(currentEqTarget);
+          if (gate) gate.range = 70;
+          if (rngGateRange) rngGateRange.value = 70;
+          const lbl = document.getElementById('lblGateRangeMobile');
+          if (lbl) lbl.textContent = '0 dB';
+          sendGateParam(0x02, 70, false);
+        });
+      }
+
+      // Botão Flat (Zera as 4 bandas para 0.0 dB)
+      document.getElementById('btnEqFlat').addEventListener('click', () => {
+        const eq = getEqData(currentEqTarget);
+        eq.low.gain = 180;
+        eq.lomid.gain = 180;
+        eq.himid.gain = 180;
+        eq.high.gain = 180;
+        sendEqParam(0x03, 180, false);
+        sendEqParam(0x06, 180, false);
+        sendEqParam(0x09, 180, false);
+        sendEqParam(0x0C, 180, false);
+        switchEqBand(currentEqBand);
+        showToast('EQ zerado (Flat 0.0 dB) ⚡');
+      });
+
+      // Tipo de Filtro (LOW e HIGH)
+      const typeSelect = document.getElementById('eqTypeSelect');
+      typeSelect.addEventListener('change', (e) => {
+        const eq = getEqData(currentEqTarget);
+        const val = e.target.value;
+        if (currentEqBand === 'low') {
+          eq.low.type = val;
+          eq.hpf = (val === 'hpf') ? 1 : 0;
+          sendEqParam(0x0D, eq.hpf, false);
+        } else if (currentEqBand === 'high') {
+          eq.high.type = val;
+          eq.lpf = (val === 'lpf') ? 1 : 0;
+          sendEqParam(0x0E, eq.lpf, false);
+        }
+        switchEqBand(currentEqBand);
+      });
+
+      // Slider de Frequência
+      const rngFreq = document.getElementById('rngEqFreq');
+      rngFreq.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        const eq = getEqData(currentEqTarget);
+        eq[currentEqBand].freq = val;
+        document.getElementById('lblEqFreq').innerText = EQ_FREQ_VALUES[val];
+        const cfg = BAND_CONFIGS[currentEqBand];
+        sendEqParam(cfg.paramFreq, val, true);
+        syncEqModalUI();
+      });
+      rngFreq.addEventListener('change', (e) => {
+        const val = parseInt(e.target.value, 10);
+        const cfg = BAND_CONFIGS[currentEqBand];
+        sendEqParam(cfg.paramFreq, val, false);
+      });
+
+      // Slider de Ganho
+      const rngGain = document.getElementById('rngEqGain');
+      rngGain.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        const eq = getEqData(currentEqTarget);
+        eq[currentEqBand].gain = val;
+        document.getElementById('lblEqGain').innerText = rawGainToDb(val);
+        const cfg = BAND_CONFIGS[currentEqBand];
+        sendEqParam(cfg.paramGain, val, true);
+        syncEqModalUI();
+      });
+      rngGain.addEventListener('change', (e) => {
+        const val = parseInt(e.target.value, 10);
+        const cfg = BAND_CONFIGS[currentEqBand];
+        sendEqParam(cfg.paramGain, val, false);
+      });
+
+      // Botão 0 dB (Zera ganho da banda atual)
+      document.getElementById('btnZeroEqGain').addEventListener('click', () => {
+        const eq = getEqData(currentEqTarget);
+        const b = eq[currentEqBand];
+        const cfg = BAND_CONFIGS[currentEqBand];
+        b.gain = 180;
+        document.getElementById('rngEqGain').value = 180;
+        document.getElementById('lblEqGain').innerText = rawGainToDb(180);
+        sendEqParam(cfg.paramGain, 180, false);
+        syncEqModalUI();
+      });
+
+      // Slider de Q
+      const rngQ = document.getElementById('rngEqQ');
+      rngQ.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        const eq = getEqData(currentEqTarget);
+        eq[currentEqBand].q = val;
+        document.getElementById('lblEqQ').innerText = formatQDisplay(val);
+        const cfg = BAND_CONFIGS[currentEqBand];
+        const midiVal = Math.max(0, Math.min(40, 40 - val));
+        sendEqParam(cfg.paramQ, midiVal, true);
+      });
+      rngQ.addEventListener('change', (e) => {
+        const val = parseInt(e.target.value, 10);
+        const cfg = BAND_CONFIGS[currentEqBand];
+        const midiVal = Math.max(0, Math.min(40, 40 - val));
+        sendEqParam(cfg.paramQ, midiVal, false);
+      });
+
+      // Atalhos de teclado (Setas Esquerda/Direita para trocar de canal, Esc para fechar)
+      window.addEventListener('keydown', (e) => {
+        if (!isEqModalOpen) return;
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          selectFxChannel(-1);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          selectFxChannel(1);
+        } else if (e.key === 'Escape') {
+          closeEqModal();
+        }
+      });
+
+      // Redimensionamento do Canvas
+      window.addEventListener('resize', () => {
+        if (!isEqModalOpen) return;
+        if (currentRackTab === 'eq') {
+          resizeEqCanvas();
+          requestEqRedrawMobile();
+        } else if (currentRackTab === 'comp') {
+          resizeCompCanvas();
+          requestCompRedrawMobile();
+        } else if (currentRackTab === 'gate') {
+          resizeGateCanvas();
+          requestGateRedrawMobile();
+        }
+      });
+    }
+
+    // ==========================================
     // INICIALIZAÇÃO GERAL
     // ==========================================
     document.addEventListener('DOMContentLoaded', () => {
@@ -2015,6 +4842,7 @@
       initNavCollapse();
       initGlobalActions();
       initUserMenu();
+      initEqModal();
 
       // Botões de Saída (Bloco 2)
       document.querySelectorAll('.btn-out').forEach(btn => {

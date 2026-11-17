@@ -21,7 +21,7 @@ Este documento serve como ponto de partida rápido para novas sessões de IA ou 
 |---|---|
 | `main.go` | Ponto de entrada do backend. Gerencia portas MIDI (ALSA), servidor HTTP, conexões WebSocket, throttling de pacotes, autenticação por cookies e simulador de faders. |
 | `index.html` | Interface gráfica do console. Faders estilizados, rotas de Auxiliares (*Sends on Fader*), modal de Equalizador 4 bandas com gráfico Canvas, modal de Compressor e medidores. |
-| `mobile.html` | Interface vertical compacta para celular (`/m` ou `/mobile`). Faders horizontais, botões táteis resumidos, diálogo modal de canais e master integrado rolável. |
+| `mobile.html` | Interface vertical compacta para celular (`/m` ou `/mobile`). Faders horizontais, botões táteis resumidos, diálogo modal de canais, master de saída e rack modal de equalizador paramétrico 4 bandas. |
 | `login.html` | Interface de autenticação com suporte a login por formulário padrão e requisições assíncronas JSON. |
 | `usuarios.csv` | Banco de dados plano de usuários (`nome,usuario,senha,papel`). Relido em tempo real sem necessidade de reiniciar o binário. |
 | `auth_test.go` | Suíte de testes automatizados para verificação do módulo de autenticação e manipulação do CSV. |
@@ -94,6 +94,7 @@ sudo modprobe snd-virmidi
 * `0x1A`: Input ON / MUTE (0 = Mute, 1 = On)
 * `0x1B`: Input PAN (0 = L63, 63 = C, 126 = R63)
 * `0x20`: Input Equalizer 4 Bandas (Param 0 a 14)
+* `0x21`: Input Noise Gate (Param 0 a 5)
 * `0x22`: Input Compressor (Param 0 a 6)
 * `0x23`: Input Aux Send (`pp 0..7`: Níveis Aux 1..8; `pp 8..15`: ON Aux 1..8)
 * `0x31`: Aux Master Fader (Aux 1 a 8, cc = 0 a 7)

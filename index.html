@@ -5979,6 +5979,21 @@
       }
       updateMasterOutputFaderUI(mixData[currentMixTarget].masterVolume);
     });
+
+    // Abertura direta do modal de processamento via URL query param (ex: /?view=desktop&fx=0&tab=comp)
+    const urlParams = new URLSearchParams(window.location.search);
+    const fxParam = urlParams.get('fx');
+    if (fxParam !== null) {
+      const tabParam = urlParams.get('tab') || 'eq';
+      setTimeout(() => {
+        let target = fxParam;
+        if (!isNaN(parseInt(fxParam, 10)) && String(parseInt(fxParam, 10)) === fxParam) {
+          target = parseInt(fxParam, 10);
+        }
+        if (typeof switchFxTab === 'function') switchFxTab(tabParam);
+        if (typeof openFxModal === 'function') openFxModal(target);
+      }, 350);
+    }
   </script>
 </body>
 </html>

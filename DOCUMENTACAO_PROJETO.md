@@ -93,6 +93,17 @@ O **Web Remote Controller** é uma solução moderna e leve para controle remoto
   * Master da saída selecionada com acabamento translúcido (vermelho no Stereo Master e azul no Auxiliar).
   * Canais de entrada: Nome, botão `ON/MUTE`, botão `SEL` (brilho dourado indicando se EQ/Compressor está ativo).
   * Slider horizontal touch-friendly com manopla ampla, indicador numérico em dB e botões de pulo rápido `[ 0 ]` e `[ -∞ ]`.
+* **Rack de Processamento & Equalizador Paramétrico (Modal SEL):**
+  * Acionamento ao tocar no botão `SEL` de qualquer canal de entrada ou do fader Master da saída atual.
+  * **Navegação de Canais (Prev / Next):** Botões táteis `◀` e `▶` no cabeçalho do modal (e setas do teclado `←`/`→`) para alternar instantaneamente entre os canais (1 a 32, Stereo Master e Auxiliares 1 a 8). Otimizado para não causar reflows/scroll no mixer de fundo enquanto o modal estiver aberto, sincronizando e posicionando o fader suavemente apenas no momento em que o modal for fechado.
+  * **Abas dos Módulos do Rack:** Seletor em abas para `EQUALIZADOR`, `COMPRESSOR` e `GATE` (com LEDs indicadores de ativação verde). A aba Gate é ocultada automaticamente para saídas Master e Auxiliares.
+  * **Ponte para o Console Completo (PC):** Botão `🖥️ PC` no cabeçalho e atalhos dedicados nos painéis de Compressor e Gate que abrem diretamente a versão desktop com o canal e a aba pré-selecionados (`/?view=desktop&fx=CH&tab=...`).
+  * **Controle Rápido de Compressor no Mobile:** Botão `COMP: ON / BYPASS` funcional em tempo real com SysEx (`0x22`, `0x51`, `0x36`).
+  * **Gráfico de Resposta em Frequência (Canvas):** Ocupa toda a largura da tela móvel (~125px de altura) com grade de frequências (100Hz, 1kHz, 10kHz), linhas de ganho (0 dB, ±12 dB), curva com gradiente e 4 marcadores coloridos com anel de foco na banda ativa.
+  * **Seletor de Bandas:** 4 botões compactos em linha (`LOW`, `LO-MID`, `HI-MID`, `HIGH`) exibindo mini badges dinâmicos de frequência/ganho/filtro.
+  * **Container Único de Edição:** Sliders ergonômicos de Frequência, Ganho (com botão `0 dB`) e Q (`touch-action: pan-y`).
+  * **Filtros Integrados:** Sem botões avulsos de HPF/LPF — o filtro corte passa-altas (HPF) é selecionado diretamente no dropdown da banda `LOW`, e o passa-baixas (LPF) na banda `HIGH`, desabilitando e esmaecendo automaticamente Ganho e Q.
+  * **Ações de Cabeçalho:** Alternador `EQ: ON` / `BYPASS` e botão `⚡ FLAT` para zerar as 4 bandas instantaneamente.
 
 ---
 
@@ -139,11 +150,13 @@ O **Web Remote Controller** é uma solução moderna e leve para controle remoto
 ### Funcionalidades Prontas e Operacionais:
 1. **Controle de Volumes e Mutes:** Totalmente funcional em Canais 1-32, Stereo Master e Aux Masters 1-8.
 2. **Sends on Fader (Monitores):** Comutação suave e envio de SysEx dedicado para Aux 1 a 8.
-3. **Equalizador 4 Bandas Paramétrico:** Ajustes finos de frequências, ganhos, Q e filtros com visualizador gráfico.
-4. **Compressor Dinâmico:** Ajuste completo de dinâmica com presets e curva de resposta.
-5. **Autenticação:** Proteção de acesso com cookies de sessão e usuários configuráveis via CSV.
-6. **Ambiente de Desenvolvimento Sem Mesa:** Simulador multi-fader e logs detalhados de decodificação SysEx no console.
-7. **Estabilidade de Tráfego:** Throttling ativo protegendo a saída MIDI contra estouro de buffer.
+3. **Equalizador 4 Bandas Paramétrico:** Ajustes finos de frequências, ganhos, Q e filtros com visualizador gráfico Canvas tanto no Desktop quanto no Mobile (`/m`).
+4. **Compressor Dinâmico Completo:** Ajuste completo de dinâmica (Threshold, Ratio, Attack, Release, Knee, Make-up Gain) com curva de transferência dinâmica e presets (Padrão, Vocal, Bateria, Baixo, Limiter) no Desktop e Mobile.
+5. **Noise Gate / Expander Dinâmico:** Controle completo de ruído (Threshold, Range com -∞ dB, Attack, Hold, Decay) com curva de transferência gráfica e presets (Padrão, Bumbo, Caixa, Tons, Vocal) no Desktop e Mobile (Canais 1-32, Element `0x21`).
+6. **Rack Mobile Completo com Navegação de Canais:** Modal responsivo de tela cheia no mobile com navegação rápida entre canais (`◀` / `▶` e setas de teclado) com otimização de renderização que sincroniza a rolagem do mixer de fundo apenas ao fechar o diálogo.
+7. **Autenticação:** Proteção de acesso com cookies de sessão e usuários configuráveis via CSV. Redirecionamento automático para `/m` ao autenticar em dispositivos móveis.
+8. **Ambiente de Desenvolvimento Sem Mesa:** Simulador multi-fader e logs detalhados de decodificação SysEx no console.
+9. **Estabilidade de Tráfego:** Throttling ativo protegendo a saída MIDI contra estouro de buffer, com bypass automático para eventos discretos (Mute, On, Flat, Bypass de EQ, Comp e Gate).
 
 ---
 
@@ -173,11 +186,9 @@ O **Web Remote Controller** é uma solução moderna e leve para controle remoto
 ### Médio Prazo (v1.2)
 1. **Controle de Acesso por Permissão (Músico vs Operador):**
    * Limitar a visualização e controle do usuário logado baseado no seu papel (ex: um músico com papel `AUX1` só pode mexer nos envios do seu próprio auxiliar e não tem acesso ao Master nem ao EQ dos outros canais).
-2. **Implementação de Gate de Ruído:**
-   * Adicionar aba no modal de efeitos para o Noise Gate da 01V96 (Element `0x21`: Threshold, Range, Attack, Hold, Decay).
-3. **Controle de Panorâmico (PAN) na Interface:**
+2. **Controle de Panorâmico (PAN) na Interface:**
    * Adicionar knobs ou controles deslizantes de PAN (Element `0x1B`) na faixa de canais.
-4. **Gerenciador de Cenas (Snapshots):**
+3. **Gerenciador de Cenas (Snapshots):**
    * Possibilidade de salvar o estado de todos os faders e parâmetros no servidor em formato JSON e recarregá-los com um clique.
 
 ### Longo Prazo (v2.0)
