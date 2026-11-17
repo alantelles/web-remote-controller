@@ -2856,28 +2856,49 @@
     // ==========================================
     // WEBSOCKET & MIDI
     // ==========================================
-    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${proto}//${location.host}/ws`);
+    let ws = null;
+    let wsReconnectTimer = null;
     const wsStatusBadge = document.getElementById('wsStatusBadge');
     const wsStatusText = document.getElementById('wsStatusText');
     const midiPortEl = document.getElementById('midiPortBadge');
 
-    ws.onopen = () => {
-      wsStatusText.textContent = 'Conectado';
-      wsStatusBadge.classList.add('online');
-    };
+    function connectWebSocket() {
+      if (wsReconnectTimer) {
+        clearTimeout(wsReconnectTimer);
+        wsReconnectTimer = null;
+      }
 
-    ws.onclose = () => {
-      wsStatusText.textContent = 'Desconectado';
-      wsStatusBadge.classList.remove('online');
-      midiPortEl.textContent = 'Porta MIDI: Desconectado';
-      // Verifica se a sessão expirou
-      fetch('/api/me').then(res => {
-        if (res.status === 401) {
-          window.location.href = '/login?error=session';
-        }
-      }).catch(() => {});
-    };
+      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${proto}//${location.host}/ws`);
+
+      ws.onopen = () => {
+        wsStatusText.textContent = 'Conectado';
+        wsStatusBadge.classList.add('online');
+      };
+
+      ws.onclose = () => {
+        wsStatusText.textContent = 'Reconectando...';
+        wsStatusBadge.classList.remove('online');
+        midiPortEl.textContent = 'Porta MIDI: Reconectando...';
+
+        // Verifica se a sessão expirou
+        fetch('/api/me').then(res => {
+          if (res.status === 401) {
+            window.location.href = '/login?error=session';
+            return;
+          }
+          wsReconnectTimer = setTimeout(connectWebSocket, 2000);
+        }).catch(() => {
+          wsReconnectTimer = setTimeout(connectWebSocket, 2000);
+        });
+      };
+
+      ws.onerror = (err) => {
+        console.error('Erro no WebSocket:', err);
+      };
+
+      ws.onmessage = handleWebSocketMessage;
+    }
 
     // Elementos do Botão de Simulação 01V96
     const btnToggleSim = document.getElementById('btnToggleSim');
@@ -2899,13 +2920,13 @@
 
     if (btnToggleSim) {
       btnToggleSim.addEventListener('click', () => {
-        if (ws.readyState === WebSocket.OPEN) {
+        if (ws && ws.readyState === WebSocket.OPEN) {
           ws.send(JSON.stringify({ action: 'toggle_sim' }));
         }
       });
     }
 
-    ws.onmessage = (event) => {
+    function handleWebSocketMessage(event) {
       try {
         const data = JSON.parse(event.data);
 
@@ -3072,13 +3093,16 @@
       } catch (e) {
         console.error(e);
       }
-    };
+    }
 
     function sendCommand(element, param, channel, value) {
-      if (ws.readyState === WebSocket.OPEN) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ element, param, channel, value }));
       }
     }
+
+    // Inicia conexão WebSocket
+    connectWebSocket();
 
     // ==========================================
     // CRIAÇÃO E RENDERIZAÇÃO DOS CANAIS

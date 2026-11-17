@@ -1249,7 +1249,16 @@
         dot.classList.remove('connected');
         dot.title = 'Desconectado da 01V96';
         document.getElementById('headerPortName').innerText = 'Reconectando...';
-        setTimeout(connectWebSocket, 2000);
+
+        fetch('/api/me').then(res => {
+          if (res.status === 401) {
+            window.location.href = '/login?error=session';
+            return;
+          }
+          setTimeout(connectWebSocket, 2000);
+        }).catch(() => {
+          setTimeout(connectWebSocket, 2000);
+        });
       };
 
       ws.onerror = (err) => {

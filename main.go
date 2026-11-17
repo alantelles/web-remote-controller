@@ -176,16 +176,89 @@ type User struct {
 }
 
 type Session struct {
-	Token     string
-	User      User
-	CreatedAt time.Time
-	ExpiresAt time.Time
+	Token     string    `json:"token"`
+	User      User      `json:"user"`
+	CreatedAt time.Time `json:"created_at"`
+	ExpiresAt time.Time `json:"expires_at"`
 }
 
 var (
-	sessions     = make(map[string]*Session)
-	sessionsLock sync.RWMutex
+	sessions             = make(map[string]*Session)
+	sessionsLock         sync.RWMutex
+	sessionsFile         = "sessions.json"
+	sessionsFilePathLock sync.RWMutex
 )
+
+func setSessionsFile(path string) {
+	sessionsFilePathLock.Lock()
+	defer sessionsFilePathLock.Unlock()
+	if strings.TrimSpace(path) != "" {
+		sessionsFile = strings.TrimSpace(path)
+	}
+}
+
+func getSessionsFile() string {
+	sessionsFilePathLock.RLock()
+	defer sessionsFilePathLock.RUnlock()
+	return sessionsFile
+}
+
+// saveSessionsLocked persiste o mapa de sessões em arquivo JSON de forma atômica.
+// Deve ser chamado com sessionsLock adquirido (Lock).
+func saveSessionsLocked() {
+	filePath := getSessionsFile()
+	data, err := json.MarshalIndent(sessions, "", "  ")
+	if err != nil {
+		log.Printf("Aviso: Falha ao serializar sessões: %v", err)
+		return
+	}
+
+	tmpFile := filePath + ".tmp"
+	if err := os.WriteFile(tmpFile, data, 0600); err != nil {
+		log.Printf("Aviso: Falha ao salvar sessões em %s: %v", tmpFile, err)
+		return
+	}
+
+	if err := os.Rename(tmpFile, filePath); err != nil {
+		log.Printf("Aviso: Falha ao atualizar %s: %v", filePath, err)
+	}
+}
+
+// loadSessions restaura as sessões persistidas do disco descartando as expiradas.
+func loadSessions() {
+	filePath := getSessionsFile()
+	sessionsLock.Lock()
+	defer sessionsLock.Unlock()
+
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			log.Printf("Aviso: Falha ao ler %s: %v", filePath, err)
+		}
+		return
+	}
+
+	var loaded map[string]*Session
+	if err := json.Unmarshal(data, &loaded); err != nil {
+		log.Printf("Aviso: Falha ao decodificar %s: %v", filePath, err)
+		return
+	}
+
+	now := time.Now()
+	activeCount := 0
+	sessions = make(map[string]*Session)
+	for token, sess := range loaded {
+		if sess != nil && now.Before(sess.ExpiresAt) {
+			sessions[token] = sess
+			activeCount++
+		}
+	}
+
+	log.Printf("Sessões persistidas: %d sessão(ões) ativa(s) carregada(s) de '%s'", activeCount, filePath)
+	if len(loaded) != activeCount {
+		saveSessionsLocked()
+	}
+}
 
 func setUsersCSVFile(path string) {
 	usersLock.Lock()
@@ -303,6 +376,7 @@ func createSession(user User) string {
 		CreatedAt: time.Now(),
 		ExpiresAt: time.Now().Add(sessionDuration),
 	}
+	saveSessionsLocked()
 	sessionsLock.Unlock()
 
 	return token
@@ -323,6 +397,7 @@ func getSession(token string) *Session {
 	if time.Now().After(sess.ExpiresAt) {
 		sessionsLock.Lock()
 		delete(sessions, token)
+		saveSessionsLocked()
 		sessionsLock.Unlock()
 		return nil
 	}
@@ -336,6 +411,7 @@ func deleteSession(token string) {
 	}
 	sessionsLock.Lock()
 	delete(sessions, token)
+	saveSessionsLocked()
 	sessionsLock.Unlock()
 }
 
@@ -1112,11 +1188,16 @@ func main() {
 	flag.BoolVar(flagSimulate, "sim", false, "Atalho para -simulate")
 	flagUsers := flag.String("users", "usuarios.csv", "Caminho do arquivo CSV de credenciais de usuários (padrão: usuarios.csv)")
 	flag.StringVar(flagUsers, "users-file", "usuarios.csv", "Atalho para -users")
+	flagSessions := flag.String("sessions", "sessions.json", "Caminho do arquivo de persistência de sessões (padrão: sessions.json)")
 	flag.Parse()
 
 	// Configura e valida o arquivo de credenciais
 	setUsersCSVFile(*flagUsers)
 	ensureUsersCSV()
+
+	// Configura e restaura as sessões persistidas do disco
+	setSessionsFile(*flagSessions)
+	loadSessions()
 
 	initialUsers, err := loadUsers()
 	if err != nil {

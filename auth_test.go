@@ -86,29 +86,67 @@ func TestLoadUsersAndCustomFile(t *testing.T) {
 	}
 }
 
-func TestSessionLifecycle(t *testing.T) {
+func TestSessionLifecycleAndPersistence(t *testing.T) {
+	testSessions := "test_sessions.json"
+	defer os.Remove(testSessions)
+	defer os.Remove(testSessions + ".tmp")
+	_ = os.Remove(testSessions)
+
+	origSessionsFile := getSessionsFile()
+	defer setSessionsFile(origSessionsFile)
+	setSessionsFile(testSessions)
+
 	testUser := User{
 		Name:     "Test Admin",
 		Username: "admin_test",
 		Role:     "ADMIN",
 	}
 
+	// 1. Criação e persistência em disco
 	token := createSession(testUser)
 	if token == "" {
 		t.Fatalf("Token de sessão veio vazio")
 	}
 
+	// Verifica se o arquivo foi criado em disco
+	if _, err := os.Stat(testSessions); os.IsNotExist(err) {
+		t.Fatalf("Arquivo de sessões '%s' deveria ter sido criado", testSessions)
+	}
+
+	// 2. Simula reinicialização do servidor limpando o mapa em memória
+	sessionsLock.Lock()
+	sessions = make(map[string]*Session)
+	sessionsLock.Unlock()
+
+	// Antes de carregar, getSession não encontra
+	if sess := getSession(token); sess != nil {
+		t.Fatalf("Sessão deveria estar vazia em memória antes de loadSessions")
+	}
+
+	// 3. Restaura do arquivo
+	loadSessions()
 	sess := getSession(token)
 	if sess == nil {
-		t.Fatalf("Sessão não encontrada")
+		t.Fatalf("Sessão persistida deveria ter sido restaurada pelo loadSessions")
 	}
 	if sess.User.Username != "admin_test" {
 		t.Fatalf("Esperava username 'admin_test', obteve '%s'", sess.User.Username)
 	}
 
+	// 4. Exclusão e atualização no arquivo
 	deleteSession(token)
 	if getSession(token) != nil {
 		t.Fatalf("Sessão ainda existe após exclusão")
+	}
+
+	// Limpa memória de novo e recarrega para garantir que a exclusão persistiu
+	sessionsLock.Lock()
+	sessions = make(map[string]*Session)
+	sessionsLock.Unlock()
+
+	loadSessions()
+	if getSession(token) != nil {
+		t.Fatalf("Sessão deletada não deveria ser restaurada do disco")
 	}
 }
 

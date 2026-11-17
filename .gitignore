@@ -3,6 +3,8 @@
 /dist/
 midi-console
 web-remote-controller
+web-remote-controller-*
+build-compat.sh
 *.exe
 *.exe~
 *.dll
@@ -35,6 +37,7 @@ go.work.sum
 *.sqlite
 *.db
 *.csv
+sessions.json*
 
 # Arquivos gerados por sistemas operacionais
 .DS_Store
