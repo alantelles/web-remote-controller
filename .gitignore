@@ -1,10 +1,6 @@
 # Binários e executáveis compilados
 /bin/
 /dist/
-midi-console
-web-remote-controller
-web-remote-controller-*
-build-compat.sh
 *.exe
 *.exe~
 *.dll
