@@ -642,6 +642,7 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Comando de alteração de fader ou mute vindo da tela
+		ApplyParamToState(msg.Element, msg.Param, msg.Channel, msg.Value)
 		sysex := Build01V96SysEx(msg.Element, msg.Param, msg.Channel, msg.Value)
 		hexStr := fmt.Sprintf("% X", sysex)
 
@@ -1164,6 +1165,7 @@ func runFaderLoop(out drivers.Out, stopChan chan struct{}) {
 					}
 
 					if canMIDI || canWS {
+						ApplyParamToState(mix.element, mix.param, byte(ch), st.currentVal)
 						dbStr := faderValueToDB(st.currentVal)
 						sentFlags := ""
 						if canMIDI {
@@ -1189,7 +1191,11 @@ func main() {
 	flagUsers := flag.String("users", "usuarios.csv", "Caminho do arquivo CSV de credenciais de usuários (padrão: usuarios.csv)")
 	flag.StringVar(flagUsers, "users-file", "usuarios.csv", "Atalho para -users")
 	flagSessions := flag.String("sessions", "sessions.json", "Caminho do arquivo de persistência de sessões (padrão: sessions.json)")
+	flagData := flag.String("data", "data", "Diretório de persistência de cenas e auto-save (padrão: data)")
 	flag.Parse()
+
+	// Configura e inicializa o gerenciador de estado, auto-save e cenas
+	InitSceneManager(*flagData)
 
 	// Configura e valida o arquivo de credenciais
 	setUsersCSVFile(*flagUsers)
@@ -1230,6 +1236,12 @@ func main() {
 	http.HandleFunc("/login", handleLogin)
 	http.HandleFunc("/logout", handleLogout)
 	http.HandleFunc("/api/me", handleMe)
+	http.HandleFunc("/api/scenes", handleAPIScenes)
+	http.HandleFunc("/api/scenes/", handleAPISceneDetail)
+	http.HandleFunc("/api/scenes/import", handleAPIImportScene)
+	http.HandleFunc("/api/state/status", handleAPIStateStatus)
+	http.HandleFunc("/api/state/restore-last", handleAPIRestoreLastState)
+	http.HandleFunc("/api/state", handleAPIGetCurrentState)
 	http.HandleFunc("/m", handleMobile)
 	http.HandleFunc("/mobile", handleMobile)
 
@@ -1259,6 +1271,7 @@ func main() {
 		<-sigChan
 		fmt.Println("\n[!] Encerrando servidor e simulação...")
 		stopSimulation()
+		StopAutoSave()
 		os.Exit(0)
 	}()
 

@@ -1274,6 +1274,13 @@
             if (msg.simulation_running !== undefined) {
               updateSimButton(msg.simulation_running);
             }
+            syncMobileStateFromBackend();
+            return;
+          }
+
+          if (msg.type === 'state_sync') {
+            syncMobileStateFromBackend();
+            showToast('Cena sincronizada! 🎬');
             return;
           }
 
@@ -1287,6 +1294,64 @@
           console.error('Erro ao processar mensagem WS:', e);
         }
       };
+    }
+
+    async function syncMobileStateFromBackend() {
+      try {
+        const res = await fetch('/api/state');
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!json.success || !json.state) return;
+        const st = json.state;
+
+        // Master Stereo
+        if (st.stereo_master) {
+          state.masterFaders['MASTER'] = st.stereo_master.fader;
+          state.masterMutes['MASTER'] = st.stereo_master.on;
+        }
+
+        // Aux Masters 1 a 8
+        if (Array.isArray(st.aux_masters)) {
+          st.aux_masters.forEach((aux, i) => {
+            const auxKey = 'AUX' + (i + 1);
+            if (state.masterFaders[auxKey] !== undefined) {
+              state.masterFaders[auxKey] = aux.fader;
+              state.masterMutes[auxKey] = aux.on;
+            }
+          });
+        }
+
+        // Inputs 1 a 32
+        if (Array.isArray(st.inputs)) {
+          st.inputs.forEach((inp, i) => {
+            if (i < TOTAL_CHANNELS) {
+              if (inp.name) {
+                const labelEl = document.querySelector(`#channelCard_${i} .channel-label`);
+                if (labelEl) labelEl.innerText = inp.name;
+              }
+              state.faders.MASTER[i] = inp.fader;
+              state.mutes.MASTER[i] = inp.on;
+
+              if (Array.isArray(inp.aux_sends)) {
+                inp.aux_sends.forEach(send => {
+                  const auxKey = 'AUX' + send.aux;
+                  if (state.faders[auxKey]) {
+                    state.faders[auxKey][i] = send.level;
+                    state.mutes[auxKey][i] = send.on;
+                  }
+                });
+              }
+            }
+          });
+        }
+
+        for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
+          updateChannelUI(ch);
+        }
+        updateMasterFaderCard();
+      } catch (err) {
+        console.warn('Falha ao sincronizar mobile:', err);
+      }
     }
 
     function handleIncomingSysEx(msg) {

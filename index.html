@@ -768,6 +768,317 @@
       color: #fff;
     }
 
+    /* Botão de Cenas no Topo */
+    .btn-admin-scenes {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      padding: 4px 10px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+    }
+    .btn-admin-scenes:hover {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.5);
+      transform: translateY(-1px);
+    }
+
+    /* Modal de Cenas */
+    .scenes-modal-card {
+      background: #131722;
+      border: 1px solid #2a3348;
+      border-radius: 12px;
+      width: 720px;
+      max-width: 95vw;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      animation: modalFadeIn 0.18s ease-out;
+      overflow: hidden;
+    }
+    .scenes-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: linear-gradient(180deg, #1c2230 0%, #151a26 100%);
+      border-bottom: 1px solid #252e42;
+    }
+    .scenes-header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .scenes-header-icon {
+      font-size: 26px;
+    }
+    .scenes-header-title h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      color: #f8fafc;
+      letter-spacing: 0.5px;
+    }
+    .scenes-header-sub {
+      margin: 2px 0 0 0;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .btn-scenes-close {
+      background: transparent;
+      border: 1px solid #333f56;
+      color: #94a3b8;
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+    .btn-scenes-close:hover {
+      background: #ef4444;
+      border-color: #ef4444;
+      color: #fff;
+    }
+
+    .scenes-modal-body {
+      padding: 18px 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .scenes-actions-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn-scene-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      background: #1f2737;
+      color: #cbd5e1;
+      border-color: #334155;
+    }
+    .btn-scene-action:hover {
+      background: #2b364c;
+      color: #fff;
+    }
+    .btn-scene-action.primary {
+      background: #0284c7;
+      color: #fff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 10px rgba(2, 132, 199, 0.35);
+    }
+    .btn-scene-action.primary:hover {
+      background: #0369a1;
+    }
+    .btn-scene-action.secondary {
+      background: #1e293b;
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+    .btn-scene-action.secondary:hover {
+      background: #0f172a;
+      border-color: #38bdf8;
+    }
+    .btn-scene-action.danger {
+      background: #ef4444;
+      color: #fff;
+      border-color: #f87171;
+    }
+    .btn-scene-action.danger:hover {
+      background: #dc2626;
+    }
+    .btn-scene-action.warning {
+      background: #b45309;
+      color: #fff;
+      border-color: #f59e0b;
+    }
+    .btn-scene-action.warning:hover {
+      background: #92400e;
+    }
+    .btn-scene-action.sm {
+      font-size: 11px;
+      padding: 4px 8px;
+    }
+
+    /* Formulário de Salvar Nova Cena */
+    .scene-save-form {
+      background: #0f131c;
+      border: 1px solid #2a3449;
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .scene-save-form h4 {
+      margin: 0;
+      font-size: 13px;
+      color: #f59e0b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .scene-save-form .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .scene-save-form label {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+    .scene-save-form input {
+      background: #171d2b;
+      border: 1px solid #334155;
+      color: #f1f5f9;
+      font-size: 13px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      outline: none;
+    }
+    .scene-save-form input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+    }
+    .scene-save-form .form-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    /* Lista de Cenas */
+    .scenes-list-container {
+      background: #0d1017;
+      border: 1px solid #222938;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: 320px;
+    }
+    .scenes-list-header {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr 1.2fr 1.6fr;
+      padding: 8px 14px;
+      background: #161c28;
+      border-bottom: 1px solid #222938;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .scenes-list-items {
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .scene-row {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr 1.2fr 1.6fr;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      align-items: center;
+      transition: background 0.15s ease;
+    }
+    .scene-row:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .scene-info-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .scene-item-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    .scene-item-desc {
+      font-size: 11px;
+      color: #818cf8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 250px;
+    }
+    .scene-item-author {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .scene-item-date {
+      font-size: 11px;
+      color: #64748b;
+    }
+    .scene-item-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+    .scenes-empty, .scenes-loading {
+      padding: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    /* Painel de Disaster Recovery */
+    .disaster-recovery-panel {
+      background: linear-gradient(180deg, #1a1712 0%, #14110d 100%);
+      border: 1px solid #452b12;
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .dr-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .dr-icon {
+      font-size: 22px;
+    }
+    .dr-info strong {
+      font-size: 12px;
+      color: #fbbf24;
+      display: block;
+    }
+    .dr-info p {
+      margin: 2px 0 0 0;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
     /* Botão de Simulação 01V96 */
     .btn-sim {
       background: #172554;
@@ -2092,6 +2403,9 @@
           <div class="status-dot"></div>
           <span id="wsStatusText">Desconectado</span>
         </div>
+        <button type="button" class="btn-admin-scenes" id="btnAdminScenes" title="Gerenciamento de Cenas e Auto-Save" style="display: none;">
+          🎬 Cenas
+        </button>
         <div class="user-pill" id="userPill">
           <span>👤</span>
           <span class="user-name" id="userDisplayName">Carregando...</span>
@@ -2310,6 +2624,99 @@
       <div class="modal-actions">
         <button type="button" class="btn-modal btn-modal-cancel" id="btnModalCancel">Cancelar</button>
         <button type="button" class="btn-modal btn-modal-confirm" id="btnModalConfirm">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE ADMINISTRAÇÃO E CENAS -->
+  <div id="scenesModalOverlay" class="modal-overlay">
+    <div class="scenes-modal-card">
+      <div class="scenes-modal-header">
+        <div class="scenes-header-title">
+          <span class="scenes-header-icon">🎬</span>
+          <div>
+            <h3>Gerenciador de Cenas & Snapshots</h3>
+            <p class="scenes-header-sub">Dumps de configuração para a Yamaha 01V96</p>
+          </div>
+        </div>
+        <button type="button" class="btn-scenes-close" id="btnScenesClose" title="Fechar (Esc)">✕</button>
+      </div>
+
+      <div class="scenes-modal-body">
+        <!-- Painel de Ações Rápidas -->
+        <div class="scenes-actions-bar">
+          <button type="button" class="btn-scene-action primary" id="btnOpenSaveSceneDialog">
+            💾 Salvar Cena Atual
+          </button>
+          <button type="button" class="btn-scene-action secondary" id="btnTriggerImportScene">
+            ⬆ Importar Arquivo (.json)
+          </button>
+          <input type="file" id="fileSceneImportInput" accept=".json" style="display: none;">
+        </div>
+
+        <!-- Formulário Inline de Salvar Nova Cena (oculto por padrão) -->
+        <div class="scene-save-form" id="sceneSaveForm" style="display: none;">
+          <h4>Salvar Novo Snapshot</h4>
+          <div class="form-row">
+            <label for="newSceneName">Nome da Cena:</label>
+            <input type="text" id="newSceneName" placeholder="Ex: Culto Domingo Manhã" maxlength="50" autocomplete="off">
+          </div>
+          <div class="form-row">
+            <label for="newSceneDesc">Descrição / Observações:</label>
+            <input type="text" id="newSceneDesc" placeholder="Ex: Banda completa com 4 retornos in-ear" maxlength="150" autocomplete="off">
+          </div>
+          <div class="form-buttons">
+            <button type="button" class="btn-scene-action primary" id="btnConfirmSaveScene">Salvar Snapshot</button>
+            <button type="button" class="btn-scene-action" id="btnCancelSaveScene">Cancelar</button>
+          </div>
+        </div>
+
+        <!-- Tabela / Lista de Cenas Salvas -->
+        <div class="scenes-list-container">
+          <div class="scenes-list-header">
+            <span class="col-name">Cena</span>
+            <span class="col-author">Autor</span>
+            <span class="col-date">Modificado</span>
+            <span class="col-actions" style="text-align: right;">Ações</span>
+          </div>
+          <div class="scenes-list-items" id="scenesListItems">
+            <div class="scenes-loading">Carregando cenas...</div>
+          </div>
+        </div>
+
+        <!-- Painel de Auto-Save / Disaster Recovery -->
+        <div class="disaster-recovery-panel">
+          <div class="dr-header">
+            <span class="dr-icon">🛡️</span>
+            <div class="dr-info">
+              <strong>Restauração de Desastre (Auto-Save Periódico)</strong>
+              <p id="drAutoSaveStatus">Verificando status do auto-save...</p>
+            </div>
+          </div>
+          <button type="button" class="btn-scene-action warning" id="btnRestoreLastState">
+            🔄 Restaurar Último Estado na Mesa
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMAÇÃO DE RECALL (SEGURANÇA CONTRA CLIQUE ACIDENTAL) -->
+  <div id="confirmRecallModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-icon">⚠️</span>
+        <h3 class="modal-title">Confirmar Carregamento na Mesa</h3>
+      </div>
+      <div class="modal-body" style="color: #cbd5e1; font-size: 13px; line-height: 1.5; margin: 12px 0;">
+        <p id="confirmRecallMessage">Você está prestes a carregar a cena na Yamaha 01V96 física.</p>
+        <p style="color: #f59e0b; font-size: 12px; margin-top: 8px;">
+          ⚠️ Todos os faders, mutes e configurações da mesa serão ajustados em tempo real de forma cadenciada.
+        </p>
+      </div>
+      <div class="modal-actions" style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button type="button" class="btn-scene-action" id="btnCancelRecall">Cancelar</button>
+        <button type="button" class="btn-scene-action danger" id="btnConfirmRecall">Sim, Carregar na Mesa</button>
       </div>
     </div>
   </div>
@@ -2842,10 +3249,15 @@
         }
         if (res.ok) {
           const user = await res.json();
+          currentUserRole = (user.role || '').toUpperCase();
           const nameEl = document.getElementById('userDisplayName');
           const roleEl = document.getElementById('userRoleBadge');
+          const btnAdminScenes = document.getElementById('btnAdminScenes');
           if (nameEl) nameEl.textContent = user.name || user.username;
           if (roleEl) roleEl.textContent = user.role || 'ADMIN';
+          if (btnAdminScenes) {
+            btnAdminScenes.style.display = (currentUserRole === 'ADMIN') ? 'inline-flex' : 'none';
+          }
         }
       } catch (err) {
         console.warn('Erro ao carregar dados do usuário:', err);
@@ -2936,6 +3348,15 @@
 
         if (data.running !== undefined) {
           updateSimButtonUI(data.running);
+        }
+
+        if (data.type === 'init') {
+          syncFullStateFromBackend();
+        }
+
+        if (data.type === 'state_sync') {
+          syncFullStateFromBackend();
+          showToast('Cena carregada e sincronizada! 🎬', '🎬');
         }
 
         if (data.type === 'param') {
@@ -5100,6 +5521,452 @@
       // 4. Inicializa os badges de FX (EQ e COMP) em todos os canais
       for (let i = 0; i < TOTAL_CHANNELS; i++) {
         updateChannelStripFxBadges(i);
+      }
+    });
+
+    // ==========================================
+    // SINCRONIZAÇÃO TOTAL COM O ESTADO DO SERVIDOR
+    // ==========================================
+    async function syncFullStateFromBackend() {
+      try {
+        const res = await fetch('/api/state');
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!json.success || !json.state) return;
+        const st = json.state;
+
+        // 1. Stereo Master
+        if (st.stereo_master) {
+          mixData.MASTER.masterVolume = st.stereo_master.fader;
+          mixData.MASTER.masterOn = st.stereo_master.on;
+          if (mixData.MASTER.eq && st.stereo_master.eq) {
+            mixData.MASTER.eq.on = st.stereo_master.eq.on;
+          }
+          if (mixData.MASTER.comp && st.stereo_master.comp) {
+            mixData.MASTER.comp.on = st.stereo_master.comp.on;
+          }
+        }
+
+        // 2. Aux Masters 1 a 8
+        if (Array.isArray(st.aux_masters)) {
+          st.aux_masters.forEach((aux, i) => {
+            const auxKey = 'AUX' + (i + 1);
+            if (mixData[auxKey]) {
+              mixData[auxKey].masterVolume = aux.fader;
+              mixData[auxKey].masterOn = aux.on;
+            }
+          });
+        }
+
+        // 3. Canais de Entrada 1 a 32
+        if (Array.isArray(st.inputs)) {
+          st.inputs.forEach((inp, i) => {
+            if (i < TOTAL_CHANNELS) {
+              // Rótulo do Canal
+              if (inp.name) {
+                channelsState[i].name = inp.name;
+                const nameEl = document.querySelector(`.ch-strip[data-ch="${i}"] .ch-name`);
+                if (nameEl) nameEl.textContent = inp.name;
+              }
+
+              // Fader e ON no Stereo Master
+              mixData.MASTER.volumes[i] = inp.fader;
+              mixData.MASTER.on[i] = inp.on;
+
+              // Envios Auxiliares (Sends on Fader)
+              if (Array.isArray(inp.aux_sends)) {
+                inp.aux_sends.forEach(send => {
+                  const auxKey = 'AUX' + send.aux;
+                  if (mixData[auxKey]) {
+                    mixData[auxKey].volumes[i] = send.level;
+                    mixData[auxKey].on[i] = send.on;
+                  }
+                });
+              }
+
+              // Equalizador de Canal
+              if (typeof eqState !== 'undefined' && eqState[i] && inp.eq) {
+                eqState[i].on = inp.eq.on;
+                eqState[i].low.gain = inp.eq.low.gain;
+                eqState[i].low.freq = inp.eq.low.freq;
+                eqState[i].low.q = inp.eq.low.q;
+                eqState[i].lomid.gain = inp.eq.low_mid.gain;
+                eqState[i].lomid.freq = inp.eq.low_mid.freq;
+                eqState[i].lomid.q = inp.eq.low_mid.q;
+                eqState[i].himid.gain = inp.eq.hi_mid.gain;
+                eqState[i].himid.freq = inp.eq.hi_mid.freq;
+                eqState[i].himid.q = inp.eq.hi_mid.q;
+                eqState[i].high.gain = inp.eq.high.gain;
+                eqState[i].high.freq = inp.eq.high.freq;
+                eqState[i].high.q = inp.eq.high.q;
+                eqState[i].hpf = inp.eq.hpf_on;
+                eqState[i].lpf = inp.eq.lpf_on;
+              }
+
+              // Compressor de Canal
+              if (typeof compState !== 'undefined' && compState[i] && inp.comp) {
+                compState[i].on = inp.comp.on;
+                compState[i].threshold = inp.comp.threshold;
+                compState[i].ratio = inp.comp.ratio;
+                compState[i].attack = inp.comp.attack;
+                compState[i].release = inp.comp.release;
+                compState[i].knee = inp.comp.knee;
+                compState[i].gain = inp.comp.gain;
+              }
+            }
+          });
+        }
+
+        // 4. Atualiza os componentes visuais na tela para a mixagem selecionada
+        for (let i = 0; i < TOTAL_CHANNELS; i++) {
+          if (channelsState[i].visible) {
+            updateFaderUI(i, mixData[currentMixTarget].volumes[i]);
+            updateChannelOnUI(i, mixData[currentMixTarget].on[i] === 1);
+            updateChannelStripFxBadges(i);
+          }
+        }
+        updateMasterOutputFaderUI(mixData[currentMixTarget].masterVolume);
+        updateMasterOutputOnUI(mixData[currentMixTarget].masterOn === 1);
+        if (typeof updateOutputSelBadges === 'function') {
+          updateOutputSelBadges();
+        }
+
+        saveMixDataDebounced();
+      } catch (err) {
+        console.error('Falha ao sincronizar estado com o servidor:', err);
+      }
+    }
+
+    // ==========================================
+    // GERENCIADOR DE CENAS E ADMINISTRAÇÃO (UI)
+    // ==========================================
+    const scenesModalOverlay = document.getElementById('scenesModalOverlay');
+    const btnAdminScenes = document.getElementById('btnAdminScenes');
+    const btnScenesClose = document.getElementById('btnScenesClose');
+    const btnOpenSaveSceneDialog = document.getElementById('btnOpenSaveSceneDialog');
+    const sceneSaveForm = document.getElementById('sceneSaveForm');
+    const newSceneNameInput = document.getElementById('newSceneName');
+    const newSceneDescInput = document.getElementById('newSceneDesc');
+    const btnConfirmSaveScene = document.getElementById('btnConfirmSaveScene');
+    const btnCancelSaveScene = document.getElementById('btnCancelSaveScene');
+    const scenesListItems = document.getElementById('scenesListItems');
+    const drAutoSaveStatus = document.getElementById('drAutoSaveStatus');
+    const btnRestoreLastState = document.getElementById('btnRestoreLastState');
+    const btnTriggerImportScene = document.getElementById('btnTriggerImportScene');
+    const fileSceneImportInput = document.getElementById('fileSceneImportInput');
+
+    // Modal de Confirmação de Recall
+    const confirmRecallModal = document.getElementById('confirmRecallModal');
+    const confirmRecallMessage = document.getElementById('confirmRecallMessage');
+    const btnCancelRecall = document.getElementById('btnCancelRecall');
+    const btnConfirmRecall = document.getElementById('btnConfirmRecall');
+    let pendingRecallAction = null;
+
+    function openScenesModal() {
+      if (!scenesModalOverlay) return;
+      scenesModalOverlay.classList.add('open');
+      if (sceneSaveForm) sceneSaveForm.style.display = 'none';
+      loadScenesList();
+      loadAutoSaveStatus();
+    }
+
+    function closeScenesModal() {
+      if (scenesModalOverlay) scenesModalOverlay.classList.remove('open');
+      if (sceneSaveForm) sceneSaveForm.style.display = 'none';
+    }
+
+    function openConfirmRecallModal(message, onConfirm) {
+      if (!confirmRecallModal) return;
+      if (confirmRecallMessage) confirmRecallMessage.textContent = message;
+      pendingRecallAction = onConfirm;
+      confirmRecallModal.classList.add('open');
+    }
+
+    function closeConfirmRecallModal() {
+      if (confirmRecallModal) confirmRecallModal.classList.remove('open');
+      pendingRecallAction = null;
+    }
+
+    if (btnAdminScenes) {
+      btnAdminScenes.addEventListener('click', openScenesModal);
+    }
+    if (btnScenesClose) {
+      btnScenesClose.addEventListener('click', closeScenesModal);
+    }
+
+    if (scenesModalOverlay) {
+      scenesModalOverlay.addEventListener('click', (e) => {
+        if (e.target === scenesModalOverlay) closeScenesModal();
+      });
+    }
+
+    if (btnCancelRecall) {
+      btnCancelRecall.addEventListener('click', closeConfirmRecallModal);
+    }
+    if (btnConfirmRecall) {
+      btnConfirmRecall.addEventListener('click', () => {
+        if (typeof pendingRecallAction === 'function') {
+          pendingRecallAction();
+        }
+        closeConfirmRecallModal();
+      });
+    }
+
+    // Formulário de Salvar Nova Cena
+    if (btnOpenSaveSceneDialog) {
+      btnOpenSaveSceneDialog.addEventListener('click', () => {
+        if (!sceneSaveForm) return;
+        const isHidden = sceneSaveForm.style.display === 'none';
+        sceneSaveForm.style.display = isHidden ? 'flex' : 'none';
+        if (isHidden && newSceneNameInput) {
+          newSceneNameInput.value = '';
+          if (newSceneDescInput) newSceneDescInput.value = '';
+          newSceneNameInput.focus();
+        }
+      });
+    }
+
+    if (btnCancelSaveScene) {
+      btnCancelSaveScene.addEventListener('click', () => {
+        if (sceneSaveForm) sceneSaveForm.style.display = 'none';
+      });
+    }
+
+    if (btnConfirmSaveScene) {
+      btnConfirmSaveScene.addEventListener('click', async () => {
+        const name = newSceneNameInput.value.trim();
+        const desc = newSceneDescInput.value.trim();
+        if (!name) {
+          alert('Por favor, informe um nome para a cena.');
+          newSceneNameInput.focus();
+          return;
+        }
+
+        btnConfirmSaveScene.disabled = true;
+        btnConfirmSaveScene.textContent = 'Salvando...';
+
+        try {
+          const res = await fetch('/api/scenes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, description: desc })
+          });
+          const result = await res.json();
+          if (res.ok && result.success) {
+            showToast(`Cena '${name}' salva com sucesso! 💾`, '💾');
+            if (sceneSaveForm) sceneSaveForm.style.display = 'none';
+            loadScenesList();
+          } else {
+            alert(`Falha ao salvar cena: ${result.error || 'Erro desconhecido'}`);
+          }
+        } catch (err) {
+          alert('Erro na comunicação com o servidor ao salvar cena.');
+        } finally {
+          btnConfirmSaveScene.disabled = false;
+          btnConfirmSaveScene.textContent = 'Salvar Snapshot';
+        }
+      });
+    }
+
+    // Carregamento da Lista de Cenas
+    async function loadScenesList() {
+      if (!scenesListItems) return;
+      scenesListItems.innerHTML = '<div class="scenes-loading">Carregando cenas...</div>';
+
+      try {
+        const res = await fetch('/api/scenes');
+        if (!res.ok) {
+          scenesListItems.innerHTML = '<div class="scenes-empty">Erro ao listar cenas do servidor.</div>';
+          return;
+        }
+        const data = await res.json();
+        const list = data.scenes || [];
+
+        if (list.length === 0) {
+          scenesListItems.innerHTML = '<div class="scenes-empty">Nenhuma cena salva no servidor até o momento.</div>';
+          return;
+        }
+
+        scenesListItems.innerHTML = '';
+        list.forEach(scene => {
+          const row = document.createElement('div');
+          row.className = 'scene-row';
+
+          const d = new Date(scene.updated_at || scene.created_at);
+          const dateStr = !isNaN(d.getTime())
+            ? d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+            : '-';
+
+          row.innerHTML = `
+            <div class="scene-info-wrap">
+              <span class="scene-item-name">${escapeHTML(scene.name)}</span>
+              ${scene.description ? `<span class="scene-item-desc" title="${escapeHTML(scene.description)}">${escapeHTML(scene.description)}</span>` : ''}
+            </div>
+            <span class="scene-item-author">${escapeHTML(scene.author || 'admin')}</span>
+            <span class="scene-item-date">${dateStr}</span>
+            <div class="scene-item-actions">
+              <button type="button" class="btn-scene-action primary sm btn-recall" data-id="${scene.id}" data-name="${escapeHTML(scene.name)}" title="Carregar parâmetros na mesa física">▶ Recall</button>
+              <a href="/api/scenes/${scene.id}?download=1" class="btn-scene-action secondary sm" style="text-decoration:none;" title="Baixar arquivo JSON">⬇ JSON</a>
+              <button type="button" class="btn-scene-action danger sm btn-delete" data-id="${scene.id}" data-name="${escapeHTML(scene.name)}" title="Excluir cena">🗑</button>
+            </div>
+          `;
+
+          scenesListItems.appendChild(row);
+        });
+
+        // Eventos nos botões da lista
+        scenesListItems.querySelectorAll('.btn-recall').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const name = btn.dataset.name;
+            openConfirmRecallModal(`Tem certeza que deseja carregar a cena "${name}" na mesa física Yamaha 01V96?`, () => {
+              triggerRecallScene(id, name);
+            });
+          });
+        });
+
+        scenesListItems.querySelectorAll('.btn-delete').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id = btn.dataset.id;
+            const name = btn.dataset.name;
+            if (confirm(`Tem certeza que deseja excluir permanentemente a cena "${name}"?`)) {
+              await deleteScene(id, name);
+            }
+          });
+        });
+
+      } catch (err) {
+        scenesListItems.innerHTML = '<div class="scenes-empty">Falha na conexão com o servidor.</div>';
+      }
+    }
+
+    async function triggerRecallScene(id, name) {
+      try {
+        const res = await fetch(`/api/scenes/${id}/recall`, { method: 'POST' });
+        const result = await res.json();
+        if (res.ok && result.success) {
+          showToast(`Cena '${name}' sendo aplicada na mesa física! 🎬`, '🎬');
+          closeScenesModal();
+          syncFullStateFromBackend();
+        } else {
+          alert(`Erro ao carregar cena: ${result.error || 'Erro desconhecido'}`);
+        }
+      } catch (err) {
+        alert('Falha na comunicação com o servidor ao carregar cena.');
+      }
+    }
+
+    async function deleteScene(id, name) {
+      try {
+        const res = await fetch(`/api/scenes/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (res.ok && result.success) {
+          showToast(`Cena '${name}' excluída com sucesso.`, '🗑');
+          loadScenesList();
+        } else {
+          alert(`Falha ao excluir cena: ${result.error || 'Erro desconhecido'}`);
+        }
+      } catch (err) {
+        alert('Erro na comunicação com o servidor ao excluir cena.');
+      }
+    }
+
+    // Status do Auto-Save e Restauração de Emergência
+    async function loadAutoSaveStatus() {
+      if (!drAutoSaveStatus) return;
+      try {
+        const res = await fetch('/api/state/status');
+        if (!res.ok) {
+          drAutoSaveStatus.textContent = 'Status do auto-save indisponível.';
+          return;
+        }
+        const data = await res.json();
+        if (data.has_auto_save) {
+          const d = new Date(data.last_auto_save);
+          const dateStr = !isNaN(d.getTime())
+            ? d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR')
+            : 'Disponível no disco';
+          drAutoSaveStatus.innerHTML = `Último snapshot gravado: <strong>${dateStr}</strong>`;
+          if (btnRestoreLastState) btnRestoreLastState.disabled = false;
+        } else {
+          drAutoSaveStatus.textContent = 'Nenhum snapshot de auto-save gravado ainda.';
+          if (btnRestoreLastState) btnRestoreLastState.disabled = true;
+        }
+      } catch (err) {
+        drAutoSaveStatus.textContent = 'Falha ao consultar auto-save.';
+      }
+    }
+
+    if (btnRestoreLastState) {
+      btnRestoreLastState.addEventListener('click', () => {
+        openConfirmRecallModal('Atenção: Deseja restaurar o último estado gravado (auto-save) diretamente na mesa física Yamaha 01V96?', async () => {
+          try {
+            const res = await fetch('/api/state/restore-last', { method: 'POST' });
+            const result = await res.json();
+            if (res.ok && result.success) {
+              showToast('Último estado restaurado com sucesso na mesa física! 🛡️', '🛡️');
+              closeScenesModal();
+              syncFullStateFromBackend();
+            } else {
+              alert(`Falha ao restaurar: ${result.error || 'Erro desconhecido'}`);
+            }
+          } catch (err) {
+            alert('Falha na comunicação com o servidor ao restaurar estado.');
+          }
+        });
+      });
+    }
+
+    // Importação de Arquivo JSON de Cena
+    if (btnTriggerImportScene && fileSceneImportInput) {
+      btnTriggerImportScene.addEventListener('click', () => {
+        fileSceneImportInput.value = '';
+        fileSceneImportInput.click();
+      });
+
+      fileSceneImportInput.addEventListener('change', async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+          const res = await fetch('/api/scenes/import', {
+            method: 'POST',
+            body: formData
+          });
+          const result = await res.json();
+          if (res.ok && result.success) {
+            showToast(`Cena '${result.scene.name}' importada com sucesso! ⬆`, '⬆');
+            loadScenesList();
+          } else {
+            alert(`Falha ao importar cena: ${result.error || 'Arquivo inválido'}`);
+          }
+        } catch (err) {
+          alert('Erro de conexão ao enviar arquivo de cena.');
+        }
+      });
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Tecla ESC para fechar modais de cenas
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (confirmRecallModal && confirmRecallModal.classList.contains('open')) {
+          closeConfirmRecallModal();
+        } else if (scenesModalOverlay && scenesModalOverlay.classList.contains('open')) {
+          closeScenesModal();
+        }
       }
     });
 
