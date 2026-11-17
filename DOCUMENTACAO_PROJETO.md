@@ -80,6 +80,20 @@ O **Web Remote Controller** é uma solução moderna e leve para controle remoto
   * Intervalo configurado: 20 ms para envios MIDI e 16 ms para broadcasts WebSocket.
   * Comandos discretos críticos (como ON/MUTE, Bypass e seletores) ignoram o throttling e têm entrega imediata garantida.
 
+### Etapa 9: Interface Mobile Vertical Reduzida (`/m` e `/mobile`)
+* **Rota Dedicada:** Endpoints `/m` e `/mobile` servindo `mobile.html`, permitindo operação ergonômica com o polegar em smartphones na vertical.
+* **Header Mínimo:** Botão de perfil `👤` (abre menu com papel e logout) e indicador de conexão MIDI/WebSocket 100% estático (sem animações ou pulsações).
+* **Redirecionamento Automático Mobile:** Detecção inteligente via User-Agent e dimensões de tela tanto no login quanto na rota raiz (`/`), encaminhando celulares diretamente para `/m` (com parâmetro `?view=desktop` para alternar intencionalmente).
+* **Matriz de Saídas Compacta:**
+  * Linha 1: Dividida em **3/4** para o botão `MASTER` e **1/4** para o botão `🎚️ OUT` (toggle para exibir/ocultar o fader de saída, persistido no navegador).
+  * Linhas 2 e 3: Grades 4x1 com botões de AUX 1 a 4 e AUX 5 a 8.
+* **Barra de Funções Retrátil (Colapsável):** Barra recolhível com resumo de canais ativos, liberando espaço vertical na tela para faders.
+* **Faders Horizontais em Cartões:**
+  * Glow interno e borda superior luminosa em **vermelho** (modo Master) ou **azul** (modo Auxiliar) indicando a rota de mixagem em cada canal.
+  * Master da saída selecionada com acabamento translúcido (vermelho no Stereo Master e azul no Auxiliar).
+  * Canais de entrada: Nome, botão `ON/MUTE`, botão `SEL` (brilho dourado indicando se EQ/Compressor está ativo).
+  * Slider horizontal touch-friendly com manopla ampla, indicador numérico em dB e botões de pulo rápido `[ 0 ]` e `[ -∞ ]`.
+
 ---
 
 ## 3. Em que Ponto Estamos Hoje (Status Atual)

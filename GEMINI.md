@@ -21,6 +21,7 @@ Este documento serve como ponto de partida rápido para novas sessões de IA ou 
 |---|---|
 | `main.go` | Ponto de entrada do backend. Gerencia portas MIDI (ALSA), servidor HTTP, conexões WebSocket, throttling de pacotes, autenticação por cookies e simulador de faders. |
 | `index.html` | Interface gráfica do console. Faders estilizados, rotas de Auxiliares (*Sends on Fader*), modal de Equalizador 4 bandas com gráfico Canvas, modal de Compressor e medidores. |
+| `mobile.html` | Interface vertical compacta para celular (`/m` ou `/mobile`). Faders horizontais, botões táteis resumidos, diálogo modal de canais e master integrado rolável. |
 | `login.html` | Interface de autenticação com suporte a login por formulário padrão e requisições assíncronas JSON. |
 | `usuarios.csv` | Banco de dados plano de usuários (`nome,usuario,senha,papel`). Relido em tempo real sem necessidade de reiniciar o binário. |
 | `auth_test.go` | Suíte de testes automatizados para verificação do módulo de autenticação e manipulação do CSV. |

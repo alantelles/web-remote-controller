@@ -1,0 +1,1969 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Yamaha 01V96 — Mobile Control</title>
+  <style>
+    :root {
+      --bg-chassis: #0b0d12;
+      --bg-surface: #141720;
+      --bg-card: #1a1e29;
+      --bg-card-alt: #161922;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      
+      --text-main: #f1f5f9;
+      --text-dim: #94a3b8;
+      --text-faint: #64748b;
+
+      --yamaha-blue: #0284c7;
+      --yamaha-cyan: #06b6d4;
+      --yamaha-amber: #f59e0b;
+      --yamaha-red: #ef4444;
+      --yamaha-green: #10b981;
+
+      --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg-chassis);
+      color: var(--text-main);
+      font-family: var(--font-stack);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    /* ==========================================
+       BLOCO 1: TOPO / CABEÇALHO ULTRACOMPACTO
+       ========================================== */
+    .mobile-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: #11141c;
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-user-btn {
+      background: #1b202c;
+      border: 1px solid var(--border-strong);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .header-user-btn:active {
+      background: #252c3d;
+    }
+
+    .header-status-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .port-label {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      max-width: 140px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Ícone de status estático (SEM PISCAR NEM PULSAR) */
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--yamaha-red);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      flex-shrink: 0;
+    }
+
+    .status-indicator.connected {
+      background: var(--yamaha-green);
+    }
+
+    /* Dropdown / Modal do Usuário */
+    .user-popover-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 100;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 60px;
+    }
+
+    .user-popover-backdrop.open {
+      display: flex;
+    }
+
+    .user-popover-box {
+      background: #1a1e29;
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 16px;
+      width: 88%;
+      max-width: 320px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .user-popover-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 8px;
+    }
+
+    .user-popover-info {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .user-popover-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn-popover {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-popover-desktop {
+      background: #252b3b;
+      color: var(--yamaha-cyan);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+
+    .btn-popover-logout {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    .btn-popover-close {
+      background: transparent;
+      color: var(--text-dim);
+    }
+
+    /* ==========================================
+       BLOCO 2: BOTÕES COM AS SAÍDAS (MIX TARGETS)
+       ========================================== */
+    .outputs-block {
+      padding: 10px 10px 4px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #11141c;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .btn-out {
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.1s, border-color 0.1s;
+    }
+
+    .btn-out:active {
+      transform: scale(0.98);
+    }
+
+    /* Linha 1: Master ocupa 3/4 (75%) e botão de visibilidade de saída ocupa 1/4 (25%) */
+    .outputs-top-row {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .btn-out-master {
+      height: 40px;
+      background: #1e222d;
+      color: #fca5a5;
+      font-size: 13px;
+    }
+
+    .btn-out-master.active {
+      background: #7f1d1d;
+      color: #ffffff;
+      border-color: #ef4444;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-toggle-out {
+      height: 40px;
+      background: #151822;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-toggle-out:active {
+      transform: scale(0.98);
+    }
+
+    .btn-toggle-out.active {
+      background: #0f2b3d;
+      color: #38bdf8;
+      border-color: #0284c7;
+      box-shadow: 0 0 8px rgba(2, 132, 199, 0.35);
+    }
+
+    /* Linhas 2 e 3: Grades 4x1 de Auxiliares */
+    .outputs-aux-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .btn-out-aux {
+      height: 36px;
+      background: #171b24;
+      color: #94a3b8;
+    }
+
+    .btn-out-aux.active {
+      background: #0e3d54;
+      color: #38bdf8;
+      border-color: #0284c7;
+      box-shadow: 0 0 8px rgba(2, 132, 199, 0.4);
+    }
+
+    /* ==========================================
+       BLOCO 3: BOTÕES DE NAVEGAÇÃO DE CANAIS
+       ========================================== */
+    .nav-block {
+      padding: 6px 10px 10px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #11141c;
+      border-bottom: 1px solid var(--border-strong);
+    }
+
+    .nav-collapse-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 2px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .nav-collapse-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-summary-pill {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      background: #0f1219;
+      color: #38bdf8;
+      border: 1px solid #232c3d;
+      padding: 1px 6px;
+      border-radius: 10px;
+      text-transform: none;
+    }
+
+    .nav-chevron {
+      font-size: 11px;
+      color: var(--text-dim);
+      transition: transform 0.2s ease;
+    }
+
+    .nav-block.collapsed {
+      padding-bottom: 6px;
+    }
+
+    .nav-block.collapsed .nav-chevron {
+      transform: rotate(180deg);
+    }
+
+    .nav-collapsible-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-block.collapsed .nav-collapsible-body {
+      display: none;
+    }
+
+    /* Linha 1: Botão abre diálogo de visualização */
+    .btn-dialog-trigger {
+      width: 100%;
+      height: 36px;
+      background: #1e2330;
+      color: #38bdf8;
+      border: 1px solid #2e374d;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      cursor: pointer;
+    }
+
+    .btn-dialog-trigger:active {
+      background: #272e40;
+    }
+
+    /* Linha 2, 3 e 4: Grades de 4 botões */
+    .nav-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .btn-nav {
+      height: 34px;
+      background: #161922;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-nav:active {
+      background: #222735;
+    }
+
+    .btn-nav.active {
+      background: #1e293b;
+      color: #38bdf8;
+      border-color: #38bdf8;
+    }
+
+    /* Linha 4: Ações Globais */
+    .btn-action-sim.active {
+      background: #451a03;
+      color: #fbbf24;
+      border-color: #d97706;
+    }
+
+    .btn-action-mute {
+      color: #f87171;
+    }
+
+    .btn-action-unmute {
+      color: #34d399;
+    }
+
+    /* ==========================================
+       MODAL DE SELEÇÃO DE CANAIS
+       ========================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 150;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-container {
+      background: #151821;
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 380px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.85);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 12px 16px;
+      background: #1c212d;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .modal-header button {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .modal-body {
+      padding: 12px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .channels-checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .channel-chk-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #0f1218;
+      border: 1px solid var(--border-subtle);
+      padding: 8px 6px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .channel-chk-item input {
+      accent-color: #38bdf8;
+      cursor: pointer;
+    }
+
+    .modal-footer {
+      padding: 10px 12px;
+      background: #11141c;
+      border-top: 1px solid var(--border-subtle);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .modal-footer-save {
+      grid-column: span 2;
+    }
+
+    .btn-modal-action {
+      height: 36px;
+      border-radius: 6px;
+      border: 1px solid var(--border-strong);
+      background: #1e2330;
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-modal-save {
+      background: #065f46;
+      color: #34d399;
+      border-color: #059669;
+    }
+
+    /* ==========================================
+       LISTA ROLÁVEL DE FADERS HORIZONTAIS
+       ========================================== */
+    .faders-list {
+      flex: 1;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--bg-chassis);
+    }
+
+    /* Badge Compacto de Saída (quando fader master completo está oculto) */
+    .output-compact-badge-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 0 4px 0;
+      width: 100%;
+    }
+
+    .output-dest-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      cursor: pointer;
+    }
+
+    .output-dest-badge:active {
+      transform: scale(0.97);
+    }
+
+    .output-dest-badge.dest-master {
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.16);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+    }
+
+    .output-dest-badge.dest-aux {
+      color: #38bdf8;
+      background: rgba(6, 182, 212, 0.16);
+      border: 1px solid rgba(6, 182, 212, 0.45);
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.25);
+    }
+
+    /* Card de Canal */
+    .fader-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+      touch-action: pan-y;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* Glow interno superior em vermelho quando a mixagem é para o MASTER */
+    .mix-master .fader-card:not(.fader-card-master) {
+      border-top: 2px solid rgba(239, 68, 68, 0.85);
+      box-shadow: inset 0 6px 14px -3px rgba(239, 68, 68, 0.4), 0 3px 8px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Glow interno superior em azul quando a mixagem é para um AUXILIAR */
+    .mix-aux .fader-card:not(.fader-card-master) {
+      border-top: 2px solid rgba(6, 182, 212, 0.85);
+      box-shadow: inset 0 6px 14px -3px rgba(6, 182, 212, 0.4), 0 3px 8px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Card do Master da Mix (Primeiro elemento, rola junto) */
+    .fader-card-master {
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.2) 0%, rgba(26, 30, 41, 0.95) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.55);
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .fader-card-master .fader-horizontal::-webkit-slider-runnable-track {
+      border-color: rgba(239, 68, 68, 0.45);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(239, 68, 68, 0.25);
+    }
+    .fader-card-master .fader-horizontal::-moz-range-track {
+      border-color: rgba(239, 68, 68, 0.45);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(239, 68, 68, 0.25);
+    }
+
+    .fader-card-master .fader-horizontal::-webkit-slider-thumb {
+      background: linear-gradient(180deg, #fca5a5 0%, #ef4444 45%, #b91c1c 55%, #f87171 100%);
+      border: 1px solid #7f1d1d;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+    .fader-card-master .fader-horizontal::-moz-range-thumb {
+      background: linear-gradient(180deg, #fca5a5 0%, #ef4444 45%, #b91c1c 55%, #f87171 100%);
+      border: 1px solid #7f1d1d;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+    }
+
+    .fader-card-master .db-readout {
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.45);
+      background: rgba(239, 68, 68, 0.12);
+    }
+
+    .fader-card-master .btn-ch-mute.is-on {
+      background: linear-gradient(180deg, #b91c1c 0%, #7f1d1d 100%);
+      color: #ffffff;
+      border-color: #ef4444;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.45);
+    }
+
+    /* Versão Translúcida do Auxiliar (Azul / Ciano como o Master é Vermelho) */
+    .fader-card-master.aux-mode {
+      background: linear-gradient(180deg, rgba(6, 182, 212, 0.2) 0%, rgba(26, 30, 41, 0.95) 100%);
+      border: 1px solid rgba(6, 182, 212, 0.55);
+      box-shadow: 0 4px 16px rgba(6, 182, 212, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .fader-card-master.aux-mode .fader-horizontal::-webkit-slider-runnable-track {
+      border-color: rgba(6, 182, 212, 0.45);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(6, 182, 212, 0.25);
+    }
+    .fader-card-master.aux-mode .fader-horizontal::-moz-range-track {
+      border-color: rgba(6, 182, 212, 0.45);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(6, 182, 212, 0.25);
+    }
+
+    .fader-card-master.aux-mode .fader-horizontal::-webkit-slider-thumb {
+      background: linear-gradient(180deg, #7dd3fc 0%, #0284c7 45%, #0369a1 55%, #38bdf8 100%);
+      border: 1px solid #075985;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+    .fader-card-master.aux-mode .fader-horizontal::-moz-range-thumb {
+      background: linear-gradient(180deg, #7dd3fc 0%, #0284c7 45%, #0369a1 55%, #38bdf8 100%);
+      border: 1px solid #075985;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.6);
+    }
+
+    .fader-card-master.aux-mode .db-readout {
+      color: #38bdf8;
+      border-color: rgba(6, 182, 212, 0.45);
+      background: rgba(6, 182, 212, 0.12);
+    }
+
+    .fader-card-master.aux-mode .btn-ch-mute.is-on {
+      background: linear-gradient(180deg, #0284c7 0%, #075985 100%);
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 8px rgba(6, 182, 212, 0.45);
+    }
+
+    /* Linha 1 do Card: Nome e Botões MUTE / SEL */
+    .card-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .channel-name-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .channel-num-badge {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      background: #0f1219;
+      color: #38bdf8;
+      border: 1px solid #232c3d;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .card-top-buttons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Botão MUTE / ON */
+    .btn-ch-mute {
+      height: 32px;
+      min-width: 68px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.12s ease;
+      background: #2b1115;
+      color: #f87171;
+      border: 1px solid #7f1d1d;
+    }
+
+    .btn-ch-mute.is-on {
+      background: #064e3b;
+      color: #34d399;
+      border-color: #059669;
+    }
+
+    /* Botão SEL (SEM LEDs. Brilha diferente se algum efeito estiver ativo) */
+    .btn-ch-sel {
+      height: 32px;
+      min-width: 52px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #212634;
+      color: #94a3b8;
+      border: 1px solid #333c52;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .btn-ch-sel:active {
+      background: #2b3245;
+    }
+
+    .btn-ch-sel.selected {
+      background: #1e3a8a;
+      color: #bfdbfe;
+      border-color: #3b82f6;
+    }
+
+    /* Brilho especial quando algum efeito (EQ/Comp) está ativo no canal */
+    .btn-ch-sel.fx-active {
+      border: 1px solid #f59e0b;
+      color: #fbbf24;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.45);
+    }
+
+    /* Linha 2 do Card: Slider Horizontal */
+    .card-row-slider {
+      padding: 4px 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .fader-horizontal {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 36px;
+      background: transparent;
+      outline: none;
+      cursor: pointer;
+      touch-action: pan-y;
+    }
+
+    /* Trilho do Slider */
+    .fader-horizontal::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 12px;
+      background: #0a0c10;
+      border-radius: 6px;
+      border: 1px solid #232838;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .fader-horizontal::-moz-range-track {
+      width: 100%;
+      height: 12px;
+      background: #0a0c10;
+      border-radius: 6px;
+      border: 1px solid #232838;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Manopla (Fader Cap) Estilo Yamaha para Touch */
+    .fader-horizontal::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 36px;
+      width: 32px;
+      margin-top: -12px;
+      border-radius: 6px;
+      background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 45%, #64748b 55%, #e2e8f0 100%);
+      border: 1px solid #000;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      cursor: grab;
+      position: relative;
+    }
+
+    .fader-horizontal::-moz-range-thumb {
+      height: 36px;
+      width: 32px;
+      border-radius: 6px;
+      background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 45%, #64748b 55%, #e2e8f0 100%);
+      border: 1px solid #000;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+      cursor: grab;
+    }
+
+    /* Linha 3 do Card: Indicador Numérico e Botões [0] e [-inf] */
+    .card-row-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .db-readout {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 800;
+      color: #38bdf8;
+      background: #0c0f16;
+      border: 1px solid #1e2536;
+      padding: 4px 10px;
+      border-radius: 6px;
+      min-width: 82px;
+      text-align: center;
+    }
+
+    .card-bottom-buttons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-quick-val {
+      height: 30px;
+      min-width: 44px;
+      padding: 0 10px;
+      background: #1e2330;
+      border: 1px solid #2e374d;
+      border-radius: 6px;
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-quick-val:active {
+      background: #2b3345;
+    }
+
+    /* Toast Flutuante de Alerta */
+    .toast-msg {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid #38bdf8;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .toast-msg.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================
+       BLOCO 1: TOPO / CABEÇALHO ULTRACOMPACTO
+       ========================================== -->
+  <header class="mobile-header">
+    <button class="header-user-btn" id="btnUserMenu" type="button" title="Menu de usuário">
+      <span>👤</span>
+      <span id="headerUserName">Usuário</span>
+    </button>
+
+    <div class="header-status-area">
+      <span class="port-label" id="headerPortName">MIDI: Conectando...</span>
+      <div class="status-indicator" id="headerStatusDot" title="Status da Conexão (Verde = Conectado, Vermelho = Desconectado)"></div>
+    </div>
+  </header>
+
+  <!-- Popover do Usuário (Toque no 👤 para abrir) -->
+  <div class="user-popover-backdrop" id="userPopover">
+    <div class="user-popover-box">
+      <div class="user-popover-title">
+        <span>👤</span>
+        <span id="popoverUserTitle">Perfil do Usuário</span>
+      </div>
+      <div class="user-popover-info">
+        <div><strong>Nome:</strong> <span id="popoverUserName">-</span></div>
+        <div><strong>Login:</strong> <span id="popoverUserLogin">-</span></div>
+        <div><strong>Papel:</strong> <span id="popoverUserRole">-</span></div>
+      </div>
+      <div class="user-popover-actions">
+        <a href="/?view=desktop" class="btn-popover btn-popover-desktop">🖥️ Ir para Versão Desktop</a>
+        <a href="/logout" class="btn-popover btn-popover-logout">Sair da Sessão ↪</a>
+        <button class="btn-popover btn-popover-close" id="btnCloseUserPopover" type="button">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       BLOCO 2: BOTÕES COM AS SAÍDAS (MIX TARGETS)
+       ========================================== -->
+  <section class="outputs-block">
+    <!-- Linha 1: Master (3/4) e Botão Ver/Ocultar Saída (1/4) -->
+    <div class="outputs-top-row">
+      <button class="btn-out btn-out-master active" data-mix="MASTER" type="button" title="Mix Principal Stereo Out">
+        ★ MASTER (STEREO OUT)
+      </button>
+      <button class="btn-out btn-toggle-out active" id="btnToggleMasterOut" type="button" title="Mostrar/ocultar fader da saída da mix atual">
+        🎚️ OUT
+      </button>
+    </div>
+
+    <!-- Linha 2: Aux 1 a 4 -->
+    <div class="outputs-aux-grid">
+      <button class="btn-out btn-out-aux" data-mix="AUX1" type="button">AUX 1</button>
+      <button class="btn-out btn-out-aux" data-mix="AUX2" type="button">AUX 2</button>
+      <button class="btn-out btn-out-aux" data-mix="AUX3" type="button">AUX 3</button>
+      <button class="btn-out btn-out-aux" data-mix="AUX4" type="button">AUX 4</button>
+    </div>
+
+    <!-- Linha 3: Aux 5 a 8 -->
+    <div class="outputs-aux-grid">
+      <button class="btn-out btn-out-aux" data-mix="AUX5" type="button">AUX 5</button>
+      <button class="btn-out btn-out-aux" data-mix="AUX6" type="button">AUX 6</button>
+      <button class="btn-out btn-out-aux" data-mix="AUX7" type="button">AUX 7</button>
+      <button class="btn-out btn-out-aux" data-mix="AUX8" type="button">AUX 8</button>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       BLOCO 3: BOTÕES DE NAVEGAÇÃO DE PÁGINAS (COLAPSÁVEL)
+       ========================================== -->
+  <section class="nav-block" id="navBlock">
+    <!-- Barra de Controle de Colapso -->
+    <div class="nav-collapse-bar" id="btnToggleNavCollapse" role="button" tabindex="0" title="Toque para ocultar/exibir funções">
+      <div class="nav-collapse-title">
+        <span>⚙️ Funções & Filtros</span>
+        <span class="nav-summary-pill" id="navSummaryPill">32 canais</span>
+      </div>
+      <span class="nav-chevron" id="navChevron">▲</span>
+    </div>
+
+    <!-- Conteúdo Colapsável -->
+    <div class="nav-collapsible-body" id="navCollapsibleBody">
+      <!-- Linha 1: Botão que abre diálogo de visualização -->
+      <button class="btn-dialog-trigger" id="btnOpenChannelsModal" type="button">
+        <span id="navChannelsCount">Selecionar Canais Individuais (32/32)</span>
+        <span>▾</span>
+      </button>
+
+      <!-- Linha 2: Todos, 1-16, 17-32, Salvo -->
+      <div class="nav-grid-4">
+        <button class="btn-nav active" data-bank="all" type="button">Todos</button>
+        <button class="btn-nav" data-bank="1-16" type="button">1–16</button>
+        <button class="btn-nav" data-bank="17-32" type="button">17–32</button>
+        <button class="btn-nav" id="btnRestoreSaved" type="button">Salvo</button>
+      </div>
+
+      <!-- Linha 3: 1-8, 9-16, 17-24, 25-32 -->
+      <div class="nav-grid-4">
+        <button class="btn-nav" data-bank="1-8" type="button">1–8</button>
+        <button class="btn-nav" data-bank="9-16" type="button">9–16</button>
+        <button class="btn-nav" data-bank="17-24" type="button">17–24</button>
+        <button class="btn-nav" data-bank="25-32" type="button">25–32</button>
+      </div>
+
+      <!-- Linha 4: Simulação e Ações Globais -->
+      <div class="nav-grid-4">
+        <button class="btn-nav btn-action-sim" id="btnToggleSim" type="button">🎲 Sim</button>
+        <button class="btn-nav" id="btnAllZeroDb" type="button">⚡ 0dB</button>
+        <button class="btn-nav btn-action-unmute" id="btnUnmuteAll" type="button">🔔 ON</button>
+        <button class="btn-nav btn-action-mute" id="btnMuteAll" type="button">🔇 MUTE</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       MODAL DE SELEÇÃO DE CANAIS VISÍVEIS
+       ========================================== -->
+  <div class="modal-backdrop" id="channelsModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <span>Canais Visíveis na Tela</span>
+        <button id="btnCloseChannelsModal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="channels-checkbox-grid" id="modalCheckboxGrid">
+          <!-- Gerado via JS (CH 1 a 32) -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-action" id="btnModalSelectAll" type="button">Marcar Todos</button>
+        <button class="btn-modal-action" id="btnModalSelectNone" type="button">Desmarcar Todos</button>
+        <button class="btn-modal-action btn-modal-save modal-footer-save" id="btnModalSaveCurrent" type="button">
+          💾 Salvar Seleção Atual no Celular
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       LISTA ROLÁVEL DE FADERS HORIZONTAIS
+       ========================================== -->
+  <main class="faders-list" id="fadersList">
+    <!-- Badge Compacto de Saída (exibido quando o fader completo está oculto) -->
+    <div class="output-compact-badge-bar" id="outputCompactBadgeBar" style="display: none;">
+      <span class="output-dest-badge dest-master" id="compactOutputBadge" title="Toque para reabrir o fader de saída completo">
+        ★ SAÍDA: STEREO MASTER
+      </span>
+    </div>
+
+    <!-- Card 1: Master de Saída da Mix Selecionada (Rola junto com os outros) -->
+    <div class="fader-card fader-card-master" id="masterFaderCard">
+      <div class="card-row-top">
+        <div class="channel-name-tag">
+          <span class="channel-num-badge">OUT</span>
+          <span id="masterOutputTitle">STEREO MASTER</span>
+        </div>
+        <div class="card-top-buttons">
+          <button class="btn-ch-mute is-on" id="masterMuteBtn" type="button">ON</button>
+        </div>
+      </div>
+      <div class="card-row-slider">
+        <input type="range" class="fader-horizontal" id="masterSlider" min="0" max="1023" value="823">
+      </div>
+      <div class="card-row-bottom">
+        <div class="db-readout" id="masterDbText">0.0 dB</div>
+        <div class="card-bottom-buttons">
+          <button class="btn-quick-val" id="masterZeroBtn" type="button">0</button>
+          <button class="btn-quick-val" id="masterInfBtn" type="button">-∞</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards 2 a 33: Canais de Entrada gerados dinamicamente via JS -->
+  </main>
+
+  <div class="toast-msg" id="toastMsg">Salvo com sucesso!</div>
+
+  <script>
+    // ==========================================
+    // CONSTANTES E MAPEAMENTO DE SYSEX (01V96V2)
+    // ==========================================
+    const TOTAL_CHANNELS = 32;
+    const NOMINAL_VALUE = 823; // 0.0 dB
+    const MAX_VALUE = 1023;    // +10.0 dB
+    const MIN_VALUE = 0;       // -∞ dB
+
+    // Curva aproximada de dB da 01V96
+    const DB_BREAKPOINTS = [
+      { val: 1023, db: 10.0 },
+      { val: 823,  db: 0.0 },
+      { val: 710,  db: -5.0 },
+      { val: 595,  db: -10.0 },
+      { val: 480,  db: -15.0 },
+      { val: 365,  db: -20.0 },
+      { val: 245,  db: -30.0 },
+      { val: 140,  db: -40.0 },
+      { val: 65,   db: -50.0 },
+      { val: 20,   db: -70.0 },
+      { val: 0,    db: -Infinity }
+    ];
+
+    function rawToDb(val) {
+      if (val === undefined || val === null || isNaN(val) || val <= 0) return '-∞ dB';
+      if (val === NOMINAL_VALUE) return '0.0 dB';
+      if (val >= MAX_VALUE) return '+10.0 dB';
+
+      for (let i = 0; i < DB_BREAKPOINTS.length - 1; i++) {
+        const p1 = DB_BREAKPOINTS[i];
+        const p2 = DB_BREAKPOINTS[i + 1];
+        if (val <= p1.val && val >= p2.val) {
+          if (p2.db === -Infinity) {
+            return `-${((p1.val - val) * 2).toFixed(1)} dB`;
+          }
+          const ratio = (val - p2.val) / (p1.val - p2.val);
+          const db = p2.db + ratio * (p1.db - p2.db);
+          const sign = db > 0 ? '+' : '';
+          return `${sign}${db.toFixed(1)} dB`;
+        }
+      }
+      return `${val}`;
+    }
+
+    // Configurações das 9 Mixagens
+    const MIX_TARGETS = {
+      MASTER: {
+        id: 'MASTER',
+        title: 'STEREO MASTER',
+        isMaster: true,
+        faderElement: 0x1C, faderParam: 0x00,
+        onElement: 0x1A,    onParam: 0x00,
+        outFaderElement: 0x4D, outFaderParam: 0x00, outChannel: 0x00,
+        outOnElement: 0x4B,    outOnParam: 0x00
+      },
+      AUX1: { id: 'AUX1', title: 'AUX 1 MASTER', isMaster: false, auxIdx: 0, faderElement: 0x23, faderParam: 0x00, onElement: 0x23, onParam: 0x08, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x00, outOnElement: 0x2F, outOnParam: 0x00 },
+      AUX2: { id: 'AUX2', title: 'AUX 2 MASTER', isMaster: false, auxIdx: 1, faderElement: 0x23, faderParam: 0x01, onElement: 0x23, onParam: 0x09, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x01, outOnElement: 0x2F, outOnParam: 0x00 },
+      AUX3: { id: 'AUX3', title: 'AUX 3 MASTER', isMaster: false, auxIdx: 2, faderElement: 0x23, faderParam: 0x02, onElement: 0x23, onParam: 0x0A, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x02, outOnElement: 0x2F, outOnParam: 0x00 },
+      AUX4: { id: 'AUX4', title: 'AUX 4 MASTER', isMaster: false, auxIdx: 3, faderElement: 0x23, faderParam: 0x03, onElement: 0x23, onParam: 0x0B, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x03, outOnElement: 0x2F, outOnParam: 0x00 },
+      AUX5: { id: 'AUX5', title: 'AUX 5 MASTER', isMaster: false, auxIdx: 4, faderElement: 0x23, faderParam: 0x04, onElement: 0x23, onParam: 0x0C, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x04, outOnElement: 0x2F, outOnParam: 0x00 },
+      AUX6: { id: 'AUX6', title: 'AUX 6 MASTER', isMaster: false, auxIdx: 5, faderElement: 0x23, faderParam: 0x05, onElement: 0x23, onParam: 0x0D, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x05, outOnElement: 0x2F, outOnParam: 0x00 },
+      AUX7: { id: 'AUX7', title: 'AUX 7 MASTER', isMaster: false, auxIdx: 6, faderElement: 0x23, faderParam: 0x06, onElement: 0x23, onParam: 0x0E, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x06, outOnElement: 0x2F, outOnParam: 0x00 },
+      AUX8: { id: 'AUX8', title: 'AUX 8 MASTER', isMaster: false, auxIdx: 7, faderElement: 0x23, faderParam: 0x07, onElement: 0x23, onParam: 0x0F, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x07, outOnElement: 0x2F, outOnParam: 0x00 }
+    };
+
+    // ==========================================
+    // ESTADO DA APLICAÇÃO
+    // ==========================================
+    let currentMix = 'MASTER';
+    let selectedChannel = 0; // Canal selecionado pelo SEL
+
+    // Estado local dos 32 canais para cada uma das 9 mixes
+    // faders[mixId][ch]
+    const state = {
+      faders: {},
+      mutes: {}, // 1 = ON, 0 = MUTED
+      eqOn: new Array(TOTAL_CHANNELS).fill(false),
+      compOn: new Array(TOTAL_CHANNELS).fill(false),
+      masterFaders: { MASTER: NOMINAL_VALUE },
+      masterMutes: { MASTER: 1 },
+      visibleChannels: new Set(Array.from({ length: TOTAL_CHANNELS }, (_, i) => i))
+    };
+
+    // Inicializa estruturas de dados para todas as mixes
+    Object.keys(MIX_TARGETS).forEach(mix => {
+      state.faders[mix] = new Array(TOTAL_CHANNELS).fill(NOMINAL_VALUE);
+      state.mutes[mix] = new Array(TOTAL_CHANNELS).fill(1); // Todos iniciam ON
+      if (mix !== 'MASTER') {
+        state.masterFaders[mix] = NOMINAL_VALUE;
+        state.masterMutes[mix] = 1;
+      }
+    });
+
+    // ==========================================
+    // COMUNICAÇÃO WEBSOCKET E THROTTLING
+    // ==========================================
+    let ws = null;
+    let wsConnected = false;
+    let lastSent = {};
+    const THROTTLE_MS = 25; // 25ms para evitar saturação do MIDI
+
+    function showToast(text) {
+      const t = document.getElementById('toastMsg');
+      t.innerText = text;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    function sendCommand(element, param, channel, value, isThrottled = false) {
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+      const key = `${element}_${param}_${channel}`;
+      const now = performance.now();
+
+      if (isThrottled && lastSent[key] && (now - lastSent[key] < THROTTLE_MS)) {
+        return;
+      }
+      lastSent[key] = now;
+
+      ws.send(JSON.stringify({
+        element: element,
+        param: param,
+        channel: channel,
+        value: value
+      }));
+    }
+
+    function connectWebSocket() {
+      const loc = window.location;
+      const proto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${proto}//${loc.host}/ws`;
+
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        wsConnected = true;
+        const dot = document.getElementById('headerStatusDot');
+        dot.classList.add('connected');
+        dot.title = 'Conectado à 01V96';
+      };
+
+      ws.onclose = () => {
+        wsConnected = false;
+        const dot = document.getElementById('headerStatusDot');
+        dot.classList.remove('connected');
+        dot.title = 'Desconectado da 01V96';
+        document.getElementById('headerPortName').innerText = 'Reconectando...';
+        setTimeout(connectWebSocket, 2000);
+      };
+
+      ws.onerror = (err) => {
+        console.error('Erro no WebSocket:', err);
+      };
+
+      ws.onmessage = (evt) => {
+        try {
+          const msg = JSON.parse(evt.data);
+
+          if (msg.type === 'init') {
+            document.getElementById('headerPortName').innerText = msg.port || 'MIDI Conectado';
+            if (msg.simulation_running !== undefined) {
+              updateSimButton(msg.simulation_running);
+            }
+            return;
+          }
+
+          if (msg.type === 'simulation_status') {
+            updateSimButton(msg.running);
+            return;
+          }
+
+          handleIncomingSysEx(msg);
+        } catch (e) {
+          console.error('Erro ao processar mensagem WS:', e);
+        }
+      };
+    }
+
+    function handleIncomingSysEx(msg) {
+      const el = msg.element;
+      const param = msg.param;
+      const ch = msg.channel;
+      const val = msg.value;
+
+      // Master Stereo Fader
+      if (el === 0x4D) {
+        state.masterFaders['MASTER'] = val;
+        if (currentMix === 'MASTER') updateMasterFaderCard();
+        return;
+      }
+
+      // Master Stereo ON/MUTE
+      if (el === 0x4B) {
+        state.masterMutes['MASTER'] = val;
+        if (currentMix === 'MASTER') updateMasterFaderCard();
+        return;
+      }
+
+      // Aux Master Fader
+      if (el === 0x31) {
+        const auxKey = `AUX${ch + 1}`;
+        if (state.masterFaders[auxKey] !== undefined) {
+          state.masterFaders[auxKey] = val;
+          if (currentMix === auxKey) updateMasterFaderCard();
+        }
+        return;
+      }
+
+      // Aux Master ON/MUTE
+      if (el === 0x2F) {
+        const auxKey = `AUX${ch + 1}`;
+        if (state.masterMutes[auxKey] !== undefined) {
+          state.masterMutes[auxKey] = val;
+          if (currentMix === auxKey) updateMasterFaderCard();
+        }
+        return;
+      }
+
+      // Input Fader (MASTER Mix)
+      if (el === 0x1C && param === 0x00 && ch < TOTAL_CHANNELS) {
+        state.faders['MASTER'][ch] = val;
+        if (currentMix === 'MASTER') updateChannelUI(ch);
+        return;
+      }
+
+      // Input MUTE / ON (MASTER Mix)
+      if (el === 0x1A && param === 0x00 && ch < TOTAL_CHANNELS) {
+        state.mutes['MASTER'][ch] = val;
+        if (currentMix === 'MASTER') updateChannelUI(ch);
+        return;
+      }
+
+      // Aux Sends (Níveis e ON)
+      if (el === 0x23 && ch < TOTAL_CHANNELS) {
+        if (param <= 0x07) {
+          // Send Level para Aux (param 0..7)
+          const auxKey = `AUX${param + 1}`;
+          state.faders[auxKey][ch] = val;
+          if (currentMix === auxKey) updateChannelUI(ch);
+        } else if (param >= 0x08 && param <= 0x0F) {
+          // Send ON para Aux (param 8..15)
+          const auxKey = `AUX${param - 7}`;
+          state.mutes[auxKey][ch] = val;
+          if (currentMix === auxKey) updateChannelUI(ch);
+        }
+        return;
+      }
+
+      // Input EQ ON/OFF
+      if (el === 0x20 && param === 0x00 && ch < TOTAL_CHANNELS) {
+        state.eqOn[ch] = (val === 1);
+        updateSelButtonGlow(ch);
+        return;
+      }
+
+      // Input COMP ON/OFF
+      if (el === 0x22 && param === 0x00 && ch < TOTAL_CHANNELS) {
+        state.compOn[ch] = (val === 1);
+        updateSelButtonGlow(ch);
+        return;
+      }
+    }
+
+    // ==========================================
+    // RENDERIZAÇÃO E ATUALIZAÇÃO DA INTERFACE
+    // ==========================================
+    function initChannelCards() {
+      const container = document.getElementById('fadersList');
+
+      for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
+        const chNumStr = String(ch + 1).padStart(2, '0');
+        const card = document.createElement('div');
+        card.className = 'fader-card';
+        card.id = `channelCard_${ch}`;
+        card.setAttribute('data-ch', ch);
+
+        card.innerHTML = `
+          <div class="card-row-top">
+            <div class="channel-name-tag">
+              <span class="channel-num-badge">CH ${chNumStr}</span>
+              <span>Canal ${ch + 1}</span>
+            </div>
+            <div class="card-top-buttons">
+              <button class="btn-ch-mute is-on" id="muteBtn_${ch}" type="button">ON</button>
+              <button class="btn-ch-sel" id="selBtn_${ch}" type="button">SEL</button>
+            </div>
+          </div>
+          <div class="card-row-slider">
+            <input type="range" class="fader-horizontal" id="slider_${ch}" min="0" max="1023" value="823">
+          </div>
+          <div class="card-row-bottom">
+            <div class="db-readout" id="dbText_${ch}">0.0 dB</div>
+            <div class="card-bottom-buttons">
+              <button class="btn-quick-val" id="btnZero_${ch}" type="button">0</button>
+              <button class="btn-quick-val" id="btnInf_${ch}" type="button">-∞</button>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+
+        // Eventos do Slider
+        const slider = card.querySelector(`#slider_${ch}`);
+        slider.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          state.faders[currentMix][ch] = val;
+          document.getElementById(`dbText_${ch}`).innerText = rawToDb(val);
+          const target = MIX_TARGETS[currentMix];
+          sendCommand(target.faderElement, target.faderParam, ch, val, true);
+        });
+
+        slider.addEventListener('change', (e) => {
+          const val = parseInt(e.target.value, 10);
+          state.faders[currentMix][ch] = val;
+          const target = MIX_TARGETS[currentMix];
+          sendCommand(target.faderElement, target.faderParam, ch, val, false);
+        });
+
+        // Evento Mute / ON
+        const muteBtn = card.querySelector(`#muteBtn_${ch}`);
+        muteBtn.addEventListener('click', () => {
+          const currentVal = state.mutes[currentMix][ch];
+          const newVal = currentVal === 1 ? 0 : 1;
+          state.mutes[currentMix][ch] = newVal;
+          updateMuteButtonUI(ch, newVal);
+          const target = MIX_TARGETS[currentMix];
+          sendCommand(target.onElement, target.onParam, ch, newVal, false);
+        });
+
+        // Evento SEL (Seleciona canal e destaca brilho)
+        const selBtn = card.querySelector(`#selBtn_${ch}`);
+        selBtn.addEventListener('click', () => {
+          setSelectedChannel(ch);
+        });
+
+        // Botões de Atalho 0 dB e -inf dB
+        card.querySelector(`#btnZero_${ch}`).addEventListener('click', () => {
+          setChannelFader(ch, NOMINAL_VALUE);
+        });
+        card.querySelector(`#btnInf_${ch}`).addEventListener('click', () => {
+          setChannelFader(ch, MIN_VALUE);
+        });
+      }
+    }
+
+    function setChannelFader(ch, val) {
+      state.faders[currentMix][ch] = val;
+      const slider = document.getElementById(`slider_${ch}`);
+      if (slider) slider.value = val;
+      const dbText = document.getElementById(`dbText_${ch}`);
+      if (dbText) dbText.innerText = rawToDb(val);
+      const target = MIX_TARGETS[currentMix];
+      sendCommand(target.faderElement, target.faderParam, ch, val, false);
+    }
+
+    function updateChannelUI(ch) {
+      const slider = document.getElementById(`slider_${ch}`);
+      const dbText = document.getElementById(`dbText_${ch}`);
+      if (slider && dbText) {
+        const val = state.faders[currentMix][ch];
+        slider.value = val;
+        dbText.innerText = rawToDb(val);
+      }
+      updateMuteButtonUI(ch, state.mutes[currentMix][ch]);
+    }
+
+    function updateMuteButtonUI(ch, onVal) {
+      const btn = document.getElementById(`muteBtn_${ch}`);
+      if (!btn) return;
+      if (onVal === 1) {
+        btn.classList.add('is-on');
+        btn.innerText = 'ON';
+      } else {
+        btn.classList.remove('is-on');
+        btn.innerText = 'MUTE';
+      }
+    }
+
+    function updateSelButtonGlow(ch) {
+      const btn = document.getElementById(`selBtn_${ch}`);
+      if (!btn) return;
+      // Brilha se EQ ou Compressor estiver ligado
+      const hasFx = (state.eqOn[ch] || state.compOn[ch]);
+      if (hasFx) {
+        btn.classList.add('fx-active');
+      } else {
+        btn.classList.remove('fx-active');
+      }
+    }
+
+    function setSelectedChannel(ch) {
+      selectedChannel = ch;
+      for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        const btn = document.getElementById(`selBtn_${i}`);
+        if (btn) {
+          if (i === ch) btn.classList.add('selected');
+          else btn.classList.remove('selected');
+        }
+      }
+    }
+
+    // ==========================================
+    // CARD DO MASTER DA MIX (PRIMEIRO CARD)
+    // ==========================================
+    let isMasterOutVisible = true;
+
+    function updateCompactBadge() {
+      const badge = document.getElementById('compactOutputBadge');
+      if (!badge) return;
+      const target = MIX_TARGETS[currentMix];
+      if (target.isMaster) {
+        badge.className = 'output-dest-badge dest-master';
+        badge.innerHTML = '★ SAÍDA: STEREO MASTER';
+      } else {
+        badge.className = 'output-dest-badge dest-aux';
+        badge.innerHTML = `↗ SAÍDA: ${target.title}`;
+      }
+    }
+
+    function initMasterOutToggle() {
+      const btn = document.getElementById('btnToggleMasterOut');
+      const card = document.getElementById('masterFaderCard');
+      const badgeBar = document.getElementById('outputCompactBadgeBar');
+      const badge = document.getElementById('compactOutputBadge');
+      if (!btn || !card) return;
+
+      const saved = localStorage.getItem('01v96_mobile_show_master_out');
+      isMasterOutVisible = (saved !== 'false');
+
+      function syncUI() {
+        if (isMasterOutVisible) {
+          card.style.display = 'flex';
+          if (badgeBar) badgeBar.style.display = 'none';
+          btn.classList.add('active');
+          btn.innerHTML = '🎚️ OUT';
+          btn.title = 'Fader de saída visível (toque para recolher)';
+        } else {
+          card.style.display = 'none';
+          if (badgeBar) badgeBar.style.display = 'flex';
+          btn.classList.remove('active');
+          btn.innerHTML = 'OUT ✕';
+          btn.title = 'Fader de saída recolhido (badge ativo)';
+        }
+        updateCompactBadge();
+      }
+
+      syncUI();
+
+      btn.addEventListener('click', () => {
+        isMasterOutVisible = !isMasterOutVisible;
+        localStorage.setItem('01v96_mobile_show_master_out', isMasterOutVisible);
+        syncUI();
+        showToast(isMasterOutVisible ? 'Fader de saída exibido' : 'Fader de saída recolhido (badge ativo)');
+      });
+
+      if (badge) {
+        badge.addEventListener('click', () => {
+          isMasterOutVisible = true;
+          localStorage.setItem('01v96_mobile_show_master_out', isMasterOutVisible);
+          syncUI();
+          showToast('Fader de saída expandido');
+        });
+      }
+    }
+
+    function setupMasterFaderCard() {
+      const card = document.getElementById('masterFaderCard');
+      const slider = document.getElementById('masterSlider');
+      const muteBtn = document.getElementById('masterMuteBtn');
+      const zeroBtn = document.getElementById('masterZeroBtn');
+      const infBtn = document.getElementById('masterInfBtn');
+
+      slider.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        state.masterFaders[currentMix] = val;
+        document.getElementById('masterDbText').innerText = rawToDb(val);
+        sendMasterFaderCommand(val, true);
+      });
+
+      slider.addEventListener('change', (e) => {
+        const val = parseInt(e.target.value, 10);
+        state.masterFaders[currentMix] = val;
+        sendMasterFaderCommand(val, false);
+      });
+
+      muteBtn.addEventListener('click', () => {
+        const currentVal = state.masterMutes[currentMix];
+        const newVal = currentVal === 1 ? 0 : 1;
+        state.masterMutes[currentMix] = newVal;
+        updateMasterMuteUI(newVal);
+        sendMasterMuteCommand(newVal);
+      });
+
+      zeroBtn.addEventListener('click', () => {
+        setMasterFaderVal(NOMINAL_VALUE);
+      });
+
+      infBtn.addEventListener('click', () => {
+        setMasterFaderVal(MIN_VALUE);
+      });
+    }
+
+    function setMasterFaderVal(val) {
+      state.masterFaders[currentMix] = val;
+      document.getElementById('masterSlider').value = val;
+      document.getElementById('masterDbText').innerText = rawToDb(val);
+      sendMasterFaderCommand(val, false);
+    }
+
+    function sendMasterFaderCommand(val, isThrottled) {
+      const target = MIX_TARGETS[currentMix];
+      sendCommand(target.outFaderElement, target.outFaderParam, target.outChannel, val, isThrottled);
+    }
+
+    function sendMasterMuteCommand(val) {
+      const target = MIX_TARGETS[currentMix];
+      sendCommand(target.outOnElement, target.outOnParam, target.outChannel, val, false);
+    }
+
+    function updateMasterFaderCard() {
+      const card = document.getElementById('masterFaderCard');
+      const title = document.getElementById('masterOutputTitle');
+      const slider = document.getElementById('masterSlider');
+      const dbText = document.getElementById('masterDbText');
+      const target = MIX_TARGETS[currentMix];
+
+      title.innerText = target.title;
+      const val = state.masterFaders[currentMix];
+      slider.value = val;
+      dbText.innerText = rawToDb(val);
+
+      if (target.isMaster) {
+        card.classList.remove('aux-mode');
+      } else {
+        card.classList.add('aux-mode');
+      }
+
+      if (!isMasterOutVisible) {
+        card.style.display = 'none';
+      } else {
+        card.style.display = 'flex';
+      }
+
+      updateMasterMuteUI(state.masterMutes[currentMix]);
+    }
+
+    function updateMasterMuteUI(onVal) {
+      const btn = document.getElementById('masterMuteBtn');
+      if (onVal === 1) {
+        btn.classList.add('is-on');
+        btn.innerText = 'ON';
+      } else {
+        btn.classList.remove('is-on');
+        btn.innerText = 'MUTE';
+      }
+    }
+
+    // ==========================================
+    // SELEÇÃO DE MIXAGEM (MASTER E AUX 1-8)
+    // ==========================================
+    function setMixTarget(mixId) {
+      if (!MIX_TARGETS[mixId]) return;
+      currentMix = mixId;
+
+      // Atualiza botões do Bloco 2
+      document.querySelectorAll('.btn-out').forEach(btn => {
+        if (btn.getAttribute('data-mix') === mixId) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      // Alterna classes no body para aplicar o glow interno correto nos canais
+      if (MIX_TARGETS[mixId].isMaster) {
+        document.body.classList.add('mix-master');
+        document.body.classList.remove('mix-aux');
+      } else {
+        document.body.classList.add('mix-aux');
+        document.body.classList.remove('mix-master');
+      }
+
+      // Atualiza card do Master e o badge compacto de saída
+      updateMasterFaderCard();
+      updateCompactBadge();
+
+      // Atualiza todos os canais visíveis
+      for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
+        updateChannelUI(ch);
+      }
+    }
+
+    // ==========================================
+    // FILTROS DE BANCOS E CANAIS VISÍVEIS
+    // ==========================================
+    function applyChannelFilter(filter) {
+      document.querySelectorAll('.btn-nav[data-bank]').forEach(btn => {
+        if (btn.getAttribute('data-bank') === filter) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+      document.getElementById('btnRestoreSaved').classList.remove('active');
+
+      state.visibleChannels.clear();
+
+      if (filter === 'all') {
+        for (let i = 0; i < TOTAL_CHANNELS; i++) state.visibleChannels.add(i);
+      } else if (filter === '1-16') {
+        for (let i = 0; i < 16; i++) state.visibleChannels.add(i);
+      } else if (filter === '17-32') {
+        for (let i = 16; i < 32; i++) state.visibleChannels.add(i);
+      } else if (filter === '1-8') {
+        for (let i = 0; i < 8; i++) state.visibleChannels.add(i);
+      } else if (filter === '9-16') {
+        for (let i = 8; i < 16; i++) state.visibleChannels.add(i);
+      } else if (filter === '17-24') {
+        for (let i = 16; i < 24; i++) state.visibleChannels.add(i);
+      } else if (filter === '25-32') {
+        for (let i = 24; i < 32; i++) state.visibleChannels.add(i);
+      }
+
+      renderChannelVisibility();
+    }
+
+    function renderChannelVisibility() {
+      for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
+        const card = document.getElementById(`channelCard_${ch}`);
+        const chk = document.getElementById(`modalChk_${ch}`);
+        const isVisible = state.visibleChannels.has(ch);
+
+        if (card) {
+          card.style.display = isVisible ? 'flex' : 'none';
+        }
+        if (chk) {
+          chk.checked = isVisible;
+        }
+      }
+
+      const count = state.visibleChannels.size;
+      const countLabel = `Selecionar Canais Individuais (${count}/32)`;
+      const navBtn = document.getElementById('navChannelsCount');
+      if (navBtn) navBtn.innerText = countLabel;
+      const pill = document.getElementById('navSummaryPill');
+      if (pill) pill.innerText = `${count} canais`;
+    }
+
+    // ==========================================
+    // COLAPSO DO BLOCO DE FUNÇÕES
+    // ==========================================
+    function initNavCollapse() {
+      const navBlock = document.getElementById('navBlock');
+      const btnToggle = document.getElementById('btnToggleNavCollapse');
+      if (!navBlock || !btnToggle) return;
+
+      const savedState = localStorage.getItem('01v96_mobile_nav_collapsed');
+      if (savedState === 'true') {
+        navBlock.classList.add('collapsed');
+      }
+
+      btnToggle.addEventListener('click', () => {
+        navBlock.classList.toggle('collapsed');
+        localStorage.setItem('01v96_mobile_nav_collapsed', navBlock.classList.contains('collapsed'));
+      });
+    }
+
+    // ==========================================
+    // MODAL DE CANAIS E SALVAR/RESTAURAR
+    // ==========================================
+    function initChannelsModal() {
+      const grid = document.getElementById('modalCheckboxGrid');
+      grid.innerHTML = '';
+
+      for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
+        const chNumStr = String(ch + 1).padStart(2, '0');
+        const item = document.createElement('label');
+        item.className = 'channel-chk-item';
+        item.innerHTML = `
+          <input type="checkbox" id="modalChk_${ch}" checked>
+          <span>CH ${chNumStr}</span>
+        `;
+
+        item.querySelector('input').addEventListener('change', (e) => {
+          if (e.target.checked) state.visibleChannels.add(ch);
+          else state.visibleChannels.delete(ch);
+          renderChannelVisibility();
+          clearActiveBankButtons();
+        });
+
+        grid.appendChild(item);
+      }
+
+      // Abrir/Fechar Modal
+      const modal = document.getElementById('channelsModal');
+      document.getElementById('btnOpenChannelsModal').addEventListener('click', () => {
+        modal.classList.add('open');
+      });
+      document.getElementById('btnCloseChannelsModal').addEventListener('click', () => {
+        modal.classList.remove('open');
+      });
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('open');
+      });
+
+      // Botões do Modal
+      document.getElementById('btnModalSelectAll').addEventListener('click', () => {
+        for (let i = 0; i < TOTAL_CHANNELS; i++) state.visibleChannels.add(i);
+        renderChannelVisibility();
+        clearActiveBankButtons();
+      });
+
+      document.getElementById('btnModalSelectNone').addEventListener('click', () => {
+        state.visibleChannels.clear();
+        renderChannelVisibility();
+        clearActiveBankButtons();
+      });
+
+      document.getElementById('btnModalSaveCurrent').addEventListener('click', () => {
+        const arr = Array.from(state.visibleChannels);
+        localStorage.setItem('01v96_mobile_channels', JSON.stringify(arr));
+        showToast('Seleção salva no navegador!');
+        modal.classList.remove('open');
+      });
+
+      // Botão Recuperar Salvo na Toolbar
+      document.getElementById('btnRestoreSaved').addEventListener('click', () => {
+        const raw = localStorage.getItem('01v96_mobile_channels');
+        if (!raw) {
+          showToast('Nenhuma seleção salva ainda!');
+          return;
+        }
+        try {
+          const arr = JSON.parse(raw);
+          state.visibleChannels = new Set(arr);
+          renderChannelVisibility();
+          clearActiveBankButtons();
+          document.getElementById('btnRestoreSaved').classList.add('active');
+          showToast('Seleção restaurada!');
+        } catch (e) {
+          showToast('Erro ao ler seleção salva.');
+        }
+      });
+    }
+
+    function clearActiveBankButtons() {
+      document.querySelectorAll('.btn-nav[data-bank]').forEach(btn => btn.classList.remove('active'));
+    }
+
+    // ==========================================
+    // SIMULAÇÃO E AÇÕES GLOBAIS
+    // ==========================================
+    function updateSimButton(running) {
+      const btn = document.getElementById('btnToggleSim');
+      if (running) {
+        btn.classList.add('active');
+        btn.innerText = '🎲 Sim ON';
+      } else {
+        btn.classList.remove('active');
+        btn.innerText = '🎲 Sim';
+      }
+    }
+
+    function initGlobalActions() {
+      // Alternar Simulação
+      document.getElementById('btnToggleSim').addEventListener('click', () => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ action: 'toggle_sim' }));
+        }
+      });
+
+      // Todos os Canais Visíveis em 0.0 dB
+      document.getElementById('btnAllZeroDb').addEventListener('click', () => {
+        state.visibleChannels.forEach(ch => {
+          setChannelFader(ch, NOMINAL_VALUE);
+        });
+        showToast('Canais visíveis em 0.0 dB');
+      });
+
+      // Desmutar Todos os Canais Visíveis (ON)
+      document.getElementById('btnUnmuteAll').addEventListener('click', () => {
+        const target = MIX_TARGETS[currentMix];
+        state.visibleChannels.forEach(ch => {
+          state.mutes[currentMix][ch] = 1;
+          updateMuteButtonUI(ch, 1);
+          sendCommand(target.onElement, target.onParam, ch, 1, false);
+        });
+        showToast('Canais visíveis ligados (ON)');
+      });
+
+      // Mutar Todos os Canais Visíveis
+      document.getElementById('btnMuteAll').addEventListener('click', () => {
+        const target = MIX_TARGETS[currentMix];
+        state.visibleChannels.forEach(ch => {
+          state.mutes[currentMix][ch] = 0;
+          updateMuteButtonUI(ch, 0);
+          sendCommand(target.onElement, target.onParam, ch, 0, false);
+        });
+        showToast('Canais visíveis mutados');
+      });
+    }
+
+    // ==========================================
+    // MENU DO USUÁRIO (/api/me)
+    // ==========================================
+    async function initUserMenu() {
+      const popover = document.getElementById('userPopover');
+      document.getElementById('btnUserMenu').addEventListener('click', () => {
+        popover.classList.add('open');
+      });
+      document.getElementById('btnCloseUserPopover').addEventListener('click', () => {
+        popover.classList.remove('open');
+      });
+      popover.addEventListener('click', (e) => {
+        if (e.target === popover) popover.classList.remove('open');
+      });
+
+      try {
+        const res = await fetch('/api/me');
+        if (res.ok) {
+          const u = await res.json();
+          document.getElementById('headerUserName').innerText = u.name || u.username;
+          document.getElementById('popoverUserName').innerText = u.name;
+          document.getElementById('popoverUserLogin').innerText = u.username;
+          document.getElementById('popoverUserRole').innerText = u.role.toUpperCase();
+        }
+      } catch (e) {
+        console.error('Falha ao obter perfil do usuário:', e);
+      }
+    }
+
+    // ==========================================
+    // INICIALIZAÇÃO GERAL
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+      initChannelCards();
+      setupMasterFaderCard();
+      initMasterOutToggle();
+      initChannelsModal();
+      initNavCollapse();
+      initGlobalActions();
+      initUserMenu();
+
+      // Botões de Saída (Bloco 2)
+      document.querySelectorAll('.btn-out').forEach(btn => {
+        btn.addEventListener('click', () => {
+          setMixTarget(btn.getAttribute('data-mix'));
+        });
+      });
+
+      // Botões de Banco (Bloco 3)
+      document.querySelectorAll('.btn-nav[data-bank]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          applyChannelFilter(btn.getAttribute('data-bank'));
+        });
+      });
+
+      // Inicializa com Master e Todos os Canais Visíveis
+      setMixTarget('MASTER');
+      renderChannelVisibility();
+      setSelectedChannel(0);
+
+      // Inicia Conexão WebSocket
+      connectWebSocket();
+    });
+  </script>
+</body>
+</html>

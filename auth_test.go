@@ -206,4 +206,47 @@ func TestHTTPLoginAndProtectedEndpoints(t *testing.T) {
 	if rr.Code != http.StatusUnauthorized {
 		t.Errorf("GET /ws sem autenticação: esperava 401, obteve %d", rr.Code)
 	}
+
+	// 8. GET /m sem cookie -> deve redirecionar para /login (303)
+	req = httptest.NewRequest(http.MethodGet, "/m", nil)
+	rr = httptest.NewRecorder()
+	handleMobile(rr, req)
+	if rr.Code != http.StatusSeeOther {
+		t.Errorf("GET /m sem autenticação: esperava 303, obteve %d", rr.Code)
+	}
+	if loc := rr.Header().Get("Location"); loc != "/login" {
+		t.Errorf("GET /m sem autenticação: esperava redirect para /login, obteve %s", loc)
+	}
+
+	// 9. GET /m com cookie de sessão válido -> deve retornar 200 OK (serve mobile.html)
+	// Cria uma nova sessão para testar o acesso autenticado
+	sessToken := createSession(User{Username: "admin", Name: "Admin", Role: "ADMIN"})
+	req = httptest.NewRequest(http.MethodGet, "/m", nil)
+	req.AddCookie(&http.Cookie{Name: sessionCookieName, Value: sessToken})
+	rr = httptest.NewRecorder()
+	handleMobile(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Errorf("GET /m autenticado: esperava 200, obteve %d", rr.Code)
+	}
+
+	// 10. POST /login com User-Agent Mobile -> deve retornar redirect para "/m"
+	mobileBody, _ := json.Marshal(map[string]string{
+		"username": "admin",
+		"password": "admin",
+	})
+	req = httptest.NewRequest(http.MethodPost, "/login", bytes.NewReader(mobileBody))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1")
+	rr = httptest.NewRecorder()
+	handleLogin(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Errorf("POST /login mobile: esperava 200, obteve %d", rr.Code)
+	}
+	var loginMobileResp map[string]interface{}
+	if err := json.Unmarshal(rr.Body.Bytes(), &loginMobileResp); err != nil {
+		t.Fatalf("Erro ao decodificar JSON de login mobile: %v", err)
+	}
+	if loginMobileResp["redirect"] != "/m" {
+		t.Errorf("POST /login mobile: esperava redirect '/m', obteve %v", loginMobileResp["redirect"])
+	}
 }

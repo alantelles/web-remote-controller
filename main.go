@@ -352,10 +352,36 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
+// isMobileUserAgent verifica se a requisição provém de um dispositivo móvel
+func isMobileUserAgent(r *http.Request) bool {
+	if r.URL.Query().Get("view") == "mobile" || r.URL.Query().Get("m") == "1" || r.FormValue("view") == "mobile" {
+		return true
+	}
+	if r.URL.Query().Get("view") == "desktop" {
+		return false
+	}
+	if r.Header.Get("Sec-CH-UA-Mobile") == "?1" {
+		return true
+	}
+	ua := strings.ToLower(r.UserAgent())
+	mobileKeywords := []string{"android", "iphone", "ipod", "ipad", "blackberry", "iemobile", "opera mini", "mobile"}
+	for _, kw := range mobileKeywords {
+		if strings.Contains(ua, kw) {
+			return true
+		}
+	}
+	return false
+}
+
 func handleLogin(w http.ResponseWriter, r *http.Request) {
+	target := "/"
+	if isMobileUserAgent(r) {
+		target = "/m"
+	}
+
 	if r.Method == http.MethodGet {
 		if sess := getSessionFromRequest(r); sess != nil {
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			http.Redirect(w, r, target, http.StatusSeeOther)
 			return
 		}
 		http.ServeFile(w, r, "login.html")
@@ -421,7 +447,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]interface{}{
 				"success":  true,
-				"redirect": "/",
+				"redirect": target,
 				"user": map[string]string{
 					"name":     user.Name,
 					"username": user.Username,
@@ -431,7 +457,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, target, http.StatusSeeOther)
 		return
 	}
 
@@ -473,6 +499,15 @@ func handleMe(w http.ResponseWriter, r *http.Request) {
 		"username":      sess.User.Username,
 		"role":          sess.User.Role,
 	})
+}
+
+func handleMobile(w http.ResponseWriter, r *http.Request) {
+	sess := getSessionFromRequest(r)
+	if sess == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	http.ServeFile(w, r, "mobile.html")
 }
 
 func handleWS(w http.ResponseWriter, r *http.Request) {
@@ -1114,6 +1149,8 @@ func main() {
 	http.HandleFunc("/login", handleLogin)
 	http.HandleFunc("/logout", handleLogout)
 	http.HandleFunc("/api/me", handleMe)
+	http.HandleFunc("/m", handleMobile)
+	http.HandleFunc("/mobile", handleMobile)
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
@@ -1123,6 +1160,11 @@ func main() {
 		sess := getSessionFromRequest(r)
 		if sess == nil {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		// Se o usuário estiver no celular e não tiver solicitado explicitamente a visão desktop, redireciona para /m
+		if isMobileUserAgent(r) && r.URL.Query().Get("view") != "desktop" {
+			http.Redirect(w, r, "/m", http.StatusSeeOther)
 			return
 		}
 		http.ServeFile(w, r, "index.html")

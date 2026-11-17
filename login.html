@@ -382,7 +382,12 @@
 
         if (response.ok && data.success) {
           btnSubmitText.textContent = 'Conectando ao Console...';
-          window.location.href = data.redirect || '/';
+          const isMobileClient = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+          let dest = data.redirect || '/';
+          if (isMobileClient && dest === '/') {
+            dest = '/m';
+          }
+          window.location.href = dest;
         } else {
           alertErrorText.textContent = data.error || 'Usuário ou senha incorretos.';
           alertError.classList.add('visible');
