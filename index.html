@@ -768,37 +768,37 @@
       color: #fff;
     }
 
-    /* Botão de Cenas no Topo */
-    .btn-admin-scenes {
+    /* Botão Admin no Topo */
+    .btn-admin-panel {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       font-size: 11px;
       font-weight: 800;
       letter-spacing: 0.5px;
-      padding: 4px 10px;
+      padding: 4px 12px;
       border-radius: 14px;
       background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-      color: #38bdf8;
-      border: 1px solid rgba(56, 189, 248, 0.45);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.5);
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
     }
-    .btn-admin-scenes:hover {
-      background: #0284c7;
+    .btn-admin-panel:hover {
+      background: #d97706;
       color: #ffffff;
-      border-color: #38bdf8;
-      box-shadow: 0 0 14px rgba(56, 189, 248, 0.5);
+      border-color: #fbbf24;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.5);
       transform: translateY(-1px);
     }
 
-    /* Modal de Cenas */
-    .scenes-modal-card {
+    /* Modal de Administração (Seção Admin) */
+    .admin-modal-card {
       background: #131722;
       border: 1px solid #2a3348;
       border-radius: 12px;
-      width: 720px;
+      width: 760px;
       max-width: 95vw;
       max-height: 88vh;
       display: flex;
@@ -807,7 +807,7 @@
       animation: modalFadeIn 0.18s ease-out;
       overflow: hidden;
     }
-    .scenes-modal-header {
+    .admin-modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -815,27 +815,27 @@
       background: linear-gradient(180deg, #1c2230 0%, #151a26 100%);
       border-bottom: 1px solid #252e42;
     }
-    .scenes-header-title {
+    .admin-header-title {
       display: flex;
       align-items: center;
       gap: 12px;
     }
-    .scenes-header-icon {
+    .admin-header-icon {
       font-size: 26px;
     }
-    .scenes-header-title h3 {
+    .admin-header-title h3 {
       margin: 0;
       font-size: 16px;
       font-weight: 800;
       color: #f8fafc;
       letter-spacing: 0.5px;
     }
-    .scenes-header-sub {
+    .admin-header-sub {
       margin: 2px 0 0 0;
       font-size: 11px;
       color: #94a3b8;
     }
-    .btn-scenes-close {
+    .btn-admin-close {
       background: transparent;
       border: 1px solid #333f56;
       color: #94a3b8;
@@ -849,18 +849,114 @@
       justify-content: center;
       transition: all 0.15s ease;
     }
-    .btn-scenes-close:hover {
+    .btn-admin-close:hover {
       background: #ef4444;
       border-color: #ef4444;
       color: #fff;
     }
 
-    .scenes-modal-body {
+    /* Abas da Seção Admin */
+    .admin-tabs-nav {
+      display: flex;
+      gap: 6px;
+      padding: 10px 20px 0 20px;
+      background: #10141e;
+      border-bottom: 1px solid #222a3c;
+    }
+    .admin-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #94a3b8;
+      background: transparent;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+      top: 1px;
+    }
+    .admin-tab-btn:hover {
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .admin-tab-btn.active {
+      color: #38bdf8;
+      background: #131722;
+      border-color: #222a3c;
+      border-bottom-color: #131722;
+    }
+
+    .admin-modal-body {
       padding: 18px 20px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 16px;
+    }
+    .admin-tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .admin-tab-pane.active {
+      display: flex;
+    }
+    .admin-section-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #171d2b;
+      border: 1px solid #263147;
+      border-radius: 8px;
+      padding: 12px 16px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .admin-section-banner-info h4 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 800;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .admin-section-banner-info p {
+      margin: 3px 0 0 0;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .admin-sys-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .admin-sys-card {
+      background: #0f131c;
+      border: 1px solid #222938;
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .admin-sys-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .admin-sys-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: #e2e8f0;
     }
 
     .scenes-actions-bar {
@@ -2403,8 +2499,8 @@
           <div class="status-dot"></div>
           <span id="wsStatusText">Desconectado</span>
         </div>
-        <button type="button" class="btn-admin-scenes" id="btnAdminScenes" title="Gerenciamento de Cenas e Auto-Save" style="display: none;">
-          🎬 Cenas
+        <button type="button" class="btn-admin-panel" id="btnAdminPanel" title="Painel de Administração do Sistema e Cenas" style="display: none;">
+          ⚙️ Admin
         </button>
         <div class="user-pill" id="userPill">
           <span>👤</span>
@@ -2628,74 +2724,146 @@
     </div>
   </div>
 
-  <!-- MODAL DE ADMINISTRAÇÃO E CENAS -->
-  <div id="scenesModalOverlay" class="modal-overlay">
-    <div class="scenes-modal-card">
-      <div class="scenes-modal-header">
-        <div class="scenes-header-title">
-          <span class="scenes-header-icon">🎬</span>
+  <!-- MODAL DA SEÇÃO ADMIN (ADMINISTRAÇÃO DE CENAS E SISTEMA) -->
+  <div id="adminModalOverlay" class="modal-overlay">
+    <div class="admin-modal-card">
+      <div class="admin-modal-header">
+        <div class="admin-header-title">
+          <span class="admin-header-icon">⚙️</span>
           <div>
-            <h3>Gerenciador de Cenas & Snapshots</h3>
-            <p class="scenes-header-sub">Dumps de configuração para a Yamaha 01V96</p>
+            <h3>Painel de Administração</h3>
+            <p class="admin-header-sub">Gerenciamento de Cenas, Snapshots e Sistema — Yamaha 01V96</p>
           </div>
         </div>
-        <button type="button" class="btn-scenes-close" id="btnScenesClose" title="Fechar (Esc)">✕</button>
+        <button type="button" class="btn-admin-close" id="btnAdminClose" title="Fechar (Esc)">✕</button>
       </div>
 
-      <div class="scenes-modal-body">
-        <!-- Painel de Ações Rápidas -->
-        <div class="scenes-actions-bar">
-          <button type="button" class="btn-scene-action primary" id="btnOpenSaveSceneDialog">
-            💾 Salvar Cena Atual
-          </button>
-          <button type="button" class="btn-scene-action secondary" id="btnTriggerImportScene">
-            ⬆ Importar Arquivo (.json)
-          </button>
-          <input type="file" id="fileSceneImportInput" accept=".json" style="display: none;">
-        </div>
+      <!-- Navegação da Seção Admin -->
+      <div class="admin-tabs-nav">
+        <button type="button" class="admin-tab-btn active" data-admin-tab="scenes" id="adminTabBtn_scenes">
+          <span>🎬</span>
+          <span>Cenas & Snapshots</span>
+        </button>
+        <button type="button" class="admin-tab-btn" data-admin-tab="system" id="adminTabBtn_system">
+          <span>🛡️</span>
+          <span>Sistema & Auto-Save</span>
+        </button>
+      </div>
 
-        <!-- Formulário Inline de Salvar Nova Cena (oculto por padrão) -->
-        <div class="scene-save-form" id="sceneSaveForm" style="display: none;">
-          <h4>Salvar Novo Snapshot</h4>
-          <div class="form-row">
-            <label for="newSceneName">Nome da Cena:</label>
-            <input type="text" id="newSceneName" placeholder="Ex: Culto Domingo Manhã" maxlength="50" autocomplete="off">
-          </div>
-          <div class="form-row">
-            <label for="newSceneDesc">Descrição / Observações:</label>
-            <input type="text" id="newSceneDesc" placeholder="Ex: Banda completa com 4 retornos in-ear" maxlength="150" autocomplete="off">
-          </div>
-          <div class="form-buttons">
-            <button type="button" class="btn-scene-action primary" id="btnConfirmSaveScene">Salvar Snapshot</button>
-            <button type="button" class="btn-scene-action" id="btnCancelSaveScene">Cancelar</button>
-          </div>
-        </div>
-
-        <!-- Tabela / Lista de Cenas Salvas -->
-        <div class="scenes-list-container">
-          <div class="scenes-list-header">
-            <span class="col-name">Cena</span>
-            <span class="col-author">Autor</span>
-            <span class="col-date">Modificado</span>
-            <span class="col-actions" style="text-align: right;">Ações</span>
-          </div>
-          <div class="scenes-list-items" id="scenesListItems">
-            <div class="scenes-loading">Carregando cenas...</div>
-          </div>
-        </div>
-
-        <!-- Painel de Auto-Save / Disaster Recovery -->
-        <div class="disaster-recovery-panel">
-          <div class="dr-header">
-            <span class="dr-icon">🛡️</span>
-            <div class="dr-info">
-              <strong>Restauração de Desastre (Auto-Save Periódico)</strong>
-              <p id="drAutoSaveStatus">Verificando status do auto-save...</p>
+      <div class="admin-modal-body">
+        <!-- ABA 1: ADMINISTRAÇÃO DE CENAS & SNAPSHOTS -->
+        <div class="admin-tab-pane active" id="adminPane_scenes">
+          <div class="admin-section-banner">
+            <div class="admin-section-banner-info">
+              <h4>🎬 Administração de Cenas</h4>
+              <p>Salve snapshots completos da mesa, exporte/importe arquivos JSON ou aplique cenas na Yamaha 01V96.</p>
+            </div>
+            <!-- Painel de Ações Rápidas -->
+            <div class="scenes-actions-bar">
+              <button type="button" class="btn-scene-action primary" id="btnOpenSaveSceneDialog">
+                💾 Salvar Cena Atual
+              </button>
+              <button type="button" class="btn-scene-action secondary" id="btnTriggerImportScene">
+                ⬆ Importar Arquivo (.json)
+              </button>
+              <input type="file" id="fileSceneImportInput" accept=".json" style="display: none;">
             </div>
           </div>
-          <button type="button" class="btn-scene-action warning" id="btnRestoreLastState">
-            🔄 Restaurar Último Estado na Mesa
-          </button>
+
+          <!-- Formulário Inline de Salvar Nova Cena (oculto por padrão) -->
+          <div class="scene-save-form" id="sceneSaveForm" style="display: none;">
+            <h4>Salvar Novo Snapshot</h4>
+            <div class="form-row">
+              <label for="newSceneName">Nome da Cena:</label>
+              <input type="text" id="newSceneName" placeholder="Ex: Culto Domingo Manhã" maxlength="50" autocomplete="off">
+            </div>
+            <div class="form-row">
+              <label for="newSceneDesc">Descrição / Observações:</label>
+              <input type="text" id="newSceneDesc" placeholder="Ex: Banda completa com 4 retornos in-ear" maxlength="150" autocomplete="off">
+            </div>
+            <div class="form-buttons">
+              <button type="button" class="btn-scene-action primary" id="btnConfirmSaveScene">Salvar Snapshot</button>
+              <button type="button" class="btn-scene-action" id="btnCancelSaveScene">Cancelar</button>
+            </div>
+          </div>
+
+          <!-- Tabela / Lista de Cenas Salvas -->
+          <div class="scenes-list-container">
+            <div class="scenes-list-header">
+              <span class="col-name">Cena</span>
+              <span class="col-author">Autor</span>
+              <span class="col-date">Modificado</span>
+              <span class="col-actions" style="text-align: right;">Ações</span>
+            </div>
+            <div class="scenes-list-items" id="scenesListItems">
+              <div class="scenes-loading">Carregando cenas...</div>
+            </div>
+          </div>
+
+          <!-- Painel de Auto-Save / Disaster Recovery -->
+          <div class="disaster-recovery-panel">
+            <div class="dr-header">
+              <span class="dr-icon">🛡️</span>
+              <div class="dr-info">
+                <strong>Restauração de Desastre (Auto-Save Periódico)</strong>
+                <p id="drAutoSaveStatus">Verificando status do auto-save...</p>
+              </div>
+            </div>
+            <button type="button" class="btn-scene-action warning" id="btnRestoreLastState">
+              🔄 Restaurar Último Estado na Mesa
+            </button>
+          </div>
+        </div>
+
+        <!-- ABA 2: SISTEMA & AUTO-SAVE -->
+        <div class="admin-tab-pane" id="adminPane_system">
+          <div class="admin-sys-grid">
+            <div class="admin-sys-card">
+              <span class="admin-sys-label">Porta MIDI Ativa</span>
+              <span class="admin-sys-val" id="adminSysMidiPort">-</span>
+            </div>
+            <div class="admin-sys-card">
+              <span class="admin-sys-label">Status de Auto-Save em Disco</span>
+              <span class="admin-sys-val" id="adminSysAutoSaveInfo">Verificando...</span>
+            </div>
+          </div>
+
+          <div class="admin-section-banner">
+            <div class="admin-section-banner-info">
+              <h4>🔄 Sincronização de Estado</h4>
+              <p>Recarrega na interface web todos os faders, mutes, sends, EQs e compressores do espelho em memória do servidor.</p>
+            </div>
+            <button type="button" class="btn-scene-action secondary" id="btnAdminSyncState">
+              🔄 Sincronizar Interface Agora
+            </button>
+          </div>
+
+          <!-- Painel de Desligamento do Servidor -->
+          <div class="admin-section-banner" style="background: linear-gradient(180deg, #221215 0%, #170d10 100%); border-color: #5c1f27;">
+            <div class="admin-section-banner-info">
+              <h4 style="color: #f87171;">⏻ Energia &amp; Desligamento do Servidor</h4>
+              <p>Encerra graciosamente o serviço web/MIDI e desliga a máquina host (poweroff). Exige confirmação de senha.</p>
+            </div>
+            <button type="button" class="btn-scene-action danger" id="btnAdminOpenShutdown">
+              ⏻ Desligar
+            </button>
+          </div>
+
+          <!-- Formulário de Confirmação de Senha para Desligar (oculto por padrão) -->
+          <div class="scene-save-form" id="adminShutdownForm" style="display: none; border-color: #7f1d1d; background: #160c0e;">
+            <h4 style="color: #f87171;">⚠️ Confirmar Desligamento — Digite sua Senha</h4>
+            <div class="form-row">
+              <label for="adminShutdownPassword">Senha do Administrador:</label>
+              <input type="password" id="adminShutdownPassword" placeholder="Digite sua senha atual para autorizar o desligamento" autocomplete="current-password">
+            </div>
+            <div class="form-buttons">
+              <button type="button" class="btn-scene-action danger" id="btnConfirmAdminShutdown">⏻ Confirmar e Desligar</button>
+              <button type="button" class="btn-scene-action" id="btnCancelAdminShutdown">Cancelar</button>
+            </div>
+          </div>
+
+          <!-- Resposta do Comando de Desligamento -->
+          <div id="adminShutdownFeedback" style="display: none; padding: 12px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; line-height: 1.5;"></div>
         </div>
       </div>
     </div>
@@ -3252,11 +3420,11 @@
           currentUserRole = (user.role || '').toUpperCase();
           const nameEl = document.getElementById('userDisplayName');
           const roleEl = document.getElementById('userRoleBadge');
-          const btnAdminScenes = document.getElementById('btnAdminScenes');
+          const btnAdminPanel = document.getElementById('btnAdminPanel');
           if (nameEl) nameEl.textContent = user.name || user.username;
           if (roleEl) roleEl.textContent = user.role || 'ADMIN';
-          if (btnAdminScenes) {
-            btnAdminScenes.style.display = (currentUserRole === 'ADMIN') ? 'inline-flex' : 'none';
+          if (btnAdminPanel) {
+            btnAdminPanel.style.display = (currentUserRole === 'ADMIN') ? 'inline-flex' : 'none';
           }
         }
       } catch (err) {
@@ -5638,11 +5806,24 @@
     }
 
     // ==========================================
-    // GERENCIADOR DE CENAS E ADMINISTRAÇÃO (UI)
+    // SEÇÃO ADMIN E GERENCIADOR DE CENAS (UI)
     // ==========================================
-    const scenesModalOverlay = document.getElementById('scenesModalOverlay');
-    const btnAdminScenes = document.getElementById('btnAdminScenes');
-    const btnScenesClose = document.getElementById('btnScenesClose');
+    const adminModalOverlay = document.getElementById('adminModalOverlay');
+    const btnAdminPanel = document.getElementById('btnAdminPanel');
+    const btnAdminClose = document.getElementById('btnAdminClose');
+    const adminTabBtns = document.querySelectorAll('.admin-tab-btn');
+    const adminPaneScenes = document.getElementById('adminPane_scenes');
+    const adminPaneSystem = document.getElementById('adminPane_system');
+    const adminSysMidiPort = document.getElementById('adminSysMidiPort');
+    const adminSysAutoSaveInfo = document.getElementById('adminSysAutoSaveInfo');
+    const btnAdminSyncState = document.getElementById('btnAdminSyncState');
+    const btnAdminOpenShutdown = document.getElementById('btnAdminOpenShutdown');
+    const adminShutdownForm = document.getElementById('adminShutdownForm');
+    const adminShutdownPassword = document.getElementById('adminShutdownPassword');
+    const btnConfirmAdminShutdown = document.getElementById('btnConfirmAdminShutdown');
+    const btnCancelAdminShutdown = document.getElementById('btnCancelAdminShutdown');
+    const adminShutdownFeedback = document.getElementById('adminShutdownFeedback');
+
     const btnOpenSaveSceneDialog = document.getElementById('btnOpenSaveSceneDialog');
     const sceneSaveForm = document.getElementById('sceneSaveForm');
     const newSceneNameInput = document.getElementById('newSceneName');
@@ -5662,17 +5843,147 @@
     const btnConfirmRecall = document.getElementById('btnConfirmRecall');
     let pendingRecallAction = null;
 
-    function openScenesModal() {
-      if (!scenesModalOverlay) return;
-      scenesModalOverlay.classList.add('open');
+    function switchAdminTab(tabId) {
+      adminTabBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.adminTab === tabId);
+      });
+      if (adminPaneScenes) adminPaneScenes.classList.toggle('active', tabId === 'scenes');
+      if (adminPaneSystem) adminPaneSystem.classList.toggle('active', tabId === 'system');
+      if (tabId === 'system') {
+        if (adminSysMidiPort && midiPortBadge) {
+          adminSysMidiPort.textContent = midiPortBadge.textContent;
+        }
+        loadAutoSaveStatus();
+      }
+    }
+
+    adminTabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchAdminTab(btn.dataset.adminTab);
+      });
+    });
+
+    if (btnAdminSyncState) {
+      btnAdminSyncState.addEventListener('click', async () => {
+        await syncFullStateFromBackend();
+        showToast('Estado sincronizado com o servidor! 🔄', '🔄');
+      });
+    }
+
+    function showAdminShutdownFeedback(text, type) {
+      if (!adminShutdownFeedback) return;
+      adminShutdownFeedback.style.display = 'block';
+      if (type === 'error') {
+        adminShutdownFeedback.style.background = 'rgba(239, 68, 68, 0.15)';
+        adminShutdownFeedback.style.border = '1px solid #ef4444';
+        adminShutdownFeedback.style.color = '#fca5a5';
+      } else if (type === 'warning') {
+        adminShutdownFeedback.style.background = 'rgba(245, 158, 11, 0.15)';
+        adminShutdownFeedback.style.border = '1px solid #f59e0b';
+        adminShutdownFeedback.style.color = '#fde68a';
+      } else {
+        adminShutdownFeedback.style.background = 'rgba(16, 185, 129, 0.15)';
+        adminShutdownFeedback.style.border = '1px solid #10b981';
+        adminShutdownFeedback.style.color = '#6ee7b7';
+      }
+      adminShutdownFeedback.textContent = text;
+    }
+
+    if (btnAdminOpenShutdown) {
+      btnAdminOpenShutdown.addEventListener('click', () => {
+        if (!adminShutdownForm) return;
+        if (adminShutdownFeedback) adminShutdownFeedback.style.display = 'none';
+        const isHidden = adminShutdownForm.style.display === 'none';
+        adminShutdownForm.style.display = isHidden ? 'flex' : 'none';
+        if (isHidden && adminShutdownPassword) {
+          adminShutdownPassword.value = '';
+          adminShutdownPassword.focus();
+        }
+      });
+    }
+
+    if (btnCancelAdminShutdown) {
+      btnCancelAdminShutdown.addEventListener('click', () => {
+        if (adminShutdownForm) adminShutdownForm.style.display = 'none';
+        if (adminShutdownPassword) adminShutdownPassword.value = '';
+      });
+    }
+
+    async function executeAdminShutdown() {
+      if (!adminShutdownPassword) return;
+      const password = adminShutdownPassword.value;
+      if (!password.trim()) {
+        showAdminShutdownFeedback('Por favor, digite sua senha antes de confirmar o desligamento.', 'error');
+        adminShutdownPassword.focus();
+        return;
+      }
+
+      if (btnConfirmAdminShutdown) {
+        btnConfirmAdminShutdown.disabled = true;
+        btnConfirmAdminShutdown.textContent = 'Enviando comando...';
+      }
+
+      try {
+        const res = await fetch('/api/system/shutdown', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const result = await res.json();
+
+        if (res.ok && result.success) {
+          if (adminShutdownForm) adminShutdownForm.style.display = 'none';
+          adminShutdownPassword.value = '';
+          if (result.shutdown_executed) {
+            showAdminShutdownFeedback(`✅ ${result.message}`, 'success');
+            showToast('Comando recebido! Desligando servidor...', '⏻');
+          } else {
+            showAdminShutdownFeedback(`ℹ️ ${result.message}`, 'warning');
+            showToast('Comando recebido (desligamento bloqueado sem flag).', 'ℹ️');
+          }
+        } else {
+          showAdminShutdownFeedback(`❌ ${result.error || 'Falha ao autorizar o desligamento.'}`, 'error');
+          adminShutdownPassword.select();
+        }
+      } catch (err) {
+        showAdminShutdownFeedback('❌ Erro de comunicação com o servidor ao enviar comando de desligamento.', 'error');
+      } finally {
+        if (btnConfirmAdminShutdown) {
+          btnConfirmAdminShutdown.disabled = false;
+          btnConfirmAdminShutdown.textContent = '⏻ Confirmar e Desligar';
+        }
+      }
+    }
+
+    if (btnConfirmAdminShutdown) {
+      btnConfirmAdminShutdown.addEventListener('click', executeAdminShutdown);
+    }
+    if (adminShutdownPassword) {
+      adminShutdownPassword.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          executeAdminShutdown();
+        }
+      });
+    }
+
+    function openAdminModal() {
+      if (!adminModalOverlay) return;
+      adminModalOverlay.classList.add('open');
       if (sceneSaveForm) sceneSaveForm.style.display = 'none';
+      if (adminShutdownForm) adminShutdownForm.style.display = 'none';
+      if (adminShutdownFeedback) adminShutdownFeedback.style.display = 'none';
+      if (adminSysMidiPort && midiPortBadge) {
+        adminSysMidiPort.textContent = midiPortBadge.textContent;
+      }
       loadScenesList();
       loadAutoSaveStatus();
     }
 
-    function closeScenesModal() {
-      if (scenesModalOverlay) scenesModalOverlay.classList.remove('open');
+    function closeAdminModal() {
+      if (adminModalOverlay) adminModalOverlay.classList.remove('open');
       if (sceneSaveForm) sceneSaveForm.style.display = 'none';
+      if (adminShutdownForm) adminShutdownForm.style.display = 'none';
     }
 
     function openConfirmRecallModal(message, onConfirm) {
@@ -5687,16 +5998,16 @@
       pendingRecallAction = null;
     }
 
-    if (btnAdminScenes) {
-      btnAdminScenes.addEventListener('click', openScenesModal);
+    if (btnAdminPanel) {
+      btnAdminPanel.addEventListener('click', openAdminModal);
     }
-    if (btnScenesClose) {
-      btnScenesClose.addEventListener('click', closeScenesModal);
+    if (btnAdminClose) {
+      btnAdminClose.addEventListener('click', closeAdminModal);
     }
 
-    if (scenesModalOverlay) {
-      scenesModalOverlay.addEventListener('click', (e) => {
-        if (e.target === scenesModalOverlay) closeScenesModal();
+    if (adminModalOverlay) {
+      adminModalOverlay.addEventListener('click', (e) => {
+        if (e.target === adminModalOverlay) closeAdminModal();
       });
     }
 
@@ -5846,7 +6157,7 @@
         const result = await res.json();
         if (res.ok && result.success) {
           showToast(`Cena '${name}' sendo aplicada na mesa física! 🎬`, '🎬');
-          closeScenesModal();
+          closeAdminModal();
           syncFullStateFromBackend();
         } else {
           alert(`Erro ao carregar cena: ${result.error || 'Erro desconhecido'}`);
@@ -5878,6 +6189,7 @@
         const res = await fetch('/api/state/status');
         if (!res.ok) {
           drAutoSaveStatus.textContent = 'Status do auto-save indisponível.';
+          if (adminSysAutoSaveInfo) adminSysAutoSaveInfo.textContent = 'Indisponível';
           return;
         }
         const data = await res.json();
@@ -5887,13 +6199,16 @@
             ? d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR')
             : 'Disponível no disco';
           drAutoSaveStatus.innerHTML = `Último snapshot gravado: <strong>${dateStr}</strong>`;
+          if (adminSysAutoSaveInfo) adminSysAutoSaveInfo.textContent = dateStr;
           if (btnRestoreLastState) btnRestoreLastState.disabled = false;
         } else {
           drAutoSaveStatus.textContent = 'Nenhum snapshot de auto-save gravado ainda.';
+          if (adminSysAutoSaveInfo) adminSysAutoSaveInfo.textContent = 'Nenhum gravado';
           if (btnRestoreLastState) btnRestoreLastState.disabled = true;
         }
       } catch (err) {
         drAutoSaveStatus.textContent = 'Falha ao consultar auto-save.';
+        if (adminSysAutoSaveInfo) adminSysAutoSaveInfo.textContent = 'Erro de conexão';
       }
     }
 
@@ -5905,7 +6220,7 @@
             const result = await res.json();
             if (res.ok && result.success) {
               showToast('Último estado restaurado com sucesso na mesa física! 🛡️', '🛡️');
-              closeScenesModal();
+              closeAdminModal();
               syncFullStateFromBackend();
             } else {
               alert(`Falha ao restaurar: ${result.error || 'Erro desconhecido'}`);
@@ -5959,13 +6274,13 @@
         .replace(/'/g, '&#039;');
     }
 
-    // Tecla ESC para fechar modais de cenas
+    // Tecla ESC para fechar modais de administração e cenas
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (confirmRecallModal && confirmRecallModal.classList.contains('open')) {
           closeConfirmRecallModal();
-        } else if (scenesModalOverlay && scenesModalOverlay.classList.contains('open')) {
-          closeScenesModal();
+        } else if (adminModalOverlay && adminModalOverlay.classList.contains('open')) {
+          closeAdminModal();
         }
       }
     });

@@ -1456,6 +1456,389 @@
     .toast-msg.show {
       opacity: 1;
     }
+
+    /* ==========================================
+       SEÇÃO ADMIN E GERENCIADOR DE CENAS (MOBILE)
+       ========================================== */
+    .header-left-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-admin-btn {
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid rgba(245, 158, 11, 0.55);
+      color: #fbbf24;
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 800;
+      display: none;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.2);
+    }
+
+    .header-admin-btn:active {
+      background: #d97706;
+      color: #fff;
+    }
+
+    .btn-popover-admin {
+      background: linear-gradient(180deg, #451a03 0%, #291002 100%);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      display: none;
+    }
+
+    .admin-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 220;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .admin-modal-backdrop.open {
+      display: flex;
+    }
+
+    .admin-modal-container {
+      background: #12151e;
+      border-top: 1px solid var(--border-strong);
+      border-radius: 16px 16px 0 0;
+      width: 100%;
+      max-width: 600px;
+      height: 92vh;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.9);
+      overflow: hidden;
+    }
+
+    .admin-modal-header {
+      padding: 12px 14px 0 14px;
+      background: #181c26;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .admin-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-header-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .admin-header-icon {
+      font-size: 22px;
+    }
+
+    .admin-header-title-wrap h3 {
+      font-size: 15px;
+      font-weight: 800;
+      color: #f8fafc;
+      margin: 0;
+    }
+
+    .admin-header-title-wrap p {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin: 2px 0 0 0;
+    }
+
+    .btn-admin-close-mobile {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      background: #232938;
+      color: var(--text-main);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .admin-tabs-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding-bottom: 10px;
+    }
+
+    .btn-admin-tab {
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: #12151e;
+      color: var(--text-dim);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .btn-admin-tab.active {
+      background: #1e293b;
+      color: #38bdf8;
+      border-color: #0284c7;
+      box-shadow: 0 0 10px rgba(2, 132, 199, 0.3);
+    }
+
+    .admin-modal-body {
+      padding: 14px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .admin-tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .admin-tab-pane.active {
+      display: flex;
+    }
+
+    .mobile-scenes-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn-mobile-scene-action {
+      height: 40px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      border: 1px solid var(--border-strong);
+      background: #1e2433;
+      color: var(--text-main);
+      text-decoration: none;
+    }
+
+    .btn-mobile-scene-action.primary {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 10px rgba(2, 132, 199, 0.35);
+    }
+
+    .btn-mobile-scene-action.secondary {
+      background: #1e293b;
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.45);
+    }
+
+    .btn-mobile-scene-action.warning {
+      background: #b45309;
+      color: #ffffff;
+      border-color: #f59e0b;
+    }
+
+    .btn-mobile-scene-action.danger {
+      background: #dc2626;
+      color: #ffffff;
+      border-color: #f87171;
+    }
+
+    .btn-mobile-scene-action.sm {
+      height: 34px;
+      font-size: 11px;
+      padding: 0 10px;
+    }
+
+    .mobile-scene-save-form {
+      background: #171b26;
+      border: 1px solid #2b354b;
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .mobile-scene-save-form h4 {
+      font-size: 12px;
+      color: #fbbf24;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0;
+    }
+
+    .mobile-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .mobile-form-group label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dim);
+    }
+
+    .mobile-form-group input {
+      background: #0e1118;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 10px;
+      color: #f8fafc;
+      font-size: 13px;
+      outline: none;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .mobile-form-group input:focus {
+      border-color: #38bdf8;
+    }
+
+    .mobile-form-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .mobile-scenes-section-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .mobile-scenes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mobile-scene-card {
+      background: #171b26;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mobile-scene-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .mobile-scene-name {
+      font-size: 14px;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+
+    .mobile-scene-desc {
+      font-size: 12px;
+      color: #818cf8;
+      margin-top: 2px;
+    }
+
+    .mobile-scene-meta {
+      font-size: 11px;
+      color: var(--text-faint);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mobile-scene-card-actions {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr auto;
+      gap: 6px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .mobile-dr-card {
+      background: linear-gradient(180deg, #1f1912 0%, #15110c 100%);
+      border: 1px solid #523415;
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .mobile-dr-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mobile-dr-info strong {
+      font-size: 12px;
+      color: #fbbf24;
+      display: block;
+    }
+
+    .mobile-dr-info p {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .mobile-sys-card {
+      background: #171b26;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .mobile-sys-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-faint);
+      text-transform: uppercase;
+    }
+
+    .mobile-sys-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
   </style>
 </head>
 <body>
@@ -1464,10 +1847,16 @@
        BLOCO 1: TOPO / CABEÇALHO ULTRACOMPACTO
        ========================================== -->
   <header class="mobile-header">
-    <button class="header-user-btn" id="btnUserMenu" type="button" title="Menu de usuário">
-      <span>👤</span>
-      <span id="headerUserName">Usuário</span>
-    </button>
+    <div class="header-left-group">
+      <button class="header-user-btn" id="btnUserMenu" type="button" title="Menu de usuário">
+        <span>👤</span>
+        <span id="headerUserName">Usuário</span>
+      </button>
+      <button class="header-admin-btn" id="btnMobileAdmin" type="button" title="Painel de Administração e Cenas">
+        <span>⚙️</span>
+        <span>Admin</span>
+      </button>
+    </div>
 
     <div class="header-status-area">
       <span class="port-label" id="headerPortName">MIDI: Conectando...</span>
@@ -1488,6 +1877,7 @@
         <div><strong>Papel:</strong> <span id="popoverUserRole">-</span></div>
       </div>
       <div class="user-popover-actions">
+        <button class="btn-popover btn-popover-admin" id="btnPopoverAdmin" type="button">⚙️ Painel de Administração</button>
         <a href="/?view=desktop" class="btn-popover btn-popover-desktop">🖥️ Ir para Versão Desktop</a>
         <a href="/logout" class="btn-popover btn-popover-logout">Sair da Sessão ↪</a>
         <button class="btn-popover btn-popover-close" id="btnCloseUserPopover" type="button">Fechar</button>
@@ -1936,6 +2326,150 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL DA SEÇÃO ADMIN (CENAS E SISTEMA NO MOBILE)
+       ========================================== -->
+  <div class="admin-modal-backdrop" id="adminModalMobile">
+    <div class="admin-modal-container">
+      <div class="admin-modal-header">
+        <div class="admin-header-top">
+          <div class="admin-header-title-wrap">
+            <span class="admin-header-icon">⚙️</span>
+            <div>
+              <h3>Painel de Administração</h3>
+              <p>Gerenciamento de Cenas &amp; Sistema — 01V96</p>
+            </div>
+          </div>
+          <button class="btn-admin-close-mobile" id="btnAdminCloseMobile" type="button" title="Fechar">✕</button>
+        </div>
+
+        <div class="admin-tabs-bar">
+          <button class="btn-admin-tab active" data-admin-tab="scenes" id="mobileAdminTab_scenes" type="button">
+            <span>🎬</span>
+            <span>CENAS &amp; SNAPSHOTS</span>
+          </button>
+          <button class="btn-admin-tab" data-admin-tab="system" id="mobileAdminTab_system" type="button">
+            <span>🛡️</span>
+            <span>SISTEMA &amp; AUTO-SAVE</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="admin-modal-body">
+        <!-- ABA 1: ADMINISTRAÇÃO DE CENAS -->
+        <div class="admin-tab-pane active" id="mobileAdminPane_scenes">
+          <div class="mobile-scenes-actions">
+            <button class="btn-mobile-scene-action primary" id="btnMobileOpenSaveScene" type="button">
+              💾 Salvar Cena Atual
+            </button>
+            <button class="btn-mobile-scene-action secondary" id="btnMobileImportScene" type="button">
+              ⬆ Importar (.json)
+            </button>
+            <input type="file" id="fileMobileSceneImport" accept=".json" style="display: none;">
+          </div>
+
+          <!-- Formulário Inline para Salvar Nova Cena -->
+          <div class="mobile-scene-save-form" id="mobileSceneSaveForm" style="display: none;">
+            <h4>Salvar Novo Snapshot</h4>
+            <div class="mobile-form-group">
+              <label for="mobileNewSceneName">Nome da Cena:</label>
+              <input type="text" id="mobileNewSceneName" placeholder="Ex: Culto Domingo Manhã" maxlength="50" autocomplete="off">
+            </div>
+            <div class="mobile-form-group">
+              <label for="mobileNewSceneDesc">Descrição / Observações:</label>
+              <input type="text" id="mobileNewSceneDesc" placeholder="Ex: Banda completa com 4 retornos" maxlength="150" autocomplete="off">
+            </div>
+            <div class="mobile-form-buttons">
+              <button class="btn-mobile-scene-action primary" id="btnMobileConfirmSaveScene" type="button">Salvar Snapshot</button>
+              <button class="btn-mobile-scene-action" id="btnMobileCancelSaveScene" type="button">Cancelar</button>
+            </div>
+          </div>
+
+          <div class="mobile-scenes-section-title">Cenas Salvas no Servidor</div>
+          <div class="mobile-scenes-list" id="mobileScenesListItems">
+            <div style="padding: 18px; text-align: center; font-size: 12px; color: var(--text-faint);">Carregando cenas...</div>
+          </div>
+
+          <!-- Painel de Auto-Save / Restauração de Desastre -->
+          <div class="mobile-dr-card">
+            <div class="mobile-dr-top">
+              <span style="font-size: 20px;">🛡️</span>
+              <div class="mobile-dr-info">
+                <strong>Restauração de Desastre (Auto-Save)</strong>
+                <p id="mobileDrAutoSaveStatus">Verificando status do auto-save...</p>
+              </div>
+            </div>
+            <button class="btn-mobile-scene-action warning" id="btnMobileRestoreLastState" type="button">
+              🔄 Restaurar Último Estado na Mesa
+            </button>
+          </div>
+        </div>
+
+        <!-- ABA 2: SISTEMA & AUTO-SAVE -->
+        <div class="admin-tab-pane" id="mobileAdminPane_system">
+          <div class="mobile-sys-card">
+            <span class="mobile-sys-label">Porta MIDI Conectada</span>
+            <span class="mobile-sys-val" id="mobileAdminSysPort">-</span>
+          </div>
+          <div class="mobile-sys-card">
+            <span class="mobile-sys-label">Status de Auto-Save em Disco</span>
+            <span class="mobile-sys-val" id="mobileAdminSysAutoSave">Verificando...</span>
+          </div>
+          <div class="mobile-sys-card" style="gap: 10px;">
+            <span class="mobile-sys-label">Sincronização de Interface</span>
+            <p style="font-size: 11px; color: var(--text-dim);">Recarrega todos os parâmetros de faders, mutes, sends, EQs, compressores e gates a partir do servidor.</p>
+            <button class="btn-mobile-scene-action secondary" id="btnMobileAdminSyncNow" type="button">
+              🔄 Sincronizar Estado Agora
+            </button>
+          </div>
+
+          <!-- Card de Desligamento do Servidor (Mobile) -->
+          <div class="mobile-sys-card" style="gap: 10px; background: linear-gradient(180deg, #221215 0%, #170d10 100%); border-color: #5c1f27;">
+            <span class="mobile-sys-label" style="color: #f87171;">⏻ Energia &amp; Desligamento do Servidor</span>
+            <p style="font-size: 11px; color: var(--text-dim);">Encerra graciosamente o serviço web/MIDI e desliga a máquina host (poweroff). Exige confirmação de senha.</p>
+            <button class="btn-mobile-scene-action danger" id="btnMobileOpenShutdown" type="button">
+              ⏻ Desligar
+            </button>
+          </div>
+
+          <!-- Formulário de Confirmação de Senha para Desligar (Mobile) -->
+          <div class="mobile-scene-save-form" id="mobileShutdownForm" style="display: none; border-color: #7f1d1d; background: #160c0e;">
+            <h4 style="color: #f87171;">⚠️ Confirmar Desligamento — Digite sua Senha</h4>
+            <div class="mobile-form-group">
+              <label for="mobileShutdownPassword">Senha do Administrador:</label>
+              <input type="password" id="mobileShutdownPassword" placeholder="Digite sua senha atual" autocomplete="current-password">
+            </div>
+            <div class="mobile-form-buttons">
+              <button class="btn-mobile-scene-action danger" id="btnMobileConfirmShutdown" type="button">⏻ Desligar</button>
+              <button class="btn-mobile-scene-action" id="btnMobileCancelShutdown" type="button">Cancelar</button>
+            </div>
+          </div>
+
+          <!-- Resposta do Comando de Desligamento (Mobile) -->
+          <div id="mobileShutdownFeedback" style="display: none; padding: 12px; border-radius: 8px; font-size: 12px; font-weight: 600; line-height: 1.45;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMAÇÃO DE RECALL (MOBILE) -->
+  <div class="modal-backdrop" id="mobileConfirmRecallModal" style="z-index: 250;">
+    <div class="modal-container" style="max-width: 340px;">
+      <div class="modal-header">
+        <span>⚠️ Confirmar Carregamento</span>
+        <button id="btnMobileCloseRecallConfirm" type="button">✕</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 10px; font-size: 13px; line-height: 1.45;">
+        <p id="mobileConfirmRecallMessage" style="color: var(--text-main);">Deseja carregar esta cena na Yamaha 01V96 física?</p>
+        <p style="color: #fbbf24; font-size: 11px;">⚠️ Todos os faders, mutes e configurações da mesa serão ajustados em tempo real de forma cadenciada.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-action" id="btnMobileCancelRecall" type="button">Cancelar</button>
+        <button class="btn-modal-action" id="btnMobileConfirmRecall" type="button" style="background: #dc2626; border-color: #f87171; color: #fff;">Sim, Carregar</button>
       </div>
     </div>
   </div>
@@ -3320,10 +3854,15 @@
     }
 
     // ==========================================
-    // MENU DO USUÁRIO (/api/me)
+    // MENU DO USUÁRIO (/api/me) E PERMISSÃO ADMIN
     // ==========================================
+    let currentMobileUserRole = '';
+
     async function initUserMenu() {
       const popover = document.getElementById('userPopover');
+      const btnMobileAdmin = document.getElementById('btnMobileAdmin');
+      const btnPopoverAdmin = document.getElementById('btnPopoverAdmin');
+
       document.getElementById('btnUserMenu').addEventListener('click', () => {
         popover.classList.add('open');
       });
@@ -3338,13 +3877,487 @@
         const res = await fetch('/api/me');
         if (res.ok) {
           const u = await res.json();
+          currentMobileUserRole = (u.role || '').toUpperCase();
           document.getElementById('headerUserName').innerText = u.name || u.username;
           document.getElementById('popoverUserName').innerText = u.name;
           document.getElementById('popoverUserLogin').innerText = u.username;
-          document.getElementById('popoverUserRole').innerText = u.role.toUpperCase();
+          document.getElementById('popoverUserRole').innerText = currentMobileUserRole;
+
+          const isAdmin = currentMobileUserRole === 'ADMIN';
+          if (btnMobileAdmin) {
+            btnMobileAdmin.style.display = isAdmin ? 'inline-flex' : 'none';
+          }
+          if (btnPopoverAdmin) {
+            btnPopoverAdmin.style.display = isAdmin ? 'block' : 'none';
+          }
         }
       } catch (e) {
         console.error('Falha ao obter perfil do usuário:', e);
+      }
+    }
+
+    // ==========================================
+    // SEÇÃO ADMIN E GERENCIADOR DE CENAS (MOBILE)
+    // ==========================================
+    function escapeHTMLMobile(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function initAdminModalMobile() {
+      const adminModal = document.getElementById('adminModalMobile');
+      const btnMobileAdmin = document.getElementById('btnMobileAdmin');
+      const btnPopoverAdmin = document.getElementById('btnPopoverAdmin');
+      const btnAdminClose = document.getElementById('btnAdminCloseMobile');
+      const userPopover = document.getElementById('userPopover');
+
+      const tabBtns = adminModal.querySelectorAll('.btn-admin-tab');
+      const paneScenes = document.getElementById('mobileAdminPane_scenes');
+      const paneSystem = document.getElementById('mobileAdminPane_system');
+      const sysPortEl = document.getElementById('mobileAdminSysPort');
+      const sysAutoSaveEl = document.getElementById('mobileAdminSysAutoSave');
+      const btnSyncNow = document.getElementById('btnMobileAdminSyncNow');
+      const btnOpenShutdown = document.getElementById('btnMobileOpenShutdown');
+      const shutdownForm = document.getElementById('mobileShutdownForm');
+      const shutdownPassInput = document.getElementById('mobileShutdownPassword');
+      const btnConfirmShutdown = document.getElementById('btnMobileConfirmShutdown');
+      const btnCancelShutdown = document.getElementById('btnMobileCancelShutdown');
+      const shutdownFeedback = document.getElementById('mobileShutdownFeedback');
+
+      const btnOpenSave = document.getElementById('btnMobileOpenSaveScene');
+      const saveForm = document.getElementById('mobileSceneSaveForm');
+      const inputName = document.getElementById('mobileNewSceneName');
+      const inputDesc = document.getElementById('mobileNewSceneDesc');
+      const btnConfirmSave = document.getElementById('btnMobileConfirmSaveScene');
+      const btnCancelSave = document.getElementById('btnMobileCancelSaveScene');
+      const scenesListEl = document.getElementById('mobileScenesListItems');
+      const drStatusEl = document.getElementById('mobileDrAutoSaveStatus');
+      const btnRestoreLast = document.getElementById('btnMobileRestoreLastState');
+      const btnImport = document.getElementById('btnMobileImportScene');
+      const fileImport = document.getElementById('fileMobileSceneImport');
+
+      const confirmModal = document.getElementById('mobileConfirmRecallModal');
+      const confirmMsgEl = document.getElementById('mobileConfirmRecallMessage');
+      const btnCancelRecall = document.getElementById('btnMobileCancelRecall');
+      const btnCloseRecallConfirm = document.getElementById('btnMobileCloseRecallConfirm');
+      const btnConfirmRecall = document.getElementById('btnMobileConfirmRecall');
+      let pendingMobileRecallAction = null;
+
+      function switchMobileAdminTab(tabId) {
+        tabBtns.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.adminTab === tabId);
+        });
+        if (paneScenes) paneScenes.classList.toggle('active', tabId === 'scenes');
+        if (paneSystem) paneSystem.classList.toggle('active', tabId === 'system');
+        if (tabId === 'system') {
+          const portLabel = document.getElementById('headerPortName');
+          if (sysPortEl && portLabel) sysPortEl.innerText = portLabel.innerText;
+          loadMobileAutoSaveStatus();
+        }
+      }
+
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          switchMobileAdminTab(btn.dataset.adminTab);
+        });
+      });
+
+      function openMobileAdminModal() {
+        if (!adminModal) return;
+        adminModal.classList.add('open');
+        if (saveForm) saveForm.style.display = 'none';
+        if (shutdownForm) shutdownForm.style.display = 'none';
+        if (shutdownFeedback) shutdownFeedback.style.display = 'none';
+        const portLabel = document.getElementById('headerPortName');
+        if (sysPortEl && portLabel) sysPortEl.innerText = portLabel.innerText;
+        loadMobileScenesList();
+        loadMobileAutoSaveStatus();
+      }
+
+      function closeMobileAdminModal() {
+        if (adminModal) adminModal.classList.remove('open');
+        if (saveForm) saveForm.style.display = 'none';
+        if (shutdownForm) shutdownForm.style.display = 'none';
+      }
+
+      function showMobileShutdownFeedback(text, type) {
+        if (!shutdownFeedback) return;
+        shutdownFeedback.style.display = 'block';
+        if (type === 'error') {
+          shutdownFeedback.style.background = 'rgba(239, 68, 68, 0.15)';
+          shutdownFeedback.style.border = '1px solid #ef4444';
+          shutdownFeedback.style.color = '#fca5a5';
+        } else if (type === 'warning') {
+          shutdownFeedback.style.background = 'rgba(245, 158, 11, 0.15)';
+          shutdownFeedback.style.border = '1px solid #f59e0b';
+          shutdownFeedback.style.color = '#fde68a';
+        } else {
+          shutdownFeedback.style.background = 'rgba(16, 185, 129, 0.15)';
+          shutdownFeedback.style.border = '1px solid #10b981';
+          shutdownFeedback.style.color = '#6ee7b7';
+        }
+        shutdownFeedback.innerText = text;
+      }
+
+      if (btnOpenShutdown) {
+        btnOpenShutdown.addEventListener('click', () => {
+          if (!shutdownForm) return;
+          if (shutdownFeedback) shutdownFeedback.style.display = 'none';
+          const isHidden = shutdownForm.style.display === 'none';
+          shutdownForm.style.display = isHidden ? 'flex' : 'none';
+          if (isHidden && shutdownPassInput) {
+            shutdownPassInput.value = '';
+            shutdownPassInput.focus();
+          }
+        });
+      }
+
+      if (btnCancelShutdown) {
+        btnCancelShutdown.addEventListener('click', () => {
+          if (shutdownForm) shutdownForm.style.display = 'none';
+          if (shutdownPassInput) shutdownPassInput.value = '';
+        });
+      }
+
+      async function executeMobileShutdown() {
+        if (!shutdownPassInput) return;
+        const password = shutdownPassInput.value;
+        if (!password.trim()) {
+          showMobileShutdownFeedback('Por favor, digite sua senha antes de confirmar o desligamento.', 'error');
+          shutdownPassInput.focus();
+          return;
+        }
+
+        if (btnConfirmShutdown) {
+          btnConfirmShutdown.disabled = true;
+          btnConfirmShutdown.innerText = 'Enviando...';
+        }
+
+        try {
+          const res = await fetch('/api/system/shutdown', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+          });
+          const result = await res.json();
+
+          if (res.ok && result.success) {
+            if (shutdownForm) shutdownForm.style.display = 'none';
+            shutdownPassInput.value = '';
+            if (result.shutdown_executed) {
+              showMobileShutdownFeedback(`✅ ${result.message}`, 'success');
+              showToast('Comando recebido! Desligando...');
+            } else {
+              showMobileShutdownFeedback(`ℹ️ ${result.message}`, 'warning');
+              showToast('Comando recebido (sem flag de desligar).');
+            }
+          } else {
+            showMobileShutdownFeedback(`❌ ${result.error || 'Falha ao autorizar o desligamento.'}`, 'error');
+          }
+        } catch (err) {
+          showMobileShutdownFeedback('❌ Erro de comunicação com o servidor ao enviar comando.', 'error');
+        } finally {
+          if (btnConfirmShutdown) {
+            btnConfirmShutdown.disabled = false;
+            btnConfirmShutdown.innerText = '⏻ Desligar';
+          }
+        }
+      }
+
+      if (btnConfirmShutdown) {
+        btnConfirmShutdown.addEventListener('click', executeMobileShutdown);
+      }
+      if (shutdownPassInput) {
+        shutdownPassInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            executeMobileShutdown();
+          }
+        });
+      }
+
+      function openMobileConfirmRecall(message, onConfirm) {
+        if (!confirmModal) return;
+        if (confirmMsgEl) confirmMsgEl.innerText = message;
+        pendingMobileRecallAction = onConfirm;
+        confirmModal.classList.add('open');
+      }
+
+      function closeMobileConfirmRecall() {
+        if (confirmModal) confirmModal.classList.remove('open');
+        pendingMobileRecallAction = null;
+      }
+
+      if (btnMobileAdmin) {
+        btnMobileAdmin.addEventListener('click', openMobileAdminModal);
+      }
+      if (btnPopoverAdmin) {
+        btnPopoverAdmin.addEventListener('click', () => {
+          if (userPopover) userPopover.classList.remove('open');
+          openMobileAdminModal();
+        });
+      }
+      if (btnAdminClose) {
+        btnAdminClose.addEventListener('click', closeMobileAdminModal);
+      }
+      adminModal.addEventListener('click', (e) => {
+        if (e.target === adminModal) closeMobileAdminModal();
+      });
+
+      if (btnCancelRecall) btnCancelRecall.addEventListener('click', closeMobileConfirmRecall);
+      if (btnCloseRecallConfirm) btnCloseRecallConfirm.addEventListener('click', closeMobileConfirmRecall);
+      confirmModal.addEventListener('click', (e) => {
+        if (e.target === confirmModal) closeMobileConfirmRecall();
+      });
+      if (btnConfirmRecall) {
+        btnConfirmRecall.addEventListener('click', () => {
+          if (typeof pendingMobileRecallAction === 'function') {
+            pendingMobileRecallAction();
+          }
+          closeMobileConfirmRecall();
+        });
+      }
+
+      if (btnSyncNow) {
+        btnSyncNow.addEventListener('click', async () => {
+          await syncMobileStateFromBackend();
+          showToast('Estado sincronizado! 🔄');
+        });
+      }
+
+      if (btnOpenSave) {
+        btnOpenSave.addEventListener('click', () => {
+          if (!saveForm) return;
+          const isHidden = saveForm.style.display === 'none';
+          saveForm.style.display = isHidden ? 'flex' : 'none';
+          if (isHidden && inputName) {
+            inputName.value = '';
+            if (inputDesc) inputDesc.value = '';
+            inputName.focus();
+          }
+        });
+      }
+
+      if (btnCancelSave) {
+        btnCancelSave.addEventListener('click', () => {
+          if (saveForm) saveForm.style.display = 'none';
+        });
+      }
+
+      if (btnConfirmSave) {
+        btnConfirmSave.addEventListener('click', async () => {
+          const name = inputName.value.trim();
+          const desc = inputDesc.value.trim();
+          if (!name) {
+            alert('Por favor, informe um nome para a cena.');
+            inputName.focus();
+            return;
+          }
+
+          btnConfirmSave.disabled = true;
+          btnConfirmSave.innerText = 'Salvando...';
+
+          try {
+            const res = await fetch('/api/scenes', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name, description: desc })
+            });
+            const result = await res.json();
+            if (res.ok && result.success) {
+              showToast(`Cena '${name}' salva! 💾`);
+              if (saveForm) saveForm.style.display = 'none';
+              loadMobileScenesList();
+            } else {
+              alert(`Falha ao salvar cena: ${result.error || 'Erro desconhecido'}`);
+            }
+          } catch (err) {
+            alert('Erro na comunicação com o servidor ao salvar cena.');
+          } finally {
+            btnConfirmSave.disabled = false;
+            btnConfirmSave.innerText = 'Salvar Snapshot';
+          }
+        });
+      }
+
+      async function loadMobileScenesList() {
+        if (!scenesListEl) return;
+        scenesListEl.innerHTML = '<div style="padding: 18px; text-align: center; font-size: 12px; color: var(--text-faint);">Carregando cenas...</div>';
+
+        try {
+          const res = await fetch('/api/scenes');
+          if (!res.ok) {
+            scenesListEl.innerHTML = '<div style="padding: 18px; text-align: center; font-size: 12px; color: #f87171;">Erro ao listar cenas do servidor.</div>';
+            return;
+          }
+          const data = await res.json();
+          const list = data.scenes || [];
+
+          if (list.length === 0) {
+            scenesListEl.innerHTML = '<div style="padding: 18px; text-align: center; font-size: 12px; color: var(--text-faint);">Nenhuma cena salva no servidor até o momento.</div>';
+            return;
+          }
+
+          scenesListEl.innerHTML = '';
+          list.forEach(scene => {
+            const card = document.createElement('div');
+            card.className = 'mobile-scene-card';
+
+            const d = new Date(scene.updated_at || scene.created_at);
+            const dateStr = !isNaN(d.getTime())
+              ? d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+              : '-';
+
+            card.innerHTML = `
+              <div class="mobile-scene-card-top">
+                <div>
+                  <div class="mobile-scene-name">${escapeHTMLMobile(scene.name)}</div>
+                  ${scene.description ? `<div class="mobile-scene-desc">${escapeHTMLMobile(scene.description)}</div>` : ''}
+                </div>
+              </div>
+              <div class="mobile-scene-meta">
+                <span>👤 ${escapeHTMLMobile(scene.author || 'admin')}</span>
+                <span>🕒 ${dateStr}</span>
+              </div>
+              <div class="mobile-scene-card-actions">
+                <button type="button" class="btn-mobile-scene-action primary sm btn-mob-recall" data-id="${scene.id}" data-name="${escapeHTMLMobile(scene.name)}">▶ Recall</button>
+                <a href="/api/scenes/${scene.id}?download=1" class="btn-mobile-scene-action secondary sm">⬇ JSON</a>
+                <button type="button" class="btn-mobile-scene-action danger sm btn-mob-delete" data-id="${scene.id}" data-name="${escapeHTMLMobile(scene.name)}" title="Excluir cena">🗑</button>
+              </div>
+            `;
+            scenesListEl.appendChild(card);
+          });
+
+          scenesListEl.querySelectorAll('.btn-mob-recall').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const id = btn.dataset.id;
+              const name = btn.dataset.name;
+              openMobileConfirmRecall(`Tem certeza que deseja carregar a cena "${name}" na mesa física Yamaha 01V96?`, async () => {
+                try {
+                  const res = await fetch(`/api/scenes/${id}/recall`, { method: 'POST' });
+                  const result = await res.json();
+                  if (res.ok && result.success) {
+                    showToast(`Cena '${name}' aplicada! 🎬`);
+                    closeMobileAdminModal();
+                    syncMobileStateFromBackend();
+                  } else {
+                    alert(`Erro ao carregar cena: ${result.error || 'Erro desconhecido'}`);
+                  }
+                } catch (err) {
+                  alert('Falha na comunicação com o servidor ao carregar cena.');
+                }
+              });
+            });
+          });
+
+          scenesListEl.querySelectorAll('.btn-mob-delete').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              const id = btn.dataset.id;
+              const name = btn.dataset.name;
+              if (confirm(`Tem certeza que deseja excluir permanentemente a cena "${name}"?`)) {
+                try {
+                  const res = await fetch(`/api/scenes/${id}`, { method: 'DELETE' });
+                  const result = await res.json();
+                  if (res.ok && result.success) {
+                    showToast(`Cena '${name}' excluída. 🗑`);
+                    loadMobileScenesList();
+                  } else {
+                    alert(`Falha ao excluir cena: ${result.error || 'Erro desconhecido'}`);
+                  }
+                } catch (err) {
+                  alert('Erro na comunicação com o servidor ao excluir cena.');
+                }
+              }
+            });
+          });
+        } catch (err) {
+          scenesListEl.innerHTML = '<div style="padding: 18px; text-align: center; font-size: 12px; color: #f87171;">Falha na conexão com o servidor.</div>';
+        }
+      }
+
+      async function loadMobileAutoSaveStatus() {
+        if (!drStatusEl) return;
+        try {
+          const res = await fetch('/api/state/status');
+          if (!res.ok) {
+            drStatusEl.innerText = 'Status do auto-save indisponível.';
+            if (sysAutoSaveEl) sysAutoSaveEl.innerText = 'Indisponível';
+            return;
+          }
+          const data = await res.json();
+          if (data.has_auto_save) {
+            const d = new Date(data.last_auto_save);
+            const dateStr = !isNaN(d.getTime())
+              ? d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR')
+              : 'Disponível no disco';
+            drStatusEl.innerHTML = `Último snapshot: <strong>${dateStr}</strong>`;
+            if (sysAutoSaveEl) sysAutoSaveEl.innerText = dateStr;
+            if (btnRestoreLast) btnRestoreLast.disabled = false;
+          } else {
+            drStatusEl.innerText = 'Nenhum snapshot de auto-save gravado ainda.';
+            if (sysAutoSaveEl) sysAutoSaveEl.innerText = 'Nenhum gravado';
+            if (btnRestoreLast) btnRestoreLast.disabled = true;
+          }
+        } catch (err) {
+          drStatusEl.innerText = 'Falha ao consultar auto-save.';
+          if (sysAutoSaveEl) sysAutoSaveEl.innerText = 'Erro de conexão';
+        }
+      }
+
+      if (btnRestoreLast) {
+        btnRestoreLast.addEventListener('click', () => {
+          openMobileConfirmRecall('Atenção: Deseja restaurar o último estado gravado (auto-save) diretamente na mesa física Yamaha 01V96?', async () => {
+            try {
+              const res = await fetch('/api/state/restore-last', { method: 'POST' });
+              const result = await res.json();
+              if (res.ok && result.success) {
+                showToast('Último estado restaurado! 🛡️');
+                closeMobileAdminModal();
+                syncMobileStateFromBackend();
+              } else {
+                alert(`Falha ao restaurar: ${result.error || 'Erro desconhecido'}`);
+              }
+            } catch (err) {
+              alert('Falha na comunicação com o servidor ao restaurar estado.');
+            }
+          });
+        });
+      }
+
+      if (btnImport && fileImport) {
+        btnImport.addEventListener('click', () => {
+          fileImport.value = '';
+          fileImport.click();
+        });
+
+        fileImport.addEventListener('change', async (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+
+          const formData = new FormData();
+          formData.append('file', file);
+
+          try {
+            const res = await fetch('/api/scenes/import', {
+              method: 'POST',
+              body: formData
+            });
+            const result = await res.json();
+            if (res.ok && result.success) {
+              showToast(`Cena '${result.scene.name}' importada! ⬆`);
+              loadMobileScenesList();
+            } else {
+              alert(`Falha ao importar cena: ${result.error || 'Arquivo inválido'}`);
+            }
+          } catch (err) {
+            alert('Erro de conexão ao enviar arquivo de cena.');
+          }
+        });
       }
     }
 
@@ -4842,6 +5855,7 @@
       initNavCollapse();
       initGlobalActions();
       initUserMenu();
+      initAdminModalMobile();
       initEqModal();
 
       // Botões de Saída (Bloco 2)

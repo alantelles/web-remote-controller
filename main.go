@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	crand "crypto/rand"
 	"encoding/csv"
 	"encoding/hex"
@@ -12,6 +13,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"os/exec"
 	"os/signal"
 	"strconv"
 	"strings"
@@ -56,6 +58,11 @@ var (
 
 	// Throttler global compartilhado entre o simulador e as requisições WebSocket
 	throttler = newParamThrottler(20*time.Millisecond, 16*time.Millisecond)
+
+	// Controle de desligamento do servidor/máquina via interface administrativa
+	canShutdownServer bool
+	httpServer        *http.Server
+	shutdownExecFunc  = executeSystemShutdown
 )
 
 // paramKey identifica unicamente um parâmetro da mesa: (element, param, channel)
@@ -584,6 +591,112 @@ func handleMobile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.ServeFile(w, r, "mobile.html")
+}
+
+func executeSystemShutdown() {
+	time.Sleep(400 * time.Millisecond)
+	log.Println("[!] Iniciando encerramento gracioso do serviço antes do desligamento da máquina (poweroff)...")
+	stopSimulation()
+	StopAutoSave()
+
+	clientsLock.Lock()
+	for client := range clients {
+		client.Close()
+		delete(clients, client)
+	}
+	clientsLock.Unlock()
+
+	midiLock.Lock()
+	if midiOut != nil {
+		midiOut.Close()
+		midiOut = nil
+	}
+	midiLock.Unlock()
+
+	if httpServer != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+		_ = httpServer.Shutdown(ctx)
+	}
+
+	log.Println("[!] Serviço encerrado com sucesso. Executando poweroff da máquina...")
+	if err := exec.Command("systemctl", "poweroff").Run(); err != nil {
+		if err2 := exec.Command("poweroff").Run(); err2 != nil {
+			_ = exec.Command("shutdown", "-h", "now").Run()
+		}
+	}
+	os.Exit(0)
+}
+
+func handleAPISystemShutdown(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Método não permitido. Use POST.",
+		})
+		return
+	}
+
+	sess := requireAdminRole(w, r)
+	if sess == nil {
+		return
+	}
+
+	var req struct {
+		Password string `json:"password"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Requisição JSON inválida.",
+		})
+		return
+	}
+
+	if strings.TrimSpace(req.Password) == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Digite sua senha para confirmar o desligamento.",
+		})
+		return
+	}
+
+	// Revalida a senha atual do administrador logado contra o arquivo de usuários
+	if _, err := authenticateUser(sess.User.Username, req.Password); err != nil {
+		log.Printf("[ADMIN] Tentativa de desligamento negada para '%s': senha incorreta", sess.User.Username)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Senha incorreta. O comando de desligamento não foi autorizado.",
+		})
+		return
+	}
+
+	if !canShutdownServer {
+		log.Printf("[ADMIN] Comando de desligamento recebido de '%s' (senha validada), mas não executado porque o parâmetro '-podeDesligarServidor' não foi passado na inicialização.", sess.User.Username)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success":           true,
+			"command_received":  true,
+			"shutdown_executed": false,
+			"message":           "Comando recebido com sucesso! Porém, o servidor não será desligado porque o parâmetro '-podeDesligarServidor' não foi passado na inicialização.",
+		})
+		return
+	}
+
+	log.Printf("[ADMIN] Comando de desligamento autorizado por '%s'. Encerrando serviço graciosamente e desligando a máquina (poweroff)...", sess.User.Username)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success":           true,
+		"command_received":  true,
+		"shutdown_executed": true,
+		"message":           "Comando recebido com sucesso! Encerrando o serviço graciosamente e desligando o servidor (poweroff)...",
+	})
+
+	go shutdownExecFunc()
 }
 
 func handleWS(w http.ResponseWriter, r *http.Request) {
@@ -1207,7 +1320,10 @@ func main() {
 	flag.StringVar(flagUsers, "users-file", "usuarios.csv", "Atalho para -users")
 	flagSessions := flag.String("sessions", "sessions.json", "Caminho do arquivo de persistência de sessões (padrão: sessions.json)")
 	flagData := flag.String("data", "data", "Diretório de persistência de cenas e auto-save (padrão: data)")
+	flagPodeDesligar := flag.Bool("podeDesligarServidor", false, "Permite que o botão administrativo 'Desligar' encerre o serviço e desligue a máquina (poweroff)")
 	flag.Parse()
+
+	canShutdownServer = *flagPodeDesligar
 
 	// Configura e inicializa o gerenciador de estado, auto-save e cenas
 	InitSceneManager(*flagData)
@@ -1257,6 +1373,7 @@ func main() {
 	http.HandleFunc("/api/state/status", handleAPIStateStatus)
 	http.HandleFunc("/api/state/restore-last", handleAPIRestoreLastState)
 	http.HandleFunc("/api/state", handleAPIGetCurrentState)
+	http.HandleFunc("/api/system/shutdown", handleAPISystemShutdown)
 	http.HandleFunc("/m", handleMobile)
 	http.HandleFunc("/mobile", handleMobile)
 
@@ -1290,6 +1407,9 @@ func main() {
 		os.Exit(0)
 	}()
 
-	log.Printf("Servidor Console Web rodando em http://%s", *flagAddr)
-	log.Fatal(http.ListenAndServe(*flagAddr, nil))
+	log.Printf("Servidor Console Web rodando em http://%s (podeDesligarServidor=%v)", *flagAddr, canShutdownServer)
+	httpServer = &http.Server{Addr: *flagAddr, Handler: nil}
+	if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatal(err)
+	}
 }

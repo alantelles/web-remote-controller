@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestLoadUsersAndCustomFile(t *testing.T) {
@@ -286,5 +287,81 @@ func TestHTTPLoginAndProtectedEndpoints(t *testing.T) {
 	}
 	if loginMobileResp["redirect"] != "/m" {
 		t.Errorf("POST /login mobile: esperava redirect '/m', obteve %v", loginMobileResp["redirect"])
+	}
+}
+
+func TestSystemShutdownEndpoint(t *testing.T) {
+	testFile := "test_shutdown_usuarios.csv"
+	defer os.Remove(testFile)
+	setUsersCSVFile(testFile)
+	defer setUsersCSVFile("usuarios.csv")
+	ensureUsersCSV()
+
+	adminToken := createSession(User{
+		Name:     "Administrador",
+		Username: "admin",
+		Role:     "ADMIN",
+	})
+
+	// 1. Senha incorreta -> deve retornar 401 Unauthorized
+	wrongBody := bytes.NewBufferString(`{"password": "wrongpassword"}`)
+	reqWrong := httptest.NewRequest(http.MethodPost, "/api/system/shutdown", wrongBody)
+	reqWrong.AddCookie(&http.Cookie{Name: sessionCookieName, Value: adminToken})
+	rrWrong := httptest.NewRecorder()
+	handleAPISystemShutdown(rrWrong, reqWrong)
+	if rrWrong.Code != http.StatusUnauthorized {
+		t.Errorf("Esperava 401 para senha incorreta no shutdown, obteve %d", rrWrong.Code)
+	}
+
+	// 2. Senha correta, mas sem o parâmetro -podeDesligarServidor (canShutdownServer = false)
+	canShutdownServer = false
+	okBody := bytes.NewBufferString(`{"password": "admin"}`)
+	reqNoFlag := httptest.NewRequest(http.MethodPost, "/api/system/shutdown", okBody)
+	reqNoFlag.AddCookie(&http.Cookie{Name: sessionCookieName, Value: adminToken})
+	rrNoFlag := httptest.NewRecorder()
+	handleAPISystemShutdown(rrNoFlag, reqNoFlag)
+	if rrNoFlag.Code != http.StatusOK {
+		t.Fatalf("Esperava 200 OK com senha correta sem flag, obteve %d", rrNoFlag.Code)
+	}
+	var respNoFlag map[string]interface{}
+	if err := json.Unmarshal(rrNoFlag.Body.Bytes(), &respNoFlag); err != nil {
+		t.Fatalf("Erro ao decodificar JSON: %v", err)
+	}
+	if respNoFlag["command_received"] != true || respNoFlag["shutdown_executed"] != false {
+		t.Errorf("Esperava command_received=true e shutdown_executed=false, obteve: %v", respNoFlag)
+	}
+
+	// 3. Senha correta e com -podeDesligarServidor ativo (canShutdownServer = true)
+	canShutdownServer = true
+	defer func() { canShutdownServer = false }()
+
+	calledChan := make(chan bool, 1)
+	origExec := shutdownExecFunc
+	shutdownExecFunc = func() {
+		calledChan <- true
+	}
+	defer func() { shutdownExecFunc = origExec }()
+
+	okBody2 := bytes.NewBufferString(`{"password": "admin"}`)
+	reqWithFlag := httptest.NewRequest(http.MethodPost, "/api/system/shutdown", okBody2)
+	reqWithFlag.AddCookie(&http.Cookie{Name: sessionCookieName, Value: adminToken})
+	rrWithFlag := httptest.NewRecorder()
+	handleAPISystemShutdown(rrWithFlag, reqWithFlag)
+	if rrWithFlag.Code != http.StatusOK {
+		t.Fatalf("Esperava 200 OK com senha correta e flag ativa, obteve %d", rrWithFlag.Code)
+	}
+	var respWithFlag map[string]interface{}
+	if err := json.Unmarshal(rrWithFlag.Body.Bytes(), &respWithFlag); err != nil {
+		t.Fatalf("Erro ao decodificar JSON: %v", err)
+	}
+	if respWithFlag["command_received"] != true || respWithFlag["shutdown_executed"] != true {
+		t.Errorf("Esperava command_received=true e shutdown_executed=true, obteve: %v", respWithFlag)
+	}
+
+	select {
+	case <-calledChan:
+		// OK: função de desligamento acionada
+	case <-time.After(1 * time.Second):
+		t.Errorf("Função de desligamento não foi acionada após comando válido com flag ativa")
 	}
 }
