@@ -134,29 +134,29 @@ var (
 	autoSaveStopChan  chan struct{}
 )
 
-// newDefaultEQState cria um estado seguro de EQ plano (Flat)
+// newDefaultEQState cria um estado seguro de EQ plano (Flat 0.0 dB = 180)
 func newDefaultEQState() EQState {
 	return EQState{
-		On:     0,
-		Low:    EQBand{Q: 0, Freq: 46, Gain: 36},
-		LowMid: EQBand{Q: 15, Freq: 70, Gain: 36},
-		HiMid:  EQBand{Q: 15, Freq: 95, Gain: 36},
-		High:   EQBand{Q: 0, Freq: 115, Gain: 36},
+		On:     1,
+		Low:    EQBand{Q: 23, Freq: 27, Gain: 180},
+		LowMid: EQBand{Q: 20, Freq: 51, Gain: 180},
+		HiMid:  EQBand{Q: 20, Freq: 79, Gain: 180},
+		High:   EQBand{Q: 23, Freq: 107, Gain: 180},
 		HPFOn:  0,
 		LPFOn:  0,
 	}
 }
 
-// newDefaultCompState cria um estado neutro e seguro de Compressor
+// newDefaultCompState cria um estado neutro e seguro de Compressor (-20.0 dB = 340, Ratio 4.0:1 = 7)
 func newDefaultCompState() CompState {
 	return CompState{
-		On:        0,
-		Threshold: 30, // -24 dB
-		Ratio:     5,  // 2.0:1
-		Attack:    20, // 20 ms
-		Release:   40,
-		Knee:      1,
-		Gain:      0, // 0 dB
+		On:        1,
+		Threshold: 340, // -20.0 dB
+		Ratio:     7,   // 4.0:1
+		Attack:    20,  // 20 ms
+		Release:   18,  // 250 ms
+		Knee:      0,   // HARD
+		Gain:      0,   // 0.0 dB
 	}
 }
 
@@ -780,10 +780,8 @@ func RecallMixerState(targetState MixerState, paceDelay time.Duration) {
 			sysex := Build01V96SysEx(m.element, m.param, m.channel, m.value)
 
 			midiLock.Lock()
-			if midiOut != nil {
-				if err := midiOut.Send(sysex); err != nil {
-					log.Printf("Aviso ao enviar SysEx [%d/%d]: %v", i+1, len(messages), err)
-				}
+			if err := sendMIDISysExLocked(sysex); err != nil {
+				log.Printf("Aviso ao enviar SysEx [%d/%d]: %v", i+1, len(messages), err)
 			}
 			midiLock.Unlock()
 

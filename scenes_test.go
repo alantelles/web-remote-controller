@@ -6,7 +6,9 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
+	"time"
 )
 
 func setupTestSceneEnv(t *testing.T) string {
@@ -276,5 +278,40 @@ func TestSceneHTTPEndpointsAuth(t *testing.T) {
 
 	if rrPostAdmin.Code != http.StatusCreated {
 		t.Errorf("Esperado status 201 para POST de admin, obtido: %d (body: %s)", rrPostAdmin.Code, rrPostAdmin.Body.String())
+	}
+}
+
+func TestParamThrottlerTrailingEdge(t *testing.T) {
+	pt := newParamThrottler(25*time.Millisecond, 16*time.Millisecond)
+
+	var mu sync.Mutex
+	var flushedVals []int
+
+	flushFn := func(v int) {
+		mu.Lock()
+		flushedVals = append(flushedVals, v)
+		mu.Unlock()
+	}
+
+	// 1º envio deve passar imediatamente
+	midi1, ws1 := pt.allowOrSchedule(0x1C, 0x00, 0x00, 100, flushFn)
+	if !midi1 || !ws1 {
+		t.Fatalf("Esperado primeiro envio midi=true, ws=true; obtido midi=%v, ws=%v", midi1, ws1)
+	}
+
+	// 2º e 3º envios logo em seguida (< 25ms) devem ser retidos no throttle mas agendados para flush final
+	midi2, _ := pt.allowOrSchedule(0x1C, 0x00, 0x00, 250, flushFn)
+	midi3, _ := pt.allowOrSchedule(0x1C, 0x00, 0x00, 424, flushFn)
+	if midi2 || midi3 {
+		t.Fatalf("Esperado throttle imediato nos envios 2 e 3; obtido midi2=%v, midi3=%v", midi2, midi3)
+	}
+
+	// Aguarda janela do timer de trailing-edge
+	time.Sleep(40 * time.Millisecond)
+
+	mu.Lock()
+	defer mu.Unlock()
+	if len(flushedVals) != 1 || flushedVals[0] != 424 {
+		t.Errorf("Esperado flush final com o último valor [424], obtido: %v", flushedVals)
 	}
 }

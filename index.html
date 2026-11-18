@@ -4885,11 +4885,11 @@
         sendCommand(0x20, param, currentSelectedCh, value);
       } else if (currentSelectedCh === 'MASTER') {
         sendCommand(0x50, param, 0x00, value);
-        saveMixData();
+        saveMixDataDebounced();
       } else if (typeof currentSelectedCh === 'string' && currentSelectedCh.startsWith('AUX')) {
         const auxIdx = parseInt(currentSelectedCh.replace('AUX', ''), 10) - 1;
         sendCommand(0x35, param, auxIdx, value);
-        saveMixData();
+        saveMixDataDebounced();
       }
       requestEqRedraw();
     }
@@ -5348,11 +5348,11 @@
         sendCommand(0x22, param, currentSelectedCh, value);
       } else if (currentSelectedCh === 'MASTER') {
         sendCommand(0x51, param, 0x00, value);
-        saveMixData();
+        saveMixDataDebounced();
       } else if (typeof currentSelectedCh === 'string' && currentSelectedCh.startsWith('AUX')) {
         const auxIdx = parseInt(currentSelectedCh.replace('AUX', ''), 10) - 1;
         sendCommand(0x36, param, auxIdx, value);
-        saveMixData();
+        saveMixDataDebounced();
       }
       requestCompRedraw();
     }
@@ -5757,16 +5757,16 @@
                 eqState[i].on = inp.eq.on;
                 eqState[i].low.gain = inp.eq.low.gain;
                 eqState[i].low.freq = inp.eq.low.freq;
-                eqState[i].low.q = inp.eq.low.q;
+                eqState[i].low.q = Math.max(0, Math.min(40, 40 - inp.eq.low.q));
                 eqState[i].lomid.gain = inp.eq.low_mid.gain;
                 eqState[i].lomid.freq = inp.eq.low_mid.freq;
-                eqState[i].lomid.q = inp.eq.low_mid.q;
+                eqState[i].lomid.q = Math.max(0, Math.min(40, 40 - inp.eq.low_mid.q));
                 eqState[i].himid.gain = inp.eq.hi_mid.gain;
                 eqState[i].himid.freq = inp.eq.hi_mid.freq;
-                eqState[i].himid.q = inp.eq.hi_mid.q;
+                eqState[i].himid.q = Math.max(0, Math.min(40, 40 - inp.eq.hi_mid.q));
                 eqState[i].high.gain = inp.eq.high.gain;
                 eqState[i].high.freq = inp.eq.high.freq;
-                eqState[i].high.q = inp.eq.high.q;
+                eqState[i].high.q = Math.max(0, Math.min(40, 40 - inp.eq.high.q));
                 eqState[i].hpf = inp.eq.hpf_on;
                 eqState[i].lpf = inp.eq.lpf_on;
               }

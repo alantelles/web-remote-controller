@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -40,10 +41,12 @@ type WSMessage struct {
 }
 
 var (
-	midiOut      drivers.Out
-	midiPortName string
-	midiLock     sync.Mutex
-	upgrader     = websocket.Upgrader{
+	midiOut           drivers.Out
+	midiThroughMirror drivers.Out
+	midiRawFiles      []*os.File
+	midiPortName      string
+	midiLock          sync.Mutex
+	upgrader          = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
 	}
 
@@ -63,18 +66,119 @@ var (
 	canShutdownServer bool
 	httpServer        *http.Server
 	shutdownExecFunc  = executeSystemShutdown
+
+	virmidiPortRegex = regexp.MustCompile(`(?i)(?:Virtual Raw MIDI|VirMIDI)\s+(\d+)-(\d+)`)
 )
+
+// closeMIDIBridgesLocked fecha arquivos RawMIDI e portas espelho auxiliares (deve ser chamado com midiLock)
+func closeMIDIBridgesLocked() {
+	for _, rf := range midiRawFiles {
+		if rf != nil {
+			_ = rf.Close()
+		}
+	}
+	midiRawFiles = nil
+	if midiThroughMirror != nil {
+		_ = midiThroughMirror.Close()
+		midiThroughMirror = nil
+	}
+}
+
+// setupMIDIBridges configura bridges para portas virtuais ALSA (snd-virmidi e Midi Through).
+// No Linux ALSA, eventos enviados via ALSA Sequencer (rtmididrv) para uma porta VirMIDI (ex: 24:0)
+// saem apenas no dispositivo RawMIDI (/dev/snd/midiC2D0) e NÃO são entregues a clientes ALSA Sequencer
+// inscritos na mesma porta (como Wine / Studio Manager e aseqdump -p 24:0).
+// Por outro lado, escrever diretamente em /dev/snd/midiC<card>D<dev> injeta o SysEx no driver snd-virmidi
+// para que ele seja emitido na saída ALSA Sequencer da porta VirMIDI.
+func setupMIDIBridges(outs []drivers.Out, selected drivers.Out) {
+	midiLock.Lock()
+	defer midiLock.Unlock()
+
+	closeMIDIBridgesLocked()
+	if selected == nil {
+		return
+	}
+
+	selName := selected.String()
+	selLower := strings.ToLower(selName)
+
+	// 1. Se a porta selecionada for VirMIDI (ex: "Virtual Raw MIDI 2-0:VirMIDI 2-0 24:0"),
+	// abre o dispositivo RawMIDI correspondente (/dev/snd/midiC2D0) para garantir que clientes
+	// ALSA Sequencer (Wine / Studio Manager / aseqdump) recebam os pacotes SysEx na porta 24:0,
+	// e também espelha na Midi Through (14:0) caso o Studio Manager esteja ouvindo nela (como no first commit).
+	if matches := virmidiPortRegex.FindStringSubmatch(selName); len(matches) == 3 {
+		rawPath := fmt.Sprintf("/dev/snd/midiC%sD%s", matches[1], matches[2])
+		if rf, err := os.OpenFile(rawPath, os.O_WRONLY|syscall.O_NONBLOCK, 0); err == nil {
+			midiRawFiles = append(midiRawFiles, rf)
+			log.Printf("Bridge ALSA VirMIDI ativo: injetando SysEx via %s para entrega no ALSA Sequencer (%s)", rawPath, selName)
+		} else {
+			log.Printf("Aviso: não foi possível abrir bridge RawMIDI %s: %v", rawPath, err)
+		}
+
+		for _, o := range outs {
+			if o.String() != selName && strings.Contains(strings.ToLower(o.String()), "midi through") {
+				if err := o.Open(); err == nil {
+					midiThroughMirror = o
+					log.Printf("Bridge Midi Through ativo: espelhando SysEx também em '%s'", o.String())
+				}
+				break
+			}
+		}
+		return
+	}
+
+	// 2. Se a porta selecionada for Midi Through (ex: "Midi Through:Midi Through Port-0 14:0", padrão do first commit),
+	// verifica se há portas VirMIDI carregadas no sistema e espelha na primeira VirMIDI (ex: /dev/snd/midiC2D0)
+	// para que o Studio Manager responda tanto se estiver configurado em Midi Through quanto em VirMIDI 2-0.
+	if strings.Contains(selLower, "midi through") {
+		for _, o := range outs {
+			if matches := virmidiPortRegex.FindStringSubmatch(o.String()); len(matches) == 3 {
+				rawPath := fmt.Sprintf("/dev/snd/midiC%sD%s", matches[1], matches[2])
+				if rf, err := os.OpenFile(rawPath, os.O_WRONLY|syscall.O_NONBLOCK, 0); err == nil {
+					midiRawFiles = append(midiRawFiles, rf)
+					log.Printf("Bridge ALSA VirMIDI ativo: espelhando SysEx também em %s (%s)", rawPath, o.String())
+				}
+				break
+			}
+		}
+	}
+}
+
+// sendMIDISysExLocked transmite o pacote SysEx para a porta MIDI ativa e eventuais bridges virtuais.
+// Deve ser chamado com midiLock adquirido.
+func sendMIDISysExLocked(sysex []byte) error {
+	var firstErr error
+	if midiOut != nil {
+		if err := midiOut.Send(sysex); err != nil {
+			firstErr = err
+		}
+	}
+	for _, rf := range midiRawFiles {
+		if rf != nil {
+			_, _ = rf.Write(sysex)
+		}
+	}
+	if midiThroughMirror != nil {
+		_ = midiThroughMirror.Send(sysex)
+	}
+	return firstErr
+}
 
 // paramKey identifica unicamente um parâmetro da mesa: (element, param, channel)
 type paramKey struct {
 	element, param, channel byte
 }
 
-// paramEntry armazena o último instante de envio e o último valor enviado
+// paramEntry armazena o último instante de envio e o último valor enviado separadamente para MIDI e WS
 type paramEntry struct {
-	lastMidi time.Time
-	lastWS   time.Time
-	lastVal  int
+	lastMidi     time.Time
+	lastWS       time.Time
+	lastMidiVal  int
+	lastWSVal    int
+	hasMidiVal   bool
+	hasWSVal     bool
+	pendingTimer *time.Timer
+	pendingVal   int
 }
 
 // paramThrottler limita a taxa de envio por parâmetro, de forma thread-safe.
@@ -95,8 +199,8 @@ func newParamThrottler(midiInterval, wsInterval time.Duration) *paramThrottler {
 	}
 }
 
-// allow retorna (canSendMIDI, canBroadcastWS) para o parâmetro dado e valor atual.
-// Retorna false se o valor não mudou ou se o intervalo mínimo ainda não passou.
+// allow retorna (canSendMIDI, canBroadcastWS) para o parâmetro dado e valor atual (usado pelo simulador).
+// Rastreia lastMidiVal e lastWSVal de forma independente para que um broadcast WS nunca bloqueie o envio MIDI.
 func (t *paramThrottler) allow(element, param, channel byte, value int) (midi bool, ws bool) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -109,23 +213,80 @@ func (t *paramThrottler) allow(element, param, channel byte, value int) (midi bo
 		t.entries[key] = entry
 	}
 
-	// Sem mudança de valor — descarta ambos
-	if exists && entry.lastVal == value {
-		return false, false
-	}
-
-	midi = now.Sub(entry.lastMidi) >= t.midiInterval
-	ws = now.Sub(entry.lastWS) >= t.wsInterval
-
-	if midi {
+	if (!entry.hasMidiVal || entry.lastMidiVal != value) && now.Sub(entry.lastMidi) >= t.midiInterval {
+		midi = true
 		entry.lastMidi = now
+		entry.lastMidiVal = value
+		entry.hasMidiVal = true
 	}
-	if ws {
+
+	if (!entry.hasWSVal || entry.lastWSVal != value) && now.Sub(entry.lastWS) >= t.wsInterval {
+		ws = true
 		entry.lastWS = now
+		entry.lastWSVal = value
+		entry.hasWSVal = true
 	}
-	if midi || ws {
-		entry.lastVal = value
+
+	return
+}
+
+// allowOrSchedule é usado para comandos reais do usuário via WebSocket:
+// Se o intervalo mínimo de MIDI já passou, envia imediatamente (mesmo que o valor seja igual ao anterior,
+// permitindo re-sincronizar a mesa ao clicar em 0dB ou -inf).
+// Se estiver dentro da janela de throttle (< 20ms), agenda um flush automático (trailing edge)
+// garantindo que a posição final do fader ou knob NUNCA seja descartada.
+func (t *paramThrottler) allowOrSchedule(element, param, channel byte, value int, flushMIDI func(finalVal int)) (midi bool, ws bool) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	key := paramKey{element, param, channel}
+	now := time.Now()
+	entry, exists := t.entries[key]
+	if !exists {
+		entry = &paramEntry{}
+		t.entries[key] = entry
 	}
+
+	elapsedMIDI := now.Sub(entry.lastMidi)
+	if elapsedMIDI >= t.midiInterval {
+		if entry.pendingTimer != nil {
+			entry.pendingTimer.Stop()
+			entry.pendingTimer = nil
+		}
+		midi = true
+		entry.lastMidi = now
+		entry.lastMidiVal = value
+		entry.hasMidiVal = true
+	} else {
+		entry.pendingVal = value
+		if entry.pendingTimer == nil && flushMIDI != nil {
+			wait := t.midiInterval - elapsedMIDI
+			entry.pendingTimer = time.AfterFunc(wait, func() {
+				t.mu.Lock()
+				e := t.entries[key]
+				if e == nil {
+					t.mu.Unlock()
+					return
+				}
+				finalVal := e.pendingVal
+				e.lastMidi = time.Now()
+				e.lastMidiVal = finalVal
+				e.hasMidiVal = true
+				e.pendingTimer = nil
+				t.mu.Unlock()
+
+				flushMIDI(finalVal)
+			})
+		}
+	}
+
+	if now.Sub(entry.lastWS) >= t.wsInterval || midi {
+		ws = true
+		entry.lastWS = now
+		entry.lastWSVal = value
+		entry.hasWSVal = true
+	}
+
 	return
 }
 
@@ -607,6 +768,7 @@ func executeSystemShutdown() {
 	clientsLock.Unlock()
 
 	midiLock.Lock()
+	closeMIDIBridgesLocked()
 	if midiOut != nil {
 		midiOut.Close()
 		midiOut = nil
@@ -931,25 +1093,47 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("WS -> SysEx: %s | %s\n", hexStr, targetDesc)
 
 		// Aplica throttle antes de enviar ao barramento MIDI e ao WebSocket.
-		// Eventos ON/MUTE/Bypass discretos passam direto sem throttling
+		// Eventos ON/MUTE/Bypass discretos ou limites de fader (0, 823, 1023) passam direto sem throttling.
+		// Para movimentos contínuos dentro da janela de 20ms, allowOrSchedule agenda o envio do valor final (trailing edge)
+		// para garantir que a última posição do fader/knob nunca se perca.
+		isFaderElem := msg.Element == 0x1C || msg.Element == 0x4D || msg.Element == 0x31 || (msg.Element == 0x23 && msg.Param <= 0x07)
 		isDiscrete := msg.Element == 0x1A ||
 			msg.Element == 0x4B || msg.Element == 0x2F ||
 			(msg.Element == 0x23 && msg.Param >= 0x08) ||
 			((msg.Element == 0x20 || msg.Element == 0x35 || msg.Element == 0x50) && (msg.Param == 0x00 || msg.Param == 0x0D || msg.Param == 0x0E)) ||
 			((msg.Element == 0x22 || msg.Element == 0x36 || msg.Element == 0x51) && msg.Param == 0x00) ||
-			(msg.Element == 0x21 && msg.Param == 0x00)
+			(msg.Element == 0x21 && msg.Param == 0x00) ||
+			(isFaderElem && (msg.Value == 0 || msg.Value == 823 || msg.Value == 1023))
+
 		canMIDI, canWS := true, true
 		if !isDiscrete {
-			canMIDI, canWS = throttler.allow(msg.Element, msg.Param, msg.Channel, msg.Value)
+			elemCopy, paramCopy, chCopy := msg.Element, msg.Param, msg.Channel
+			canMIDI, canWS = throttler.allowOrSchedule(elemCopy, paramCopy, chCopy, msg.Value, func(finalVal int) {
+				finalSysex := Build01V96SysEx(elemCopy, paramCopy, chCopy, finalVal)
+				finalHex := fmt.Sprintf("% X", finalSysex)
+
+				midiLock.Lock()
+				if err := sendMIDISysExLocked(finalSysex); err != nil {
+					log.Printf("Erro ao enviar MIDI (flush): %v", err)
+				}
+				midiLock.Unlock()
+
+				broadcastWS(WSMessage{
+					Type:    "param",
+					Element: elemCopy,
+					Param:   paramCopy,
+					Channel: chCopy,
+					Value:   finalVal,
+					Hex:     finalHex,
+				})
+			})
 		}
 
-		// Envia para a saída MIDI física
+		// Envia para a saída MIDI física / bridges ALSA
 		if canMIDI {
 			midiLock.Lock()
-			if midiOut != nil {
-				if err := midiOut.Send(sysex); err != nil {
-					log.Printf("Erro ao enviar MIDI: %v", err)
-				}
+			if err := sendMIDISysExLocked(sysex); err != nil {
+				log.Printf("Erro ao enviar MIDI: %v", err)
 			}
 			midiLock.Unlock()
 		}
@@ -1316,7 +1500,7 @@ func runFaderLoop(out drivers.Out, stopChan chan struct{}) {
 					if canMIDI {
 						midiLock.Lock()
 						if out != nil {
-							if err := out.Send(sysex); err != nil {
+							if err := sendMIDISysExLocked(sysex); err != nil {
 								log.Printf("Erro ao enviar SysEx MIDI [%s Ch %d]: %v", mix.name, ch+1, err)
 							}
 						}
@@ -1393,9 +1577,15 @@ func main() {
 	midiOut = selectMIDIPort(outs, *flagPort)
 
 	if midiOut != nil {
-		defer midiOut.Close()
+		defer func() {
+			midiLock.Lock()
+			closeMIDIBridgesLocked()
+			midiOut.Close()
+			midiLock.Unlock()
+		}()
 		midiPortName = midiOut.String()
 		log.Printf("Conectado na saída MIDI: %s", midiPortName)
+		setupMIDIBridges(outs, midiOut)
 	} else {
 		midiPortName = "Modo Simulação (sem porta MIDI física)"
 		log.Println("Rodando em modo simulação (nenhuma porta MIDI física conectada).")
