@@ -1,18 +1,18 @@
 # Especificação Técnica de Parâmetros SysEx — Yamaha 01V96 / 01V96V2
 
 > **Documento de Referência:** Mapeamento do Protocolo MIDI System Exclusive (SysEx)  
-> **Console:** Yamaha 01V96 / 01V96V2 / 01V96i  
-> **Documento Original de Origem:** *Yamaha 01V96V2 SysEx Parameter Address List*
+> **Console:** Yamaha 01V96 / 01V96V2 / 01V96i / Studio Manager  
+> **Status:** 100% Validado por Engenharia Reversa e Captura em Tempo Real no Studio Manager
 
 ---
 
 ## 1. Estrutura Fundamental do Pacote SysEx
 
-Toda alteração de parâmetro em tempo real na Yamaha 01V96V2 utiliza a mensagem de **14 bytes** de *Parameter Change* no buffer de edição (*Edit Buffer*):
+Toda alteração de parâmetro em tempo real na Yamaha 01V96/01V96V2 utiliza a mensagem de **14 bytes** de *Parameter Change* no formato **Universal Digital Mixer**:
 
 ```
 +----+----+----+----+----+----+----+----+----+-----+-----+-----+-----+----+
-| F0 | 43 | 1n | 3E | 0D | 01 | ee | pp | cc | dd1 | dd2 | dd3 | dd4 | F7 |
+| F0 | 43 | 1n | 3E | 7F | 01 | ee | pp | cc | dd1 | dd2 | dd3 | dd4 | F7 |
 +----+----+----+----+----+----+----+----+----+-----+-----+-----+-----+----+
    0    1    2    3    4    5    6    7    8    9    10    11    12   13
 ```
@@ -22,140 +22,171 @@ Toda alteração de parâmetro em tempo real na Yamaha 01V96V2 utiliza a mensage
 | Byte | Valor Hex | Descrição |
 |---|---|---|
 | 0 | `0xF0` | **SOX (Start of Exclusive):** Início da mensagem SysEx. |
-| 1 | `0x43` | **Yamaha ID:** Identificador de fabricante da Yamaha. |
-| 2 | `0x1n` / `0x3n` | **Sub-status / Canal MIDI:**<br>• `1n` = Parameter Change (Escrita em tempo real).<br>• `3n` = Parameter Request (Solicitação de leitura).<br>• `n` = MIDI Device ID / Canal (de `0` a `F`, correspondente ao canal MIDI 1 a 16. Padrão: `0x10` para Canal 1). |
+| 1 | `0x43` | **Yamaha ID:** Identificador de fabricante Yamaha. |
+| 2 | `0x1n` / `0x3n` | **Sub-status / Canal MIDI:**<br>• `0x10`: Parameter Change (Escrita em tempo real).<br>• `0x30`: Parameter Request (Solicitação de leitura).<br>• `n`: Canal MIDI da mesa (Padrão: `0` para Canal 1). |
 | 3 | `0x3E` | **Group ID:** Categoria *Digital Mixer*. |
-| 4 | `0x0D` | **Model ID:** Identificador exclusivo da **01V96**. |
-| 5 | `0x01` | **Data Type:** `0x01` indica o *Edit Buffer* (área de memória ativa da mesa). |
-| 6 | `[ee]` | **Element No. (Elemento Funcional):** Identifica o bloco (ex: Fader, EQ, Compressor, Aux Send). |
-| 7 | `[pp]` | **Parameter No. (Sub-parâmetro):** Identifica a propriedade dentro do bloco (ex: Ganho, Frequência, Q, Threshold). |
-| 8 | `[cc]` | **Channel No. (Índice de Canal):** Endereço zero-indexed do canal ou saída (`0x00` a `0x1F` para canais de entrada 1 a 32; `0x00` a `0x07` para Aux 1 a 8). |
-| 9 | `[dd1]` | **Data Byte 1:** Byte mais significativo do valor (normalmente `0x00`). |
-| 10 | `[dd2]` | **Data Byte 2:** Byte intermediário (normalmente `0x00`). |
-| 11 | `[dd3]` | **Data Byte 3:** 7 bits mais significativos de dados `(value >> 7) & 0x7F`. |
-| 12 | `[dd4]` | **Data Byte 4:** 7 bits menos significativos de dados `value & 0x7F`. |
+| 4 | `0x7F` | **Model ID Universal:** Cabeçalho padrão do Yamaha Studio Manager / Digital Mixers (`0x7F`). |
+| 5 | `0x01` | **Data Type:** `0x01` indica o *Edit Buffer* (área ativa de processamento). |
+| 6 | `[ee]` | **Element No. (Elemento Funcional):** Identifica o bloco (ex: Fader, Aux Send, EQ, Compressor). |
+| 7 | `[pp]` | **Parameter No. (Sub-parâmetro):** Propriedade dentro do bloco (ex: Nível, Pan, Q, Freq, Threshold). |
+| 8 | `[cc]` | **Channel No. (Índice de Canal):** Zero-indexed (`0x00` a `0x1F` para CH 1..32; `0x00` a `0x07` para Aux 1..8). |
+| 9 | `[dd1]` | **Data Byte 1:** Bits 27..21 (bit de sinal e mais significativos). |
+| 10 | `[dd2]` | **Data Byte 2:** Bits 20..14. |
+| 11 | `[dd3]` | **Data Byte 3:** Bits 13..7. |
+| 12 | `[dd4]` | **Data Byte 4:** Bits 6..0 (bits menos significativos). |
 | 13 | `0xF7` | **EOX (End of Exclusive):** Fim da mensagem SysEx. |
 
 ---
 
-## 2. Codificação e Empacotamento de Valores de Dados
+## 2. Codificação Matemática de 28 Bits com Sinal (Two's Complement)
 
-No protocolo MIDI, os bytes de dados não podem ter o oitavo bit (`MSB`) ativo (valores válidos são de `0x00` a `0x7F`). Por isso, a Yamaha distribui o número inteiro de 14 bits entre `dd3` e `dd4`:
+A Yamaha representa os valores de controle através de **inteiros de 28 bits com sinal em complemento de 2**, divididos em 4 bytes de 7 bits (`dd1` a `dd4`):
 
+### Montagem do Pacote (Go)
 ```go
-dd1 := byte(0x00)
-dd2 := byte(0x00)
-dd3 := byte((value >> 7) & 0x7F)
-dd4 := byte(value & 0x7F)
+u := uint32(value) & 0x0FFFFFFF
+dd1 := byte((u >> 21) & 0x7F)
+dd2 := byte((u >> 14) & 0x7F)
+dd3 := byte((u >> 7) & 0x7F)
+dd4 := byte(u & 0x7F)
 ```
 
-Para decodificar um valor recebido nos 4 bytes:
+### Decodificação do Pacote (Go)
 ```go
-value := (int(dd1) << 21) | (int(dd2) << 14) | (int(dd3) << 7) | int(dd4)
+raw := (uint32(dd1) << 21) | (uint32(dd2) << 14) | (uint32(dd3) << 7) | uint32(dd4)
+var value int
+if (raw & 0x08000000) != 0 {
+    // Número negativo (sinal ativo no bit 27)
+    value = int(int32(raw | 0xF0000000))
+} else {
+    value = int(raw)
+}
 ```
+
+### Exemplos Práticos Reais de Valores
+
+| Parâmetro | Valor Real | Bytes MIDI (`dd1 dd2 dd3 dd4`) | Explicação |
+|---|---|---|---|
+| Fader Unity (0.0 dB) | `823` | `00 00 06 37` | `823 = (6 << 7) | 55` |
+| Fader Máximo (+10.0 dB) | `1023` | `00 00 07 7F` | Fader 100% |
+| EQ Gain 0.0 dB | `0` | `00 00 00 00` | Centro Flat |
+| EQ Gain +18.0 dB | `+180` | `00 00 01 34` | +18.0 dB em décimos de dB |
+| EQ Gain -18.0 dB | `-180` | `7F 7F 7E 4C` | -18.0 dB em complemento de 2 |
+| Comp Threshold 0.0 dB | `0` | `00 00 00 00` | Máximo |
+| Comp Threshold -49.6 dB | `-496` | `7F 7F 7C 10` | Décimos de dB negativo |
+| Pan Center | `0` | `00 00 00 00` | Centro |
+| Pan L63 | `-63` | `7F 7F 7F 41` | Totalmente à esquerda |
+| Pan R63 | `+63` | `00 00 00 3F` | Totalmente à direita |
 
 ---
 
-## 3. Catálogo Completo de Elementos e Parâmetros Implementados
+## 3. Catálogo Completo de Elementos e Parâmetros (Validado)
 
 ### 3.1. Canais de Entrada (Input Channels 1 a 32)
 * `[cc]` varia de `0x00` (Canal 1) a `0x1F` (Canal 32).
 
 | Element (`ee`) | Param (`pp`) | Nome do Parâmetro | Faixa de Valores | Descrição Técnica |
 |---|---|---|---|---|
-| `0x1C` | `0x00` | **Input Fader Level** | `0` a `1023` | Nível do fader para o barramento Stereo. `0` = -∞ dB, `823` = 0.0 dB, `1023` = +10.0 dB. |
-| `0x1A` | `0x00` | **Input Channel ON / MUTE** | `0` ou `1` | Chave liga/desliga do canal. `0` = Muted (Apagado), `1` = ON (Ativo). |
-| `0x1B` | `0x00` | **Input Pan** | `0` a `126` | Posição panorâmica. `0` = L63, `63` = Center, `126` = R63. |
-| `0x23` | `0x00` a `0x07` | **Aux Send Level (1 a 8)** | `0` a `1023` | Nível de envio individual para o Auxiliar correspondente (`pp=0x00` é Aux 1, `pp=0x07` é Aux 8). |
-| `0x23` | `0x08` a `0x0F` | **Aux Send ON / MUTE (1 a 8)** | `0` ou `1` | Liga/Desliga do envio para o Auxiliar (`pp=0x08` é Aux 1 ON, `pp=0x0F` é Aux 8 ON). |
-| `0x23` | `0x10` a `0x17` | **Aux Send Pre/Post (1 a 8)** | `0` ou `1` | Ponto de roteamento: `0` = Post-Fader, `1` = Pre-Fader. |
+| `0x1C` | `0x00` | **Input Fader Level** | `0` a `1023` | Nível do canal para o barramento Stereo (`823` = 0.0 dB). |
+| `0x1A` | `0x00` | **Input Channel ON / MUTE** | `0` ou `1` | Chave geral do canal (`0` = Mute, `1` = ON). |
+| `0x1B` | `0x00` | **Input Pan** | `-63` a `+63` | Panorâmica estéreo (`-63` = L63, `0` = Center, `+63` = R63). |
+| `0x1D` | `0x00` | **Input Attenuator** | `-960` a `+120` | Ganho digital de entrada em décimos de dB. |
 
 ---
 
-### 3.2. Equalizador Paramétrico de Entrada (Input EQ)
-* Elemento: `0x20`
+### 3.2. Envio para Auxiliares por Canal (Aux Sends 1 a 8)
+* Elemento: **`0x23`**
 * `[cc]` varia de `0x00` a `0x1F` (Canais 1 a 32).
+* **Estrutura por passos de 3:** Para o auxiliar `auxIdx` (onde Aux 1 = 0, ..., Aux 8 = 7):
+  * **ON / MUTE:** `pp = auxIdx * 3 + 0`
+  * **PRE / POST:** `pp = auxIdx * 3 + 1` (`0` = Post-Fader, `1` = Pre-Fader)
+  * **SEND LEVEL:** `pp = auxIdx * 3 + 2` (`0` a `1023`, `823` = 0.0 dB)
 
-| Param (`pp`) | Parâmetro | Faixa de Valores | Mapeamento e Unidades |
+| Auxiliar | Send ON (`pp`) | PRE / POST (`pp`) | Send Level (`pp`) |
 |---|---|---|---|
-| `0x00` | **EQ ON / Bypass** | `0` ou `1` | `0` = Bypass / Desligado, `1` = EQ Ligado |
-| `0x01` | **LOW Q / Filter Type** | `0` a `40` | `0` = Shelving / HPF, valores `1` a `40` = Q de 10.0 a 0.10 |
-| `0x02` | **LOW Frequency** | `0` a `138` | Frequência de 20 Hz a 20 kHz (escala logarítmica) |
-| `0x03` | **LOW Gain** | `0` a `72` | Ganho de -18.0 dB (`0`) a +18.0 dB (`72`). `36` = 0.0 dB |
-| `0x04` | **LO-MID Q** | `0` a `40` | Fator de mérito Q: de 10.0 a 0.10 |
-| `0x05` | **LO-MID Frequency** | `0` a `138` | Frequência de 20 Hz a 20 kHz |
-| `0x06` | **LO-MID Gain** | `0` a `72` | Ganho de -18.0 dB (`0`) a +18.0 dB (`72`). `36` = 0.0 dB |
-| `0x07` | **HI-MID Q** | `0` a `40` | Fator de mérito Q: de 10.0 a 0.10 |
-| `0x08` | **HI-MID Frequency** | `0` a `138` | Frequência de 20 Hz a 20 kHz |
-| `0x09` | **HI-MID Gain** | `0` a `72` | Ganho de -18.0 dB (`0`) a +18.0 dB (`72`). `36` = 0.0 dB |
-| `0x0A` | **HIGH Q / Filter Type** | `0` a `40` | `0` = Shelving / LPF, valores `1` a `40` = Q de 10.0 a 0.10 |
-| `0x0B` | **HIGH Frequency** | `0` a `138` | Frequência de 20 Hz a 20 kHz |
-| `0x0C` | **HIGH Gain** | `0` a `72` | Ganho de -18.0 dB (`0`) a +18.0 dB (`72`). `36` = 0.0 dB |
-| `0x0D` | **HPF ON / OFF** | `0` ou `1` | `0` = HPF Desligado, `1` = HPF Ativo na banda LOW |
-| `0x0E` | **LPF ON / OFF** | `0` ou `1` | `0` = LPF Desligado, `1` = LPF Ativo na banda HIGH |
+| **Aux 1** | `0x00` | `0x01` | `0x02` |
+| **Aux 2** | `0x03` | `0x04` | `0x05` |
+| **Aux 3** | `0x06` | `0x07` | `0x08` |
+| **Aux 4** | `0x09` | `0x0A` | `0x0B` |
+| **Aux 5** | `0x0C` | `0x0D` | `0x0E` |
+| **Aux 6** | `0x0F` | `0x10` | `0x11` |
+| **Aux 7** | `0x12` | `0x13` | `0x14` |
+| **Aux 8** | `0x15` | `0x16` | `0x17` |
 
 ---
 
-### 3.3. Compressor de Entrada (Input Compressor)
-* Elemento: `0x22`
-* `[cc]` varia de `0x00` a `0x1F` (Canais 1 a 32).
+### 3.3. Equalizador Paramétrico de 4 Bandas e Atenuador
+* Elemento de Entrada: **`0x20`** (Canais 1 a 32, `cc = 0x00..0x1F`)
+* Elemento Master Stereo: **`0x50`** (`cc = 0x00`)
+* Elemento Aux Masters: **`0x35`** (`cc = 0x00..0x07` para Aux 1..8)
+* Elemento Atenuador Digital: **`0x1D`** (Canais 1 a 32, `pp = 0x00`, `cc = 0x00..0x1F`)
 
-| Param (`pp`) | Parâmetro | Faixa de Valores | Mapeamento e Unidades |
+| Param (`pp`) | Parâmetro | Faixa de Valores | Descrição |
 |---|---|---|---|
-| `0x00` | **COMP ON / Bypass** | `0` ou `1` | `0` = Bypass, `1` = Compressor Ativo |
-| `0x01` | **Threshold** | `0` a `54` | Limiar: `0` = -54 dB até `54` = 0 dB (passo de 1 dB) |
-| `0x02` | **Ratio** | `0` a `15` | `0`=1.0:1, `1`=1.1:1, `2`=1.3:1, `3`=1.5:1, `4`=1.7:1, `5`=2.0:1, `6`=2.5:1, `7`=3.0:1, `8`=3.5:1, `9`=4.0:1, `10`=5.0:1, `11`=6.0:1, `12`=8.0:1, `13`=10:1, `14`=20:1, `15`=∞:1 |
-| `0x03` | **Attack** | `0` a `120` | Tempo de ataque: de 0 ms a 120 ms |
-| `0x04` | **Release** | `0` a `79` | Tempo de liberação: de 5 ms a 42.3 s |
-| `0x05` | **Knee** | `0` a `5` | Curvatura do joelho: `0` = Hard Knee, `1` a `5` = Soft Knee 1 a 5 |
-| `0x06` | **Output Gain (Makeup)**| `0` a `36` | Ganho de compensação de saída: `0` = 0.0 dB até `36` = +18.0 dB (passo de 0.5 dB) |
+| `0x0F` | **EQ ON / Bypass** | `0` ou `1` | `0` = Bypass (Desligado), `1` = EQ Ativo (Ligado) |
+| `0x01` | **LOW Q / Filter Type** | `0` a `41` | `0x00` = HPF (Passa-Altas), `0x29` (41) = L.SHELF, `0..40` (`40 - Q`) = Peaking (0.10 a 10.0) |
+| `0x02` | **LOW Frequency** | `0` a `124` | 125 passos logarítmicos (20.0 Hz a 20.0 kHz, `0`=20.0 Hz, `124`=20.0 kHz) |
+| `0x03` | **LOW Gain** | `-180` a `+180` | Ganho de -18.0 dB a +18.0 dB em décimos de dB (`0` = 0.0 dB). Chave ON/OFF quando em HPF |
+| `0x05` | **LO-MID Q** | `0` a `40` | Fator Q de 0.10 a 10.0 (`40 - Q`) |
+| `0x06` | **LO-MID Frequency**| `0` a `124` | 125 passos logarítmicos (20.0 Hz a 20.0 kHz) |
+| `0x07` | **LO-MID Gain** | `-180` a `+180` | Ganho em décimos de dB |
+| `0x08` | **HI-MID Q** | `0` a `40` | Fator Q de 0.10 a 10.0 (`40 - Q`) |
+| `0x09` | **HI-MID Frequency**| `0` a `124` | 125 passos logarítmicos (20.0 Hz a 20.0 kHz) |
+| `0x0A` | **HI-MID Gain** | `-180` a `+180` | Ganho em décimos de dB |
+| `0x0B` | **HIGH Q / Filter Type**| `0` a `43` | `0x2B` (43) = LPF (Passa-Baixas), `0x2A` (42) = H.SHELF, `0..40` (`40 - Q`) = Peaking |
+| `0x0C` | **HIGH Frequency** | `0` a `124` | 125 passos logarítmicos (20.0 Hz a 20.0 kHz) |
+| `0x0D` | **HIGH Gain** | `-180` a `+180` | Ganho em décimos de dB. Chave ON/OFF quando em LPF |
+
+#### Atenuador Digital de Entrada (Elemento `0x1D`)
+* `ee = 0x1D`, `pp = 0x00`, `cc = 0x00..0x1F` (Canais 1 a 32)
+* Faixa: `-960` a `+120` décimos de dB (`-96.0 dB` a `+12.0 dB`, nominal `0` = 0.0 dB).
 
 ---
 
-### 3.4. Auxiliares Masters (Aux Masters 1 a 8)
-* `[cc]` varia de `0x00` (Aux 1) a `0x07` (Aux 8).
+### 3.4. Compressor de Canal
+* Elemento de Entrada: **`0x1F`** (Canais 1 a 32, `cc = 0x00..0x1F`)
+* Elemento Master Stereo: **`0x51`** (`cc = 0x00`)
 
-| Element (`ee`) | Param (`pp`) | Nome do Parâmetro | Faixa de Valores | Descrição Técnica |
-|---|---|---|---|---|
-| `0x31` | `0x00` | **Aux Master Fader** | `0` a `1023` | Nível master da saída auxiliar (`823` = 0.0 dB) |
-| `0x2F` | `0x00` | **Aux Master ON / MUTE**| `0` ou `1` | Chave geral da saída auxiliar (`0` = Mute, `1` = ON) |
-| `0x35` | `0x00` a `0x0E`| **Aux Master Equalizer**| *Idem 0x20* | Equalizador de 4 bandas do Master Auxiliar |
-| `0x36` | `0x00` a `0x06`| **Aux Master Compressor**| *Idem 0x22* | Compressor do Master Auxiliar |
+| Param (`pp`) | Parâmetro | Faixa de Valores | Descrição |
+|---|---|---|---|
+| `0x01` | **COMP ON / Bypass** | `0` ou `1` | `0` = Bypass, `1` = Compressor Ativo |
+| `0x09` | **Threshold** | `-540` a `0` | Limiar de -54.0 dB a 0.0 dB em décimos de dB negativos |
+| `0x06` | **Ratio** | `0` a `15` | `0`=1.0:1 até `15`=∞:1 |
+| `0x04` | **Attack** | `0` a `120` | Tempo de ataque de 0 ms a 120 ms |
+| `0x05` | **Release** | `0` a `159` | Tempo de liberação em 160 passos (5 ms a 42.3 s) |
+| `0x08` | **Knee** | `0` a `5` | Curvatura (`0` = Hard, `1` a `5` = Soft 1 a 5) |
+| `0x07` | **Out Gain (Makeup)**| `0` a `180` | Ganho de saída de 0.0 dB a +18.0 dB em décimos de dB |
 
 ---
 
-### 3.5. Saída Master Stereo (Stereo Master Out)
+### 3.5. Saídas Master (Stereo Master e Aux Masters)
+
+#### Stereo Master Out (L/R Geral)
 * `[cc]` = `0x00`
 
-| Element (`ee`) | Param (`pp`) | Nome do Parâmetro | Faixa de Valores | Descrição Técnica |
-|---|---|---|---|---|
-| `0x4D` | `0x00` | **Stereo Out Fader** | `0` a `1023` | Fader Geral da mesa (Master L/R). `823` = 0.0 dB |
-| `0x4B` | `0x00` | **Stereo Out ON / MUTE**| `0` ou `1` | Mute geral do Master Stereo (`0` = Mute, `1` = ON) |
-| `0x50` | `0x00` a `0x0E`| **Stereo Master EQ** | *Idem 0x20* | Equalizador de 4 bandas do Stereo Out |
-| `0x51` | `0x00` a `0x06`| **Stereo Master COMP** | *Idem 0x22* | Compressor do Stereo Out |
+| Element (`ee`) | Param (`pp`) | Descrição | Faixa de Valores |
+|---|---|---|---|
+| `0x4F` | `0x00` | **Stereo Out Fader** | `0` a `1023` (`823` = 0.0 dB) |
+| `0x4D` | `0x00` | **Stereo Out ON / MUTE** | `0` = Mute, `1` = ON |
+| `0x50` | Vários | **Stereo Master EQ** | Mapeamento idêntico ao EQ (`0x20`) |
+| `0x51` | Vários | **Stereo Master COMP** | Mapeamento idêntico ao Comp (`0x1F`) |
+
+#### Aux Masters 1 a 8
+* `[cc]` varia de `0x00` (Aux 1) a `0x07` (Aux 8).
+
+| Element (`ee`) | Param (`pp`) | Descrição | Faixa de Valores |
+|---|---|---|---|
+| `0x39` | `0x00` | **Aux Master Fader** | `0` a `1023` (`823` = 0.0 dB) |
+| `0x36` | `0x00` | **Aux Master ON / MUTE** | `0` = Mute, `1` = ON |
+| `0x35` | Vários | **Aux Master EQ** | Mapeamento idêntico ao EQ (`0x20`) |
 
 ---
 
-### 3.6. Demais Elementos Mapeados da 01V96 (Para Expansão Futura)
+## 4. Curva de Calibração do Fader (0 a 1023 <-> Decibéis dB)
 
-| Element (`ee`) | Bloco Funcional | Sub-elementos / Params |
-|---|---|---|
-| `0x21` | **Input Noise Gate** | `pp=0x00` (On), `0x01` (Threshold), `0x02` (Range), `0x03` (Attack), `0x04` (Hold), `0x05` (Decay) |
-| `0x2B` | **Bus Master ON / MUTE** | Canais `0x00` a `0x07` (Bus 1 a 8) |
-| `0x2D` | **Bus Master Fader** | Canais `0x00` a `0x07` (Bus 1 a 8, valor 0 a 1023) |
-| `0x33` | **Bus Master EQ** | Equalizador de 4 bandas dos barramentos Bus 1 a 8 |
-| `0x34` | **Bus Master Compressor**| Compressor dos barramentos Bus 1 a 8 |
-| `0x1D` | **Effects Return ON / MUTE** | Retornos de Efeitos internos 1 a 4 |
-| `0x1F` | **Effects Return Fader** | Faders de Retorno de Efeitos 1 a 4 |
+A tabela oficial da Yamaha 01V96V2 define os seguintes pontos de referência com interpolação linear por trecho (*piecewise linear*):
 
----
-
-## 4. Curvas de Conversão e Calibração
-
-### 4.1. Conversão de Fader (Decimal 0 a 1023 <-> Decibéis dB)
-A tabela oficial da Yamaha 01V96V2 define os seguintes marcos de calibração por interpolação linear por trecho (*piecewise linear*):
-
-| Valor Decimal | Nível em dB Exibido |
+| Decimal | dB |
 |---|---|
 | `0` | `-∞ dB` |
 | `224` | `-40.0 dB` |
@@ -165,53 +196,3 @@ A tabela oficial da Yamaha 01V96V2 define os seguintes marcos de calibração po
 | **`823`** | **`0.0 dB` (Nominal / Unity Gain)** |
 | `923` | `+5.0 dB` |
 | `1023` | `+10.0 dB` |
-
-### 4.2. Escala de Frequências de Equalização (139 Passos)
-A mesa distribui as frequências de corte de 20 Hz a 20 kHz em 139 índices (`0` a `138`).
-Fórmula matemática aproximada para exibição em Hz:
-$$\text{Freq}(idx) = 20 \times 10^{\frac{idx}{138} \times 3}$$
-
-Exemplos de correspondência:
-* `idx = 0` $\rightarrow$ 20 Hz
-* `idx = 46` $\rightarrow$ 100 Hz
-* `idx = 92` $\rightarrow$ 1.0 kHz
-* `idx = 115` $\rightarrow$ 5.0 kHz
-* `idx = 138` $\rightarrow$ 20.0 kHz
-
----
-
-## 5. Implementação no Código-Fonte
-
-### Montagem do Pacote SysEx em Go (`main.go`)
-```go
-func Build01V96SysEx(element, param, channel byte, value int) []byte {
-    if value < 0 { value = 0 }
-    if value > 1023 { value = 1023 }
-
-    dd1 := byte(0x00)
-    dd2 := byte(0x00)
-    dd3 := byte((value >> 7) & 0x7F)
-    dd4 := byte(value & 0x7F)
-
-    return []byte{
-        0xF0, 0x43, 0x10, 0x3E, 0x0D, 0x01,
-        element, param, channel,
-        dd1, dd2, dd3, dd4,
-        0xF7,
-    }
-}
-```
-
-### Transmissão no Frontend (`index.html`)
-```javascript
-function sendParam(element, param, channel, value) {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({
-            element: element,
-            param: param,
-            channel: channel,
-            value: value
-        }));
-    }
-}
-```

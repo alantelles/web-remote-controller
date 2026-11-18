@@ -88,32 +88,32 @@ func TestApplyParamToState(t *testing.T) {
 		t.Errorf("Esperado CH3 Pan = 100, obtido: %d", st.Inputs[2].Pan)
 	}
 
-	// Teste Input Aux Send Level (0x23, param 0x03 = Aux 4)
-	ApplyParamToState(0x23, 0x03, 2, 600)
+	// Teste Input Aux Send Level (0x23, param 0x0B = Aux 4 Level: 3*3 + 2 = 11 = 0x0B)
+	ApplyParamToState(0x23, 0x0B, 2, 600)
 	st = GetCurrentMixerState()
 	if st.Inputs[2].AuxSends[3].Level != 600 {
 		t.Errorf("Esperado CH3 Aux4 Send = 600, obtido: %d", st.Inputs[2].AuxSends[3].Level)
 	}
 
 	// Teste Input EQ (0x20)
-	ApplyParamToState(0x20, 0x00, 2, 1)  // EQ On
+	ApplyParamToState(0x20, 0x0F, 2, 1)  // EQ On (param 0x0F)
 	ApplyParamToState(0x20, 0x03, 2, 45) // Low Gain
 	st = GetCurrentMixerState()
 	if st.Inputs[2].EQ.On != 1 || st.Inputs[2].EQ.Low.Gain != 45 {
 		t.Errorf("Esperado CH3 EQ On=1, Low.Gain=45; obtido On=%d, Gain=%d", st.Inputs[2].EQ.On, st.Inputs[2].EQ.Low.Gain)
 	}
 
-	// Teste Stereo Master (0x4D, 0x4B)
-	ApplyParamToState(0x4D, 0x00, 0x00, 950)
-	ApplyParamToState(0x4B, 0x00, 0x00, 0)
+	// Teste Stereo Master (0x4F, 0x4D)
+	ApplyParamToState(0x4F, 0x00, 0x00, 950)
+	ApplyParamToState(0x4D, 0x00, 0x00, 0)
 	st = GetCurrentMixerState()
 	if st.StereoMaster.Fader != 950 || st.StereoMaster.On != 0 {
 		t.Errorf("Esperado Master Fader=950, On=0; obtido Fader=%d, On=%d", st.StereoMaster.Fader, st.StereoMaster.On)
 	}
 
-	// Teste Aux Master (0x31, 0x2F)
-	ApplyParamToState(0x31, 0x00, 1, 700) // Aux 2 Master
-	ApplyParamToState(0x2F, 0x00, 1, 0)
+	// Teste Aux Master (0x39, 0x36)
+	ApplyParamToState(0x39, 0x00, 1, 700) // Aux 2 Master
+	ApplyParamToState(0x36, 0x00, 1, 0)
 	st = GetCurrentMixerState()
 	if st.AuxMasters[1].Fader != 700 || st.AuxMasters[1].On != 0 {
 		t.Errorf("Esperado Aux2 Master Fader=700, On=0; obtido Fader=%d, On=%d", st.AuxMasters[1].Fader, st.AuxMasters[1].On)
@@ -211,12 +211,12 @@ func TestGenerateSysExForState(t *testing.T) {
 		t.Fatalf("Nenhuma mensagem SysEx gerada para o estado")
 	}
 
-	// Verifica se a quantidade cobre faders, mutes, pans, sends, eqs e compressores
-	// Stereo (1 fader + 1 on + 15 eq + 7 comp = 24)
-	// 8 Aux Masters * (1 + 1 + 15 + 7 = 24) = 192
-	// 32 Canais * (1 fader + 1 on + 1 pan + 8*3 sends + 15 eq + 7 comp = 49) = 1568
-	// Total esperado: 24 + 192 + 1568 = 1784 mensagens atômicas
-	expectedCount := 24 + 8*24 + 32*49
+	// Verifica se a quantidade cobre faders, mutes, pans, attenuator, sends, eqs e compressores
+	// Stereo (1 fader + 1 on + 13 eq + 7 comp = 22)
+	// 8 Aux Masters * (1 fader + 1 on + 13 eq = 15) = 120
+	// 32 Canais * (1 fader + 1 on + 1 pan + 1 att + 8*3 sends + 13 eq + 7 comp = 48) = 1536
+	// Total esperado: 22 + 120 + 1536 = 1678 mensagens atômicas
+	expectedCount := 22 + 8*15 + 32*48
 	if len(msgs) != expectedCount {
 		t.Errorf("Esperado %d mensagens SysEx para estado completo, obtido: %d", expectedCount, len(msgs))
 	}

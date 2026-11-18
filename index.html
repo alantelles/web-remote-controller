@@ -445,6 +445,36 @@
       border-color: rgba(239, 68, 68, 0.3);
     }
 
+    /* Botão PRE / POST Fader no cabeçalho do Strip (ativo em mixagens de AUX) */
+    .btn-pre-post {
+      display: none;
+      width: 66px;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      margin-top: 3px;
+      background: #181b24;
+      color: #94a3b8;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+      outline: none;
+    }
+    .btn-pre-post:hover {
+      background: #252b3b;
+      color: #f1f5f9;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .btn-pre-post.is-pre {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.5);
+      box-shadow: 0 0 6px rgba(245, 158, 11, 0.3);
+    }
+
     /* Barra de Controle de Canais (Toolbar) */
     .console-toolbar {
       flex-shrink: 0;
@@ -2931,6 +2961,12 @@
                 <button type="button" class="btn-filter-toggle" id="btnEqHpf" title="Ativar/Desativar Filtro Passa-Altas (Corte Grave na banda LOW)">HPF: <span id="lbl_hpfStatus">OFF</span></button>
                 <button type="button" class="btn-filter-toggle" id="btnEqLpf" title="Ativar/Desativar Filtro Passa-Baixas (Corte Agudo na banda HIGH)">LPF: <span id="lbl_lpfStatus">OFF</span></button>
               </div>
+              <div class="eq-att-group" id="eqAttContainer" style="display: flex; align-items: center; gap: 8px; background: rgba(15,23,42,0.6); padding: 4px 10px; border-radius: 6px; border: 1px solid #334155;">
+                <span style="font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 0.5px;">ATT:</span>
+                <input type="range" class="eq-range-input" id="rng_eqAtt" min="-960" max="120" value="0" step="5" style="width: 90px; height: 5px;">
+                <span class="eq-ctrl-val" id="lbl_eqAtt" style="font-size: 11px; min-width: 55px; text-align: right; color: #38bdf8;">0.0 dB</span>
+                <button type="button" class="btn-eq-att-zero" id="btnEqAttZero" style="background: transparent; border: 1px solid #475569; color: #94a3b8; font-size: 10px; padding: 2px 6px; border-radius: 4px; cursor: pointer;" title="Zerar Atenuador para 0.0 dB">0 dB</button>
+              </div>
               <button type="button" class="btn-eq-flat" id="btnEqFlat" title="Zerar todos os ganhos das 4 bandas">Reset Flat (0 dB)</button>
             </div>
 
@@ -2964,7 +3000,7 @@
                       <span id="lbl_lowFreqTitle">FREQ</span>
                       <span class="eq-ctrl-val" id="lbl_lowFreq">100 Hz</span>
                     </div>
-                    <input type="range" class="eq-range-input" id="rng_lowFreq" min="0" max="119" value="27">
+                    <input type="range" class="eq-range-input" id="rng_lowFreq" min="0" max="124" value="27">
                   </div>
                   <div class="eq-ctrl-row">
                     <div class="eq-ctrl-label-wrap">
@@ -2995,7 +3031,7 @@
                       <span>FREQ</span>
                       <span class="eq-ctrl-val" id="lbl_lomidFreq">400 Hz</span>
                     </div>
-                    <input type="range" class="eq-range-input" id="rng_lomidFreq" min="0" max="119" value="51">
+                    <input type="range" class="eq-range-input" id="rng_lomidFreq" min="0" max="124" value="51">
                   </div>
                   <div class="eq-ctrl-row">
                     <div class="eq-ctrl-label-wrap">
@@ -3026,7 +3062,7 @@
                       <span>FREQ</span>
                       <span class="eq-ctrl-val" id="lbl_himidFreq">2.00 kHz</span>
                     </div>
-                    <input type="range" class="eq-range-input" id="rng_himidFreq" min="0" max="119" value="79">
+                    <input type="range" class="eq-range-input" id="rng_himidFreq" min="0" max="124" value="79">
                   </div>
                   <div class="eq-ctrl-row">
                     <div class="eq-ctrl-label-wrap">
@@ -3061,7 +3097,7 @@
                       <span id="lbl_highFreqTitle">FREQ</span>
                       <span class="eq-ctrl-val" id="lbl_highFreq">10.0 kHz</span>
                     </div>
-                    <input type="range" class="eq-range-input" id="rng_highFreq" min="0" max="119" value="107">
+                    <input type="range" class="eq-range-input" id="rng_highFreq" min="0" max="124" value="107">
                   </div>
                   <div class="eq-ctrl-row">
                     <div class="eq-ctrl-label-wrap">
@@ -3168,7 +3204,7 @@
                   <span class="comp-param-val" id="lbl_compRelease">250 ms</span>
                 </div>
                 <div class="eq-ctrl-row">
-                  <input type="range" class="comp-range-input" id="rng_compRelease" min="0" max="43" value="18">
+                  <input type="range" class="comp-range-input" id="rng_compRelease" min="0" max="159" value="41">
                   <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-top: 2px;">
                     <span>5 ms</span>
                     <span>250 ms</span>
@@ -3294,10 +3330,11 @@
 
     // ==========================================
     // DEFINIÇÃO DAS MIXAGENS (MASTER E AUX 1-8)
-    // Tabela SysEx Yamaha 01V96V2:
-    // MASTER: Element 1CH (Fader, param 00H), Element 1AH (Mute/ON, param 00H)
-    // AUX 1-8 Send Level: Element 23H (params 00H a 07H para Aux 1 a 8)
-    // AUX 1-8 Send ON:    Element 23H (params 08H a 0FH para Aux 1 a 8)
+    // Tabela SysEx Yamaha 01V96V2 (Universal Protocol F0 43 10 3E 7F 01):
+    // MASTER: Fader 4FH, Mute/ON 4DH
+    // AUX 1-8 Masters: Fader 39H (ch 0..7), Mute/ON 36H (ch 0..7)
+    // AUX 1-8 Sends por Canal (Element 23H):
+    //   auxIndex 0..7: ON = auxIndex*3 + 0, PRE/POST = auxIndex*3 + 1, LEVEL = auxIndex*3 + 2
     // ==========================================
     const MIX_TARGETS = {
       MASTER: {
@@ -3311,16 +3348,18 @@
         faderParam: 0x00,
         onElement: 0x1A,
         onParam: 0x00,
+        outFaderElement: 0x4F,
+        outOnElement: 0x4D,
         sysexInfo: 'Fader: 1CH 00H | Mute: 1AH 00H'
       },
-      AUX1: { id: 'AUX1', name: 'AUX 1', displayName: 'AUX 1 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 1 Out', shortName: 'AUX 1', isMaster: false, auxIndex: 0, faderElement: 0x23, faderParam: 0x00, onElement: 0x23, onParam: 0x08, sysexInfo: 'Send: 23H 00H | On: 23H 08H' },
-      AUX2: { id: 'AUX2', name: 'AUX 2', displayName: 'AUX 2 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 2 Out', shortName: 'AUX 2', isMaster: false, auxIndex: 1, faderElement: 0x23, faderParam: 0x01, onElement: 0x23, onParam: 0x09, sysexInfo: 'Send: 23H 01H | On: 23H 09H' },
-      AUX3: { id: 'AUX3', name: 'AUX 3', displayName: 'AUX 3 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 3 Out', shortName: 'AUX 3', isMaster: false, auxIndex: 2, faderElement: 0x23, faderParam: 0x02, onElement: 0x23, onParam: 0x0A, sysexInfo: 'Send: 23H 02H | On: 23H 0AH' },
-      AUX4: { id: 'AUX4', name: 'AUX 4', displayName: 'AUX 4 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 4 Out', shortName: 'AUX 4', isMaster: false, auxIndex: 3, faderElement: 0x23, faderParam: 0x03, onElement: 0x23, onParam: 0x0B, sysexInfo: 'Send: 23H 03H | On: 23H 0BH' },
-      AUX5: { id: 'AUX5', name: 'AUX 5', displayName: 'AUX 5 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 5 Out', shortName: 'AUX 5', isMaster: false, auxIndex: 4, faderElement: 0x23, faderParam: 0x04, onElement: 0x23, onParam: 0x0C, sysexInfo: 'Send: 23H 04H | On: 23H 0CH' },
-      AUX6: { id: 'AUX6', name: 'AUX 6', displayName: 'AUX 6 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 6 Out', shortName: 'AUX 6', isMaster: false, auxIndex: 5, faderElement: 0x23, faderParam: 0x05, onElement: 0x23, onParam: 0x0D, sysexInfo: 'Send: 23H 05H | On: 23H 0DH' },
-      AUX7: { id: 'AUX7', name: 'AUX 7', displayName: 'AUX 7 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 7 Out', shortName: 'AUX 7', isMaster: false, auxIndex: 6, faderElement: 0x23, faderParam: 0x06, onElement: 0x23, onParam: 0x0E, sysexInfo: 'Send: 23H 06H | On: 23H 0EH' },
-      AUX8: { id: 'AUX8', name: 'AUX 8', displayName: 'AUX 8 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 8 Out', shortName: 'AUX 8', isMaster: false, auxIndex: 7, faderElement: 0x23, faderParam: 0x07, onElement: 0x23, onParam: 0x0F, sysexInfo: 'Send: 23H 07H | On: 23H 0FH' }
+      AUX1: { id: 'AUX1', name: 'AUX 1', displayName: 'AUX 1 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 1 Out', shortName: 'AUX 1', isMaster: false, auxIndex: 0, faderElement: 0x23, faderParam: 0x02, onElement: 0x23, onParam: 0x00, preParam: 0x01, outFaderElement: 0x39, outOnElement: 0x36, sysexInfo: 'Send: 23H 02H | On: 23H 00H | Pre: 23H 01H' },
+      AUX2: { id: 'AUX2', name: 'AUX 2', displayName: 'AUX 2 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 2 Out', shortName: 'AUX 2', isMaster: false, auxIndex: 1, faderElement: 0x23, faderParam: 0x05, onElement: 0x23, onParam: 0x03, preParam: 0x04, outFaderElement: 0x39, outOnElement: 0x36, sysexInfo: 'Send: 23H 05H | On: 23H 03H | Pre: 23H 04H' },
+      AUX3: { id: 'AUX3', name: 'AUX 3', displayName: 'AUX 3 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 3 Out', shortName: 'AUX 3', isMaster: false, auxIndex: 2, faderElement: 0x23, faderParam: 0x08, onElement: 0x23, onParam: 0x06, preParam: 0x07, outFaderElement: 0x39, outOnElement: 0x36, sysexInfo: 'Send: 23H 08H | On: 23H 06H | Pre: 23H 07H' },
+      AUX4: { id: 'AUX4', name: 'AUX 4', displayName: 'AUX 4 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 4 Out', shortName: 'AUX 4', isMaster: false, auxIndex: 3, faderElement: 0x23, faderParam: 0x0B, onElement: 0x23, onParam: 0x09, preParam: 0x0A, outFaderElement: 0x39, outOnElement: 0x36, sysexInfo: 'Send: 23H 0BH | On: 23H 09H | Pre: 23H 0AH' },
+      AUX5: { id: 'AUX5', name: 'AUX 5', displayName: 'AUX 5 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 5 Out', shortName: 'AUX 5', isMaster: false, auxIndex: 4, faderElement: 0x23, faderParam: 0x0E, onElement: 0x23, onParam: 0x0C, preParam: 0x0D, outFaderElement: 0x39, outOnElement: 0x36, sysexInfo: 'Send: 23H 0EH | On: 23H 0CH | Pre: 23H 0DH' },
+      AUX6: { id: 'AUX6', name: 'AUX 6', displayName: 'AUX 6 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 6 Out', shortName: 'AUX 6', isMaster: false, auxIndex: 5, faderElement: 0x23, faderParam: 0x11, onElement: 0x23, onParam: 0x0F, preParam: 0x10, outFaderElement: 0x39, outOnElement: 0x36, sysexInfo: 'Send: 23H 11H | On: 23H 0FH | Pre: 23H 10H' },
+      AUX7: { id: 'AUX7', name: 'AUX 7', displayName: 'AUX 7 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 7 Out', shortName: 'AUX 7', isMaster: false, auxIndex: 6, faderElement: 0x23, faderParam: 0x14, onElement: 0x23, onParam: 0x12, preParam: 0x13, outFaderElement: 0x39, outOnElement: 0x36, sysexInfo: 'Send: 23H 14H | On: 23H 12H | Pre: 23H 13H' },
+      AUX8: { id: 'AUX8', name: 'AUX 8', displayName: 'AUX 8 (SENDS ON FADER)', route: 'Saída Física: Omni Out / Aux 8 Out', shortName: 'AUX 8', isMaster: false, auxIndex: 7, faderElement: 0x23, faderParam: 0x17, onElement: 0x23, onParam: 0x15, preParam: 0x16, outFaderElement: 0x39, outOnElement: 0x36, sysexInfo: 'Send: 23H 17H | On: 23H 15H | Pre: 23H 16H' }
     };
 
     let currentMixTarget = 'MASTER';
@@ -3355,6 +3394,7 @@
       mixData[key] = {
         volumes: Array.from({ length: TOTAL_CHANNELS }, () => (key === 'MASTER' ? NOMINAL_VALUE : 0)),
         on: Array.from({ length: TOTAL_CHANNELS }, () => 1),
+        pre: Array.from({ length: TOTAL_CHANNELS }, () => 0), // 0 = Post-fader, 1 = Pre-fader
         masterVolume: NOMINAL_VALUE, // Volume da saída master da mix (823 = 0.0 dB)
         masterOn: 1,                 // Estado ON da saída master da mix (1 = ON / Aberto)
         eq: createDefaultEqState(),
@@ -3384,6 +3424,7 @@
               if (parsed[key]) {
                 if (Array.isArray(parsed[key].volumes)) mixData[key].volumes = parsed[key].volumes;
                 if (Array.isArray(parsed[key].on)) mixData[key].on = parsed[key].on;
+                if (Array.isArray(parsed[key].pre)) mixData[key].pre = parsed[key].pre;
                 if (typeof parsed[key].masterVolume === 'number') mixData[key].masterVolume = parsed[key].masterVolume;
                 if (typeof parsed[key].masterOn === 'number') mixData[key].masterOn = parsed[key].masterOn;
                 if (parsed[key].eq) mixData[key].eq = Object.assign(mixData[key].eq, parsed[key].eq);
@@ -3549,25 +3590,34 @@
               }
             }
           }
-          // Element 0x23 = Input Aux Send (Nível ou ON para Aux 1 a 8)
+          // Element 0x23 = Input Aux Send (Nível, ON ou PRE/POST para Aux 1 a 8)
           else if (data.element === 0x23) {
             const ch = data.channel;
             if (ch !== undefined && ch >= 0 && ch < TOTAL_CHANNELS) {
-              // Params 0x00 a 0x07 = Envio Aux 1 a Aux 8 (Nível do Fader)
-              if (data.param >= 0x00 && data.param <= 0x07) {
-                const targetKey = 'AUX' + (data.param + 1);
-                const val = (data.value !== undefined && data.value !== null && !isNaN(data.value)) ? data.value : 0;
-                mixData[targetKey].volumes[ch] = val;
-                if (currentMixTarget === targetKey && activeDraggingChannel !== ch) {
-                  updateFaderUI(ch, val);
-                }
-              }
-              // Params 0x08 a 0x0F = Envio Aux 1 a Aux 8 ON / MUTE
-              else if (data.param >= 0x08 && data.param <= 0x0F) {
-                const targetKey = 'AUX' + (data.param - 0x08 + 1);
-                mixData[targetKey].on[ch] = data.value;
-                if (currentMixTarget === targetKey) {
-                  updateChannelOnUI(ch, data.value === 1);
+              const auxIdx = Math.floor(data.param / 3);
+              const subParam = data.param % 3;
+              if (auxIdx >= 0 && auxIdx < 8) {
+                const targetKey = 'AUX' + (auxIdx + 1);
+                if (subParam === 0) {
+                  // Send ON / MUTE
+                  mixData[targetKey].on[ch] = data.value;
+                  if (currentMixTarget === targetKey) {
+                    updateChannelOnUI(ch, data.value === 1);
+                  }
+                } else if (subParam === 1) {
+                  // Send PRE / POST
+                  if (!mixData[targetKey].pre) mixData[targetKey].pre = new Array(TOTAL_CHANNELS).fill(0);
+                  mixData[targetKey].pre[ch] = data.value;
+                  if (currentMixTarget === targetKey) {
+                    updatePrePostUI(ch, data.value === 1);
+                  }
+                } else if (subParam === 2) {
+                  // Send Level (Fader)
+                  const val = (data.value !== undefined && data.value !== null && !isNaN(data.value)) ? data.value : 0;
+                  mixData[targetKey].volumes[ch] = val;
+                  if (currentMixTarget === targetKey && activeDraggingChannel !== ch) {
+                    updateFaderUI(ch, val);
+                  }
                 }
               }
             }
@@ -3586,21 +3636,43 @@
               const eq = getChannelEq(targetKey);
               if (eq) {
                 switch (data.param) {
-                  case 0x00: eq.on = data.value; break;
-                  case 0x01: eq.low.q = Math.max(0, Math.min(40, 40 - data.value)); break;
+                  case 0x0F: eq.on = data.value; break;
+                  case 0x01:
+                    if (data.value === 0x00) {
+                      eq.low.type = 'hpf';
+                      eq.hpf = 1;
+                    } else if (data.value === 41) {
+                      eq.low.type = 'shelf';
+                      eq.hpf = 0;
+                    } else {
+                      eq.low.type = 'peaking';
+                      eq.hpf = 0;
+                      eq.low.q = Math.max(0, Math.min(40, 40 - data.value));
+                    }
+                    break;
                   case 0x02: eq.low.freq = data.value; break;
                   case 0x03: eq.low.gain = data.value; break;
-                  case 0x04: eq.lomid.q = Math.max(0, Math.min(40, 40 - data.value)); break;
-                  case 0x05: eq.lomid.freq = data.value; break;
-                  case 0x06: eq.lomid.gain = data.value; break;
-                  case 0x07: eq.himid.q = Math.max(0, Math.min(40, 40 - data.value)); break;
-                  case 0x08: eq.himid.freq = data.value; break;
-                  case 0x09: eq.himid.gain = data.value; break;
-                  case 0x0A: eq.high.q = Math.max(0, Math.min(40, 40 - data.value)); break;
-                  case 0x0B: eq.high.freq = data.value; break;
-                  case 0x0C: eq.high.gain = data.value; break;
-                  case 0x0D: eq.hpf = data.value; eq.low.type = data.value === 1 ? 'hpf' : (eq.low.type === 'hpf' ? 'shelf' : eq.low.type); break;
-                  case 0x0E: eq.lpf = data.value; eq.high.type = data.value === 1 ? 'lpf' : (eq.high.type === 'lpf' ? 'shelf' : eq.high.type); break;
+                  case 0x05: eq.lomid.q = Math.max(0, Math.min(40, 40 - data.value)); break;
+                  case 0x06: eq.lomid.freq = data.value; break;
+                  case 0x07: eq.lomid.gain = data.value; break;
+                  case 0x08: eq.himid.q = Math.max(0, Math.min(40, 40 - data.value)); break;
+                  case 0x09: eq.himid.freq = data.value; break;
+                  case 0x0A: eq.himid.gain = data.value; break;
+                  case 0x0B:
+                    if (data.value === 43) {
+                      eq.high.type = 'lpf';
+                      eq.lpf = 1;
+                    } else if (data.value === 42) {
+                      eq.high.type = 'shelf';
+                      eq.lpf = 0;
+                    } else {
+                      eq.high.type = 'peaking';
+                      eq.lpf = 0;
+                      eq.high.q = Math.max(0, Math.min(40, 40 - data.value));
+                    }
+                    break;
+                  case 0x0C: eq.high.freq = data.value; break;
+                  case 0x0D: eq.high.gain = data.value; break;
                 }
                 if (typeof updateTabStatusDots === 'function') updateTabStatusDots(targetKey);
                 if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === targetKey && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
@@ -3610,27 +3682,25 @@
               }
             }
           }
-          // Element 0x22 (Input Comp), 0x36 (Aux Master Comp), 0x51 (Stereo Master Comp)
-          else if (data.element === 0x22 || data.element === 0x36 || data.element === 0x51) {
+          // Element 0x1F (Input Comp), 0x51 (Stereo Master Comp)
+          else if (data.element === 0x1F || data.element === 0x51) {
             let targetKey = null;
-            if (data.element === 0x22 && data.channel >= 0 && data.channel < TOTAL_CHANNELS) {
+            if (data.element === 0x1F && data.channel >= 0 && data.channel < TOTAL_CHANNELS) {
               targetKey = data.channel;
             } else if (data.element === 0x51) {
               targetKey = 'MASTER';
-            } else if (data.element === 0x36 && data.channel >= 0 && data.channel < 8) {
-              targetKey = 'AUX' + (data.channel + 1);
             }
             if (targetKey !== null && typeof getChannelComp === 'function') {
               const comp = getChannelComp(targetKey);
               if (comp) {
                 switch (data.param) {
-                  case 0x00: comp.on = data.value; break;
-                  case 0x01: comp.threshold = data.value; break;
-                  case 0x02: comp.ratio = data.value; break;
-                  case 0x03: comp.attack = data.value; break;
-                  case 0x04: comp.release = data.value; break;
-                  case 0x05: comp.knee = data.value; break;
-                  case 0x06: comp.gain = data.value; break;
+                  case 0x01: comp.on = data.value; break;
+                  case 0x09: comp.threshold = data.value; break;
+                  case 0x06: comp.ratio = data.value; break;
+                  case 0x04: comp.attack = data.value; break;
+                  case 0x05: comp.release = data.value; break;
+                  case 0x08: comp.knee = data.value; break;
+                  case 0x07: comp.gain = data.value; break;
                 }
                 if (typeof updateTabStatusDots === 'function') updateTabStatusDots(targetKey);
                 if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === targetKey && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
@@ -3640,23 +3710,36 @@
               }
             }
           }
-          // Element 0x4D = Stereo Out Fader (Master)
-          else if (data.element === 0x4D) {
+          // Element 0x1D (Input Attenuator - 0x1D param 0x00)
+          else if (data.element === 0x1D && data.channel >= 0 && data.channel < TOTAL_CHANNELS && data.param === 0x00) {
+            const ch = data.channel;
+            if (typeof getChannelEq === 'function') {
+              const eq = getChannelEq(ch);
+              if (eq) {
+                eq.attenuator = data.value;
+                if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === ch && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
+                  syncEqModalFromState(ch);
+                }
+              }
+            }
+          }
+          // Element 0x4F = Stereo Out Fader (Master)
+          else if (data.element === 0x4F) {
             const val = (data.value !== undefined && data.value !== null && !isNaN(data.value)) ? data.value : 0;
             mixData.MASTER.masterVolume = val;
             if (currentMixTarget === 'MASTER' && activeDraggingChannel !== 'masterOut') {
               updateMasterOutputFaderUI(val);
             }
           }
-          // Element 0x4B = Stereo Out ON / MUTE (Master)
-          else if (data.element === 0x4B) {
+          // Element 0x4D = Stereo Out ON / MUTE (Master)
+          else if (data.element === 0x4D) {
             mixData.MASTER.masterOn = data.value;
             if (currentMixTarget === 'MASTER') {
               updateMasterOutputOnUI(data.value === 1);
             }
           }
-          // Element 0x31 = Aux Master Fader (Aux 1 a 8)
-          else if (data.element === 0x31) {
+          // Element 0x39 = Aux Master Fader (Aux 1 a 8)
+          else if (data.element === 0x39) {
             const auxIdx = data.channel; // 0..7
             const targetKey = 'AUX' + (auxIdx + 1);
             const val = (data.value !== undefined && data.value !== null && !isNaN(data.value)) ? data.value : 0;
@@ -3667,8 +3750,8 @@
               }
             }
           }
-          // Element 0x2F = Aux Master ON / MUTE (Aux 1 a 8)
-          else if (data.element === 0x2F) {
+          // Element 0x36 = Aux Master ON / MUTE (Aux 1 a 8)
+          else if (data.element === 0x36) {
             const auxIdx = data.channel; // 0..7
             const targetKey = 'AUX' + (auxIdx + 1);
             if (mixData[targetKey]) {
@@ -3718,6 +3801,7 @@
         <div class="ch-header">
           <span class="ch-badge" id="chBadge_${ch.index}" title="${ch.name}">${ch.name}</span>
           <div class="ch-mix-dest dest-master" id="chMixDest_${ch.index}">MASTER</div>
+          <button type="button" class="btn-pre-post" id="btnPrePost_${ch.index}" data-ch="${ch.index}" title="Alternar Pré/Pós Fader (Post / Pre)">POST</button>
         </div>
 
         <div class="ch-mute-wrap">
@@ -3825,6 +3909,34 @@
       }
     }
 
+    function updatePrePostUI(chIndex, isPre) {
+      const btn = document.getElementById(`btnPrePost_${chIndex}`);
+      if (!btn) return;
+      if (isPre) {
+        btn.textContent = 'PRE';
+        btn.className = 'btn-pre-post is-pre';
+      } else {
+        btn.textContent = 'POST';
+        btn.className = 'btn-pre-post';
+      }
+    }
+
+    function toggleChannelPrePost(chIndex) {
+      if (currentMixTarget === 'MASTER') return;
+      const target = MIX_TARGETS[currentMixTarget];
+      if (!target || target.preParam === undefined) return;
+      if (!mixData[currentMixTarget].pre) {
+        mixData[currentMixTarget].pre = new Array(TOTAL_CHANNELS).fill(0);
+      }
+      const cur = mixData[currentMixTarget].pre[chIndex] || 0;
+      const next = cur === 1 ? 0 : 1;
+      mixData[currentMixTarget].pre[chIndex] = next;
+      updatePrePostUI(chIndex, next === 1);
+      saveMixDataDebounced();
+      sendCommand(0x23, target.preParam, chIndex, next);
+      showToast(`CH ${chIndex + 1} -> ${target.name}: ${next === 1 ? 'PRE-Fader' : 'POST-Fader'}`);
+    }
+
     // Função para alterar volume de um canal na mixagem ativa
     function setChannelVolume(chIndex, value, sendMidi = true) {
       value = Math.max(0, Math.min(MAX_VALUE, Math.round(value)));
@@ -3881,6 +3993,17 @@
         if (destPill) {
           destPill.textContent = target.shortName;
           destPill.className = 'ch-mix-dest ' + (target.isMaster ? 'dest-master' : 'dest-aux');
+        }
+
+        const preBtn = document.getElementById(`btnPrePost_${i}`);
+        if (preBtn) {
+          if (target.isMaster) {
+            preBtn.style.display = 'none';
+          } else {
+            preBtn.style.display = 'inline-block';
+            const isPre = (mixData[targetId].pre && mixData[targetId].pre[i] === 1);
+            updatePrePostUI(i, isPre);
+          }
         }
 
         const vol = mixData[targetId].volumes[i];
@@ -3974,11 +4097,11 @@
       if (sendMidi) {
         const target = MIX_TARGETS[currentMixTarget];
         if (target.isMaster) {
-          // Stereo Out Fader: 0x4D, Param 0x00, Channel 0x00 (L/R)
-          sendCommand(0x4D, 0x00, 0x00, value);
+          // Stereo Out Fader: 0x4F, Param 0x00, Channel 0x00 (L/R)
+          sendCommand(0x4F, 0x00, 0x00, value);
         } else {
-          // Aux Master Fader: 0x31, Param 0x00, Channel auxIndex (0..7)
-          sendCommand(0x31, 0x00, target.auxIndex, value);
+          // Aux Master Fader: 0x39, Param 0x00, Channel auxIndex (0..7)
+          sendCommand(0x39, 0x00, target.auxIndex, value);
         }
       }
     }
@@ -3992,11 +4115,11 @@
       if (sendMidi) {
         const target = MIX_TARGETS[currentMixTarget];
         if (target.isMaster) {
-          // Stereo Out ON: 0x4B, Param 0x00, Channel 0x00
-          sendCommand(0x4B, 0x00, 0x00, val);
+          // Stereo Out ON: 0x4D, Param 0x00, Channel 0x00
+          sendCommand(0x4D, 0x00, 0x00, val);
         } else {
-          // Aux Master ON: 0x2F, Param 0x00, Channel auxIndex (0..7)
-          sendCommand(0x2F, 0x00, target.auxIndex, val);
+          // Aux Master ON: 0x36, Param 0x00, Channel auxIndex (0..7)
+          sendCommand(0x36, 0x00, target.auxIndex, val);
         }
       }
     }
@@ -4134,12 +4257,20 @@
       const trackContainer = document.getElementById(`trackContainer_${chIndex}`);
       const cap = document.getElementById(`faderCap_${chIndex}`);
       const btnOn = document.getElementById(`btnOn_${chIndex}`);
+      const btnPre = document.getElementById(`btnPrePost_${chIndex}`);
 
       // Botão ON / Mute da mixagem ativa
       btnOn.addEventListener('click', () => {
         const nextState = mixData[currentMixTarget].on[chIndex] === 1 ? 0 : 1;
         setChannelOn(chIndex, nextState, true);
       });
+
+      // Botão PRE / POST da mixagem Auxiliar
+      if (btnPre) {
+        btnPre.addEventListener('click', () => {
+          toggleChannelPrePost(chIndex);
+        });
+      }
 
       // Duplo clique no Cap ou Track reseta para 0 dB (823)
       cap.addEventListener('dblclick', (e) => {
@@ -4522,16 +4653,19 @@
     // RACK DE EFEITOS & EQUALIZADOR PARAMÉTRICO
     // ==========================================
     const EQ_FREQ_VALUES = [
-      "21.2 Hz", "22.4 Hz", "23.6 Hz", "25.0 Hz", "26.5 Hz", "28.0 Hz", "30.0 Hz", "31.5 Hz", "33.5 Hz", "35.5 Hz", "37.5 Hz", "40.0 Hz",
-      "42.5 Hz", "45.0 Hz", "47.5 Hz", "50.0 Hz", "53.0 Hz", "56.0 Hz", "60.0 Hz", "63.0 Hz", "67.0 Hz", "71.0 Hz", "75.0 Hz", "80.0 Hz",
-      "85 Hz", "90 Hz", "95 Hz", "100 Hz", "106 Hz", "112 Hz", "118 Hz", "125 Hz", "132 Hz", "140 Hz", "150 Hz", "160 Hz",
-      "170 Hz", "180 Hz", "190 Hz", "200 Hz", "212 Hz", "224 Hz", "236 Hz", "250 Hz", "265 Hz", "280 Hz", "300 Hz", "315 Hz",
-      "335 Hz", "355 Hz", "375 Hz", "400 Hz", "425 Hz", "450 Hz", "475 Hz", "500 Hz", "530 Hz", "560 Hz", "600 Hz", "630 Hz",
-      "670 Hz", "710 Hz", "750 Hz", "800 Hz", "850 Hz", "900 Hz", "950 Hz", "1.00 kHz", "1.06 kHz", "1.12 kHz", "1.18 kHz", "1.25 kHz",
-      "1.32 kHz", "1.40 kHz", "1.50 kHz", "1.60 kHz", "1.70 kHz", "1.80 kHz", "1.90 kHz", "2.00 kHz", "2.12 kHz", "2.24 kHz", "2.36 kHz", "2.50 kHz",
-      "2.65 kHz", "2.80 kHz", "3.00 kHz", "3.15 kHz", "3.35 kHz", "3.55 kHz", "3.75 kHz", "4.00 kHz", "4.25 kHz", "4.50 kHz", "4.75 kHz", "5.00 kHz",
-      "5.30 kHz", "5.60 kHz", "6.00 kHz", "6.30 kHz", "6.70 kHz", "7.10 kHz", "7.50 kHz", "8.00 kHz", "8.50 kHz", "9.00 kHz", "9.50 kHz", "10.0 kHz",
-      "10.6 kHz", "11.2 kHz", "11.8 kHz", "12.5 kHz", "13.2 kHz", "14.0 kHz", "15.0 kHz", "16.0 kHz", "17.0 kHz", "18.0 kHz", "19.0 kHz", "20.0 kHz"
+      "20.0 Hz", "21.1 Hz", "22.4 Hz", "23.6 Hz", "25.0 Hz", "26.4 Hz", "27.9 Hz", "29.5 Hz", "31.2 Hz", "33.0 Hz",
+      "34.9 Hz", "36.9 Hz", "39.0 Hz", "41.3 Hz", "43.6 Hz", "46.1 Hz", "48.8 Hz", "51.6 Hz", "54.5 Hz", "57.6 Hz",
+      "60.9 Hz", "64.4 Hz", "68.1 Hz", "72.0 Hz", "76.2 Hz", "80.5 Hz", "85.1 Hz", "90.0 Hz", "95.2 Hz", "101 Hz",
+      "106 Hz", "112 Hz", "119 Hz", "126 Hz", "133 Hz", "141 Hz", "149 Hz", "157 Hz", "166 Hz", "176 Hz",
+      "186 Hz", "196 Hz", "208 Hz", "219 Hz", "232 Hz", "245 Hz", "259 Hz", "274 Hz", "290 Hz", "307 Hz",
+      "324 Hz", "343 Hz", "362 Hz", "383 Hz", "405 Hz", "428 Hz", "453 Hz", "479 Hz", "506 Hz", "535 Hz",
+      "566 Hz", "598 Hz", "632 Hz", "669 Hz", "707 Hz", "747 Hz", "790 Hz", "836 Hz", "883 Hz", "934 Hz",
+      "988 Hz", "1.04 kHz", "1.10 kHz", "1.17 kHz", "1.23 kHz", "1.30 kHz", "1.38 kHz", "1.46 kHz", "1.54 kHz", "1.63 kHz",
+      "1.72 kHz", "1.82 kHz", "1.93 kHz", "2.04 kHz", "2.15 kHz", "2.28 kHz", "2.41 kHz", "2.55 kHz", "2.69 kHz", "2.85 kHz",
+      "3.01 kHz", "3.18 kHz", "3.36 kHz", "3.56 kHz", "3.76 kHz", "3.98 kHz", "4.20 kHz", "4.44 kHz", "4.70 kHz", "4.97 kHz",
+      "5.25 kHz", "5.55 kHz", "5.87 kHz", "6.21 kHz", "6.56 kHz", "6.94 kHz", "7.34 kHz", "7.76 kHz", "8.20 kHz", "8.67 kHz",
+      "9.17 kHz", "9.69 kHz", "10.2 kHz", "10.8 kHz", "11.5 kHz", "12.1 kHz", "12.8 kHz", "13.5 kHz", "14.3 kHz", "15.1 kHz",
+      "16.0 kHz", "16.9 kHz", "17.9 kHz", "18.9 kHz", "20.0 kHz"
     ];
 
     const EQ_Q_VALUES = [
@@ -4556,6 +4690,7 @@
     // Estrutura de Estado de EQ para os 32 canais
     const eqState = Array.from({ length: TOTAL_CHANNELS }, () => ({
       on: 1, // 1 = EQ ON, 0 = Bypass
+      attenuator: 0, // -960 a +120 décimos de dB (0.0 dB default)
       hpf: 0, // HPF 0 = OFF, 1 = ON
       lpf: 0, // LPF 0 = OFF, 1 = ON
       low: { gain: 180, freq: 27, q: 17, type: "shelf" },       // 100 Hz, Q 0.70, 0 dB
@@ -4626,7 +4761,7 @@
     const btnEqFlat = document.getElementById('btnEqFlat');
     const eqCanvas = document.getElementById('eqCanvas');
 
-    // Elementos de Controle das Bandas
+    // Elementos de Controle das Bandas (Mapeamento Oficial Yamaha 01V96 / Studio Manager)
     const eqControls = {
       low: {
         type: document.getElementById('eqLowType'),
@@ -4635,20 +4770,20 @@
         q:    { rng: document.getElementById('rng_lowQ'),    lbl: document.getElementById('lbl_lowQ'),    param: 0x01 }
       },
       lomid: {
-        gain: { rng: document.getElementById('rng_lomidGain'), lbl: document.getElementById('lbl_lomidGain'), param: 0x06 },
-        freq: { rng: document.getElementById('rng_lomidFreq'), lbl: document.getElementById('lbl_lomidFreq'), param: 0x05 },
-        q:    { rng: document.getElementById('rng_lomidQ'),    lbl: document.getElementById('lbl_lomidQ'),    param: 0x04 }
+        gain: { rng: document.getElementById('rng_lomidGain'), lbl: document.getElementById('lbl_lomidGain'), param: 0x07 },
+        freq: { rng: document.getElementById('rng_lomidFreq'), lbl: document.getElementById('lbl_lomidFreq'), param: 0x06 },
+        q:    { rng: document.getElementById('rng_lomidQ'),    lbl: document.getElementById('lbl_lomidQ'),    param: 0x05 }
       },
       himid: {
-        gain: { rng: document.getElementById('rng_himidGain'), lbl: document.getElementById('lbl_himidGain'), param: 0x09 },
-        freq: { rng: document.getElementById('rng_himidFreq'), lbl: document.getElementById('lbl_himidFreq'), param: 0x08 },
-        q:    { rng: document.getElementById('rng_himidQ'),    lbl: document.getElementById('lbl_himidQ'),    param: 0x07 }
+        gain: { rng: document.getElementById('rng_himidGain'), lbl: document.getElementById('lbl_himidGain'), param: 0x0A },
+        freq: { rng: document.getElementById('rng_himidFreq'), lbl: document.getElementById('lbl_himidFreq'), param: 0x09 },
+        q:    { rng: document.getElementById('rng_himidQ'),    lbl: document.getElementById('lbl_himidQ'),    param: 0x08 }
       },
       high: {
         type: document.getElementById('eqHighType'),
-        gain: { rng: document.getElementById('rng_highGain'), lbl: document.getElementById('lbl_highGain'), param: 0x0C },
-        freq: { rng: document.getElementById('rng_highFreq'), lbl: document.getElementById('lbl_highFreq'), param: 0x0B },
-        q:    { rng: document.getElementById('rng_highQ'),    lbl: document.getElementById('lbl_highQ'),    param: 0x0A }
+        gain: { rng: document.getElementById('rng_highGain'), lbl: document.getElementById('lbl_highGain'), param: 0x0D },
+        freq: { rng: document.getElementById('rng_highFreq'), lbl: document.getElementById('lbl_highFreq'), param: 0x0C },
+        q:    { rng: document.getElementById('rng_highQ'),    lbl: document.getElementById('lbl_highQ'),    param: 0x0B }
       }
     };
 
@@ -4853,6 +4988,19 @@
       eqControls.high.gain.rng.disabled = isLpfActive;
       eqControls.high.gain.rng.style.opacity = isLpfActive ? '0.35' : '1';
 
+      // Sincroniza Atenuador Digital (Elemento 0x1D) - apenas canais de entrada 1-32
+      const attContainer = document.getElementById('eqAttContainer');
+      const rngEqAtt = document.getElementById('rng_eqAtt');
+      const lblEqAtt = document.getElementById('lbl_eqAtt');
+      if (typeof target === 'number') {
+        if (attContainer) attContainer.style.display = 'flex';
+        const attVal = (eq.attenuator !== undefined) ? eq.attenuator : 0;
+        if (rngEqAtt) rngEqAtt.value = attVal;
+        if (lblEqAtt) lblEqAtt.textContent = (attVal >= 0 ? '+' : '') + (attVal / 10).toFixed(1) + ' dB';
+      } else {
+        if (attContainer) attContainer.style.display = 'none';
+      }
+
       // Low & High Types
       eqControls.low.type.value = eq.low.type;
       eqControls.high.type.value = eq.high.type;
@@ -4901,25 +5049,33 @@
       btnEqBypass.classList.toggle('on', eq.on === 1);
       btnEqBypass.textContent = eq.on === 1 ? 'EQ: ATIVO (ON)' : 'EQ: BYPASS (OFF)';
       updateTabStatusDots(currentSelectedCh);
-      sendEqParam(0x00, eq.on);
+      sendEqParam(0x0F, eq.on);
     });
 
-    // Toggle HPF (Banda LOW)
+    // Toggle HPF (Banda LOW via Q param 0x01: 0x00 = HPF, 41 = Shelf)
     btnEqHpf.addEventListener('click', () => {
       const eq = getChannelEq(currentSelectedCh);
       eq.hpf = eq.hpf === 1 ? 0 : 1;
       eq.low.type = eq.hpf === 1 ? 'hpf' : 'shelf';
-      sendEqParam(0x0D, eq.hpf);
+      if (eq.hpf === 1) {
+        sendEqParam(0x01, 0x00);
+      } else {
+        sendEqParam(0x01, 41); // 0x29
+      }
       syncEqModalFromState(currentSelectedCh);
       requestEqRedraw();
     });
 
-    // Toggle LPF (Banda HIGH)
+    // Toggle LPF (Banda HIGH via Q param 0x0B: 43 = LPF, 42 = Shelf)
     btnEqLpf.addEventListener('click', () => {
       const eq = getChannelEq(currentSelectedCh);
       eq.lpf = eq.lpf === 1 ? 0 : 1;
       eq.high.type = eq.lpf === 1 ? 'lpf' : 'shelf';
-      sendEqParam(0x0E, eq.lpf);
+      if (eq.lpf === 1) {
+        sendEqParam(0x0B, 43); // 0x2B
+      } else {
+        sendEqParam(0x0B, 42); // 0x2A
+      }
       syncEqModalFromState(currentSelectedCh);
       requestEqRedraw();
     });
@@ -4931,20 +5087,26 @@
         eq[bKey].gain = 180;
       });
       syncEqModalFromState(currentSelectedCh);
-      sendEqParam(0x03, 180);
-      sendEqParam(0x06, 180);
-      sendEqParam(0x09, 180);
-      sendEqParam(0x0C, 180);
+      sendEqParam(0x03, 0);
+      sendEqParam(0x07, 0);
+      sendEqParam(0x0A, 0);
+      sendEqParam(0x0D, 0);
       const chLabel = typeof currentSelectedCh === 'number' ? `CH ${currentSelectedCh + 1}` : currentSelectedCh;
       showToast(`EQ de ${chLabel} zerado (Flat 0.0 dB) ⚡`, '⚡');
     });
 
-    // Tipos de Filtro LOW e HIGH
+    // Tipos de Filtro LOW e HIGH (LOW: 0x01 [0=hpf, 41=shelf, 40-q=peaking]; HIGH: 0x0B [43=lpf, 42=shelf, 40-q=peaking])
     eqControls.low.type.addEventListener('change', (e) => {
       const eq = getChannelEq(currentSelectedCh);
       eq.low.type = e.target.value;
       eq.hpf = eq.low.type === 'hpf' ? 1 : 0;
-      sendEqParam(0x0D, eq.hpf);
+      if (eq.low.type === 'hpf') {
+        sendEqParam(0x01, 0x00);
+      } else if (eq.low.type === 'shelf') {
+        sendEqParam(0x01, 41); // 0x29
+      } else {
+        sendEqParam(0x01, 40 - eq.low.q);
+      }
       syncEqModalFromState(currentSelectedCh);
       requestEqRedraw();
     });
@@ -4953,22 +5115,56 @@
       const eq = getChannelEq(currentSelectedCh);
       eq.high.type = e.target.value;
       eq.lpf = eq.high.type === 'lpf' ? 1 : 0;
-      sendEqParam(0x0E, eq.lpf);
+      if (eq.high.type === 'lpf') {
+        sendEqParam(0x0B, 43); // 0x2B
+      } else if (eq.high.type === 'shelf') {
+        sendEqParam(0x0B, 42); // 0x2A
+      } else {
+        sendEqParam(0x0B, 40 - eq.high.q);
+      }
       syncEqModalFromState(currentSelectedCh);
       requestEqRedraw();
     });
+
+    // Eventos do Atenuador Digital (Elemento 0x1D)
+    const rngEqAtt = document.getElementById('rng_eqAtt');
+    const lblEqAtt = document.getElementById('lbl_eqAtt');
+    const btnEqAttZero = document.getElementById('btnEqAttZero');
+    if (rngEqAtt) {
+      rngEqAtt.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        const eq = getChannelEq(currentSelectedCh);
+        if (eq) eq.attenuator = val;
+        if (lblEqAtt) lblEqAtt.textContent = (val >= 0 ? '+' : '') + (val / 10).toFixed(1) + ' dB';
+        if (typeof currentSelectedCh === 'number') {
+          sendCommand(0x1D, 0x00, currentSelectedCh, val);
+        }
+      });
+    }
+    if (btnEqAttZero) {
+      btnEqAttZero.addEventListener('click', () => {
+        const eq = getChannelEq(currentSelectedCh);
+        if (eq) eq.attenuator = 0;
+        if (rngEqAtt) rngEqAtt.value = 0;
+        if (lblEqAtt) lblEqAtt.textContent = '0.0 dB';
+        if (typeof currentSelectedCh === 'number') {
+          sendCommand(0x1D, 0x00, currentSelectedCh, 0);
+        }
+      });
+    }
 
     // Eventos de sliders de Ganho, Frequência e Q para cada banda
     ['low', 'lomid', 'himid', 'high'].forEach(bKey => {
       const ctrl = eqControls[bKey];
 
-      // Ganho
+      // Ganho (MIDI da 01V96 opera de -180 a +180 décimos de dB)
       ctrl.gain.rng.addEventListener('input', (e) => {
         const val = parseInt(e.target.value, 10);
         const eq = getChannelEq(currentSelectedCh);
         eq[bKey].gain = val;
         ctrl.gain.lbl.textContent = rawGainToDb(val);
-        sendEqParam(ctrl.gain.param, val);
+        const midiVal = val - 180; // 180 na UI = 0 dB no MIDI
+        sendEqParam(ctrl.gain.param, midiVal);
       });
 
       // Frequência
@@ -4996,6 +5192,26 @@
         const eq = getChannelEq(currentSelectedCh);
         eq[bKey].q = val;
         ctrl.q.lbl.textContent = formatQDisplay(val);
+
+        // Se mover Q em LOW ou HIGH enquanto estiver em shelf ou filter, automaticamente comuta para Peaking
+        if (bKey === 'low' && eq.low.type !== 'peaking') {
+          eq.low.type = 'peaking';
+          eq.hpf = 0;
+          eqControls.low.type.value = 'peaking';
+          btnEqHpf.classList.remove('active');
+          if (lblHpfStatus) lblHpfStatus.textContent = 'OFF';
+          eqControls.low.gain.rng.disabled = false;
+          eqControls.low.gain.rng.style.opacity = '1';
+        } else if (bKey === 'high' && eq.high.type !== 'peaking') {
+          eq.high.type = 'peaking';
+          eq.lpf = 0;
+          eqControls.high.type.value = 'peaking';
+          btnEqLpf.classList.remove('active');
+          if (lblLpfStatus) lblLpfStatus.textContent = 'OFF';
+          eqControls.high.gain.rng.disabled = false;
+          eqControls.high.gain.rng.style.opacity = '1';
+        }
+
         // Na tabela de parâmetros SysEx da 01V96 (Tabela 4), 0x00 = Q 10.0 e 0x28 (40) = Q 0.10.
         // O slider da UI vai naturalmente de 0 (0.10 largo) a 40 (10 estreito), então enviamos (40 - val):
         const midiVal = 40 - val;
@@ -5070,10 +5286,10 @@
       const isHpfActive = eq.hpf === 1 || lowB.type === 'hpf';
       const isLpfActive = eq.lpf === 1 || highB.type === 'lpf';
 
-      const lowNormX = lowB.freq / 119;
-      const lomidNormX = lomidB.freq / 119;
-      const himidNormX = himidB.freq / 119;
-      const highNormX = highB.freq / 119;
+      const lowNormX = lowB.freq / 124;
+      const lomidNormX = lomidB.freq / 124;
+      const himidNormX = himidB.freq / 124;
+      const highNormX = highB.freq / 124;
 
       const lowGainDb = (lowB.gain - 180) / 10;
       const lomidGainDb = (lomidB.gain - 180) / 10;
@@ -5232,23 +5448,33 @@
     ];
 
     const COMP_RELEASE_VALUES = [
-      "5 ms", "10 ms", "15 ms", "20 ms", "25 ms", "30 ms", "40 ms", "50 ms",
-      "60 ms", "70 ms", "80 ms", "90 ms", "100 ms", "120 ms", "140 ms", "160 ms",
-      "180 ms", "200 ms", "250 ms", "300 ms", "350 ms", "400 ms", "450 ms", "500 ms",
-      "600 ms", "700 ms", "800 ms", "900 ms", "1.00 s", "1.20 s", "1.40 s", "1.60 s",
-      "1.80 s", "2.00 s", "2.50 s", "3.00 s", "4.00 s", "5.00 s", "7.00 s", "10.0 s",
-      "15.0 s", "20.0 s", "30.0 s", "42.3 s"
+      "5 ms", "6 ms", "6 ms", "7 ms", "8 ms", "9 ms", "9 ms", "11 ms", "12 ms", "13 ms",
+      "14 ms", "16 ms", "18 ms", "19 ms", "21 ms", "24 ms", "26 ms", "29 ms", "32 ms", "35 ms",
+      "39 ms", "42 ms", "47 ms", "51 ms", "56 ms", "62 ms", "68 ms", "74 ms", "81 ms", "89 ms",
+      "97 ms", "106 ms", "116 ms", "127 ms", "138 ms", "151 ms", "164 ms", "178 ms", "194 ms", "211 ms",
+      "229 ms", "249 ms", "270 ms", "293 ms", "318 ms", "344 ms", "372 ms", "402 ms", "435 ms", "470 ms",
+      "507 ms", "547 ms", "590 ms", "635 ms", "684 ms", "736 ms", "791 ms", "850 ms", "913 ms", "980 ms",
+      "1.05 s", "1.13 s", "1.21 s", "1.29 s", "1.38 s", "1.48 s", "1.58 s", "1.68 s", "1.80 s", "1.91 s",
+      "2.04 s", "2.17 s", "2.31 s", "2.46 s", "2.61 s", "2.77 s", "2.94 s", "3.12 s", "3.31 s", "3.50 s",
+      "3.71 s", "3.92 s", "4.15 s", "4.38 s", "4.63 s", "4.88 s", "5.15 s", "5.42 s", "5.71 s", "6.01 s",
+      "6.32 s", "6.64 s", "6.98 s", "7.32 s", "7.68 s", "8.05 s", "8.43 s", "8.83 s", "9.24 s", "9.66 s",
+      "10.1 s", "10.5 s", "11.0 s", "11.5 s", "11.9 s", "12.4 s", "12.9 s", "13.5 s", "14.0 s", "14.5 s",
+      "15.1 s", "15.7 s", "16.2 s", "16.8 s", "17.4 s", "18.0 s", "18.6 s", "19.2 s", "19.9 s", "20.5 s",
+      "21.1 s", "21.8 s", "22.4 s", "23.1 s", "23.8 s", "24.4 s", "25.1 s", "25.8 s", "26.4 s", "27.1 s",
+      "27.8 s", "28.4 s", "29.1 s", "29.7 s", "30.4 s", "31.0 s", "31.7 s", "32.3 s", "32.9 s", "33.5 s",
+      "34.2 s", "34.7 s", "35.3 s", "35.9 s", "36.4 s", "37.0 s", "37.5 s", "38.0 s", "38.5 s", "38.9 s",
+      "39.4 s", "39.8 s", "40.2 s", "40.6 s", "40.9 s", "41.2 s", "41.5 s", "41.8 s", "42.1 s", "42.3 s"
     ];
 
     const COMP_KNEE_VALUES = ["HARD", "1 (Soft)", "2 (Soft)", "3 (Soft)", "4 (Soft)", "5 (Soft)"];
 
     // Presets pré-definidos para agilizar a mixagem
     const COMP_PRESETS = {
-      default: { threshold: 340, ratio: 7, attack: 20, release: 18, knee: 0, gain: 0 },
-      vocal:   { threshold: 300, ratio: 6, attack: 15, release: 17, knee: 2, gain: 30 },
-      drums:   { threshold: 380, ratio: 9, attack: 30, release: 12, knee: 0, gain: 20 },
-      bass:    { threshold: 320, ratio: 7, attack: 25, release: 19, knee: 1, gain: 25 },
-      limiter: { threshold: 480, ratio: 15, attack: 1, release: 12, knee: 0, gain: 0 }
+      default: { threshold: 340, ratio: 7, attack: 20, release: 41, knee: 0, gain: 0 },
+      vocal:   { threshold: 300, ratio: 6, attack: 15, release: 38, knee: 2, gain: 30 },
+      drums:   { threshold: 380, ratio: 9, attack: 30, release: 28, knee: 0, gain: 20 },
+      bass:    { threshold: 320, ratio: 7, attack: 25, release: 43, knee: 1, gain: 25 },
+      limiter: { threshold: 480, ratio: 15, attack: 1, release: 28, knee: 0, gain: 0 }
     };
 
     // Estado do Compressor para todos os 32 canais
@@ -5271,12 +5497,12 @@
     const lblCompGrVal = document.getElementById('lbl_compGrVal');
 
     const compControls = {
-      threshold: { rng: document.getElementById('rng_compThreshold'), lbl: document.getElementById('lbl_compThreshold'), param: 0x01 },
-      ratio:     { rng: document.getElementById('rng_compRatio'),     lbl: document.getElementById('lbl_compRatio'),     param: 0x02 },
-      attack:    { rng: document.getElementById('rng_compAttack'),    lbl: document.getElementById('lbl_compAttack'),    param: 0x03 },
-      release:   { rng: document.getElementById('rng_compRelease'),   lbl: document.getElementById('lbl_compRelease'),   param: 0x04 },
-      knee:      { rng: document.getElementById('rng_compKnee'),      lbl: document.getElementById('lbl_compKnee'),      param: 0x05 },
-      gain:      { rng: document.getElementById('rng_compGain'),      lbl: document.getElementById('lbl_compGain'),      param: 0x06 }
+      threshold: { rng: document.getElementById('rng_compThreshold'), lbl: document.getElementById('lbl_compThreshold'), param: 0x09 },
+      ratio:     { rng: document.getElementById('rng_compRatio'),     lbl: document.getElementById('lbl_compRatio'),     param: 0x06 },
+      attack:    { rng: document.getElementById('rng_compAttack'),    lbl: document.getElementById('lbl_compAttack'),    param: 0x04 },
+      release:   { rng: document.getElementById('rng_compRelease'),   lbl: document.getElementById('lbl_compRelease'),   param: 0x05 },
+      knee:      { rng: document.getElementById('rng_compKnee'),      lbl: document.getElementById('lbl_compKnee'),      param: 0x08 },
+      gain:      { rng: document.getElementById('rng_compGain'),      lbl: document.getElementById('lbl_compGain'),      param: 0x07 }
     };
 
     function rawThresholdToDb(val) {
@@ -5342,16 +5568,12 @@
       compControls.gain.lbl.textContent = rawGainToCompDb(comp.gain);
     }
 
-    // Envia comandos SysEx de Compressor (Element 0x22 para CH 1-32, 0x51 para Stereo Master, 0x36 para Aux 1-8)
+    // Envia comandos SysEx de Compressor (Element 0x1F para CH 1-32, 0x51 para Stereo Master)
     function sendCompParam(param, value) {
       if (typeof currentSelectedCh === 'number') {
-        sendCommand(0x22, param, currentSelectedCh, value);
+        sendCommand(0x1F, param, currentSelectedCh, value);
       } else if (currentSelectedCh === 'MASTER') {
         sendCommand(0x51, param, 0x00, value);
-        saveMixDataDebounced();
-      } else if (typeof currentSelectedCh === 'string' && currentSelectedCh.startsWith('AUX')) {
-        const auxIdx = parseInt(currentSelectedCh.replace('AUX', ''), 10) - 1;
-        sendCommand(0x36, param, auxIdx, value);
         saveMixDataDebounced();
       }
       requestCompRedraw();
@@ -5556,7 +5778,7 @@
       btnCompBypass.classList.toggle('on', comp.on === 1);
       btnCompBypass.textContent = comp.on === 1 ? 'COMP: ATIVO (ON)' : 'COMP: BYPASS (OFF)';
       updateTabStatusDots(currentSelectedCh);
-      sendCompParam(0x00, comp.on);
+      sendCompParam(0x01, comp.on);
     });
 
     // Reset Padrão do Compressor
@@ -5571,12 +5793,12 @@
       comp.gain = def.gain;
 
       syncCompModalFromState(currentSelectedCh);
-      sendCompParam(0x01, def.threshold);
-      sendCompParam(0x02, def.ratio);
-      sendCompParam(0x03, def.attack);
-      sendCompParam(0x04, def.release);
-      sendCompParam(0x05, def.knee);
-      sendCompParam(0x06, def.gain);
+      sendCompParam(0x09, def.threshold - 540);
+      sendCompParam(0x06, def.ratio);
+      sendCompParam(0x04, def.attack);
+      sendCompParam(0x05, def.release);
+      sendCompParam(0x08, def.knee);
+      sendCompParam(0x07, def.gain);
       compPresetSelect.value = 'default';
       const chLabel = typeof currentSelectedCh === 'number' ? `CH ${currentSelectedCh + 1}` : currentSelectedCh;
       showToast(`Compressor de ${chLabel} restaurado para o padrão ⚡`, '⚡');
@@ -5597,12 +5819,12 @@
       comp.gain = p.gain;
 
       syncCompModalFromState(currentSelectedCh);
-      sendCompParam(0x01, p.threshold);
-      sendCompParam(0x02, p.ratio);
-      sendCompParam(0x03, p.attack);
-      sendCompParam(0x04, p.release);
-      sendCompParam(0x05, p.knee);
-      sendCompParam(0x06, p.gain);
+      sendCompParam(0x09, p.threshold - 540);
+      sendCompParam(0x06, p.ratio);
+      sendCompParam(0x04, p.attack);
+      sendCompParam(0x05, p.release);
+      sendCompParam(0x08, p.knee);
+      sendCompParam(0x07, p.gain);
       showToast(`Preset "${e.target.options[e.target.selectedIndex].text}" aplicado! 🎚️`, '🎚️');
     });
 
@@ -5612,7 +5834,7 @@
       const comp = getChannelComp(currentSelectedCh);
       comp.threshold = val;
       compControls.threshold.lbl.textContent = rawThresholdToDb(val);
-      sendCompParam(0x01, val);
+      sendCompParam(0x09, val - 540);
     });
 
     compControls.ratio.rng.addEventListener('input', (e) => {
@@ -5620,7 +5842,7 @@
       const comp = getChannelComp(currentSelectedCh);
       comp.ratio = val;
       compControls.ratio.lbl.textContent = COMP_RATIO_VALUES[val] || `${val}:1`;
-      sendCompParam(0x02, val);
+      sendCompParam(0x06, val);
     });
 
     compControls.attack.rng.addEventListener('input', (e) => {
@@ -5628,7 +5850,7 @@
       const comp = getChannelComp(currentSelectedCh);
       comp.attack = val;
       compControls.attack.lbl.textContent = `${val} ms`;
-      sendCompParam(0x03, val);
+      sendCompParam(0x04, val);
     });
 
     compControls.release.rng.addEventListener('input', (e) => {
@@ -5636,7 +5858,7 @@
       const comp = getChannelComp(currentSelectedCh);
       comp.release = val;
       compControls.release.lbl.textContent = COMP_RELEASE_VALUES[val] || `${val} ms`;
-      sendCompParam(0x04, val);
+      sendCompParam(0x05, val);
     });
 
     compControls.knee.rng.addEventListener('input', (e) => {
@@ -5644,7 +5866,7 @@
       const comp = getChannelComp(currentSelectedCh);
       comp.knee = val;
       compControls.knee.lbl.textContent = COMP_KNEE_VALUES[val] || `${val}`;
-      sendCompParam(0x05, val);
+      sendCompParam(0x08, val);
     });
 
     compControls.gain.rng.addEventListener('input', (e) => {
@@ -5652,7 +5874,7 @@
       const comp = getChannelComp(currentSelectedCh);
       comp.gain = val;
       compControls.gain.lbl.textContent = rawGainToCompDb(val);
-      sendCompParam(0x06, val);
+      sendCompParam(0x07, val);
     });
 
     // Evento de clique no botão SEL dos canais

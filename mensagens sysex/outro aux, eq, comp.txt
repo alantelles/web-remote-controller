@@ -1,0 +1,655 @@
+canal 1 para auxiliar 2 (0 para max)
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 00 37 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 00 6F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 01 68 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 02 43 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 02 7A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 03 10 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 03 29 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 03 4E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 03 65 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 03 74 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 04 03 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 04 1A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 04 2B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 04 3E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 04 5F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 05 17 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 05 3D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 06 03 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 06 32 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 07 0A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 07 7B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 05 00 00 00 07 7F F7
+
+off/on canal 1 para auxiliar 2
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 03 00 00 00 00 00 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 23 03 00 00 00 00 01 F7
+
+aux 2 master max para 0
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 07 7A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 07 68 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 07 5F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 07 5B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 07 52 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 07 3F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 07 3B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 07 32 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 07 29 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 07 20 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 07 14 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 07 04 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 7D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 76 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 73 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 66 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 5F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 5C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 4E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 44 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 3E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 2F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 2B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 24 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 1C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 11 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 09 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 06 01 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 05 7D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 05 76 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 05 66 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 05 62 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 05 53 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 05 4C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 05 49 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 05 35 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 05 32 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 05 24 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 05 14 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 05 03 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 04 7C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 04 72 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 04 57 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 04 52 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 04 28 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 04 15 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 04 06 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 03 73 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 03 52 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 03 44 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 03 31 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 03 2C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 03 24 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 03 13 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 03 06 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 02 7C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 02 6E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 02 6B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 02 57 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 02 4D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 02 3C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 02 35 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 02 23 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 02 15 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 02 03 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 01 7C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 01 78 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 01 63 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 01 5F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 01 59 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 01 4E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 01 46 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 01 38 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 01 33 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 01 2D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 01 1A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 01 0E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 01 01 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 00 7B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 00 5F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 00 4D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 00 42 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 00 31 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 00 26 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 00 1F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 00 11 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 39 00 01 00 00 00 00 F7
+
+ off/on master aux 2
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 36 00 01 00 00 00 00 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 36 00 01 00 00 00 01 F7
+
+ EQ CH 1
+
+ off/on 
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0F 00 00 00 00 00 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0F 00 00 00 00 01 F7
+
+Q do low (importante porque manda mensagem quando vai pra HPF ou low shelf)
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 01 F7 (parece setar HPF)
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 02 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 05 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 08 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 0D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 10 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 11 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 14 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 15 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 18 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 19 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 1B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 1D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 1E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 1F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 22 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 25 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 26 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 01 00 00 00 00 29 F7 (parece setar low shelf)
+
+ frequência do low (min to max)
+ Source  Event                  Ch  Data
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 09 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 10 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 13 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 15 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 17 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 1B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 1C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 20 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 25 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 30 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 36 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 3D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 40 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 46 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 4C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 50 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 54 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 5A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 5F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 65 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 70 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 02 00 00 00 00 7C F7
+
+gain low (atua como on off, quando está no filtro, mas a mensagem parece ser a mesma)
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 7F 7F 7F 62 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 7F 7F 7F 19 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 7F 7F 7F 12 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 7F 7F 7E 7D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 7F 7F 7E 52 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 7F 7F 7E 4C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 7F 7F 7E 55 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 7F 7F 7F 0A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 7F 7F 7F 38 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 7F 7F 7F 55 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 7F 7F 7F 6F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 7F 7F 7F 7A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 00 00 00 07 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 00 00 00 11 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 00 00 00 2A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 00 00 00 43 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 00 00 00 50 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 00 00 00 61 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 00 00 00 76 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 00 00 01 15 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 00 00 01 30 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 03 00 00 00 01 34 F7
+
+ q low mid
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 25 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 1F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 1D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 1B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 19 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 17 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 16 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 15 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 14 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 12 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 11 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 10 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 0E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 0C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 0B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 0A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 08 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 06 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 04 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 01 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 05 00 00 00 00 00 F7
+
+ frequência lo-mid
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 40 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 28 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 1C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 0F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 07 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 05 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 10 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 30 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 3B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 3C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 3E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 44 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 49 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 4E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 53 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 57 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 5D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 67 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 69 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 6E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 76 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 06 00 00 00 00 7C F7
+
+ gain low mid
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 7F 7F 7F 76 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 7F 7F 7F 4D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 7F 7F 7E 50 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 7F 7F 7E 4C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 7F 7F 7E 56 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 7F 7F 7F 0E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 7F 7F 7F 3A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 7F 7F 7F 66 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 00 00 00 0C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 00 00 00 22 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 00 00 00 30 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 00 00 00 3B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 00 00 00 4A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 00 00 00 62 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 00 00 01 1F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 07 00 00 00 01 34 F7
+
+ q high mid
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 18 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 1C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 1D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 1F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 21 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 22 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 24 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 25 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 26 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 27 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 28 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 27 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 24 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 22 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 1E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 1B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 18 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 17 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 16 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 15 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 14 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 13 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 0F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 0C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 0A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 09 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 08 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 06 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 04 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 02 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 01 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 08 00 00 00 00 00 F7
+
+ frequência hi mid
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 41 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 27 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 19 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 06 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 05 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 0B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 1F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 2A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 47 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 53 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 54 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 56 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 58 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 61 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 68 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 72 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 09 00 00 00 00 7C F7
+
+ gain hi mid
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 00 00 00 0C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 00 00 00 7A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 00 00 01 15 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 00 00 01 33 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 00 00 01 34 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 00 00 01 2F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 00 00 01 02 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 00 00 00 4E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 00 00 00 33 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 00 00 00 22 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 00 00 00 1A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 00 00 00 06 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 7F 7F 7F 6E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 7F 7F 7F 5E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 7F 7F 7F 42 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 7F 7F 7F 2D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 7F 7F 7F 18 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 7F 7F 7E 7C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 7F 7F 7E 6D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 7F 7F 7E 59 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 7F 7F 7E 4D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0A 00 7F 7F 7E 4C F7
+
+ Q high (máximo e mínimo setam LPF e High shelf)
+
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 17 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 14 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 12 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 0D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 0C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 0A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 07 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 05 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 03 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 01 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 2B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 02 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 09 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 0C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 0D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 10 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 12 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 14 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 15 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 16 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 17 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 18 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 19 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 1B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 1D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 1E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 21 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 26 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0B 00 00 00 00 2A F7
+
+ frequencia high
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 43 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 39 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 37 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 36 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 35 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 34 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 33 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 32 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 31 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 2F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 2B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 29 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 26 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 1F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 1B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 19 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 17 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 13 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 0E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 09 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 05 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 07 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 16 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 2A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 39 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 42 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 47 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 54 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 5A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 64 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0C 00 00 00 00 7C F7
+
+ gain fo high (mesmo funcionamento on/off quando tá no filtro)
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 7F 7F 7F 73 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 7F 7F 7E 7B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 7F 7F 7E 69 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 7F 7F 7E 5B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 7F 7F 7E 4C F7
+ 14:0   System exclusive           F0 43 30 3E 0D 21 00 00 00 00 10 F7
+ 14:0   System exclusive           F0 43 30 3E 0D 21 00 00 20 00 10 F7
+ 14:0   System exclusive           F0 43 30 3E 0D 21 00 02 00 00 10 F7
+ 14:0   System exclusive           F0 43 30 3E 0D 21 00 03 00 00 10 F7
+ 14:0   System exclusive           F0 43 30 3E 0D 21 00 04 00 00 10 F7
+ 14:0   System exclusive           F0 43 30 3E 0D 21 00 05 00 00 10 F7
+ 14:0   System exclusive           F0 43 30 3E 0D 21 00 05 20 00 10 F7
+ 14:0   System exclusive           F0 43 30 3E 0D 21 01 00 00 00 08 F7
+ 14:0   System exclusive           F0 43 30 3E 0D 21 04 00 00 00 02 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 7F 7F 7E 5B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 7F 7F 7E 6F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 7F 7F 7F 22 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 7F 7F 7F 3D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 7F 7F 7F 40 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 7F 7F 7F 58 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 7F 7F 7F 77 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 00 00 00 03 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 00 00 00 1E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 00 00 00 23 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 00 00 00 2E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 00 00 00 34 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 00 00 00 3C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 00 00 00 46 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 00 00 00 69 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 00 00 01 08 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 00 00 01 14 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 00 00 01 2B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 20 0D 00 00 00 01 34 F7
+
+ attenuator (parece ser um ganho digital ou uma compensação de aumento de nível dado pelo equalizador)
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7E 4C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 00 00 00 00 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 00 00 00 78 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 00 00 00 01 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7F 58 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7F 3B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7F 27 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7F 07 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7E 7C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7E 72 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7E 75 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7E 78 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7E 72 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7E 6D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7E 68 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7E 64 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7E 2C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7E 27 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7E 1D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7E 0C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7E 03 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7D 7A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7D 72 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7D 6D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7D 49 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7D 35 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7D 2A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7D 1D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7D 11 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7D 0A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7C 7D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7C 77 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7C 63 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7C 5C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7C 55 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7C 1B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7C 0B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7B 75 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7B 59 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7B 28 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7A 6C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7A 54 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7A 34 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7A 23 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 7A 0A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 79 74 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 79 41 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 79 1F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 79 0D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 78 73 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 78 63 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 78 55 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1D 00 00 7F 7F 78 40 F7
+
+COMP
+
+ comp on/off
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 01 00 00 00 00 01 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 01 00 00 00 00 00 F7
+
+ threshold
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7C 10 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7C 70 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7D 1E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7D 31 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7D 51 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7D 72 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7E 06 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7E 1A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7E 2C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7E 33 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7E 46 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7E 57 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7E 62 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7F 0C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7F 34 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7F 4A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 7F 7F 7F 6A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 09 00 00 00 00 00 F7
+
+ ratio
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 05 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 04 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 02 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 01 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 00 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 01 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 03 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 05 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 07 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 08 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 09 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 0A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 0B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 0C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 0E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 06 00 00 00 00 0F F7
+
+ attack
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 06 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 16 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 23 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 25 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 0C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 00 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 07 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 19 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 30 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 41 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 46 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 49 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 51 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 55 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 60 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 69 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 72 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 04 00 00 00 00 78 F7
+
+ release
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 1D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 10 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 0F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 0E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 0D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 06 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 03 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 02 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 01 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 13 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 31 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 3D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 43 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 45 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 47 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 48 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 4B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 52 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 54 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 58 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 60 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 63 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 68 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 6E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 72 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 00 7D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 01 0B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 01 13 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 01 1A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 01 1B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 05 00 00 00 01 1F F7
+
+ make-up gain
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 02 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 05 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 0F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 13 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 18 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 1A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 1D F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 20 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 25 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 26 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 28 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 2A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 2E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 33 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 37 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 3A F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 3B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 3F F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 46 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 48 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 4E F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 55 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 62 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 71 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 75 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 00 7B F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 01 00 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 01 09 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 01 0C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 01 17 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 01 20 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 01 21 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 01 26 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 01 2C F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 07 00 00 00 01 34 F7
+
+ knee
+
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 08 00 00 00 00 01 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 08 00 00 00 00 00 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 08 00 00 00 00 01 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 08 00 00 00 00 02 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 08 00 00 00 00 03 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 08 00 00 00 00 04 F7
+ 14:0   System exclusive           F0 43 10 3E 7F 01 1F 08 00 00 00 00 05 F7

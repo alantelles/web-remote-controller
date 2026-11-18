@@ -302,22 +302,17 @@ func broadcastWS(msg WSMessage) {
 	}
 }
 
-// Build01V96SysEx monta a mensagem de 14 bytes da Yamaha 01V96V2
+// Build01V96SysEx monta a mensagem de 14 bytes da Yamaha 01V96V2 (Universal Digital Mixer Format)
+// Suporta números inteiros com sinal de 28 bits (faders, pan, ganhos e thresholds negativos).
 func Build01V96SysEx(element, param, channel byte, value int) []byte {
-	if value < 0 {
-		value = 0
-	}
-	if value > 1023 {
-		value = 1023
-	}
-
-	dd1 := byte(0x00)
-	dd2 := byte(0x00)
-	dd3 := byte((value >> 7) & 0x7F)
-	dd4 := byte(value & 0x7F)
+	u := uint32(value) & 0x0FFFFFFF
+	dd1 := byte((u >> 21) & 0x7F)
+	dd2 := byte((u >> 14) & 0x7F)
+	dd3 := byte((u >> 7) & 0x7F)
+	dd4 := byte(u & 0x7F)
 
 	return []byte{
-		0xF0, 0x43, 0x10, 0x3E, 0x0D, 0x01,
+		0xF0, 0x43, 0x10, 0x3E, 0x7F, 0x01,
 		element, param, channel,
 		dd1, dd2, dd3, dd4,
 		0xF7,
@@ -967,30 +962,28 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		var targetDesc string
 		chNum := msg.Channel + 1
 		eqParamNames := map[byte]string{
-			0x00: "EQ ON/OFF",
-			0x01: "LOW Q/Type",
+			0x0F: "EQ ON/OFF",
+			0x01: "LOW Q/Mode",
 			0x02: "LOW Freq",
 			0x03: "LOW Gain",
-			0x04: "LO-MID Q",
-			0x05: "LO-MID Freq",
-			0x06: "LO-MID Gain",
-			0x07: "HI-MID Q",
-			0x08: "HI-MID Freq",
-			0x09: "HI-MID Gain",
-			0x0A: "HIGH Q/Type",
-			0x0B: "HIGH Freq",
-			0x0C: "HIGH Gain",
-			0x0D: "HPF ON/OFF",
-			0x0E: "LPF ON/OFF",
+			0x05: "LO-MID Q",
+			0x06: "LO-MID Freq",
+			0x07: "LO-MID Gain",
+			0x08: "HI-MID Q",
+			0x09: "HI-MID Freq",
+			0x0A: "HI-MID Gain",
+			0x0B: "HIGH Q/Mode",
+			0x0C: "HIGH Freq",
+			0x0D: "HIGH Gain",
 		}
 		compParamNames := map[byte]string{
-			0x00: "COMP ON/OFF",
-			0x01: "Threshold",
-			0x02: "Ratio",
-			0x03: "Attack",
-			0x04: "Release",
-			0x05: "Knee",
-			0x06: "Gain (Out Gain)",
+			0x01: "COMP ON/OFF",
+			0x04: "Attack",
+			0x05: "Release",
+			0x06: "Ratio",
+			0x07: "Make-up Gain",
+			0x08: "Knee",
+			0x09: "Threshold",
 		}
 		gateParamNames := map[byte]string{
 			0x00: "GATE ON/OFF",
@@ -1010,50 +1003,77 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 				onStr = "ON (1)"
 			}
 			targetDesc = fmt.Sprintf("CH %02d -> MASTER Channel: %s", chNum, onStr)
+		case 0x1B:
+			panStr := "C (0)"
+			if msg.Value > 0 {
+				panStr = fmt.Sprintf("R%d", msg.Value)
+			} else if msg.Value < 0 {
+				panStr = fmt.Sprintf("L%d", -msg.Value)
+			}
+			targetDesc = fmt.Sprintf("CH %02d -> PAN: %s", chNum, panStr)
 		case 0x23:
-			if msg.Param <= 0x07 {
-				auxNum := msg.Param + 1
-				targetDesc = fmt.Sprintf("CH %02d -> AUX %d Send Level: %d (%s)", chNum, auxNum, msg.Value, faderValueToDB(msg.Value))
-			} else if msg.Param >= 0x08 && msg.Param <= 0x0F {
-				auxNum := (msg.Param - 0x08) + 1
+			auxNum := int(msg.Param/3) + 1
+			subParam := msg.Param % 3
+			switch subParam {
+			case 0:
 				onStr := "MUTE (0)"
 				if msg.Value == 1 {
 					onStr = "ON (1)"
 				}
 				targetDesc = fmt.Sprintf("CH %02d -> AUX %d Send: %s", chNum, auxNum, onStr)
-			} else {
-				targetDesc = fmt.Sprintf("CH %02d -> Element 0x%02X, Param 0x%02X: %d", chNum, msg.Element, msg.Param, msg.Value)
+			case 1:
+				preStr := "POST-Fader (0)"
+				if msg.Value == 1 {
+					preStr = "PRE-Fader (1)"
+				}
+				targetDesc = fmt.Sprintf("CH %02d -> AUX %d Routing: %s", chNum, auxNum, preStr)
+			case 2:
+				targetDesc = fmt.Sprintf("CH %02d -> AUX %d Send Level: %d (%s)", chNum, auxNum, msg.Value, faderValueToDB(msg.Value))
+			default:
+				targetDesc = fmt.Sprintf("CH %02d -> AUX %d Param 0x%02X: %d", chNum, auxNum, msg.Param, msg.Value)
 			}
 		case 0x20:
 			pName, ok := eqParamNames[msg.Param]
 			if !ok {
 				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
 			}
-			targetDesc = fmt.Sprintf("CH %02d -> EQ %s: %d", chNum, pName, msg.Value)
-		case 0x22:
+			valDesc := fmt.Sprintf("%d", msg.Value)
+			if msg.Param == 0x03 || msg.Param == 0x07 || msg.Param == 0x0A || msg.Param == 0x0D {
+				valDesc = fmt.Sprintf("%.1f dB (%d)", float64(msg.Value)/10.0, msg.Value)
+			}
+			targetDesc = fmt.Sprintf("CH %02d -> EQ %s: %s", chNum, pName, valDesc)
+		case 0x1F:
 			pName, ok := compParamNames[msg.Param]
 			if !ok {
 				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
 			}
-			targetDesc = fmt.Sprintf("CH %02d -> COMP %s: %d", chNum, pName, msg.Value)
+			valDesc := fmt.Sprintf("%d", msg.Value)
+			if msg.Param == 0x09 {
+				valDesc = fmt.Sprintf("%.1f dB (%d)", float64(msg.Value)/10.0, msg.Value)
+			} else if msg.Param == 0x07 {
+				valDesc = fmt.Sprintf("+%.1f dB (%d)", float64(msg.Value)/10.0, msg.Value)
+			}
+			targetDesc = fmt.Sprintf("CH %02d -> COMP %s: %s", chNum, pName, valDesc)
+		case 0x1D:
+			targetDesc = fmt.Sprintf("CH %02d -> ATTENUATOR: %+.1f dB (%d)", chNum, float64(msg.Value)/10.0, msg.Value)
 		case 0x21:
 			pName, ok := gateParamNames[msg.Param]
 			if !ok {
 				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
 			}
 			targetDesc = fmt.Sprintf("CH %02d -> GATE %s: %d", chNum, pName, msg.Value)
-		case 0x4D:
+		case 0x4F:
 			targetDesc = fmt.Sprintf("STEREO MASTER Out Fader: %d (%s)", msg.Value, faderValueToDB(msg.Value))
-		case 0x4B:
+		case 0x4D:
 			onStr := "MUTE (0)"
 			if msg.Value == 1 {
 				onStr = "ON (1)"
 			}
 			targetDesc = fmt.Sprintf("STEREO MASTER Out: %s", onStr)
-		case 0x31:
+		case 0x39:
 			auxNum := msg.Channel + 1
 			targetDesc = fmt.Sprintf("AUX %d MASTER Fader: %d (%s)", auxNum, msg.Value, faderValueToDB(msg.Value))
-		case 0x2F:
+		case 0x36:
 			auxNum := msg.Channel + 1
 			onStr := "MUTE (0)"
 			if msg.Value == 1 {
@@ -1067,13 +1087,6 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
 			}
 			targetDesc = fmt.Sprintf("AUX %d MASTER Out -> EQ %s: %d", auxNum, pName, msg.Value)
-		case 0x36:
-			auxNum := msg.Channel + 1
-			pName, ok := compParamNames[msg.Param]
-			if !ok {
-				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
-			}
-			targetDesc = fmt.Sprintf("AUX %d MASTER Out -> COMP %s: %d", auxNum, pName, msg.Value)
 		case 0x50:
 			pName, ok := eqParamNames[msg.Param]
 			if !ok {
@@ -1096,12 +1109,12 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		// Eventos ON/MUTE/Bypass discretos ou limites de fader (0, 823, 1023) passam direto sem throttling.
 		// Para movimentos contínuos dentro da janela de 20ms, allowOrSchedule agenda o envio do valor final (trailing edge)
 		// para garantir que a última posição do fader/knob nunca se perca.
-		isFaderElem := msg.Element == 0x1C || msg.Element == 0x4D || msg.Element == 0x31 || (msg.Element == 0x23 && msg.Param <= 0x07)
+		isFaderElem := msg.Element == 0x1C || msg.Element == 0x4F || msg.Element == 0x39 || msg.Element == 0x1D || (msg.Element == 0x23 && msg.Param%3 == 2)
 		isDiscrete := msg.Element == 0x1A ||
-			msg.Element == 0x4B || msg.Element == 0x2F ||
-			(msg.Element == 0x23 && msg.Param >= 0x08) ||
-			((msg.Element == 0x20 || msg.Element == 0x35 || msg.Element == 0x50) && (msg.Param == 0x00 || msg.Param == 0x0D || msg.Param == 0x0E)) ||
-			((msg.Element == 0x22 || msg.Element == 0x36 || msg.Element == 0x51) && msg.Param == 0x00) ||
+			msg.Element == 0x4D || msg.Element == 0x36 ||
+			(msg.Element == 0x23 && (msg.Param%3 == 0 || msg.Param%3 == 1)) ||
+			((msg.Element == 0x20 || msg.Element == 0x35 || msg.Element == 0x50) && (msg.Param == 0x0F || msg.Param == 0x00)) ||
+			((msg.Element == 0x1F || msg.Element == 0x36 || msg.Element == 0x51) && msg.Param == 0x01) ||
 			(msg.Element == 0x21 && msg.Param == 0x00) ||
 			(isFaderElem && (msg.Value == 0 || msg.Value == 823 || msg.Value == 1023))
 
@@ -1375,14 +1388,14 @@ func runFaderLoop(out drivers.Out, stopChan chan struct{}) {
 	// Define as 9 mixagens com seus parâmetros SysEx correspondentes
 	mixes := []mixSimState{
 		{name: "MASTER", element: 0x1C, param: 0x00},
-		{name: "AUX1", element: 0x23, param: 0x00},
-		{name: "AUX2", element: 0x23, param: 0x01},
-		{name: "AUX3", element: 0x23, param: 0x02},
-		{name: "AUX4", element: 0x23, param: 0x03},
-		{name: "AUX5", element: 0x23, param: 0x04},
-		{name: "AUX6", element: 0x23, param: 0x05},
-		{name: "AUX7", element: 0x23, param: 0x06},
-		{name: "AUX8", element: 0x23, param: 0x07},
+		{name: "AUX1", element: 0x23, param: 0x02},
+		{name: "AUX2", element: 0x23, param: 0x05},
+		{name: "AUX3", element: 0x23, param: 0x08},
+		{name: "AUX4", element: 0x23, param: 0x0B},
+		{name: "AUX5", element: 0x23, param: 0x0E},
+		{name: "AUX6", element: 0x23, param: 0x11},
+		{name: "AUX7", element: 0x23, param: 0x14},
+		{name: "AUX8", element: 0x23, param: 0x17},
 	}
 
 	// Inicializa os canais de cada mixagem com posições variadas mas realistas

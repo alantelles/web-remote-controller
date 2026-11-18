@@ -28,13 +28,14 @@ type EQBand struct {
 
 // EQState representa o equalizador de 4 bandas da Yamaha 01V96
 type EQState struct {
-	On     int    `json:"on"`     // 0 = Bypass, 1 = On (0x00)
-	Low    EQBand `json:"low"`    // Banda LOW
-	LowMid EQBand `json:"low_mid"`// Banda LO-MID
-	HiMid  EQBand `json:"hi_mid"` // Banda HI-MID
-	High   EQBand `json:"high"`   // Banda HIGH
-	HPFOn  int    `json:"hpf_on"` // 1 = HPF ativo (0x0D)
-	LPFOn  int    `json:"lpf_on"` // 1 = LPF ativo (0x0E)
+	On         int    `json:"on"`         // 0 = Bypass, 1 = On (0x0F)
+	Low        EQBand `json:"low"`        // Banda LOW
+	LowMid     EQBand `json:"low_mid"`    // Banda LO-MID
+	HiMid      EQBand `json:"hi_mid"`     // Banda HI-MID
+	High       EQBand `json:"high"`       // Banda HIGH
+	HPFOn      int    `json:"hpf_on"`     // 1 = HPF ativo
+	LPFOn      int    `json:"lpf_on"`     // 1 = LPF ativo
+	Attenuator int    `json:"attenuator"` // -960 a +120 décimos de dB (0x1D, 0 = 0.0 dB)
 }
 
 // CompState representa o compressor de canal ou saída
@@ -134,29 +135,29 @@ var (
 	autoSaveStopChan  chan struct{}
 )
 
-// newDefaultEQState cria um estado seguro de EQ plano (Flat 0.0 dB = 180)
+// newDefaultEQState cria um estado seguro de EQ plano (Flat 0.0 dB = 0)
 func newDefaultEQState() EQState {
 	return EQState{
 		On:     1,
-		Low:    EQBand{Q: 23, Freq: 27, Gain: 180},
-		LowMid: EQBand{Q: 20, Freq: 51, Gain: 180},
-		HiMid:  EQBand{Q: 20, Freq: 79, Gain: 180},
-		High:   EQBand{Q: 23, Freq: 107, Gain: 180},
+		Low:    EQBand{Q: 23, Freq: 27, Gain: 0},
+		LowMid: EQBand{Q: 20, Freq: 51, Gain: 0},
+		HiMid:  EQBand{Q: 20, Freq: 79, Gain: 0},
+		High:   EQBand{Q: 23, Freq: 107, Gain: 0},
 		HPFOn:  0,
 		LPFOn:  0,
 	}
 }
 
-// newDefaultCompState cria um estado neutro e seguro de Compressor (-20.0 dB = 340, Ratio 4.0:1 = 7)
+// newDefaultCompState cria um estado neutro e seguro de Compressor (-20.0 dB = -200, Ratio 4.0:1 = 7)
 func newDefaultCompState() CompState {
 	return CompState{
 		On:        1,
-		Threshold: 340, // -20.0 dB
-		Ratio:     7,   // 4.0:1
-		Attack:    20,  // 20 ms
-		Release:   18,  // 250 ms
-		Knee:      0,   // HARD
-		Gain:      0,   // 0.0 dB
+		Threshold: -200, // -20.0 dB
+		Ratio:     7,    // 4.0:1
+		Attack:    20,   // 20 ms
+		Release:   18,   // 250 ms
+		Knee:      0,    // HARD
+		Gain:      0,    // 0.0 dB
 	}
 }
 
@@ -240,15 +241,17 @@ func ApplyParamToState(element, param, channel byte, value int) {
 	// Input Aux Sends (0x23)
 	case 0x23:
 		if chIdx >= 0 && chIdx < 32 {
-			if param <= 0x07 {
-				auxIdx := int(param)
-				currentMixer.Inputs[chIdx].AuxSends[auxIdx].Level = value
-			} else if param >= 0x08 && param <= 0x0F {
-				auxIdx := int(param - 0x08)
-				currentMixer.Inputs[chIdx].AuxSends[auxIdx].On = value
-			} else if param >= 0x10 && param <= 0x17 {
-				auxIdx := int(param - 0x10)
-				currentMixer.Inputs[chIdx].AuxSends[auxIdx].Pre = value
+			auxIdx := int(param / 3)
+			if auxIdx >= 0 && auxIdx < 8 {
+				subParam := param % 3
+				switch subParam {
+				case 0: // ON/OFF
+					currentMixer.Inputs[chIdx].AuxSends[auxIdx].On = value
+				case 1: // PRE/POST (0 = Post, 1 = Pre)
+					currentMixer.Inputs[chIdx].AuxSends[auxIdx].Pre = value
+				case 2: // LEVEL (0 a 1023)
+					currentMixer.Inputs[chIdx].AuxSends[auxIdx].Level = value
+				}
 			}
 		}
 
@@ -258,18 +261,24 @@ func ApplyParamToState(element, param, channel byte, value int) {
 			applyEQParam(&currentMixer.Inputs[chIdx].EQ, param, value)
 		}
 
-	// Input Compressor (0x22)
-	case 0x22:
+	// Input Attenuator (0x1D)
+	case 0x1D:
+		if chIdx >= 0 && chIdx < 32 && param == 0x00 {
+			currentMixer.Inputs[chIdx].EQ.Attenuator = value
+		}
+
+	// Input Compressor (0x1F)
+	case 0x1F:
 		if chIdx >= 0 && chIdx < 32 {
 			applyCompParam(&currentMixer.Inputs[chIdx].Comp, param, value)
 		}
 
-	// Stereo Master Fader (0x4D)
-	case 0x4D:
+	// Stereo Master Fader (0x4F)
+	case 0x4F:
 		currentMixer.StereoMaster.Fader = value
 
-	// Stereo Master ON / MUTE (0x4B)
-	case 0x4B:
+	// Stereo Master ON / MUTE (0x4D)
+	case 0x4D:
 		currentMixer.StereoMaster.On = value
 
 	// Stereo Master EQ (0x50)
@@ -280,14 +289,14 @@ func ApplyParamToState(element, param, channel byte, value int) {
 	case 0x51:
 		applyCompParam(&currentMixer.StereoMaster.Comp, param, value)
 
-	// Aux Master Fader (0x31)
-	case 0x31:
+	// Aux Master Fader (0x39)
+	case 0x39:
 		if chIdx >= 0 && chIdx < 8 {
 			currentMixer.AuxMasters[chIdx].Fader = value
 		}
 
-	// Aux Master ON / MUTE (0x2F)
-	case 0x2F:
+	// Aux Master ON / MUTE (0x36)
+	case 0x36:
 		if chIdx >= 0 && chIdx < 8 {
 			currentMixer.AuxMasters[chIdx].On = value
 		}
@@ -297,18 +306,12 @@ func ApplyParamToState(element, param, channel byte, value int) {
 		if chIdx >= 0 && chIdx < 8 {
 			applyEQParam(&currentMixer.AuxMasters[chIdx].EQ, param, value)
 		}
-
-	// Aux Master COMP (0x36)
-	case 0x36:
-		if chIdx >= 0 && chIdx < 8 {
-			applyCompParam(&currentMixer.AuxMasters[chIdx].Comp, param, value)
-		}
 	}
 }
 
 func applyEQParam(eq *EQState, param byte, value int) {
 	switch param {
-	case 0x00:
+	case 0x0F:
 		eq.On = value
 	case 0x01:
 		eq.Low.Q = value
@@ -316,46 +319,42 @@ func applyEQParam(eq *EQState, param byte, value int) {
 		eq.Low.Freq = value
 	case 0x03:
 		eq.Low.Gain = value
-	case 0x04:
-		eq.LowMid.Q = value
 	case 0x05:
-		eq.LowMid.Freq = value
+		eq.LowMid.Q = value
 	case 0x06:
-		eq.LowMid.Gain = value
+		eq.LowMid.Freq = value
 	case 0x07:
-		eq.HiMid.Q = value
+		eq.LowMid.Gain = value
 	case 0x08:
-		eq.HiMid.Freq = value
+		eq.HiMid.Q = value
 	case 0x09:
-		eq.HiMid.Gain = value
+		eq.HiMid.Freq = value
 	case 0x0A:
-		eq.High.Q = value
+		eq.HiMid.Gain = value
 	case 0x0B:
-		eq.High.Freq = value
+		eq.High.Q = value
 	case 0x0C:
-		eq.High.Gain = value
+		eq.High.Freq = value
 	case 0x0D:
-		eq.HPFOn = value
-	case 0x0E:
-		eq.LPFOn = value
+		eq.High.Gain = value
 	}
 }
 
 func applyCompParam(comp *CompState, param byte, value int) {
 	switch param {
-	case 0x00:
-		comp.On = value
 	case 0x01:
+		comp.On = value
+	case 0x09:
 		comp.Threshold = value
-	case 0x02:
-		comp.Ratio = value
-	case 0x03:
-		comp.Attack = value
-	case 0x04:
-		comp.Release = value
-	case 0x05:
-		comp.Knee = value
 	case 0x06:
+		comp.Ratio = value
+	case 0x04:
+		comp.Attack = value
+	case 0x05:
+		comp.Release = value
+	case 0x08:
+		comp.Knee = value
+	case 0x07:
 		comp.Gain = value
 	}
 }
@@ -678,8 +677,8 @@ func GenerateSysExForState(st *MixerState) []sysexMessage {
 	var msgs []sysexMessage
 
 	// 1. STEREO MASTER
-	msgs = append(msgs, sysexMessage{element: 0x4D, param: 0x00, channel: 0x00, value: st.StereoMaster.Fader})
-	msgs = append(msgs, sysexMessage{element: 0x4B, param: 0x00, channel: 0x00, value: st.StereoMaster.On})
+	msgs = append(msgs, sysexMessage{element: 0x4F, param: 0x00, channel: 0x00, value: st.StereoMaster.Fader})
+	msgs = append(msgs, sysexMessage{element: 0x4D, param: 0x00, channel: 0x00, value: st.StereoMaster.On})
 	msgs = append(msgs, generateEQSysEx(0x50, 0x00, &st.StereoMaster.EQ)...)
 	msgs = append(msgs, generateCompSysEx(0x51, 0x00, &st.StereoMaster.Comp)...)
 
@@ -687,10 +686,9 @@ func GenerateSysExForState(st *MixerState) []sysexMessage {
 	for i := 0; i < 8; i++ {
 		auxCh := byte(i)
 		aux := &st.AuxMasters[i]
-		msgs = append(msgs, sysexMessage{element: 0x31, param: 0x00, channel: auxCh, value: aux.Fader})
-		msgs = append(msgs, sysexMessage{element: 0x2F, param: 0x00, channel: auxCh, value: aux.On})
+		msgs = append(msgs, sysexMessage{element: 0x39, param: 0x00, channel: auxCh, value: aux.Fader})
+		msgs = append(msgs, sysexMessage{element: 0x36, param: 0x00, channel: auxCh, value: aux.On})
 		msgs = append(msgs, generateEQSysEx(0x35, auxCh, &aux.EQ)...)
-		msgs = append(msgs, generateCompSysEx(0x36, auxCh, &aux.Comp)...)
 	}
 
 	// 3. INPUT CHANNELS 1 A 32
@@ -702,18 +700,19 @@ func GenerateSysExForState(st *MixerState) []sysexMessage {
 		msgs = append(msgs, sysexMessage{element: 0x1C, param: 0x00, channel: ch, value: inp.Fader})
 		msgs = append(msgs, sysexMessage{element: 0x1A, param: 0x00, channel: ch, value: inp.On})
 		msgs = append(msgs, sysexMessage{element: 0x1B, param: 0x00, channel: ch, value: inp.Pan})
+		msgs = append(msgs, sysexMessage{element: 0x1D, param: 0x00, channel: ch, value: inp.EQ.Attenuator})
 
 		// Aux Sends
 		for a := 0; a < 8; a++ {
 			send := &inp.AuxSends[a]
-			msgs = append(msgs, sysexMessage{element: 0x23, param: byte(a), channel: ch, value: send.Level})
-			msgs = append(msgs, sysexMessage{element: 0x23, param: byte(0x08 + a), channel: ch, value: send.On})
-			msgs = append(msgs, sysexMessage{element: 0x23, param: byte(0x10 + a), channel: ch, value: send.Pre})
+			msgs = append(msgs, sysexMessage{element: 0x23, param: byte(a*3 + 0), channel: ch, value: send.On})
+			msgs = append(msgs, sysexMessage{element: 0x23, param: byte(a*3 + 1), channel: ch, value: send.Pre})
+			msgs = append(msgs, sysexMessage{element: 0x23, param: byte(a*3 + 2), channel: ch, value: send.Level})
 		}
 
 		// EQ e Compressor
 		msgs = append(msgs, generateEQSysEx(0x20, ch, &inp.EQ)...)
-		msgs = append(msgs, generateCompSysEx(0x22, ch, &inp.Comp)...)
+		msgs = append(msgs, generateCompSysEx(0x1F, ch, &inp.Comp)...)
 	}
 
 	return msgs
@@ -721,33 +720,31 @@ func GenerateSysExForState(st *MixerState) []sysexMessage {
 
 func generateEQSysEx(element, channel byte, eq *EQState) []sysexMessage {
 	return []sysexMessage{
-		{element: element, param: 0x00, channel: channel, value: eq.On},
+		{element: element, param: 0x0F, channel: channel, value: eq.On},
 		{element: element, param: 0x01, channel: channel, value: eq.Low.Q},
 		{element: element, param: 0x02, channel: channel, value: eq.Low.Freq},
 		{element: element, param: 0x03, channel: channel, value: eq.Low.Gain},
-		{element: element, param: 0x04, channel: channel, value: eq.LowMid.Q},
-		{element: element, param: 0x05, channel: channel, value: eq.LowMid.Freq},
-		{element: element, param: 0x06, channel: channel, value: eq.LowMid.Gain},
-		{element: element, param: 0x07, channel: channel, value: eq.HiMid.Q},
-		{element: element, param: 0x08, channel: channel, value: eq.HiMid.Freq},
-		{element: element, param: 0x09, channel: channel, value: eq.HiMid.Gain},
-		{element: element, param: 0x0A, channel: channel, value: eq.High.Q},
-		{element: element, param: 0x0B, channel: channel, value: eq.High.Freq},
-		{element: element, param: 0x0C, channel: channel, value: eq.High.Gain},
-		{element: element, param: 0x0D, channel: channel, value: eq.HPFOn},
-		{element: element, param: 0x0E, channel: channel, value: eq.LPFOn},
+		{element: element, param: 0x05, channel: channel, value: eq.LowMid.Q},
+		{element: element, param: 0x06, channel: channel, value: eq.LowMid.Freq},
+		{element: element, param: 0x07, channel: channel, value: eq.LowMid.Gain},
+		{element: element, param: 0x08, channel: channel, value: eq.HiMid.Q},
+		{element: element, param: 0x09, channel: channel, value: eq.HiMid.Freq},
+		{element: element, param: 0x0A, channel: channel, value: eq.HiMid.Gain},
+		{element: element, param: 0x0B, channel: channel, value: eq.High.Q},
+		{element: element, param: 0x0C, channel: channel, value: eq.High.Freq},
+		{element: element, param: 0x0D, channel: channel, value: eq.High.Gain},
 	}
 }
 
 func generateCompSysEx(element, channel byte, comp *CompState) []sysexMessage {
 	return []sysexMessage{
-		{element: element, param: 0x00, channel: channel, value: comp.On},
-		{element: element, param: 0x01, channel: channel, value: comp.Threshold},
-		{element: element, param: 0x02, channel: channel, value: comp.Ratio},
-		{element: element, param: 0x03, channel: channel, value: comp.Attack},
-		{element: element, param: 0x04, channel: channel, value: comp.Release},
-		{element: element, param: 0x05, channel: channel, value: comp.Knee},
-		{element: element, param: 0x06, channel: channel, value: comp.Gain},
+		{element: element, param: 0x01, channel: channel, value: comp.On},
+		{element: element, param: 0x09, channel: channel, value: comp.Threshold},
+		{element: element, param: 0x06, channel: channel, value: comp.Ratio},
+		{element: element, param: 0x04, channel: channel, value: comp.Attack},
+		{element: element, param: 0x05, channel: channel, value: comp.Release},
+		{element: element, param: 0x08, channel: channel, value: comp.Knee},
+		{element: element, param: 0x07, channel: channel, value: comp.Gain},
 	}
 }
 

@@ -758,6 +758,35 @@
       border-color: #059669;
     }
 
+    /* Botão PRE / POST Fader (visível nos modos AUX) */
+    .btn-ch-pre-post {
+      height: 32px;
+      min-width: 48px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.12s ease;
+      background: #1e2430;
+      color: #94a3b8;
+      border: 1px solid #334155;
+    }
+
+    .btn-ch-pre-post.is-pre {
+      background: #78350f;
+      color: #fde047;
+      border-color: #d97706;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.35);
+    }
+
+    body.mix-aux .btn-ch-pre-post {
+      display: flex;
+    }
+
     /* Botão SEL (SEM LEDs. Brilha diferente se algum efeito estiver ativo) */
     .btn-ch-sel {
       height: 32px;
@@ -2066,9 +2095,15 @@
 
       <!-- ABA 1: EQUALIZADOR PARAMÉTRICO -->
       <div class="fx-tab-pane active" id="pane_eq">
-        <!-- Ações do EQ (ON / FLAT) -->
+        <!-- Ações do EQ (ON / FLAT / ATT) -->
         <div class="eq-actions-bar">
           <button class="btn-eq-toggle is-on" id="btnEqToggleOn" type="button">EQ: ON</button>
+          <div class="eq-att-mobile-group" id="eqAttMobileGroup" style="display: flex; align-items: center; gap: 6px; background: rgba(15,23,42,0.6); padding: 3px 8px; border-radius: 6px; border: 1px solid #334155;">
+            <span style="font-size: 10px; font-weight: 700; color: #94a3b8;">ATT:</span>
+            <input type="range" class="param-slider" id="rngEqAttMobile" min="-960" max="120" value="0" step="5" style="width: 70px; height: 4px;">
+            <span class="param-value-badge" id="lblEqAttMobile" style="font-size: 10px; min-width: 44px; text-align: right; color: #38bdf8;">0.0 dB</span>
+            <button class="btn-quick-val" id="btnZeroEqAttMobile" type="button" style="font-size: 9px; padding: 2px 4px;" title="Zerar Atenuador">0 dB</button>
+          </div>
           <button class="btn-eq-flat" id="btnEqFlat" type="button">⚡ FLAT</button>
         </div>
 
@@ -2117,7 +2152,7 @@
               <span class="param-value-badge" id="lblEqFreq">100 Hz</span>
             </div>
             <div class="param-slider-row">
-              <input type="range" class="param-slider" id="rngEqFreq" min="0" max="119" value="27">
+              <input type="range" class="param-slider" id="rngEqFreq" min="0" max="124" value="27">
             </div>
           </div>
 
@@ -2212,7 +2247,7 @@
               <span class="param-value-badge" id="lblCompReleaseMobile">250 ms</span>
             </div>
             <div class="param-slider-row">
-              <input type="range" class="param-slider" id="rngCompReleaseMobile" min="0" max="43" value="18">
+              <input type="range" class="param-slider" id="rngCompReleaseMobile" min="0" max="159" value="41">
             </div>
           </div>
 
@@ -2521,7 +2556,7 @@
       return `${val}`;
     }
 
-    // Configurações das 9 Mixagens
+    // Configurações das 9 Mixagens (Mapeamento Yamaha 01V96 / Studio Manager)
     const MIX_TARGETS = {
       MASTER: {
         id: 'MASTER',
@@ -2529,17 +2564,17 @@
         isMaster: true,
         faderElement: 0x1C, faderParam: 0x00,
         onElement: 0x1A,    onParam: 0x00,
-        outFaderElement: 0x4D, outFaderParam: 0x00, outChannel: 0x00,
-        outOnElement: 0x4B,    outOnParam: 0x00
+        outFaderElement: 0x4F, outFaderParam: 0x00, outChannel: 0x00,
+        outOnElement: 0x4D,    outOnParam: 0x00
       },
-      AUX1: { id: 'AUX1', title: 'AUX 1 MASTER', isMaster: false, auxIdx: 0, faderElement: 0x23, faderParam: 0x00, onElement: 0x23, onParam: 0x08, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x00, outOnElement: 0x2F, outOnParam: 0x00 },
-      AUX2: { id: 'AUX2', title: 'AUX 2 MASTER', isMaster: false, auxIdx: 1, faderElement: 0x23, faderParam: 0x01, onElement: 0x23, onParam: 0x09, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x01, outOnElement: 0x2F, outOnParam: 0x00 },
-      AUX3: { id: 'AUX3', title: 'AUX 3 MASTER', isMaster: false, auxIdx: 2, faderElement: 0x23, faderParam: 0x02, onElement: 0x23, onParam: 0x0A, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x02, outOnElement: 0x2F, outOnParam: 0x00 },
-      AUX4: { id: 'AUX4', title: 'AUX 4 MASTER', isMaster: false, auxIdx: 3, faderElement: 0x23, faderParam: 0x03, onElement: 0x23, onParam: 0x0B, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x03, outOnElement: 0x2F, outOnParam: 0x00 },
-      AUX5: { id: 'AUX5', title: 'AUX 5 MASTER', isMaster: false, auxIdx: 4, faderElement: 0x23, faderParam: 0x04, onElement: 0x23, onParam: 0x0C, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x04, outOnElement: 0x2F, outOnParam: 0x00 },
-      AUX6: { id: 'AUX6', title: 'AUX 6 MASTER', isMaster: false, auxIdx: 5, faderElement: 0x23, faderParam: 0x05, onElement: 0x23, onParam: 0x0D, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x05, outOnElement: 0x2F, outOnParam: 0x00 },
-      AUX7: { id: 'AUX7', title: 'AUX 7 MASTER', isMaster: false, auxIdx: 6, faderElement: 0x23, faderParam: 0x06, onElement: 0x23, onParam: 0x0E, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x06, outOnElement: 0x2F, outOnParam: 0x00 },
-      AUX8: { id: 'AUX8', title: 'AUX 8 MASTER', isMaster: false, auxIdx: 7, faderElement: 0x23, faderParam: 0x07, onElement: 0x23, onParam: 0x0F, outFaderElement: 0x31, outFaderParam: 0x00, outChannel: 0x07, outOnElement: 0x2F, outOnParam: 0x00 }
+      AUX1: { id: 'AUX1', title: 'AUX 1 MASTER', isMaster: false, auxIdx: 0, faderElement: 0x23, faderParam: 0x02, onElement: 0x23, onParam: 0x00, preParam: 0x01, outFaderElement: 0x39, outFaderParam: 0x00, outChannel: 0x00, outOnElement: 0x36, outOnParam: 0x00 },
+      AUX2: { id: 'AUX2', title: 'AUX 2 MASTER', isMaster: false, auxIdx: 1, faderElement: 0x23, faderParam: 0x05, onElement: 0x23, onParam: 0x03, preParam: 0x04, outFaderElement: 0x39, outFaderParam: 0x00, outChannel: 0x01, outOnElement: 0x36, outOnParam: 0x00 },
+      AUX3: { id: 'AUX3', title: 'AUX 3 MASTER', isMaster: false, auxIdx: 2, faderElement: 0x23, faderParam: 0x08, onElement: 0x23, onParam: 0x06, preParam: 0x07, outFaderElement: 0x39, outFaderParam: 0x00, outChannel: 0x02, outOnElement: 0x36, outOnParam: 0x00 },
+      AUX4: { id: 'AUX4', title: 'AUX 4 MASTER', isMaster: false, auxIdx: 3, faderElement: 0x23, faderParam: 0x0B, onElement: 0x23, onParam: 0x09, preParam: 0x0A, outFaderElement: 0x39, outFaderParam: 0x00, outChannel: 0x03, outOnElement: 0x36, outOnParam: 0x00 },
+      AUX5: { id: 'AUX5', title: 'AUX 5 MASTER', isMaster: false, auxIdx: 4, faderElement: 0x23, faderParam: 0x0E, onElement: 0x23, onParam: 0x0C, preParam: 0x0D, outFaderElement: 0x39, outFaderParam: 0x00, outChannel: 0x04, outOnElement: 0x36, outOnParam: 0x00 },
+      AUX6: { id: 'AUX6', title: 'AUX 6 MASTER', isMaster: false, auxIdx: 5, faderElement: 0x23, faderParam: 0x11, onElement: 0x23, onParam: 0x0F, preParam: 0x10, outFaderElement: 0x39, outFaderParam: 0x00, outChannel: 0x05, outOnElement: 0x36, outOnParam: 0x00 },
+      AUX7: { id: 'AUX7', title: 'AUX 7 MASTER', isMaster: false, auxIdx: 6, faderElement: 0x23, faderParam: 0x14, onElement: 0x23, onParam: 0x12, preParam: 0x13, outFaderElement: 0x39, outFaderParam: 0x00, outChannel: 0x06, outOnElement: 0x36, outOnParam: 0x00 },
+      AUX8: { id: 'AUX8', title: 'AUX 8 MASTER', isMaster: false, auxIdx: 7, faderElement: 0x23, faderParam: 0x17, onElement: 0x23, onParam: 0x15, preParam: 0x16, outFaderElement: 0x39, outFaderParam: 0x00, outChannel: 0x07, outOnElement: 0x36, outOnParam: 0x00 }
     };
 
     // ==========================================
@@ -2553,6 +2588,7 @@
     const state = {
       faders: {},
       mutes: {}, // 1 = ON, 0 = MUTED
+      pre: {},   // 0 = POST, 1 = PRE (para cada mix)
       eqOn: new Array(TOTAL_CHANNELS).fill(false),
       compOn: new Array(TOTAL_CHANNELS).fill(false),
       gateOn: new Array(TOTAL_CHANNELS).fill(false),
@@ -2565,6 +2601,7 @@
     Object.keys(MIX_TARGETS).forEach(mix => {
       state.faders[mix] = new Array(TOTAL_CHANNELS).fill(NOMINAL_VALUE);
       state.mutes[mix] = new Array(TOTAL_CHANNELS).fill(1); // Todos iniciam ON
+      state.pre[mix] = new Array(TOTAL_CHANNELS).fill(0);   // Todos iniciam POST (0)
       if (mix !== 'MASTER') {
         state.masterFaders[mix] = NOMINAL_VALUE;
         state.masterMutes[mix] = 1;
@@ -2575,16 +2612,19 @@
     // TABELAS E ESTADO DO EQUALIZADOR PARAMÉTRICO
     // ==========================================
     const EQ_FREQ_VALUES = [
-      "21.2 Hz", "22.4 Hz", "23.6 Hz", "25.0 Hz", "26.5 Hz", "28.0 Hz", "30.0 Hz", "31.5 Hz", "33.5 Hz", "35.5 Hz", "37.5 Hz", "40.0 Hz",
-      "42.5 Hz", "45.0 Hz", "47.5 Hz", "50.0 Hz", "53.0 Hz", "56.0 Hz", "60.0 Hz", "63.0 Hz", "67.0 Hz", "71.0 Hz", "75.0 Hz", "80.0 Hz",
-      "85 Hz", "90 Hz", "95 Hz", "100 Hz", "106 Hz", "112 Hz", "118 Hz", "125 Hz", "132 Hz", "140 Hz", "150 Hz", "160 Hz",
-      "170 Hz", "180 Hz", "190 Hz", "200 Hz", "212 Hz", "224 Hz", "236 Hz", "250 Hz", "265 Hz", "280 Hz", "300 Hz", "315 Hz",
-      "335 Hz", "355 Hz", "375 Hz", "400 Hz", "425 Hz", "450 Hz", "475 Hz", "500 Hz", "530 Hz", "560 Hz", "600 Hz", "630 Hz",
-      "670 Hz", "710 Hz", "750 Hz", "800 Hz", "850 Hz", "900 Hz", "950 Hz", "1.00 kHz", "1.06 kHz", "1.12 kHz", "1.18 kHz", "1.25 kHz",
-      "1.32 kHz", "1.40 kHz", "1.50 kHz", "1.60 kHz", "1.70 kHz", "1.80 kHz", "1.90 kHz", "2.00 kHz", "2.12 kHz", "2.24 kHz", "2.36 kHz", "2.50 kHz",
-      "2.65 kHz", "2.80 kHz", "3.00 kHz", "3.15 kHz", "3.35 kHz", "3.55 kHz", "3.75 kHz", "4.00 kHz", "4.25 kHz", "4.50 kHz", "4.75 kHz", "5.00 kHz",
-      "5.30 kHz", "5.60 kHz", "6.00 kHz", "6.30 kHz", "6.70 kHz", "7.10 kHz", "7.50 kHz", "8.00 kHz", "8.50 kHz", "9.00 kHz", "9.50 kHz", "10.0 kHz",
-      "10.6 kHz", "11.2 kHz", "11.8 kHz", "12.5 kHz", "13.2 kHz", "14.0 kHz", "15.0 kHz", "16.0 kHz", "17.0 kHz", "18.0 kHz", "19.0 kHz", "20.0 kHz"
+      "20.0 Hz", "21.1 Hz", "22.4 Hz", "23.6 Hz", "25.0 Hz", "26.4 Hz", "27.9 Hz", "29.5 Hz", "31.2 Hz", "33.0 Hz",
+      "34.9 Hz", "36.9 Hz", "39.0 Hz", "41.3 Hz", "43.6 Hz", "46.1 Hz", "48.8 Hz", "51.6 Hz", "54.5 Hz", "57.6 Hz",
+      "60.9 Hz", "64.4 Hz", "68.1 Hz", "72.0 Hz", "76.2 Hz", "80.5 Hz", "85.1 Hz", "90.0 Hz", "95.2 Hz", "101 Hz",
+      "106 Hz", "112 Hz", "119 Hz", "126 Hz", "133 Hz", "141 Hz", "149 Hz", "157 Hz", "166 Hz", "176 Hz",
+      "186 Hz", "196 Hz", "208 Hz", "219 Hz", "232 Hz", "245 Hz", "259 Hz", "274 Hz", "290 Hz", "307 Hz",
+      "324 Hz", "343 Hz", "362 Hz", "383 Hz", "405 Hz", "428 Hz", "453 Hz", "479 Hz", "506 Hz", "535 Hz",
+      "566 Hz", "598 Hz", "632 Hz", "669 Hz", "707 Hz", "747 Hz", "790 Hz", "836 Hz", "883 Hz", "934 Hz",
+      "988 Hz", "1.04 kHz", "1.10 kHz", "1.17 kHz", "1.23 kHz", "1.30 kHz", "1.38 kHz", "1.46 kHz", "1.54 kHz", "1.63 kHz",
+      "1.72 kHz", "1.82 kHz", "1.93 kHz", "2.04 kHz", "2.15 kHz", "2.28 kHz", "2.41 kHz", "2.55 kHz", "2.69 kHz", "2.85 kHz",
+      "3.01 kHz", "3.18 kHz", "3.36 kHz", "3.56 kHz", "3.76 kHz", "3.98 kHz", "4.20 kHz", "4.44 kHz", "4.70 kHz", "4.97 kHz",
+      "5.25 kHz", "5.55 kHz", "5.87 kHz", "6.21 kHz", "6.56 kHz", "6.94 kHz", "7.34 kHz", "7.76 kHz", "8.20 kHz", "8.67 kHz",
+      "9.17 kHz", "9.69 kHz", "10.2 kHz", "10.8 kHz", "11.5 kHz", "12.1 kHz", "12.8 kHz", "13.5 kHz", "14.3 kHz", "15.1 kHz",
+      "16.0 kHz", "16.9 kHz", "17.9 kHz", "18.9 kHz", "20.0 kHz"
     ];
 
     const EQ_Q_VALUES = [
@@ -2617,7 +2657,7 @@
         paramFreq: 0x02,
         paramQ: 0x01,
         hasFilterType: true,
-        filterParam: 0x0D,
+        filterParam: 0x01,
         typeKey: 'hpf',
         filterOptions: [
           { val: 'peaking', label: 'Peaking (Sino)' },
@@ -2626,23 +2666,23 @@
         ]
       },
       lomid: {
-        paramGain: 0x06,
-        paramFreq: 0x05,
-        paramQ: 0x04,
+        paramGain: 0x07,
+        paramFreq: 0x06,
+        paramQ: 0x05,
         hasFilterType: false
       },
       himid: {
-        paramGain: 0x09,
-        paramFreq: 0x08,
-        paramQ: 0x07,
+        paramGain: 0x0A,
+        paramFreq: 0x09,
+        paramQ: 0x08,
         hasFilterType: false
       },
       high: {
-        paramGain: 0x0C,
-        paramFreq: 0x0B,
-        paramQ: 0x0A,
+        paramGain: 0x0D,
+        paramFreq: 0x0C,
+        paramQ: 0x0B,
         hasFilterType: true,
-        filterParam: 0x0E,
+        filterParam: 0x0B,
         typeKey: 'lpf',
         filterOptions: [
           { val: 'peaking', label: 'Peaking (Sino)' },
@@ -2654,6 +2694,7 @@
 
     const eqState = Array.from({ length: TOTAL_CHANNELS }, () => ({
       on: 1,
+      attenuator: 0, // -960 a +120 décimos de dB
       hpf: 0,
       lpf: 0,
       low: { gain: 180, freq: 27, q: 17, type: "shelf" },
@@ -2695,22 +2736,32 @@
     ];
 
     const COMP_RELEASE_VALUES = [
-      "5 ms", "10 ms", "15 ms", "20 ms", "25 ms", "30 ms", "40 ms", "50 ms",
-      "60 ms", "70 ms", "80 ms", "90 ms", "100 ms", "120 ms", "140 ms", "160 ms",
-      "180 ms", "200 ms", "250 ms", "300 ms", "350 ms", "400 ms", "450 ms", "500 ms",
-      "600 ms", "700 ms", "800 ms", "900 ms", "1.00 s", "1.20 s", "1.40 s", "1.60 s",
-      "1.80 s", "2.00 s", "2.50 s", "3.00 s", "4.00 s", "5.00 s", "7.00 s", "10.0 s",
-      "15.0 s", "20.0 s", "30.0 s", "42.3 s"
+      "5 ms", "6 ms", "6 ms", "7 ms", "8 ms", "9 ms", "9 ms", "11 ms", "12 ms", "13 ms",
+      "14 ms", "16 ms", "18 ms", "19 ms", "21 ms", "24 ms", "26 ms", "29 ms", "32 ms", "35 ms",
+      "39 ms", "42 ms", "47 ms", "51 ms", "56 ms", "62 ms", "68 ms", "74 ms", "81 ms", "89 ms",
+      "97 ms", "106 ms", "116 ms", "127 ms", "138 ms", "151 ms", "164 ms", "178 ms", "194 ms", "211 ms",
+      "229 ms", "249 ms", "270 ms", "293 ms", "318 ms", "344 ms", "372 ms", "402 ms", "435 ms", "470 ms",
+      "507 ms", "547 ms", "590 ms", "635 ms", "684 ms", "736 ms", "791 ms", "850 ms", "913 ms", "980 ms",
+      "1.05 s", "1.13 s", "1.21 s", "1.29 s", "1.38 s", "1.48 s", "1.58 s", "1.68 s", "1.80 s", "1.91 s",
+      "2.04 s", "2.17 s", "2.31 s", "2.46 s", "2.61 s", "2.77 s", "2.94 s", "3.12 s", "3.31 s", "3.50 s",
+      "3.71 s", "3.92 s", "4.15 s", "4.38 s", "4.63 s", "4.88 s", "5.15 s", "5.42 s", "5.71 s", "6.01 s",
+      "6.32 s", "6.64 s", "6.98 s", "7.32 s", "7.68 s", "8.05 s", "8.43 s", "8.83 s", "9.24 s", "9.66 s",
+      "10.1 s", "10.5 s", "11.0 s", "11.5 s", "11.9 s", "12.4 s", "12.9 s", "13.5 s", "14.0 s", "14.5 s",
+      "15.1 s", "15.7 s", "16.2 s", "16.8 s", "17.4 s", "18.0 s", "18.6 s", "19.2 s", "19.9 s", "20.5 s",
+      "21.1 s", "21.8 s", "22.4 s", "23.1 s", "23.8 s", "24.4 s", "25.1 s", "25.8 s", "26.4 s", "27.1 s",
+      "27.8 s", "28.4 s", "29.1 s", "29.7 s", "30.4 s", "31.0 s", "31.7 s", "32.3 s", "32.9 s", "33.5 s",
+      "34.2 s", "34.7 s", "35.3 s", "35.9 s", "36.4 s", "37.0 s", "37.5 s", "38.0 s", "38.5 s", "38.9 s",
+      "39.4 s", "39.8 s", "40.2 s", "40.6 s", "40.9 s", "41.2 s", "41.5 s", "41.8 s", "42.1 s", "42.3 s"
     ];
 
     const COMP_KNEE_VALUES = ["HARD", "1 (Soft)", "2 (Soft)", "3 (Soft)", "4 (Soft)", "5 (Soft)"];
 
     const COMP_PRESETS = {
-      default: { threshold: 340, ratio: 7, attack: 20, release: 18, knee: 0, gain: 0 },
-      vocal:   { threshold: 300, ratio: 6, attack: 15, release: 17, knee: 2, gain: 30 },
-      drums:   { threshold: 380, ratio: 9, attack: 30, release: 12, knee: 0, gain: 20 },
-      bass:    { threshold: 320, ratio: 7, attack: 25, release: 19, knee: 1, gain: 25 },
-      limiter: { threshold: 480, ratio: 15, attack: 1, release: 12, knee: 0, gain: 0 }
+      default: { threshold: 340, ratio: 7, attack: 20, release: 41, knee: 0, gain: 0 },
+      vocal:   { threshold: 300, ratio: 6, attack: 15, release: 38, knee: 2, gain: 30 },
+      drums:   { threshold: 380, ratio: 9, attack: 30, release: 28, knee: 0, gain: 20 },
+      bass:    { threshold: 320, ratio: 7, attack: 25, release: 43, knee: 1, gain: 25 },
+      limiter: { threshold: 480, ratio: 15, attack: 1, release: 28, knee: 0, gain: 0 }
     };
 
     // Estado do Compressor dos 32 canais de entrada
@@ -2807,7 +2858,7 @@
 
     function sendCompParam(param, value, isThrottled = false) {
       if (typeof currentEqTarget === 'number') {
-        sendCommand(0x22, param, currentEqTarget, value, isThrottled);
+        sendCommand(0x1F, param, currentEqTarget, value, isThrottled);
       } else if (currentEqTarget === 'MASTER') {
         sendCommand(0x51, param, 0x00, value, isThrottled);
       } else if (typeof currentEqTarget === 'string' && currentEqTarget.startsWith('AUX')) {
@@ -3003,6 +3054,7 @@
 
               if (inp.eq && eqState[i]) {
                 eqState[i].on = inp.eq.on;
+                eqState[i].attenuator = (inp.eq.attenuator !== undefined) ? inp.eq.attenuator : 0;
                 eqState[i].low.gain = inp.eq.low.gain;
                 eqState[i].low.freq = inp.eq.low.freq;
                 eqState[i].low.q = Math.max(0, Math.min(40, 40 - inp.eq.low.q));
@@ -3049,6 +3101,9 @@
                   if (state.faders[auxKey]) {
                     state.faders[auxKey][i] = send.level;
                     state.mutes[auxKey][i] = send.on;
+                    if (state.pre[auxKey]) {
+                      state.pre[auxKey][i] = send.pre || 0;
+                    }
                   }
                 });
               }
@@ -3088,22 +3143,22 @@
       const ch = msg.channel;
       const val = msg.value;
 
-      // Master Stereo Fader
-      if (el === 0x4D) {
+      // Master Stereo Fader (Element 0x4F)
+      if (el === 0x4F) {
         state.masterFaders['MASTER'] = val;
         if (currentMix === 'MASTER') updateMasterFaderCard();
         return;
       }
 
-      // Master Stereo ON/MUTE
-      if (el === 0x4B) {
+      // Master Stereo ON/MUTE (Element 0x4D)
+      if (el === 0x4D) {
         state.masterMutes['MASTER'] = val;
         if (currentMix === 'MASTER') updateMasterFaderCard();
         return;
       }
 
-      // Aux Master Fader
-      if (el === 0x31) {
+      // Aux Master Fader (Element 0x39, ch 0..7)
+      if (el === 0x39 && ch < 8) {
         const auxKey = `AUX${ch + 1}`;
         if (state.masterFaders[auxKey] !== undefined) {
           state.masterFaders[auxKey] = val;
@@ -3112,8 +3167,8 @@
         return;
       }
 
-      // Aux Master ON/MUTE
-      if (el === 0x2F) {
+      // Aux Master ON/MUTE (Element 0x36, ch 0..7)
+      if (el === 0x36 && ch < 8 && param === 0x00) {
         const auxKey = `AUX${ch + 1}`;
         if (state.masterMutes[auxKey] !== undefined) {
           state.masterMutes[auxKey] = val;
@@ -3136,18 +3191,31 @@
         return;
       }
 
-      // Aux Sends (Níveis e ON)
+      // Aux Sends (Níveis, ON e PRE/POST: passos de 3 por Auxiliar)
       if (el === 0x23 && ch < TOTAL_CHANNELS) {
-        if (param <= 0x07) {
-          // Send Level para Aux (param 0..7)
-          const auxKey = `AUX${param + 1}`;
-          state.faders[auxKey][ch] = val;
-          if (currentMix === auxKey) updateChannelUI(ch);
-        } else if (param >= 0x08 && param <= 0x0F) {
-          // Send ON para Aux (param 8..15)
-          const auxKey = `AUX${param - 7}`;
-          state.mutes[auxKey][ch] = val;
-          if (currentMix === auxKey) updateChannelUI(ch);
+        const auxIdx = Math.floor(param / 3);
+        const subParam = param % 3;
+        if (auxIdx >= 0 && auxIdx < 8) {
+          const auxKey = `AUX${auxIdx + 1}`;
+          if (subParam === 0) {
+            // Send ON / MUTE
+            state.mutes[auxKey][ch] = val;
+            if (currentMix === auxKey) updateMuteButtonUI(ch, val);
+          } else if (subParam === 1) {
+            // Send PRE / POST
+            if (!state.pre[auxKey]) state.pre[auxKey] = new Array(TOTAL_CHANNELS).fill(0);
+            state.pre[auxKey][ch] = val;
+            if (currentMix === auxKey) updatePrePostButtonUI(ch, val);
+          } else if (subParam === 2) {
+            // Send Level (Fader)
+            state.faders[auxKey][ch] = val;
+            if (currentMix === auxKey) {
+              const slider = document.getElementById(`slider_${ch}`);
+              const dbText = document.getElementById(`dbText_${ch}`);
+              if (slider) slider.value = val;
+              if (dbText) dbText.innerText = rawToDb(val);
+            }
+          }
         }
         return;
       }
@@ -3167,7 +3235,7 @@
           const eq = getEqData(targetKey);
           if (eq) {
             switch (param) {
-              case 0x00:
+              case 0x0F:
                 eq.on = val;
                 if (typeof targetKey === 'number') {
                   state.eqOn[targetKey] = (val === 1);
@@ -3176,26 +3244,42 @@
                   updateMasterSelGlow();
                 }
                 break;
-              case 0x01: eq.low.q = Math.max(0, Math.min(40, 40 - val)); break;
+              case 0x01:
+                if (val === 0x00) {
+                  eq.low.type = 'hpf';
+                  eq.hpf = 1;
+                } else if (val === 41) {
+                  eq.low.type = 'shelf';
+                  eq.hpf = 0;
+                } else {
+                  eq.low.type = 'peaking';
+                  eq.hpf = 0;
+                  eq.low.q = Math.max(0, Math.min(40, 40 - val));
+                }
+                break;
               case 0x02: eq.low.freq = val; break;
-              case 0x03: eq.low.gain = val; break;
-              case 0x04: eq.lomid.q = Math.max(0, Math.min(40, 40 - val)); break;
-              case 0x05: eq.lomid.freq = val; break;
-              case 0x06: eq.lomid.gain = val; break;
-              case 0x07: eq.himid.q = Math.max(0, Math.min(40, 40 - val)); break;
-              case 0x08: eq.himid.freq = val; break;
-              case 0x09: eq.himid.gain = val; break;
-              case 0x0A: eq.high.q = Math.max(0, Math.min(40, 40 - val)); break;
-              case 0x0B: eq.high.freq = val; break;
-              case 0x0C: eq.high.gain = val; break;
-              case 0x0D:
-                eq.hpf = val;
-                eq.low.type = (val === 1 ? 'hpf' : (eq.low.type === 'hpf' ? 'shelf' : eq.low.type));
+              case 0x03: eq.low.gain = val + 180; break;
+              case 0x05: eq.lomid.q = Math.max(0, Math.min(40, 40 - val)); break;
+              case 0x06: eq.lomid.freq = val; break;
+              case 0x07: eq.lomid.gain = val + 180; break;
+              case 0x08: eq.himid.q = Math.max(0, Math.min(40, 40 - val)); break;
+              case 0x09: eq.himid.freq = val; break;
+              case 0x0A: eq.himid.gain = val + 180; break;
+              case 0x0B:
+                if (val === 43) {
+                  eq.high.type = 'lpf';
+                  eq.lpf = 1;
+                } else if (val === 42) {
+                  eq.high.type = 'shelf';
+                  eq.lpf = 0;
+                } else {
+                  eq.high.type = 'peaking';
+                  eq.lpf = 0;
+                  eq.high.q = Math.max(0, Math.min(40, 40 - val));
+                }
                 break;
-              case 0x0E:
-                eq.lpf = val;
-                eq.high.type = (val === 1 ? 'lpf' : (eq.high.type === 'lpf' ? 'shelf' : eq.high.type));
-                break;
+              case 0x0C: eq.high.freq = val; break;
+              case 0x0D: eq.high.gain = val + 180; break;
             }
 
             if (isEqModalOpen && currentEqTarget === targetKey) {
@@ -3208,42 +3292,44 @@
         return;
       }
 
-      // Element 0x22 (Input COMP), 0x51 (Stereo Master COMP), 0x36 (Aux Master COMP)
-      if (el === 0x22 || el === 0x51 || el === 0x36) {
-        let targetKey = null;
-        if (el === 0x22 && ch < TOTAL_CHANNELS) {
-          targetKey = ch;
-        } else if (el === 0x51) {
-          targetKey = 'MASTER';
-        } else if (el === 0x36 && ch < 8) {
-          targetKey = 'AUX' + (ch + 1);
+      // Element 0x1D (Input Attenuator - Canais 1 a 32, param 0x00)
+      if (el === 0x1D && ch < TOTAL_CHANNELS && param === 0x00) {
+        const eq = eqState[ch];
+        if (eq) {
+          eq.attenuator = val;
+          if (isEqModalOpen && currentEqTarget === ch) {
+            syncEqModalUI();
+          }
         }
+        return;
+      }
 
-        if (targetKey !== null) {
-          const comp = getChannelComp(targetKey);
-          if (comp) {
-            switch (param) {
-              case 0x00:
-                comp.on = val;
-                if (typeof targetKey === 'number') {
-                  state.compOn[targetKey] = (val === 1);
-                  updateSelButtonGlow(targetKey);
-                } else if (targetKey === currentMix) {
-                  updateMasterSelGlow();
-                }
-                break;
-              case 0x01: comp.threshold = val; break;
-              case 0x02: comp.ratio = val; break;
-              case 0x03: comp.attack = val; break;
-              case 0x04: comp.release = val; break;
-              case 0x05: comp.knee = val; break;
-              case 0x06: comp.gain = val; break;
-            }
+      // Element 0x1F (Input COMP), 0x51 (Stereo Master COMP)
+      if ((el === 0x1F && ch < TOTAL_CHANNELS) || el === 0x51) {
+        const targetKey = el === 0x51 ? 'MASTER' : ch;
+        const comp = getChannelComp(targetKey);
+        if (comp) {
+          switch (param) {
+            case 0x01:
+              comp.on = val;
+              if (typeof targetKey === 'number') {
+                state.compOn[targetKey] = (val === 1);
+                updateSelButtonGlow(targetKey);
+              } else if (targetKey === currentMix) {
+                updateMasterSelGlow();
+              }
+              break;
+            case 0x09: comp.threshold = val + 540; break;
+            case 0x06: comp.ratio = val; break;
+            case 0x04: comp.attack = val; break;
+            case 0x05: comp.release = val; break;
+            case 0x08: comp.knee = val; break;
+            case 0x07: comp.gain = val; break;
+          }
 
-            if (isEqModalOpen && currentEqTarget === targetKey) {
-              syncCompModalUI();
-              requestCompRedrawMobile();
-            }
+          if (isEqModalOpen && currentEqTarget === targetKey) {
+            syncCompModalUI();
+            requestCompRedrawMobile();
           }
         }
         return;
@@ -3295,6 +3381,7 @@
               <span>Canal ${ch + 1}</span>
             </div>
             <div class="card-top-buttons">
+              <button class="btn-ch-pre-post" id="prePostBtn_${ch}" type="button">POST</button>
               <button class="btn-ch-mute is-on" id="muteBtn_${ch}" type="button">ON</button>
               <button class="btn-ch-sel" id="selBtn_${ch}" type="button">SEL</button>
             </div>
@@ -3329,6 +3416,23 @@
           const target = MIX_TARGETS[currentMix];
           sendCommand(target.faderElement, target.faderParam, ch, val, false);
         });
+
+        // Evento PRE / POST
+        const prePostBtn = card.querySelector(`#prePostBtn_${ch}`);
+        if (prePostBtn) {
+          prePostBtn.addEventListener('click', () => {
+            if (currentMix === 'MASTER') return;
+            const currentVal = state.pre[currentMix] ? state.pre[currentMix][ch] : 0;
+            const newVal = currentVal === 1 ? 0 : 1;
+            if (!state.pre[currentMix]) state.pre[currentMix] = new Array(TOTAL_CHANNELS).fill(0);
+            state.pre[currentMix][ch] = newVal;
+            updatePrePostButtonUI(ch, newVal);
+            const target = MIX_TARGETS[currentMix];
+            if (target && target.preParam !== undefined) {
+              sendCommand(target.faderElement, target.preParam, ch, newVal, false);
+            }
+          });
+        }
 
         // Evento Mute / ON
         const muteBtn = card.querySelector(`#muteBtn_${ch}`);
@@ -3377,6 +3481,21 @@
         dbText.innerText = rawToDb(val);
       }
       updateMuteButtonUI(ch, state.mutes[currentMix][ch]);
+      if (state.pre[currentMix]) {
+        updatePrePostButtonUI(ch, state.pre[currentMix][ch]);
+      }
+    }
+
+    function updatePrePostButtonUI(ch, isPre) {
+      const btn = document.getElementById(`prePostBtn_${ch}`);
+      if (!btn) return;
+      if (isPre === 1 || isPre === true) {
+        btn.classList.add('is-pre');
+        btn.innerText = 'PRE';
+      } else {
+        btn.classList.remove('is-pre');
+        btn.innerText = 'POST';
+      }
     }
 
     function updateMuteButtonUI(ch, onVal) {
@@ -4435,9 +4554,9 @@
       ctx.stroke();
 
       // Linhas verticais de frequência
-      const x100 = (27 / 119) * w;
-      const x1k = (67 / 119) * w;
-      const x10k = (107 / 119) * w;
+      const x100 = (27 / 124) * w;
+      const x1k = (71 / 124) * w;
+      const x10k = (112 / 124) * w;
 
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
       ctx.beginPath();
@@ -4484,10 +4603,10 @@
       const isHpfActive = eq.hpf === 1 || lowB.type === 'hpf';
       const isLpfActive = eq.lpf === 1 || highB.type === 'lpf';
 
-      const lowNormX = lowB.freq / 119;
-      const lomidNormX = lomidB.freq / 119;
-      const himidNormX = himidB.freq / 119;
-      const highNormX = highB.freq / 119;
+      const lowNormX = lowB.freq / 124;
+      const lomidNormX = lomidB.freq / 124;
+      const himidNormX = himidB.freq / 124;
+      const highNormX = highB.freq / 124;
 
       const lowGainDb = (lowB.gain - 180) / 10;
       const lomidGainDb = (lomidB.gain - 180) / 10;
@@ -4602,7 +4721,7 @@
 
       ['low', 'lomid', 'himid', 'high'].forEach(bKey => {
         const b = eq[bKey];
-        const bx = (b.freq / 119) * w;
+        const bx = (b.freq / 124) * w;
         let by = zeroY;
 
         if (bKey === 'low' && isHpfActive) {
@@ -5263,6 +5382,19 @@
           }
         }
       });
+
+      // Sincroniza Atenuador Digital (Elemento 0x1D) - apenas canais de entrada
+      const attGroup = document.getElementById('eqAttMobileGroup');
+      const rngAtt = document.getElementById('rngEqAttMobile');
+      const lblAtt = document.getElementById('lblEqAttMobile');
+      if (typeof currentEqTarget === 'number') {
+        if (attGroup) attGroup.style.display = 'flex';
+        const attVal = (eq.attenuator !== undefined) ? eq.attenuator : 0;
+        if (rngAtt) rngAtt.value = attVal;
+        if (lblAtt) lblAtt.textContent = (attVal >= 0 ? '+' : '') + (attVal / 10).toFixed(1) + ' dB';
+      } else {
+        if (attGroup) attGroup.style.display = 'none';
+      }
     }
 
     function switchEqBand(bandKey) {
@@ -5358,7 +5490,7 @@
       document.getElementById('btnEqToggleOn').addEventListener('click', () => {
         const eq = getEqData(currentEqTarget);
         eq.on = eq.on === 1 ? 0 : 1;
-        sendEqParam(0x00, eq.on, false);
+        sendEqParam(0x0F, eq.on, false);
         if (typeof currentEqTarget === 'number') {
           state.eqOn[currentEqTarget] = (eq.on === 1);
           updateSelButtonGlow(currentEqTarget);
@@ -5385,7 +5517,7 @@
           } else if (currentEqTarget === currentMix) {
             updateMasterSelGlow();
           }
-          sendCompParam(0x00, newVal, false);
+          sendCompParam(0x01, newVal, false);
           syncCompModalUI();
           requestCompRedrawMobile();
         });
@@ -5405,12 +5537,12 @@
           comp.knee = preset.knee;
           comp.gain = preset.gain;
 
-          sendCompParam(0x01, preset.threshold, false);
-          sendCompParam(0x02, preset.ratio, false);
-          sendCompParam(0x03, preset.attack, false);
-          sendCompParam(0x04, preset.release, false);
-          sendCompParam(0x05, preset.knee, false);
-          sendCompParam(0x06, preset.gain, false);
+          sendCompParam(0x09, preset.threshold - 540, false);
+          sendCompParam(0x06, preset.ratio, false);
+          sendCompParam(0x04, preset.attack, false);
+          sendCompParam(0x05, preset.release, false);
+          sendCompParam(0x08, preset.knee, false);
+          sendCompParam(0x07, preset.gain, false);
 
           syncCompModalUI();
           requestCompRedrawMobile();
@@ -5431,12 +5563,12 @@
           comp.knee = preset.knee;
           comp.gain = preset.gain;
 
-          sendCompParam(0x01, preset.threshold, false);
-          sendCompParam(0x02, preset.ratio, false);
-          sendCompParam(0x03, preset.attack, false);
-          sendCompParam(0x04, preset.release, false);
-          sendCompParam(0x05, preset.knee, false);
-          sendCompParam(0x06, preset.gain, false);
+          sendCompParam(0x09, preset.threshold - 540, false);
+          sendCompParam(0x06, preset.ratio, false);
+          sendCompParam(0x04, preset.attack, false);
+          sendCompParam(0x05, preset.release, false);
+          sendCompParam(0x08, preset.knee, false);
+          sendCompParam(0x07, preset.gain, false);
 
           if (compPresetSelect) compPresetSelect.value = 'default';
           syncCompModalUI();
@@ -5454,10 +5586,10 @@
           if (comp) comp.threshold = val;
           const lbl = document.getElementById('lblCompThresholdMobile');
           if (lbl) lbl.textContent = rawThresholdToDb(val);
-          sendCompParam(0x01, val, true);
+          sendCompParam(0x09, val - 540, true);
         });
         rngCompTh.addEventListener('change', (e) => {
-          sendCompParam(0x01, parseInt(e.target.value, 10), false);
+          sendCompParam(0x09, parseInt(e.target.value, 10) - 540, false);
         });
       }
 
@@ -5469,10 +5601,10 @@
           if (comp) comp.ratio = val;
           const lbl = document.getElementById('lblCompRatioMobile');
           if (lbl) lbl.textContent = COMP_RATIO_VALUES[val] || `${val}:1`;
-          sendCompParam(0x02, val, true);
+          sendCompParam(0x06, val, true);
         });
         rngCompRatio.addEventListener('change', (e) => {
-          sendCompParam(0x02, parseInt(e.target.value, 10), false);
+          sendCompParam(0x06, parseInt(e.target.value, 10), false);
         });
       }
 
@@ -5484,10 +5616,10 @@
           if (comp) comp.attack = val;
           const lbl = document.getElementById('lblCompAttackMobile');
           if (lbl) lbl.textContent = `${val} ms`;
-          sendCompParam(0x03, val, true);
+          sendCompParam(0x04, val, true);
         });
         rngCompAttack.addEventListener('change', (e) => {
-          sendCompParam(0x03, parseInt(e.target.value, 10), false);
+          sendCompParam(0x04, parseInt(e.target.value, 10), false);
         });
       }
 
@@ -5499,10 +5631,10 @@
           if (comp) comp.release = val;
           const lbl = document.getElementById('lblCompReleaseMobile');
           if (lbl) lbl.textContent = COMP_RELEASE_VALUES[val] || `${val} ms`;
-          sendCompParam(0x04, val, true);
+          sendCompParam(0x05, val, true);
         });
         rngCompRelease.addEventListener('change', (e) => {
-          sendCompParam(0x04, parseInt(e.target.value, 10), false);
+          sendCompParam(0x05, parseInt(e.target.value, 10), false);
         });
       }
 
@@ -5514,10 +5646,10 @@
           if (comp) comp.knee = val;
           const lbl = document.getElementById('lblCompKneeMobile');
           if (lbl) lbl.textContent = COMP_KNEE_VALUES[val] || `${val}`;
-          sendCompParam(0x05, val, true);
+          sendCompParam(0x08, val, true);
         });
         rngCompKnee.addEventListener('change', (e) => {
-          sendCompParam(0x05, parseInt(e.target.value, 10), false);
+          sendCompParam(0x08, parseInt(e.target.value, 10), false);
         });
       }
 
@@ -5529,10 +5661,10 @@
           if (comp) comp.gain = val;
           const lbl = document.getElementById('lblCompGainMobile');
           if (lbl) lbl.textContent = rawCompGainToDb(val);
-          sendCompParam(0x06, val, true);
+          sendCompParam(0x07, val, true);
         });
         rngCompGain.addEventListener('change', (e) => {
-          sendCompParam(0x06, parseInt(e.target.value, 10), false);
+          sendCompParam(0x07, parseInt(e.target.value, 10), false);
         });
       }
 
@@ -5544,7 +5676,7 @@
           if (rngCompGain) rngCompGain.value = 0;
           const lbl = document.getElementById('lblCompGainMobile');
           if (lbl) lbl.textContent = '+0.0 dB';
-          sendCompParam(0x06, 0, false);
+          sendCompParam(0x07, 0, false);
         });
       }
 
@@ -5725,15 +5857,15 @@
         eq.lomid.gain = 180;
         eq.himid.gain = 180;
         eq.high.gain = 180;
-        sendEqParam(0x03, 180, false);
-        sendEqParam(0x06, 180, false);
-        sendEqParam(0x09, 180, false);
-        sendEqParam(0x0C, 180, false);
+        sendEqParam(0x03, 0, false);
+        sendEqParam(0x07, 0, false);
+        sendEqParam(0x0A, 0, false);
+        sendEqParam(0x0D, 0, false);
         switchEqBand(currentEqBand);
         showToast('EQ zerado (Flat 0.0 dB) ⚡');
       });
 
-      // Tipo de Filtro (LOW e HIGH)
+      // Tipo de Filtro (LOW e HIGH via Q)
       const typeSelect = document.getElementById('eqTypeSelect');
       typeSelect.addEventListener('change', (e) => {
         const eq = getEqData(currentEqTarget);
@@ -5741,14 +5873,61 @@
         if (currentEqBand === 'low') {
           eq.low.type = val;
           eq.hpf = (val === 'hpf') ? 1 : 0;
-          sendEqParam(0x0D, eq.hpf, false);
+          if (val === 'hpf') {
+            sendEqParam(0x01, 0x00, false);
+          } else if (val === 'shelf') {
+            sendEqParam(0x01, 41, false); // 0x29
+          } else {
+            sendEqParam(0x01, 40 - eq.low.q, false);
+          }
         } else if (currentEqBand === 'high') {
           eq.high.type = val;
           eq.lpf = (val === 'lpf') ? 1 : 0;
-          sendEqParam(0x0E, eq.lpf, false);
+          if (val === 'lpf') {
+            sendEqParam(0x0B, 43, false); // 0x2B
+          } else if (val === 'shelf') {
+            sendEqParam(0x0B, 42, false); // 0x2A
+          } else {
+            sendEqParam(0x0B, 40 - eq.high.q, false);
+          }
         }
         switchEqBand(currentEqBand);
+        syncEqModalUI();
+        requestEqRedrawMobile();
       });
+
+      // Eventos do Atenuador Digital Mobile (Elemento 0x1D)
+      const rngEqAttMobile = document.getElementById('rngEqAttMobile');
+      const lblEqAttMobile = document.getElementById('lblEqAttMobile');
+      const btnZeroEqAttMobile = document.getElementById('btnZeroEqAttMobile');
+      if (rngEqAttMobile) {
+        rngEqAttMobile.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          const eq = getEqData(currentEqTarget);
+          if (eq) eq.attenuator = val;
+          if (lblEqAttMobile) lblEqAttMobile.textContent = (val >= 0 ? '+' : '') + (val / 10).toFixed(1) + ' dB';
+          if (typeof currentEqTarget === 'number') {
+            sendCommand(0x1D, 0x00, currentEqTarget, val, true);
+          }
+        });
+        rngEqAttMobile.addEventListener('change', (e) => {
+          const val = parseInt(e.target.value, 10);
+          if (typeof currentEqTarget === 'number') {
+            sendCommand(0x1D, 0x00, currentEqTarget, val, false);
+          }
+        });
+      }
+      if (btnZeroEqAttMobile) {
+        btnZeroEqAttMobile.addEventListener('click', () => {
+          const eq = getEqData(currentEqTarget);
+          if (eq) eq.attenuator = 0;
+          if (rngEqAttMobile) rngEqAttMobile.value = 0;
+          if (lblEqAttMobile) lblEqAttMobile.textContent = '0.0 dB';
+          if (typeof currentEqTarget === 'number') {
+            sendCommand(0x1D, 0x00, currentEqTarget, 0, false);
+          }
+        });
+      }
 
       // Slider de Frequência
       const rngFreq = document.getElementById('rngEqFreq');
@@ -5767,7 +5946,7 @@
         sendEqParam(cfg.paramFreq, val, false);
       });
 
-      // Slider de Ganho
+      // Slider de Ganho (Envia val - 180 para refletir escala com sinal no MIDI)
       const rngGain = document.getElementById('rngEqGain');
       rngGain.addEventListener('input', (e) => {
         const val = parseInt(e.target.value, 10);
@@ -5775,13 +5954,13 @@
         eq[currentEqBand].gain = val;
         document.getElementById('lblEqGain').innerText = rawGainToDb(val);
         const cfg = BAND_CONFIGS[currentEqBand];
-        sendEqParam(cfg.paramGain, val, true);
+        sendEqParam(cfg.paramGain, val - 180, true);
         syncEqModalUI();
       });
       rngGain.addEventListener('change', (e) => {
         const val = parseInt(e.target.value, 10);
         const cfg = BAND_CONFIGS[currentEqBand];
-        sendEqParam(cfg.paramGain, val, false);
+        sendEqParam(cfg.paramGain, val - 180, false);
       });
 
       // Botão 0 dB (Zera ganho da banda atual)
@@ -5792,7 +5971,7 @@
         b.gain = 180;
         document.getElementById('rngEqGain').value = 180;
         document.getElementById('lblEqGain').innerText = rawGainToDb(180);
-        sendEqParam(cfg.paramGain, 180, false);
+        sendEqParam(cfg.paramGain, 0, false);
         syncEqModalUI();
       });
 
@@ -5804,8 +5983,21 @@
         eq[currentEqBand].q = val;
         document.getElementById('lblEqQ').innerText = formatQDisplay(val);
         const cfg = BAND_CONFIGS[currentEqBand];
+        if (currentEqBand === 'low' && eq.low.type !== 'peaking') {
+          eq.low.type = 'peaking';
+          eq.hpf = 0;
+          const ts = document.getElementById('eqTypeSelect');
+          if (ts) ts.value = 'peaking';
+        } else if (currentEqBand === 'high' && eq.high.type !== 'peaking') {
+          eq.high.type = 'peaking';
+          eq.lpf = 0;
+          const ts = document.getElementById('eqTypeSelect');
+          if (ts) ts.value = 'peaking';
+        }
         const midiVal = Math.max(0, Math.min(40, 40 - val));
         sendEqParam(cfg.paramQ, midiVal, true);
+        syncEqModalUI();
+        requestEqRedrawMobile();
       });
       rngQ.addEventListener('change', (e) => {
         const val = parseInt(e.target.value, 10);
