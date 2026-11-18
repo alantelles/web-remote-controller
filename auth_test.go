@@ -152,7 +152,19 @@ func TestSessionLifecycleAndPersistence(t *testing.T) {
 }
 
 func TestHTTPLoginAndProtectedEndpoints(t *testing.T) {
-	setUsersCSVFile("usuarios.csv")
+	testCSV := "test_http_login_usuarios.csv"
+	testSess := "test_http_login_sessions.json"
+	defer os.Remove(testCSV)
+	defer os.Remove(testSess)
+
+	origCSV := getUsersCSVFile()
+	origSess := getSessionsFile()
+	setUsersCSVFile(testCSV)
+	setSessionsFile(testSess)
+	defer func() {
+		setUsersCSVFile(origCSV)
+		setSessionsFile(origSess)
+	}()
 	ensureUsersCSV()
 
 	// 1. GET /login deve retornar 200 OK
@@ -292,9 +304,17 @@ func TestHTTPLoginAndProtectedEndpoints(t *testing.T) {
 
 func TestSystemShutdownEndpoint(t *testing.T) {
 	testFile := "test_shutdown_usuarios.csv"
+	testSess := "test_shutdown_sessions.json"
 	defer os.Remove(testFile)
+	defer os.Remove(testSess)
+	origCSV := getUsersCSVFile()
+	origSess := getSessionsFile()
 	setUsersCSVFile(testFile)
-	defer setUsersCSVFile("usuarios.csv")
+	setSessionsFile(testSess)
+	defer func() {
+		setUsersCSVFile(origCSV)
+		setSessionsFile(origSess)
+	}()
 	ensureUsersCSV()
 
 	adminToken := createSession(User{

@@ -14,12 +14,14 @@ func setupTestSceneEnv(t *testing.T) string {
 	if err != nil {
 		t.Fatalf("Erro ao criar diretório temporário para testes: %v", err)
 	}
+	setSessionsFile(filepath.Join(tmpDir, "sessions.json"))
 	InitSceneManager(tmpDir)
 	return tmpDir
 }
 
 func cleanupTestSceneEnv(tmpDir string) {
 	StopAutoSave()
+	setSessionsFile("sessions.json")
 	os.RemoveAll(tmpDir)
 }
 

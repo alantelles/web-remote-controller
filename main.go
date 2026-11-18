@@ -620,10 +620,33 @@ func executeSystemShutdown() {
 	}
 
 	log.Println("[!] Serviço encerrado com sucesso. Executando poweroff da máquina...")
-	if err := exec.Command("systemctl", "poweroff").Run(); err != nil {
-		if err2 := exec.Command("poweroff").Run(); err2 != nil {
-			_ = exec.Command("shutdown", "-h", "now").Run()
+	poweroffCmds := [][]string{
+		{"sudo", "-n", "systemctl", "poweroff", "-i"},
+		{"sudo", "-n", "systemctl", "poweroff"},
+		{"sudo", "-n", "/bin/systemctl", "poweroff"},
+		{"sudo", "-n", "/usr/bin/systemctl", "poweroff"},
+		{"sudo", "-n", "/sbin/poweroff"},
+		{"sudo", "-n", "/usr/sbin/poweroff"},
+		{"sudo", "-n", "/sbin/shutdown", "-h", "now"},
+		{"sudo", "-n", "/usr/sbin/shutdown", "-h", "now"},
+		{"systemctl", "poweroff", "-i"},
+		{"systemctl", "poweroff"},
+		{"poweroff"},
+		{"shutdown", "-h", "now"},
+	}
+	shutdownSuccess := false
+	for _, cmdArgs := range poweroffCmds {
+		cmdStr := strings.Join(cmdArgs, " ")
+		out, err := exec.Command(cmdArgs[0], cmdArgs[1:]...).CombinedOutput()
+		if err == nil {
+			log.Printf("[!] Comando de desligamento executado com sucesso: '%s'", cmdStr)
+			shutdownSuccess = true
+			break
 		}
+		log.Printf("[!] Tentativa '%s' falhou: %v (%s)", cmdStr, err, strings.TrimSpace(string(out)))
+	}
+	if !shutdownSuccess {
+		log.Println("[ERRO] Nenhum comando de poweroff obteve sucesso. Verifique as permissões no /etc/sudoers.d/ ou Polkit.")
 	}
 	os.Exit(0)
 }
@@ -668,6 +691,25 @@ func handleAPISystemShutdown(w http.ResponseWriter, r *http.Request) {
 
 	// Revalida a senha atual do administrador logado contra o arquivo de usuários
 	if _, err := authenticateUser(sess.User.Username, req.Password); err != nil {
+		// Verifica se o usuário da sessão ainda existe no CSV (ex: CSV foi editado com a sessão aberta)
+		users, _ := loadUsers()
+		userExists := false
+		for _, u := range users {
+			if strings.EqualFold(u.Username, sess.User.Username) {
+				userExists = true
+				break
+			}
+		}
+		if !userExists {
+			log.Printf("[ADMIN] Tentativa de desligamento negada: usuário da sessão '%s' não existe mais em '%s'", sess.User.Username, getUsersCSVFile())
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"success": false,
+				"error":   fmt.Sprintf("O usuário '%s' da sua sessão atual não existe mais em usuarios.csv. Saia da sessão e faça login novamente.", sess.User.Username),
+			})
+			return
+		}
+
 		log.Printf("[ADMIN] Tentativa de desligamento negada para '%s': senha incorreta", sess.User.Username)
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -1409,7 +1451,11 @@ func main() {
 
 	log.Printf("Servidor Console Web rodando em http://%s (podeDesligarServidor=%v)", *flagAddr, canShutdownServer)
 	httpServer = &http.Server{Addr: *flagAddr, Handler: nil}
-	if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+	if err := httpServer.ListenAndServe(); err != nil {
+		if err == http.ErrServerClosed {
+			// Aguarda a goroutine executeSystemShutdown concluir o poweroff e chamar os.Exit(0)
+			select {}
+		}
 		log.Fatal(err)
 	}
 }
