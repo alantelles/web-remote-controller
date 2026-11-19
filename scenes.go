@@ -64,7 +64,7 @@ type InputChannel struct {
 	Name     string     `json:"name"`      // Rótulo amigável ("Vocal 1", "Bumbo")
 	Fader    int        `json:"fader"`     // 0 a 1023 (823 = 0.0 dB)
 	On       int        `json:"on"`        // 1 = ON, 0 = MUTE
-	Pan      int        `json:"pan"`       // 0 a 126 (63 = Center)
+	Pan      int        `json:"pan"`       // -63 a +63 (0 = Center)
 	AuxSends [8]AuxSend `json:"aux_sends"` // Envios para Aux 1 a 8
 	EQ       EQState    `json:"eq"`        // Equalizador 4 bandas
 	Comp     CompState  `json:"comp"`      // Compressor
@@ -169,7 +169,7 @@ func NewDefaultMixerState() MixerState {
 
 	// Stereo Master
 	state.StereoMaster = StereoMasterState{
-		Fader: 823, // 0.0 dB
+		Fader: 0, // -infinito (escala dBFS de -inf a 0)
 		On:    1,
 		EQ:    newDefaultEQState(),
 		Comp:  newDefaultCompState(),
@@ -180,7 +180,7 @@ func NewDefaultMixerState() MixerState {
 		state.AuxMasters[i] = AuxMasterState{
 			Aux:   i + 1,
 			Name:  fmt.Sprintf("AUX %d", i+1),
-			Fader: 823, // 0.0 dB
+			Fader: 0, // -infinito (escala dBFS de -inf a 0)
 			On:    1,
 			EQ:    newDefaultEQState(),
 			Comp:  newDefaultCompState(),
@@ -194,7 +194,7 @@ func NewDefaultMixerState() MixerState {
 			Name:    fmt.Sprintf("CH %02d", i+1),
 			Fader:   0, // -infinito
 			On:      1, // ON ativo
-			Pan:     63, // Centro
+			Pan:     0, // Centro (-63 a +63)
 			EQ:      newDefaultEQState(),
 			Comp:    newDefaultCompState(),
 		}
@@ -795,6 +795,8 @@ func RecallMixerState(targetState MixerState, paceDelay time.Duration) {
 		for i, m := range messages {
 			sysex := Build01V96SysEx(m.element, m.param, m.channel, m.value)
 
+			markSentEcho(m.element, m.param, m.channel, m.value)
+
 			midiLock.Lock()
 			if err := sendMIDISysExLocked(sysex); err != nil {
 				log.Printf("Aviso ao enviar SysEx [%d/%d]: %v", i+1, len(messages), err)
@@ -1143,5 +1145,49 @@ func handleAPIGetCurrentState(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
 		"state":   state,
+	})
+}
+
+func handleAPISyncMixer(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	sess := getSessionFromRequest(r)
+	if sess == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Não autenticado"})
+		return
+	}
+
+	midiLock.Lock()
+	out := midiOut
+	midiLock.Unlock()
+
+	if out == nil {
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success":    true,
+			"simulation": true,
+			"message":    "Servidor em modo simulação. Estado atual já está ativo na memória.",
+		})
+		return
+	}
+
+	if IsMixerSyncing() {
+		w.WriteHeader(http.StatusConflict)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Sincronização com a mesa física já em andamento. Aguarde.",
+		})
+		return
+	}
+
+	go func() {
+		_ = RequestMixerInitialState(15 * time.Millisecond)
+	}()
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "Sincronização com a mesa física iniciada com sucesso!",
 	})
 }

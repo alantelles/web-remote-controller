@@ -30,16 +30,16 @@ func cleanupTestSceneEnv(tmpDir string) {
 func TestDefaultMixerStateValues(t *testing.T) {
 	st := NewDefaultMixerState()
 
-	if st.StereoMaster.Fader != 823 {
-		t.Errorf("Esperado fader Stereo Master 823 (0dB), obtido: %d", st.StereoMaster.Fader)
+	if st.StereoMaster.Fader != 0 {
+		t.Errorf("Esperado fader Stereo Master 0 (-infinito), obtido: %d", st.StereoMaster.Fader)
 	}
 	if st.StereoMaster.On != 1 {
 		t.Errorf("Esperado Stereo Master ON=1, obtido: %d", st.StereoMaster.On)
 	}
 
 	for i := 0; i < 8; i++ {
-		if st.AuxMasters[i].Fader != 823 {
-			t.Errorf("Esperado Aux Master %d fader 823, obtido: %d", i+1, st.AuxMasters[i].Fader)
+		if st.AuxMasters[i].Fader != 0 {
+			t.Errorf("Esperado Aux Master %d fader 0 (-infinito), obtido: %d", i+1, st.AuxMasters[i].Fader)
 		}
 		if st.AuxMasters[i].On != 1 {
 			t.Errorf("Esperado Aux Master %d ON=1, obtido: %d", i+1, st.AuxMasters[i].On)
@@ -54,8 +54,8 @@ func TestDefaultMixerStateValues(t *testing.T) {
 		if ch.Fader != 0 {
 			t.Errorf("Esperado fader inicial de canal 0, obtido: %d", ch.Fader)
 		}
-		if ch.Pan != 63 {
-			t.Errorf("Esperado pan inicial 63 (Centro), obtido: %d", ch.Pan)
+		if ch.Pan != 0 {
+			t.Errorf("Esperado pan inicial 0 (Centro, escala -63 a +63), obtido: %d", ch.Pan)
 		}
 		if len(ch.AuxSends) != 8 {
 			t.Fatalf("Esperado 8 aux sends, obtido: %d", len(ch.AuxSends))

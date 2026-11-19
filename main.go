@@ -37,7 +37,9 @@ type WSMessage struct {
 	Channel byte   `json:"channel"`           // 0x00 a 0x1F (0 a 31)
 	Value   int    `json:"value"`             // 0 a 1023
 	Running *bool  `json:"running,omitempty"` // status da simulação
-	Action  string `json:"action,omitempty"`  // "toggle_sim"
+	Action  string `json:"action,omitempty"`  // "toggle_sim", "sync_main", "sync_aux", "sync_fx"
+	Aux     int    `json:"aux,omitempty"`     // 1 a 8 para sync_aux
+	Target  string `json:"target,omitempty"`  // Identificador do canal/saída para sync_fx
 }
 
 var (
@@ -275,6 +277,7 @@ func (t *paramThrottler) allowOrSchedule(element, param, channel byte, value int
 				e.pendingTimer = nil
 				t.mu.Unlock()
 
+				markSentEcho(element, param, channel, finalVal)
 				flushMIDI(finalVal)
 			})
 		}
@@ -953,158 +956,46 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		// Ação de solicitar sincronização da tela principal (Canais e Masters)
+		if msg.Action == "sync_mixer" || msg.Action == "sync_main" {
+			go func() {
+				_ = RequestMainViewSync(15 * time.Millisecond)
+			}()
+			continue
+		}
+
+		// Ação de solicitar sincronização sob demanda dos envios de um Auxiliar (Sends on Fader)
+		if msg.Action == "sync_aux" {
+			auxNum := msg.Aux
+			if auxNum < 1 || auxNum > 8 {
+				auxNum = int(msg.Channel) + 1
+			}
+			if auxNum >= 1 && auxNum <= 8 {
+				go func(a int) {
+					_ = RequestAuxSendsSync(a-1, 15*time.Millisecond)
+				}(auxNum)
+			}
+			continue
+		}
+
+		// Ação de solicitar sincronização sob demanda do Rack de Efeitos de um Canal (EQ, Comp, Gate)
+		if msg.Action == "sync_fx" {
+			target := msg.Target
+			if target == "" {
+				target = fmt.Sprintf("%d", msg.Channel)
+			}
+			go func(t string) {
+				_ = RequestChannelFXSync(t, 15*time.Millisecond)
+			}(target)
+			continue
+		}
+
 		// Comando de alteração de fader ou mute vindo da tela
 		ApplyParamToState(msg.Element, msg.Param, msg.Channel, msg.Value)
 		sysex := Build01V96SysEx(msg.Element, msg.Param, msg.Channel, msg.Value)
 		hexStr := fmt.Sprintf("% X", sysex)
 
-		// Log detalhado no terminal identificando a saída / destino e parâmetro
-		var targetDesc string
-		chNum := msg.Channel + 1
-		eqParamNames := map[byte]string{
-			0x0F: "EQ ON/OFF",
-			0x01: "LOW Q/Mode",
-			0x02: "LOW Freq",
-			0x03: "LOW Gain",
-			0x04: "HPF Filter ON/OFF",
-			0x05: "LO-MID Q",
-			0x06: "LO-MID Freq",
-			0x07: "LO-MID Gain",
-			0x08: "HI-MID Q",
-			0x09: "HI-MID Freq",
-			0x0A: "HI-MID Gain",
-			0x0B: "HIGH Q/Mode",
-			0x0C: "HIGH Freq",
-			0x0D: "HIGH Gain",
-			0x0E: "LPF Filter ON/OFF",
-		}
-		compParamNames := map[byte]string{
-			0x00: "Position (Insert)",
-			0x01: "COMP ON/OFF",
-			0x04: "Attack",
-			0x05: "Release",
-			0x06: "Ratio",
-			0x07: "Make-up Gain",
-			0x08: "Knee",
-			0x09: "Threshold",
-		}
-		gateParamNames := map[byte]string{
-			0x00: "GATE ON/OFF",
-			0x01: "Threshold",
-			0x02: "Range",
-			0x03: "Attack",
-			0x04: "Hold",
-			0x05: "Decay",
-		}
-
-		switch msg.Element {
-		case 0x1C:
-			targetDesc = fmt.Sprintf("CH %02d -> MASTER Fader: %d (%s)", chNum, msg.Value, faderValueToDB(msg.Value))
-		case 0x1A:
-			onStr := "MUTE (0)"
-			if msg.Value == 1 {
-				onStr = "ON (1)"
-			}
-			targetDesc = fmt.Sprintf("CH %02d -> MASTER Channel: %s", chNum, onStr)
-		case 0x1B:
-			panStr := "C (0)"
-			if msg.Value > 0 {
-				panStr = fmt.Sprintf("R%d", msg.Value)
-			} else if msg.Value < 0 {
-				panStr = fmt.Sprintf("L%d", -msg.Value)
-			}
-			targetDesc = fmt.Sprintf("CH %02d -> PAN: %s", chNum, panStr)
-		case 0x23:
-			auxNum := int(msg.Param/3) + 1
-			subParam := msg.Param % 3
-			switch subParam {
-			case 0:
-				onStr := "MUTE (0)"
-				if msg.Value == 1 {
-					onStr = "ON (1)"
-				}
-				targetDesc = fmt.Sprintf("CH %02d -> AUX %d Send: %s", chNum, auxNum, onStr)
-			case 1:
-				preStr := "POST-Fader (0)"
-				if msg.Value == 1 {
-					preStr = "PRE-Fader (1)"
-				}
-				targetDesc = fmt.Sprintf("CH %02d -> AUX %d Routing: %s", chNum, auxNum, preStr)
-			case 2:
-				targetDesc = fmt.Sprintf("CH %02d -> AUX %d Send Level: %d (%s)", chNum, auxNum, msg.Value, faderValueToDB(msg.Value))
-			default:
-				targetDesc = fmt.Sprintf("CH %02d -> AUX %d Param 0x%02X: %d", chNum, auxNum, msg.Param, msg.Value)
-			}
-		case 0x20:
-			pName, ok := eqParamNames[msg.Param]
-			if !ok {
-				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
-			}
-			valDesc := fmt.Sprintf("%d", msg.Value)
-			if msg.Param == 0x03 || msg.Param == 0x07 || msg.Param == 0x0A || msg.Param == 0x0D {
-				valDesc = fmt.Sprintf("%.1f dB (%d)", float64(msg.Value)/10.0, msg.Value)
-			}
-			targetDesc = fmt.Sprintf("CH %02d -> EQ %s: %s", chNum, pName, valDesc)
-		case 0x1F:
-			pName, ok := compParamNames[msg.Param]
-			if !ok {
-				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
-			}
-			valDesc := fmt.Sprintf("%d", msg.Value)
-			if msg.Param == 0x09 {
-				valDesc = fmt.Sprintf("%.1f dB (%d)", float64(msg.Value)/10.0, msg.Value)
-			} else if msg.Param == 0x07 {
-				valDesc = fmt.Sprintf("+%.1f dB (%d)", float64(msg.Value)/10.0, msg.Value)
-			}
-			targetDesc = fmt.Sprintf("CH %02d -> COMP %s: %s", chNum, pName, valDesc)
-		case 0x1D:
-			targetDesc = fmt.Sprintf("CH %02d -> ATTENUATOR: %+.1f dB (%d)", chNum, float64(msg.Value)/10.0, msg.Value)
-		case 0x21:
-			pName, ok := gateParamNames[msg.Param]
-			if !ok {
-				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
-			}
-			targetDesc = fmt.Sprintf("CH %02d -> GATE %s: %d", chNum, pName, msg.Value)
-		case 0x4F:
-			targetDesc = fmt.Sprintf("STEREO MASTER Out Fader: %d (%s)", msg.Value, faderValueToDB(msg.Value))
-		case 0x4D:
-			onStr := "MUTE (0)"
-			if msg.Value == 1 {
-				onStr = "ON (1)"
-			}
-			targetDesc = fmt.Sprintf("STEREO MASTER Out: %s", onStr)
-		case 0x39:
-			auxNum := msg.Channel + 1
-			targetDesc = fmt.Sprintf("AUX %d MASTER Fader: %d (%s)", auxNum, msg.Value, faderValueToDB(msg.Value))
-		case 0x36:
-			auxNum := msg.Channel + 1
-			onStr := "MUTE (0)"
-			if msg.Value == 1 {
-				onStr = "ON (1)"
-			}
-			targetDesc = fmt.Sprintf("AUX %d MASTER Out: %s", auxNum, onStr)
-		case 0x35:
-			auxNum := msg.Channel + 1
-			pName, ok := eqParamNames[msg.Param]
-			if !ok {
-				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
-			}
-			targetDesc = fmt.Sprintf("AUX %d MASTER Out -> EQ %s: %d", auxNum, pName, msg.Value)
-		case 0x50:
-			pName, ok := eqParamNames[msg.Param]
-			if !ok {
-				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
-			}
-			targetDesc = fmt.Sprintf("STEREO MASTER Out -> EQ %s: %d", pName, msg.Value)
-		case 0x51:
-			pName, ok := compParamNames[msg.Param]
-			if !ok {
-				pName = fmt.Sprintf("Param 0x%02X", msg.Param)
-			}
-			targetDesc = fmt.Sprintf("STEREO MASTER Out -> COMP %s: %d", pName, msg.Value)
-		default:
-			targetDesc = fmt.Sprintf("CH %02d -> Element 0x%02X, Param 0x%02X: %d", chNum, msg.Element, msg.Param, msg.Value)
-		}
+		targetDesc := describe01V96Param(msg.Element, msg.Param, msg.Channel, msg.Value)
 
 		fmt.Printf("WS -> SysEx: %s | %s\n", hexStr, targetDesc)
 
@@ -1131,6 +1022,8 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 				finalSysex := Build01V96SysEx(elemCopy, paramCopy, chCopy, finalVal)
 				finalHex := fmt.Sprintf("% X", finalSysex)
 
+				markSentEcho(elemCopy, paramCopy, chCopy, finalVal)
+
 				midiLock.Lock()
 				if err := sendMIDISysExLocked(finalSysex); err != nil {
 					log.Printf("Erro ao enviar MIDI (flush): %v", err)
@@ -1150,6 +1043,8 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 
 		// Envia para a saída MIDI física / bridges ALSA
 		if canMIDI {
+			markSentEcho(msg.Element, msg.Param, msg.Channel, msg.Value)
+
 			midiLock.Lock()
 			if err := sendMIDISysExLocked(sysex); err != nil {
 				log.Printf("Erro ao enviar MIDI: %v", err)
@@ -1171,14 +1066,58 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// selectMIDIPort gerencia a escolha da porta MIDI (via flag ou interativamente no terminal antes de iniciar o serviço)
-func selectMIDIPort(outs []drivers.Out, flagPort string) drivers.Out {
+// findMatchingInPort busca a porta de entrada MIDI correspondente à porta de saída selecionada
+func findMatchingInPort(ins []drivers.In, out drivers.Out) drivers.In {
+	if out == nil || len(ins) == 0 {
+		return nil
+	}
+	outStr := out.String()
+	// 1. Coincidência exata do nome da porta
+	for _, in := range ins {
+		if in.String() == outStr {
+			return in
+		}
+	}
+	// 2. Coincidência pelo prefixo antes de ':' ou pelo nome do dispositivo/interface
+	outParts := strings.Split(outStr, ":")
+	if len(outParts) > 0 && len(strings.TrimSpace(outParts[0])) > 0 {
+		prefix := strings.ToLower(strings.TrimSpace(outParts[0]))
+		for _, in := range ins {
+			if strings.Contains(strings.ToLower(in.String()), prefix) {
+				return in
+			}
+		}
+	}
+	// 3. Fallback: se houver apenas uma entrada disponível no sistema
+	if len(ins) == 1 {
+		return ins[0]
+	}
+	return nil
+}
+
+// selectMIDIPorts gerencia a escolha da porta MIDI (via flag ou interativamente no terminal antes de iniciar o serviço)
+// e emparelha automaticamente a saída e a entrada correspondentes para comunicação bidirecional.
+func selectMIDIPorts(outs []drivers.Out, ins []drivers.In, flagPort string) (drivers.Out, drivers.In) {
+	pairAndOpen := func(out drivers.Out) (drivers.Out, drivers.In) {
+		if out == nil {
+			return nil, nil
+		}
+		in := findMatchingInPort(ins, out)
+		if in != nil {
+			if err := in.Open(); err != nil {
+				log.Printf("Aviso: não foi possível abrir a porta de entrada MIDI correspondente '%s': %v", in.String(), err)
+				in = nil
+			}
+		}
+		return out, in
+	}
+
 	// Se foi especificado por flag de linha de comando
 	if flagPort != "" {
 		trimmed := strings.TrimSpace(flagPort)
 		if strings.EqualFold(trimmed, "s") || strings.EqualFold(trimmed, "sim") || strings.EqualFold(trimmed, "none") {
 			log.Println("Modo de simulação selecionado via parâmetro de linha de comando.")
-			return nil
+			return nil, nil
 		}
 
 		// Tenta interpretar como índice numérico
@@ -1188,7 +1127,7 @@ func selectMIDIPort(outs []drivers.Out, flagPort string) drivers.Out {
 				if err := out.Open(); err != nil {
 					log.Printf("Erro ao abrir porta %d (%s): %v. Prosseguindo para seleção interativa.", idx, out.String(), err)
 				} else {
-					return out
+					return pairAndOpen(out)
 				}
 			} else {
 				log.Printf("Índice de porta %d inválido (disponíveis: 0 a %d).", idx, len(outs)-1)
@@ -1201,7 +1140,7 @@ func selectMIDIPort(outs []drivers.Out, flagPort string) drivers.Out {
 						log.Printf("Erro ao abrir porta %s: %v. Prosseguindo para seleção interativa.", out.String(), err)
 						break
 					}
-					return out
+					return pairAndOpen(out)
 				}
 			}
 			log.Printf("Nenhuma porta encontrada contendo o termo '%s'.", trimmed)
@@ -1212,14 +1151,14 @@ func selectMIDIPort(outs []drivers.Out, flagPort string) drivers.Out {
 	if len(outs) == 0 {
 		fmt.Println("\n⚠️  Nenhuma porta MIDI de saída foi encontrada no sistema.")
 		fmt.Println("O serviço funcionará em modo de simulação (apenas gerando SysEx nos logs e na tela).")
-		return nil
+		return nil, nil
 	}
 
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
 		fmt.Println("\n==============================================================")
-		fmt.Println("  Yamaha 01V96 Controller — Seleção de Porta MIDI de Saída")
+		fmt.Println("  Yamaha 01V96 Controller — Seleção de Porta MIDI de Saída/Entrada")
 		fmt.Println("==============================================================")
 		fmt.Println("Portas MIDI disponíveis:")
 		for i, out := range outs {
@@ -1227,7 +1166,11 @@ func selectMIDIPort(outs []drivers.Out, flagPort string) drivers.Out {
 			if i == 0 {
 				defaultMark = " (Padrão)"
 			}
-			fmt.Printf("  [%d] %s%s\n", i, out.String(), defaultMark)
+			matchedInStr := ""
+			if matchedIn := findMatchingInPort(ins, out); matchedIn != nil {
+				matchedInStr = fmt.Sprintf(" [IN: %s]", matchedIn.String())
+			}
+			fmt.Printf("  [%d] %s%s%s\n", i, out.String(), matchedInStr, defaultMark)
 		}
 		fmt.Println("  [s] Modo Simulação (apenas log, sem envio físico)")
 		fmt.Println("  [q] Sair")
@@ -1241,9 +1184,9 @@ func selectMIDIPort(outs []drivers.Out, flagPort string) drivers.Out {
 			out := outs[0]
 			if err := out.Open(); err != nil {
 				log.Printf("Aviso: não foi possível abrir %s: %v", out.String(), err)
-				return nil
+				return nil, nil
 			}
-			return out
+			return pairAndOpen(out)
 		}
 
 		input = strings.TrimSpace(input)
@@ -1260,7 +1203,7 @@ func selectMIDIPort(outs []drivers.Out, flagPort string) drivers.Out {
 
 		if strings.EqualFold(input, "s") {
 			fmt.Println("Modo Simulação ativado.")
-			return nil
+			return nil, nil
 		}
 
 		idx, err := strconv.Atoi(input)
@@ -1276,7 +1219,7 @@ func selectMIDIPort(outs []drivers.Out, flagPort string) drivers.Out {
 			continue
 		}
 
-		return out
+		return pairAndOpen(out)
 	}
 }
 
@@ -1593,7 +1536,9 @@ func main() {
 	defer midi.CloseDriver()
 
 	outs := midi.GetOutPorts()
-	midiOut = selectMIDIPort(outs, *flagPort)
+	ins := midi.GetInPorts()
+	var in drivers.In
+	midiOut, in = selectMIDIPorts(outs, ins, *flagPort)
 
 	if midiOut != nil {
 		defer func() {
@@ -1610,6 +1555,30 @@ func main() {
 		log.Println("Rodando em modo simulação (nenhuma porta MIDI física conectada).")
 	}
 
+	if in != nil {
+		log.Printf("Conectado na entrada MIDI: %s", in.String())
+		stopFn, err := startMIDIInListener(in)
+		if err != nil {
+			log.Printf("Aviso: erro ao iniciar escuta MIDI IN: %v", err)
+		} else {
+			defer func() {
+				if stopFn != nil {
+					stopFn()
+				}
+				in.Close()
+			}()
+			log.Printf("Escuta MIDI IN ativada em '%s'. Alterações físicas na mesa serão refletidas no navegador.", in.String())
+
+			// Solicita o estado inicial da mesa física em segundo plano
+			go func() {
+				time.Sleep(300 * time.Millisecond)
+				if err := RequestMixerInitialState(15 * time.Millisecond); err != nil {
+					log.Printf("Aviso na sincronização inicial com a mesa: %v", err)
+				}
+			}()
+		}
+	}
+
 	// Se o modo simulação foi solicitado por linha de comando, inicia os faders
 	if *flagSimulate {
 		startSimulation(midiOut)
@@ -1623,6 +1592,7 @@ func main() {
 	http.HandleFunc("/api/scenes/import", handleAPIImportScene)
 	http.HandleFunc("/api/state/status", handleAPIStateStatus)
 	http.HandleFunc("/api/state/restore-last", handleAPIRestoreLastState)
+	http.HandleFunc("/api/state/sync-mixer", handleAPISyncMixer)
 	http.HandleFunc("/api/state", handleAPIGetCurrentState)
 	http.HandleFunc("/api/system/shutdown", handleAPISystemShutdown)
 	http.HandleFunc("/m", handleMobile)
@@ -1655,6 +1625,9 @@ func main() {
 		fmt.Println("\n[!] Encerrando servidor e simulação...")
 		stopSimulation()
 		StopAutoSave()
+		if midiInStopFunc != nil {
+			midiInStopFunc()
+		}
 		os.Exit(0)
 	}()
 

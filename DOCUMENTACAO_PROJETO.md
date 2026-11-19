@@ -155,8 +155,18 @@ O **Web Remote Controller** é uma solução moderna e leve para controle remoto
 5. **Noise Gate / Expander Dinâmico:** Controle completo de ruído (Threshold, Range com -∞ dB, Attack, Hold, Decay) com curva de transferência gráfica e presets (Padrão, Bumbo, Caixa, Tons, Vocal) no Desktop e Mobile (Canais 1-32, Element `0x21`).
 6. **Rack Mobile Completo com Navegação de Canais:** Modal responsivo de tela cheia no mobile com navegação rápida entre canais (`◀` / `▶` e setas de teclado) com otimização de renderização que sincroniza a rolagem do mixer de fundo apenas ao fechar o diálogo.
 7. **Autenticação:** Proteção de acesso com cookies de sessão e usuários configuráveis via CSV. Redirecionamento automático para `/m` ao autenticar em dispositivos móveis.
-8. **Ambiente de Desenvolvimento Sem Mesa:** Simulador multi-fader e logs detalhados de decodificação SysEx no console.
-9. **Estabilidade de Tráfego:** Throttling ativo protegendo a saída MIDI contra estouro de buffer, com bypass automático para eventos discretos (Mute, On, Flat, Bypass de EQ, Comp e Gate).
+8. **Feedback Bidirecional em Tempo Real (MIDI IN -> WebSocket):** Escuta ativa na porta MIDI IN ALSA recebendo alterações de faders, mutes, envios, EQ e compressores realizadas na mesa física e propagando instantaneamente via broadcast WebSocket para todos os navegadores e dispositivos móveis conectados.
+9. **Sincronização de Estado Sob Demanda (Lazy Parameter Requests):** Estratégia otimizada que reduz drasticamente o tráfego MIDI e saturação de barramento:
+   * **Visão Principal (Boot / FOH):** Solicita apenas os parâmetros essenciais em tempo real (Stereo Master, Aux Masters 1 a 8, e os faders/mutes dos 32 canais de entrada).
+   * **Ao alternar para Auxiliar (Sends on Fader):** Solicita sob demanda apenas os 32 envios (faders e mutes) daquele auxiliar específico.
+   * **Ao abrir Rack de FX (EQ, Comp, Gate):** Solicita sob demanda exclusivamente os parâmetros de processamento dinâmico e equalização do canal ou saída selecionada.
+   * **Sincronização Global sob demanda:** Disponível sob ação direta do usuário ("🔄 Puxar da Mesa") no Desktop e Mobile.
+10. **Calibração Fiel da Escala de Faders de Saída (dBFS):** Alinhamento perfeito com a serigrafia física da 01V96V2 nas saídas (Stereo Master e Aux Masters 1 a 8):
+   * Escala de saída em **dBFS** de **-∞ a 0 dBFS** (1023 no topo = 0.0 dB, 0 na base = -∞ dB), sem boost de +10 dB (inexistente nas saídas do hardware).
+   * Valores iniciais e canais em repouso padronizados em 0 (-∞ dB), eliminando o salto indevido para 0 dB (823) em canais mínimos.
+11. **Proteção contra Loopback e Eco Local:** Filtro de supressão de reflexão que descarta mensagens emitidas pela própria aplicação que retornam via portas ALSA como `Midi Through` ou `VirMIDI`.
+12. **Ambiente de Desenvolvimento Sem Mesa:** Simulador multi-fader e logs detalhados de decodificação SysEx no console.
+13. **Estabilidade de Tráfego:** Throttling ativo protegendo a saída MIDI contra estouro de buffer, com bypass automático para eventos discretos (Mute, On, Flat, Bypass de EQ, Comp e Gate).
 
 ---
 
@@ -176,19 +186,15 @@ O **Web Remote Controller** é uma solução moderna e leve para controle remoto
 ## 5. Planos de Futuro e Roadmap Prioritário
 
 ### Curto Prazo (v1.1)
-1. **Feedback Bidirecional (MIDI IN -> WebSocket):**
-   * Implementação de goroutine de escuta na porta MIDI IN para receber eventos da mesa física (quando alguém move um fader físico na 01V96) e disparar o broadcast WebSocket atualizando a interface web de todos os dispositivos.
-2. **Sincronização Inicial de Estado (Bulk Request / Parameter Request):**
-   * Envio de mensagens de solicitação de parâmetros (`F0 43 30 3E 0D ...`) ao iniciar a conexão ou conectar um novo cliente, para ler os valores reais da mesa em vez de assumir valores padrão.
-3. **Nomes Personalizados de Canais:**
+1. **Nomes Personalizados de Canais:**
    * Permitir que o usuário nomeie os canais na interface (ex: "Voz Principal", "Violão", "Bumbo") e salve localmente ou no servidor.
+2. **Controle de Panorâmico (PAN) na Interface:**
+   * Adicionar knobs ou controles deslizantes de PAN (Element `0x1B`) na faixa de canais.
 
 ### Médio Prazo (v1.2)
 1. **Controle de Acesso por Permissão (Músico vs Operador):**
    * Limitar a visualização e controle do usuário logado baseado no seu papel (ex: um músico com papel `AUX1` só pode mexer nos envios do seu próprio auxiliar e não tem acesso ao Master nem ao EQ dos outros canais).
-2. **Controle de Panorâmico (PAN) na Interface:**
-   * Adicionar knobs ou controles deslizantes de PAN (Element `0x1B`) na faixa de canais.
-3. **Gerenciador de Cenas (Snapshots):**
+2. **Gerenciador de Cenas (Snapshots):**
    * Possibilidade de salvar o estado de todos os faders e parâmetros no servidor em formato JSON e recarregá-los com um clique.
 
 ### Longo Prazo (v2.0)

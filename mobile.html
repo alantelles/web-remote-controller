@@ -1515,6 +1515,16 @@
       color: #fff;
     }
 
+    .header-admin-btn.loading {
+      opacity: 0.85;
+      pointer-events: none;
+      animation: pulse-sync-mobile 1.2s infinite ease-in-out;
+    }
+    @keyframes pulse-sync-mobile {
+      0%, 100% { transform: scale(1); opacity: 0.85; }
+      50% { transform: scale(1.05); opacity: 1; filter: brightness(1.2); }
+    }
+
     .btn-popover-admin {
       background: linear-gradient(180deg, #451a03 0%, #291002 100%);
       color: #fbbf24;
@@ -1885,6 +1895,10 @@
         <span>⚙️</span>
         <span>Admin</span>
       </button>
+      <button class="header-admin-btn" id="btnMobileSyncMixer" type="button" title="Puxar estado da mesa física Yamaha 01V96" style="display: inline-flex; border-color: rgba(56, 189, 248, 0.45); color: #38bdf8; background: linear-gradient(180deg, #0c2d3e 0%, #081a26 100%);">
+        <span>🔄</span>
+        <span>Sync</span>
+      </button>
     </div>
 
     <div class="header-status-area">
@@ -2040,10 +2054,10 @@
         </div>
       </div>
       <div class="card-row-slider">
-        <input type="range" class="fader-horizontal" id="masterSlider" min="0" max="1023" value="823">
+        <input type="range" class="fader-horizontal" id="masterSlider" min="0" max="1023" value="0">
       </div>
       <div class="card-row-bottom">
-        <div class="db-readout" id="masterDbText">0.0 dB</div>
+        <div class="db-readout" id="masterDbText">-∞ dB</div>
         <div class="card-bottom-buttons">
           <button class="btn-quick-val" id="masterZeroBtn" type="button">0</button>
           <button class="btn-quick-val" id="masterInfBtn" type="button">-∞</button>
@@ -2460,6 +2474,14 @@
             <span class="mobile-sys-val" id="mobileAdminSysAutoSave">Verificando...</span>
           </div>
           <div class="mobile-sys-card" style="gap: 10px;">
+            <span class="mobile-sys-label">🎛️ Puxar da Mesa Física (01V96)</span>
+            <p style="font-size: 11px; color: var(--text-dim);">Consulta a mesa física via MIDI SysEx e atualiza faders, mutes, envios auxiliares, equalizadores e compressores no aplicativo.</p>
+            <button class="btn-mobile-scene-action primary" id="btnMobileAdminSyncMixer" type="button">
+              🔄 Puxar da Mesa Física
+            </button>
+          </div>
+
+          <div class="mobile-sys-card" style="gap: 10px;">
             <span class="mobile-sys-label">Sincronização de Interface</span>
             <p style="font-size: 11px; color: var(--text-dim);">Recarrega todos os parâmetros de faders, mutes, sends, EQs, compressores e gates a partir do servidor.</p>
             <button class="btn-mobile-scene-action secondary" id="btnMobileAdminSyncNow" type="button">
@@ -2561,6 +2583,38 @@
       return `${val}`;
     }
 
+    // Curva de dB para faders de saída na escala dBFS da 01V96V2 (0 a 1023 mapeando para -∞ a 0.0 dB)
+    function rawToDbOutput(val) {
+      if (val === undefined || val === null || isNaN(val) || val <= 0) return '-∞ dB';
+      if (val >= MAX_VALUE) return '0.0 dB';
+
+      const OUTPUT_DB_BREAKPOINTS = [
+        { val: 1023, db: 0.0 },
+        { val: 890,  db: -5.0 },
+        { val: 760,  db: -10.0 },
+        { val: 620,  db: -15.0 },
+        { val: 480,  db: -20.0 },
+        { val: 340,  db: -30.0 },
+        { val: 200,  db: -40.0 },
+        { val: 100,  db: -50.0 },
+        { val: 0,    db: -Infinity }
+      ];
+
+      for (let i = 0; i < OUTPUT_DB_BREAKPOINTS.length - 1; i++) {
+        const p1 = OUTPUT_DB_BREAKPOINTS[i];
+        const p2 = OUTPUT_DB_BREAKPOINTS[i + 1];
+        if (val <= p1.val && val >= p2.val) {
+          if (p2.db === -Infinity) {
+            return `-${((p1.val - val) * 2).toFixed(1)} dB`;
+          }
+          const ratio = (val - p2.val) / (p1.val - p2.val);
+          const db = p2.db + ratio * (p1.db - p2.db);
+          return `${db.toFixed(1)} dB`;
+        }
+      }
+      return `${val}`;
+    }
+
     // Configurações das 9 Mixagens (Mapeamento Yamaha 01V96 / Studio Manager)
     const MIX_TARGETS = {
       MASTER: {
@@ -2597,18 +2651,18 @@
       eqOn: new Array(TOTAL_CHANNELS).fill(false),
       compOn: new Array(TOTAL_CHANNELS).fill(false),
       gateOn: new Array(TOTAL_CHANNELS).fill(false),
-      masterFaders: { MASTER: NOMINAL_VALUE },
+      masterFaders: { MASTER: 0 },
       masterMutes: { MASTER: 1 },
       visibleChannels: new Set(Array.from({ length: TOTAL_CHANNELS }, (_, i) => i))
     };
 
     // Inicializa estruturas de dados para todas as mixes
     Object.keys(MIX_TARGETS).forEach(mix => {
-      state.faders[mix] = new Array(TOTAL_CHANNELS).fill(NOMINAL_VALUE);
+      state.faders[mix] = new Array(TOTAL_CHANNELS).fill(0);
       state.mutes[mix] = new Array(TOTAL_CHANNELS).fill(1); // Todos iniciam ON
       state.pre[mix] = new Array(TOTAL_CHANNELS).fill(0);   // Todos iniciam POST (0)
       if (mix !== 'MASTER') {
-        state.masterFaders[mix] = NOMINAL_VALUE;
+        state.masterFaders[mix] = 0;
         state.masterMutes[mix] = 1;
       }
     });
@@ -2916,6 +2970,50 @@
       }));
     }
 
+    function updateMobileSyncMixerUI(isSyncing) {
+      const btnHeader = document.getElementById('btnMobileSyncMixer');
+      const btnAdmin = document.getElementById('btnMobileAdminSyncMixer');
+      if (btnHeader) {
+        if (isSyncing) {
+          btnHeader.classList.add('loading');
+          btnHeader.innerHTML = '<span>⏳</span><span>Lendo...</span>';
+        } else {
+          btnHeader.classList.remove('loading');
+          btnHeader.innerHTML = '<span>🔄</span><span>Sync</span>';
+        }
+      }
+      if (btnAdmin) {
+        if (isSyncing) {
+          btnAdmin.disabled = true;
+          btnAdmin.innerText = '⏳ Lendo da Mesa...';
+        } else {
+          btnAdmin.disabled = false;
+          btnAdmin.innerText = '🔄 Puxar da Mesa Física';
+        }
+      }
+    }
+
+    function triggerMobileMixerSync() {
+      updateMobileSyncMixerUI(true);
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ action: 'sync_mixer' }));
+      } else {
+        fetch('/api/state/sync-mixer', { method: 'POST' })
+          .then(res => res.json())
+          .then(data => {
+            if (!data.success && data.error) {
+              showToast(data.error);
+              updateMobileSyncMixerUI(false);
+            }
+          })
+          .catch(err => {
+            console.error('Erro ao acionar sincronização:', err);
+            updateMobileSyncMixerUI(false);
+          });
+      }
+      showToast('Solicitando parâmetros da mesa física...');
+    }
+
     function connectWebSocket() {
       const loc = window.location;
       const proto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -2968,6 +3066,15 @@
           if (msg.type === 'state_sync') {
             syncMobileStateFromBackend();
             showToast('Cena sincronizada! 🎬');
+            return;
+          }
+
+          if (msg.type === 'sync_status') {
+            const isSyncing = msg.running === true;
+            updateMobileSyncMixerUI(isSyncing);
+            if (!isSyncing && msg.hex) {
+              showToast(msg.hex);
+            }
             return;
           }
 
@@ -3403,10 +3510,10 @@
             </div>
           </div>
           <div class="card-row-slider">
-            <input type="range" class="fader-horizontal" id="slider_${ch}" min="0" max="1023" value="823">
+            <input type="range" class="fader-horizontal" id="slider_${ch}" min="0" max="1023" value="0">
           </div>
           <div class="card-row-bottom">
-            <div class="db-readout" id="dbText_${ch}">0.0 dB</div>
+            <div class="db-readout" id="dbText_${ch}">-∞ dB</div>
             <div class="card-bottom-buttons">
               <button class="btn-quick-val" id="btnZero_${ch}" type="button">0</button>
               <button class="btn-quick-val" id="btnInf_${ch}" type="button">-∞</button>
@@ -3650,7 +3757,7 @@
       slider.addEventListener('input', (e) => {
         const val = parseInt(e.target.value, 10);
         state.masterFaders[currentMix] = val;
-        document.getElementById('masterDbText').innerText = rawToDb(val);
+        document.getElementById('masterDbText').innerText = rawToDbOutput(val);
         sendMasterFaderCommand(val, true);
       });
 
@@ -3669,7 +3776,7 @@
       });
 
       zeroBtn.addEventListener('click', () => {
-        setMasterFaderVal(NOMINAL_VALUE);
+        setMasterFaderVal(MAX_VALUE);
       });
 
       infBtn.addEventListener('click', () => {
@@ -3688,7 +3795,7 @@
     function setMasterFaderVal(val) {
       state.masterFaders[currentMix] = val;
       document.getElementById('masterSlider').value = val;
-      document.getElementById('masterDbText').innerText = rawToDb(val);
+      document.getElementById('masterDbText').innerText = rawToDbOutput(val);
       sendMasterFaderCommand(val, false);
     }
 
@@ -3712,7 +3819,7 @@
       title.innerText = target.title;
       const val = state.masterFaders[currentMix];
       slider.value = val;
-      dbText.innerText = rawToDb(val);
+      dbText.innerText = rawToDbOutput(val);
 
       if (target.isMaster) {
         card.classList.remove('aux-mode');
@@ -3778,6 +3885,19 @@
       // Atualiza todos os canais visíveis
       for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
         updateChannelUI(ch);
+      }
+
+      // Sincronização sob demanda: se for Auxiliar, puxa os envios daquele auxiliar da mesa física
+      if (!MIX_TARGETS[mixId].isMaster) {
+        if (typeof ws !== 'undefined' && ws && ws.readyState === WebSocket.OPEN) {
+          const auxNum = parseInt(mixId.replace('AUX', ''), 10);
+          if (auxNum >= 1 && auxNum <= 8) {
+            ws.send(JSON.stringify({
+              action: 'sync_aux',
+              aux: auxNum
+            }));
+          }
+        }
       }
     }
 
@@ -4492,6 +4612,18 @@
           } catch (err) {
             alert('Erro de conexão ao enviar arquivo de cena.');
           }
+        });
+      }
+
+      const btnMobSyncMixer = document.getElementById('btnMobileSyncMixer');
+      if (btnMobSyncMixer) {
+        btnMobSyncMixer.addEventListener('click', triggerMobileMixerSync);
+      }
+      const btnMobAdminSyncMixer = document.getElementById('btnMobileAdminSyncMixer');
+      if (btnMobAdminSyncMixer) {
+        btnMobAdminSyncMixer.addEventListener('click', () => {
+          triggerMobileMixerSync();
+          closeMobileAdminModal();
         });
       }
     }
@@ -5344,6 +5476,14 @@
         resizeGateCanvas();
         syncGateModalUI();
         requestGateRedrawMobile();
+      }
+
+      // Sincronização sob demanda: solicita parâmetros de EQ, Compressor e Gate da mesa física para este canal/saída
+      if (typeof ws !== 'undefined' && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          action: 'sync_fx',
+          target: String(target)
+        }));
       }
     }
 

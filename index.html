@@ -823,6 +823,40 @@
       transform: translateY(-1px);
     }
 
+    /* Botão Puxar da Mesa Física no Topo */
+    .btn-sync-mixer {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      padding: 4px 12px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #0c2d3e 0%, #081a26 100%);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+    }
+    .btn-sync-mixer:hover {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.5);
+      transform: translateY(-1px);
+    }
+    .btn-sync-mixer.loading {
+      opacity: 0.85;
+      pointer-events: none;
+      animation: pulse-sync 1.2s infinite ease-in-out;
+    }
+    @keyframes pulse-sync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.03); opacity: 1; filter: brightness(1.2); }
+    }
+
     /* Modal de Administração (Seção Admin) */
     .admin-modal-card {
       background: #131722;
@@ -2529,6 +2563,9 @@
           <div class="status-dot"></div>
           <span id="wsStatusText">Desconectado</span>
         </div>
+        <button type="button" class="btn-sync-mixer" id="btnSyncMixer" title="Puxar estado integral da mesa física Yamaha 01V96">
+          🔄 Puxar da Mesa
+        </button>
         <button type="button" class="btn-admin-panel" id="btnAdminPanel" title="Painel de Administração do Sistema e Cenas" style="display: none;">
           ⚙️ Admin
         </button>
@@ -2718,7 +2755,7 @@
           </div>
 
           <div class="ch-footer">
-            <div class="ch-db-readout db-master-red" id="dbReadout_masterOut">0.0 dB</div>
+            <div class="ch-db-readout db-master-red" id="dbReadout_masterOut">-∞ dB</div>
             <div class="ch-quick-actions">
               <button type="button" class="btn-ch-snap" id="btnSnap0db_masterOut" title="Ajustar Saída para 0.0 dB">0dB</button>
               <button type="button" class="btn-ch-snap" id="btnSnapInf_masterOut" title="Mutar Saída em -∞ dB">-∞</button>
@@ -2856,6 +2893,16 @@
               <span class="admin-sys-label">Status de Auto-Save em Disco</span>
               <span class="admin-sys-val" id="adminSysAutoSaveInfo">Verificando...</span>
             </div>
+          </div>
+
+          <div class="admin-section-banner">
+            <div class="admin-section-banner-info">
+              <h4>🎛️ Puxar Estado da Mesa Física (Yamaha 01V96)</h4>
+              <p>Envia mensagens MIDI Parameter Request para consultar faders, mutes, envios auxiliares, EQs e compressores diretamente da mesa física.</p>
+            </div>
+            <button type="button" class="btn-scene-action primary" id="btnAdminSyncMixer">
+              🔄 Puxar da Mesa Física
+            </button>
           </div>
 
           <div class="admin-section-banner">
@@ -3321,7 +3368,7 @@
       return `${val}`;
     }
 
-    // Escala de posições visuais (% a partir de cima)
+    // Escala de posições visuais (% a partir de cima) - Canais de Entrada (-∞ a +10 dB)
     const SCALE_MARKERS = [
       { db: '+10', pct: 0 },
       { db: '+5',  pct: 9.7 },
@@ -3335,6 +3382,51 @@
       { db: '-50', pct: 93.6 },
       { db: '∞',   pct: 100 }
     ];
+
+    // Escala de posições visuais para Saídas Master (Stereo e AuxILIARES) - Escala dBFS (-∞ a 0 dB)
+    const OUTPUT_SCALE_MARKERS = [
+      { db: '0',   pct: 0, isZero: true },
+      { db: '-5',  pct: 13.0 },
+      { db: '-10', pct: 25.7 },
+      { db: '-15', pct: 39.4 },
+      { db: '-20', pct: 53.1 },
+      { db: '-30', pct: 66.8 },
+      { db: '-40', pct: 80.4 },
+      { db: '-50', pct: 90.2 },
+      { db: '∞',   pct: 100 }
+    ];
+
+    // Curva de dB para faders de saída na escala dBFS da 01V96V2 (0 a 1023 mapeando para -∞ a 0.0 dB)
+    function rawToDbOutput(val) {
+      if (val === undefined || val === null || isNaN(val) || val <= 0) return '-∞ dB';
+      if (val >= MAX_VALUE) return '0.0 dB';
+
+      const OUTPUT_DB_BREAKPOINTS = [
+        { val: 1023, db: 0.0 },
+        { val: 890,  db: -5.0 },
+        { val: 760,  db: -10.0 },
+        { val: 620,  db: -15.0 },
+        { val: 480,  db: -20.0 },
+        { val: 340,  db: -30.0 },
+        { val: 200,  db: -40.0 },
+        { val: 100,  db: -50.0 },
+        { val: 0,    db: -Infinity }
+      ];
+
+      for (let i = 0; i < OUTPUT_DB_BREAKPOINTS.length - 1; i++) {
+        const p1 = OUTPUT_DB_BREAKPOINTS[i];
+        const p2 = OUTPUT_DB_BREAKPOINTS[i + 1];
+        if (val <= p1.val && val >= p2.val) {
+          if (p2.db === -Infinity) {
+            return `-${((p1.val - val) * 2).toFixed(1)} dB`;
+          }
+          const ratio = (val - p2.val) / (p1.val - p2.val);
+          const db = p2.db + ratio * (p1.db - p2.db);
+          return `${db.toFixed(1)} dB`;
+        }
+      }
+      return `${val}`;
+    }
 
     // ==========================================
     // DEFINIÇÃO DAS MIXAGENS (MASTER E AUX 1-8)
@@ -3400,10 +3492,10 @@
     const mixData = {};
     Object.keys(MIX_TARGETS).forEach(key => {
       mixData[key] = {
-        volumes: Array.from({ length: TOTAL_CHANNELS }, () => (key === 'MASTER' ? NOMINAL_VALUE : 0)),
+        volumes: Array.from({ length: TOTAL_CHANNELS }, () => 0), // Todos iniciam em -∞ dB (0)
         on: Array.from({ length: TOTAL_CHANNELS }, () => 1),
         pre: Array.from({ length: TOTAL_CHANNELS }, () => 0), // 0 = Post-fader, 1 = Pre-fader
-        masterVolume: NOMINAL_VALUE, // Volume da saída master da mix (823 = 0.0 dB)
+        masterVolume: 0,              // Inicia em -∞ dB (0)
         masterOn: 1,                 // Estado ON da saída master da mix (1 = ON / Aberto)
         eq: createDefaultEqState(),
         comp: createDefaultCompState()
@@ -3569,6 +3661,14 @@
 
         if (data.type === 'init') {
           syncFullStateFromBackend();
+        }
+
+        if (data.type === 'sync_status') {
+          const isSyncing = data.running === true;
+          updateSyncMixerUI(isSyncing);
+          if (!isSyncing && data.hex) {
+            showToast(data.hex, '🔄');
+          }
         }
 
         if (data.type === 'state_sync') {
@@ -3850,7 +3950,7 @@
         </div>
 
         <div class="ch-footer">
-          <div class="ch-db-readout" id="dbReadout_${ch.index}">0.0 dB</div>
+          <div class="ch-db-readout" id="dbReadout_${ch.index}">-∞ dB</div>
           <div class="ch-quick-actions">
             <button type="button" class="btn-ch-snap" data-action="0db" data-ch="${ch.index}">0dB</button>
             <button type="button" class="btn-ch-snap" data-action="inf" data-ch="${ch.index}">-∞</button>
@@ -4037,6 +4137,16 @@
 
       // 5. Atualiza o fader master de saída para a mixagem selecionada (Vermelho se Master, Azul se Auxiliar)
       updateMasterOutputSectionUI(target);
+
+      // 6. Sincronização sob demanda: se for Auxiliar, puxa os envios daquele auxiliar da mesa física
+      if (!target.isMaster && target.auxIndex !== undefined) {
+        if (typeof ws !== 'undefined' && ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
+            action: 'sync_aux',
+            aux: target.auxIndex + 1
+          }));
+        }
+      }
     }
 
     // ==========================================
@@ -4058,7 +4168,7 @@
       const topPct = (1 - fraction) * 100;
       cap.style.top = `${topPct.toFixed(2)}%`;
 
-      if (dbReadout) dbReadout.textContent = rawToDb(value);
+      if (dbReadout) dbReadout.textContent = rawToDbOutput(value);
       if (rawReadout) rawReadout.textContent = value;
     }
 
@@ -4144,7 +4254,7 @@
     function initMasterOutputStrip() {
       const scaleTicksEl = document.getElementById('scaleTicks_masterOut');
       if (scaleTicksEl) {
-        const ticksHtml = SCALE_MARKERS.map(m => `
+        const ticksHtml = OUTPUT_SCALE_MARKERS.map(m => `
           <div class="scale-tick ${m.isZero ? 'tick-0db' : ''}" style="top: ${m.pct}%;">
             <span>${m.db}</span>
             <span>${m.db}</span>
@@ -4175,7 +4285,7 @@
 
       if (btnSnap0db) {
         btnSnap0db.addEventListener('click', () => {
-          setMasterOutputVolume(NOMINAL_VALUE, true);
+          setMasterOutputVolume(MAX_VALUE, true);
         });
       }
 
@@ -4188,10 +4298,10 @@
       if (trackContainer && cap) {
         cap.addEventListener('dblclick', (e) => {
           e.stopPropagation();
-          setMasterOutputVolume(NOMINAL_VALUE, true);
+          setMasterOutputVolume(MAX_VALUE, true);
         });
         trackContainer.addEventListener('dblclick', () => {
-          setMasterOutputVolume(NOMINAL_VALUE, true);
+          setMasterOutputVolume(MAX_VALUE, true);
         });
 
         let isMasterDragging = false;
@@ -4886,6 +4996,14 @@
         requestEqRedraw();
       } else if (currentFxTab === 'comp') {
         requestCompRedraw();
+      }
+
+      // Sincronização sob demanda: solicita parâmetros de EQ, Compressor e Gate da mesa física para este canal/saída
+      if (typeof ws !== 'undefined' && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          action: 'sync_fx',
+          target: String(target)
+        }));
       }
     }
 
@@ -6182,6 +6300,50 @@
         switchAdminTab(btn.dataset.adminTab);
       });
     });
+
+    const btnSyncMixer = document.getElementById('btnSyncMixer');
+    const btnAdminSyncMixer = document.getElementById('btnAdminSyncMixer');
+
+    function updateSyncMixerUI(isSyncing) {
+      const btns = [btnSyncMixer, btnAdminSyncMixer].filter(Boolean);
+      btns.forEach(btn => {
+        if (isSyncing) {
+          btn.classList.add('loading');
+          btn.innerHTML = '⏳ Lendo da Mesa...';
+        } else {
+          btn.classList.remove('loading');
+          btn.innerHTML = '🔄 Puxar da Mesa';
+        }
+      });
+    }
+
+    function triggerMixerSync() {
+      updateSyncMixerUI(true);
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ action: 'sync_mixer' }));
+      } else {
+        fetch('/api/state/sync-mixer', { method: 'POST' })
+          .then(res => res.json())
+          .then(data => {
+            if (!data.success && data.error) {
+              showToast(data.error, '⚠️');
+              updateSyncMixerUI(false);
+            }
+          })
+          .catch(err => {
+            console.error('Erro ao acionar sincronização:', err);
+            updateSyncMixerUI(false);
+          });
+      }
+      showToast('Solicitando estado da mesa física Yamaha 01V96...', '🔄');
+    }
+
+    if (btnSyncMixer) {
+      btnSyncMixer.addEventListener('click', triggerMixerSync);
+    }
+    if (btnAdminSyncMixer) {
+      btnAdminSyncMixer.addEventListener('click', triggerMixerSync);
+    }
 
     if (btnAdminSyncState) {
       btnAdminSyncState.addEventListener('click', async () => {
