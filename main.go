@@ -966,6 +966,7 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 			0x01: "LOW Q/Mode",
 			0x02: "LOW Freq",
 			0x03: "LOW Gain",
+			0x04: "HPF Filter ON/OFF",
 			0x05: "LO-MID Q",
 			0x06: "LO-MID Freq",
 			0x07: "LO-MID Gain",
@@ -975,8 +976,10 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 			0x0B: "HIGH Q/Mode",
 			0x0C: "HIGH Freq",
 			0x0D: "HIGH Gain",
+			0x0E: "LPF Filter ON/OFF",
 		}
 		compParamNames := map[byte]string{
+			0x00: "Position (Insert)",
 			0x01: "COMP ON/OFF",
 			0x04: "Attack",
 			0x05: "Release",
@@ -1106,17 +1109,20 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("WS -> SysEx: %s | %s\n", hexStr, targetDesc)
 
 		// Aplica throttle antes de enviar ao barramento MIDI e ao WebSocket.
-		// Eventos ON/MUTE/Bypass discretos ou limites de fader (0, 823, 1023) passam direto sem throttling.
+		// Eventos ON/MUTE/Bypass discretos, seletores de filtro/Q ou limites de fader/freq passam direto sem throttling.
 		// Para movimentos contínuos dentro da janela de 20ms, allowOrSchedule agenda o envio do valor final (trailing edge)
 		// para garantir que a última posição do fader/knob nunca se perca.
 		isFaderElem := msg.Element == 0x1C || msg.Element == 0x4F || msg.Element == 0x39 || msg.Element == 0x1D || (msg.Element == 0x23 && msg.Param%3 == 2)
+		isEqElem := msg.Element == 0x20 || msg.Element == 0x35 || msg.Element == 0x50
 		isDiscrete := msg.Element == 0x1A ||
 			msg.Element == 0x4D || msg.Element == 0x36 ||
 			(msg.Element == 0x23 && (msg.Param%3 == 0 || msg.Param%3 == 1)) ||
-			((msg.Element == 0x20 || msg.Element == 0x35 || msg.Element == 0x50) && (msg.Param == 0x0F || msg.Param == 0x00)) ||
-			((msg.Element == 0x1F || msg.Element == 0x36 || msg.Element == 0x51) && msg.Param == 0x01) ||
+			(isEqElem && (msg.Param == 0x0F || msg.Param == 0x00 || msg.Param == 0x01 || msg.Param == 0x0B || msg.Param == 0x04 || msg.Param == 0x0E)) ||
+			(isEqElem && (msg.Param == 0x03 || msg.Param == 0x0D) && (msg.Value == 0 || msg.Value == 1)) ||
+			(isEqElem && (msg.Param == 0x02 || msg.Param == 0x06 || msg.Param == 0x09 || msg.Param == 0x0C) && (msg.Value <= 0 || msg.Value >= 124)) ||
+			((msg.Element == 0x1F || msg.Element == 0x36 || msg.Element == 0x51) && (msg.Param == 0x01 || msg.Param == 0x00)) ||
 			(msg.Element == 0x21 && msg.Param == 0x00) ||
-			(isFaderElem && (msg.Value == 0 || msg.Value == 823 || msg.Value == 1023))
+			(isFaderElem && (msg.Value <= 0 || msg.Value == 823 || msg.Value >= 1023))
 
 		canMIDI, canWS := true, true
 		if !isDiscrete {

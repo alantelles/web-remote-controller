@@ -212,11 +212,11 @@ func TestGenerateSysExForState(t *testing.T) {
 	}
 
 	// Verifica se a quantidade cobre faders, mutes, pans, attenuator, sends, eqs e compressores
-	// Stereo (1 fader + 1 on + 13 eq + 7 comp = 22)
+	// Stereo (1 fader + 1 on + 13 eq + 8 comp = 23)
 	// 8 Aux Masters * (1 fader + 1 on + 13 eq = 15) = 120
-	// 32 Canais * (1 fader + 1 on + 1 pan + 1 att + 8*3 sends + 13 eq + 7 comp = 48) = 1536
-	// Total esperado: 22 + 120 + 1536 = 1678 mensagens atômicas
-	expectedCount := 22 + 8*15 + 32*48
+	// 32 Canais * (1 fader + 1 on + 1 pan + 1 att + 8*3 sends + 13 eq + 8 comp = 49) = 1568
+	// Total esperado: 23 + 120 + 1568 = 1711 mensagens atômicas
+	expectedCount := 23 + 8*15 + 32*49
 	if len(msgs) != expectedCount {
 		t.Errorf("Esperado %d mensagens SysEx para estado completo, obtido: %d", expectedCount, len(msgs))
 	}

@@ -2185,10 +2185,15 @@
 
       <!-- ABA 2: COMPRESSOR DE CANAL -->
       <div class="fx-tab-pane" id="pane_comp">
-        <!-- Ações do Compressor (ON / RESET / PRESET) -->
+        <!-- Ações do Compressor (ON / POS / RESET / PRESET) -->
         <div class="eq-actions-bar">
           <button class="btn-eq-toggle is-on" id="btnCompToggleOn" type="button">COMP: ON</button>
           <div style="display: flex; align-items: center; gap: 6px;">
+            <select class="band-type-select" id="compPosSelectMobile" title="Posição do Compressor no Rack">
+              <option value="0">Pre EQ</option>
+              <option value="1" selected>Pre Fdr</option>
+              <option value="2">Post Fdr</option>
+            </select>
             <select class="band-type-select" id="compPresetSelectMobile">
               <option value="default" selected>Padrão</option>
               <option value="vocal">Vocal</option>
@@ -2612,7 +2617,7 @@
     // TABELAS E ESTADO DO EQUALIZADOR PARAMÉTRICO
     // ==========================================
     const EQ_FREQ_VALUES = [
-      "20.0 Hz", "21.1 Hz", "22.4 Hz", "23.6 Hz", "25.0 Hz", "26.4 Hz", "27.9 Hz", "29.5 Hz", "31.2 Hz", "33.0 Hz",
+      "21.2 Hz", "21.1 Hz", "22.4 Hz", "23.6 Hz", "25.0 Hz", "26.4 Hz", "27.9 Hz", "29.5 Hz", "31.2 Hz", "33.0 Hz",
       "34.9 Hz", "36.9 Hz", "39.0 Hz", "41.3 Hz", "43.6 Hz", "46.1 Hz", "48.8 Hz", "51.6 Hz", "54.5 Hz", "57.6 Hz",
       "60.9 Hz", "64.4 Hz", "68.1 Hz", "72.0 Hz", "76.2 Hz", "80.5 Hz", "85.1 Hz", "90.0 Hz", "95.2 Hz", "101 Hz",
       "106 Hz", "112 Hz", "119 Hz", "126 Hz", "133 Hz", "141 Hz", "149 Hz", "157 Hz", "166 Hz", "176 Hz",
@@ -2767,6 +2772,7 @@
     // Estado do Compressor dos 32 canais de entrada
     const compState = Array.from({ length: TOTAL_CHANNELS }, () => ({
       on: 1,
+      position: 1,    // 0 = Pre EQ, 1 = Pre Fader, 2 = Post Fader
       threshold: 340, // -20.0 dB
       ratio: 7,       // 4.0:1
       attack: 20,     // 20 ms
@@ -2780,6 +2786,7 @@
     ['MASTER', 'AUX1', 'AUX2', 'AUX3', 'AUX4', 'AUX5', 'AUX6', 'AUX7', 'AUX8'].forEach(k => {
       mixCompState[k] = {
         on: 1,
+        position: 1,
         threshold: 340,
         ratio: 7,
         attack: 20,
@@ -3245,10 +3252,10 @@
                 }
                 break;
               case 0x01:
-                if (val === 0x00) {
+                if (val === 44 || val === 0x2C) {
                   eq.low.type = 'hpf';
                   eq.hpf = 1;
-                } else if (val === 41) {
+                } else if (val === 41 || val === 0x29) {
                   eq.low.type = 'shelf';
                   eq.hpf = 0;
                 } else {
@@ -3256,6 +3263,10 @@
                   eq.hpf = 0;
                   eq.low.q = Math.max(0, Math.min(40, 40 - val));
                 }
+                break;
+              case 0x04:
+                eq.hpf = val;
+                if (val === 1) eq.low.type = 'hpf';
                 break;
               case 0x02: eq.low.freq = val; break;
               case 0x03: eq.low.gain = val + 180; break;
@@ -3266,10 +3277,10 @@
               case 0x09: eq.himid.freq = val; break;
               case 0x0A: eq.himid.gain = val + 180; break;
               case 0x0B:
-                if (val === 43) {
+                if (val === 43 || val === 0x2B) {
                   eq.high.type = 'lpf';
                   eq.lpf = 1;
-                } else if (val === 42) {
+                } else if (val === 42 || val === 0x2A) {
                   eq.high.type = 'shelf';
                   eq.lpf = 0;
                 } else {
@@ -3277,6 +3288,10 @@
                   eq.lpf = 0;
                   eq.high.q = Math.max(0, Math.min(40, 40 - val));
                 }
+                break;
+              case 0x0E:
+                eq.lpf = val;
+                if (val === 1) eq.high.type = 'lpf';
                 break;
               case 0x0C: eq.high.freq = val; break;
               case 0x0D: eq.high.gain = val + 180; break;
@@ -3310,6 +3325,7 @@
         const comp = getChannelComp(targetKey);
         if (comp) {
           switch (param) {
+            case 0x00: comp.position = val; break;
             case 0x01:
               comp.on = val;
               if (typeof targetKey === 'number') {
@@ -5115,6 +5131,9 @@
       const dotComp = document.getElementById('dot_tab_comp');
       if (dotComp) dotComp.classList.toggle('on', comp.on === 1);
 
+      const selPos = document.getElementById('compPosSelectMobile');
+      if (selPos) selPos.value = (comp.position !== undefined ? comp.position : 1);
+
       const rngTh = document.getElementById('rngCompThresholdMobile');
       const lblTh = document.getElementById('lblCompThresholdMobile');
       if (rngTh) rngTh.value = comp.threshold;
@@ -5426,10 +5445,16 @@
 
       const isFilterCut = (bandKey === 'low' && (eq.hpf === 1 || b.type === 'hpf')) ||
                           (bandKey === 'high' && (eq.lpf === 1 || b.type === 'lpf'));
+      const isShelf = (bandKey === 'low' || bandKey === 'high') && b.type === 'shelf';
 
       if (isFilterCut) {
         blockGain.style.opacity = '0.35';
         blockGain.style.pointerEvents = 'none';
+        blockQ.style.opacity = '0.35';
+        blockQ.style.pointerEvents = 'none';
+      } else if (isShelf) {
+        blockGain.style.opacity = '1';
+        blockGain.style.pointerEvents = 'auto';
         blockQ.style.opacity = '0.35';
         blockQ.style.pointerEvents = 'none';
       } else {
@@ -5447,12 +5472,22 @@
       const rngGain = document.getElementById('rngEqGain');
       const lblGain = document.getElementById('lblEqGain');
       rngGain.value = b.gain;
-      lblGain.innerText = rawGainToDb(b.gain);
+      if (isFilterCut) {
+        lblGain.innerText = 'ATIVO';
+      } else {
+        lblGain.innerText = rawGainToDb(b.gain);
+      }
 
       const rngQ = document.getElementById('rngEqQ');
       const lblQ = document.getElementById('lblEqQ');
       rngQ.value = b.q;
-      lblQ.innerText = formatQDisplay(b.q);
+      if (isFilterCut) {
+        lblQ.innerText = (bandKey === 'low') ? 'HPF' : 'LPF';
+      } else if (isShelf) {
+        lblQ.innerText = 'SHELF';
+      } else {
+        lblQ.innerText = formatQDisplay(b.q);
+      }
 
       syncEqModalUI();
       requestEqRedrawMobile();
@@ -5550,12 +5585,24 @@
         });
       }
 
+      const compPosSelectMobile = document.getElementById('compPosSelectMobile');
+      if (compPosSelectMobile) {
+        compPosSelectMobile.addEventListener('change', (e) => {
+          const comp = getChannelComp(currentEqTarget);
+          if (!comp) return;
+          const val = parseInt(e.target.value, 10);
+          comp.position = val;
+          sendCompParam(0x00, val, false);
+        });
+      }
+
       const btnCompReset = document.getElementById('btnCompResetMobile');
       if (btnCompReset) {
         btnCompReset.addEventListener('click', () => {
           const preset = COMP_PRESETS.default;
           const comp = getChannelComp(currentEqTarget);
           if (!comp) return;
+          comp.position = 1;
           comp.threshold = preset.threshold;
           comp.ratio = preset.ratio;
           comp.attack = preset.attack;
@@ -5563,6 +5610,7 @@
           comp.knee = preset.knee;
           comp.gain = preset.gain;
 
+          sendCompParam(0x00, 1, false);
           sendCompParam(0x09, preset.threshold - 540, false);
           sendCompParam(0x06, preset.ratio, false);
           sendCompParam(0x04, preset.attack, false);
@@ -5570,6 +5618,7 @@
           sendCompParam(0x08, preset.knee, false);
           sendCompParam(0x07, preset.gain, false);
 
+          if (compPosSelectMobile) compPosSelectMobile.value = '1';
           if (compPresetSelect) compPresetSelect.value = 'default';
           syncCompModalUI();
           requestCompRedrawMobile();
@@ -5874,21 +5923,33 @@
           eq.low.type = val;
           eq.hpf = (val === 'hpf') ? 1 : 0;
           if (val === 'hpf') {
-            sendEqParam(0x01, 0x00, false);
+            sendEqParam(0x01, 44, false); // 0x2C = HPF da Yamaha 01V96
+            sendEqParam(0x04, 1, false);  // 0x04 = 1 (Chave HPF ativa)
+            sendEqParam(0x03, 1, false);  // Ganho em modo filtro
           } else if (val === 'shelf') {
-            sendEqParam(0x01, 41, false); // 0x29
+            sendEqParam(0x04, 0, false);  // Desliga filtro HPF
+            sendEqParam(0x01, 41, false); // 0x29 = Low Shelf
+            sendEqParam(0x03, eq.low.gain - 180, false); // Restaura ganho real
           } else {
-            sendEqParam(0x01, 40 - eq.low.q, false);
+            sendEqParam(0x04, 0, false);  // Desliga filtro HPF
+            sendEqParam(0x01, 40 - eq.low.q, false); // Peaking
+            sendEqParam(0x03, eq.low.gain - 180, false); // Restaura ganho real
           }
         } else if (currentEqBand === 'high') {
           eq.high.type = val;
           eq.lpf = (val === 'lpf') ? 1 : 0;
           if (val === 'lpf') {
-            sendEqParam(0x0B, 43, false); // 0x2B
+            sendEqParam(0x0B, 43, false); // 0x2B = LPF
+            sendEqParam(0x0E, 1, false);  // 0x0E = 1 (Chave LPF ativa)
+            sendEqParam(0x0D, 1, false);  // Ganho em modo filtro
           } else if (val === 'shelf') {
-            sendEqParam(0x0B, 42, false); // 0x2A
+            sendEqParam(0x0E, 0, false);  // Desliga filtro LPF
+            sendEqParam(0x0B, 42, false); // 0x2A = High Shelf
+            sendEqParam(0x0D, eq.high.gain - 180, false); // Restaura ganho real
           } else {
-            sendEqParam(0x0B, 40 - eq.high.q, false);
+            sendEqParam(0x0E, 0, false);  // Desliga filtro LPF
+            sendEqParam(0x0B, 40 - eq.high.q, false); // Peaking
+            sendEqParam(0x0D, eq.high.gain - 180, false); // Restaura ganho real
           }
         }
         switchEqBand(currentEqBand);
@@ -5978,28 +6039,24 @@
       // Slider de Q
       const rngQ = document.getElementById('rngEqQ');
       rngQ.addEventListener('input', (e) => {
-        const val = parseInt(e.target.value, 10);
         const eq = getEqData(currentEqTarget);
+        if (currentEqBand === 'low' && eq.low.type !== 'peaking') return;
+        if (currentEqBand === 'high' && eq.high.type !== 'peaking') return;
+
+        const val = parseInt(e.target.value, 10);
         eq[currentEqBand].q = val;
         document.getElementById('lblEqQ').innerText = formatQDisplay(val);
         const cfg = BAND_CONFIGS[currentEqBand];
-        if (currentEqBand === 'low' && eq.low.type !== 'peaking') {
-          eq.low.type = 'peaking';
-          eq.hpf = 0;
-          const ts = document.getElementById('eqTypeSelect');
-          if (ts) ts.value = 'peaking';
-        } else if (currentEqBand === 'high' && eq.high.type !== 'peaking') {
-          eq.high.type = 'peaking';
-          eq.lpf = 0;
-          const ts = document.getElementById('eqTypeSelect');
-          if (ts) ts.value = 'peaking';
-        }
         const midiVal = Math.max(0, Math.min(40, 40 - val));
         sendEqParam(cfg.paramQ, midiVal, true);
         syncEqModalUI();
         requestEqRedrawMobile();
       });
       rngQ.addEventListener('change', (e) => {
+        const eq = getEqData(currentEqTarget);
+        if (currentEqBand === 'low' && eq.low.type !== 'peaking') return;
+        if (currentEqBand === 'high' && eq.high.type !== 'peaking') return;
+
         const val = parseInt(e.target.value, 10);
         const cfg = BAND_CONFIGS[currentEqBand];
         const midiVal = Math.max(0, Math.min(40, 40 - val));

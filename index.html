@@ -2982,9 +2982,9 @@
                 <div class="eq-band-header">
                   <span class="eq-band-title">LOW</span>
                   <select class="eq-band-mode-select" id="eqLowType">
-                    <option value="peaking">PEAKING</option>
+                    <option value="peaking">PEAKING (Sino)</option>
                     <option value="shelf" selected>L.SHELF</option>
-                    <option value="hpf">HPF</option>
+                    <option value="hpf">HPF (Filtro)</option>
                   </select>
                 </div>
                 <div class="eq-ctrl-group">
@@ -3079,9 +3079,9 @@
                 <div class="eq-band-header">
                   <span class="eq-band-title">HIGH</span>
                   <select class="eq-band-mode-select" id="eqHighType">
-                    <option value="peaking">PEAKING</option>
+                    <option value="peaking">PEAKING (Sino)</option>
                     <option value="shelf" selected>H.SHELF</option>
-                    <option value="lpf">LPF</option>
+                    <option value="lpf">LPF (Filtro)</option>
                   </select>
                 </div>
                 <div class="eq-ctrl-group">
@@ -3119,6 +3119,14 @@
             <div class="comp-top-bar">
               <div class="comp-switch-group">
                 <button type="button" class="btn-comp-bypass on" id="btnCompBypass">COMP: ATIVO (ON)</button>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="font-size: 11px; font-weight: 700; color: #94a3b8;">Posição:</span>
+                  <select class="comp-preset-select" id="compPosSelect" title="Posição do compressor no rack de áudio">
+                    <option value="0">PRE EQ</option>
+                    <option value="1" selected>PRE FADER</option>
+                    <option value="2">POST FADER</option>
+                  </select>
+                </div>
                 <div style="display: flex; align-items: center; gap: 6px;">
                   <span style="font-size: 11px; font-weight: 700; color: #94a3b8;">Preset:</span>
                   <select class="comp-preset-select" id="compPresetSelect">
@@ -3638,10 +3646,10 @@
                 switch (data.param) {
                   case 0x0F: eq.on = data.value; break;
                   case 0x01:
-                    if (data.value === 0x00) {
+                    if (data.value === 44 || data.value === 0x2C) {
                       eq.low.type = 'hpf';
                       eq.hpf = 1;
-                    } else if (data.value === 41) {
+                    } else if (data.value === 41 || data.value === 0x29) {
                       eq.low.type = 'shelf';
                       eq.hpf = 0;
                     } else {
@@ -3649,6 +3657,10 @@
                       eq.hpf = 0;
                       eq.low.q = Math.max(0, Math.min(40, 40 - data.value));
                     }
+                    break;
+                  case 0x04:
+                    eq.hpf = data.value;
+                    if (data.value === 1) eq.low.type = 'hpf';
                     break;
                   case 0x02: eq.low.freq = data.value; break;
                   case 0x03: eq.low.gain = data.value; break;
@@ -3659,10 +3671,10 @@
                   case 0x09: eq.himid.freq = data.value; break;
                   case 0x0A: eq.himid.gain = data.value; break;
                   case 0x0B:
-                    if (data.value === 43) {
+                    if (data.value === 43 || data.value === 0x2B) {
                       eq.high.type = 'lpf';
                       eq.lpf = 1;
-                    } else if (data.value === 42) {
+                    } else if (data.value === 42 || data.value === 0x2A) {
                       eq.high.type = 'shelf';
                       eq.lpf = 0;
                     } else {
@@ -3670,6 +3682,10 @@
                       eq.lpf = 0;
                       eq.high.q = Math.max(0, Math.min(40, 40 - data.value));
                     }
+                    break;
+                  case 0x0E:
+                    eq.lpf = data.value;
+                    if (data.value === 1) eq.high.type = 'lpf';
                     break;
                   case 0x0C: eq.high.freq = data.value; break;
                   case 0x0D: eq.high.gain = data.value; break;
@@ -3694,6 +3710,7 @@
               const comp = getChannelComp(targetKey);
               if (comp) {
                 switch (data.param) {
+                  case 0x00: comp.position = data.value; break;
                   case 0x01: comp.on = data.value; break;
                   case 0x09: comp.threshold = data.value; break;
                   case 0x06: comp.ratio = data.value; break;
@@ -4653,7 +4670,7 @@
     // RACK DE EFEITOS & EQUALIZADOR PARAMÉTRICO
     // ==========================================
     const EQ_FREQ_VALUES = [
-      "20.0 Hz", "21.1 Hz", "22.4 Hz", "23.6 Hz", "25.0 Hz", "26.4 Hz", "27.9 Hz", "29.5 Hz", "31.2 Hz", "33.0 Hz",
+      "21.2 Hz", "21.1 Hz", "22.4 Hz", "23.6 Hz", "25.0 Hz", "26.4 Hz", "27.9 Hz", "29.5 Hz", "31.2 Hz", "33.0 Hz",
       "34.9 Hz", "36.9 Hz", "39.0 Hz", "41.3 Hz", "43.6 Hz", "46.1 Hz", "48.8 Hz", "51.6 Hz", "54.5 Hz", "57.6 Hz",
       "60.9 Hz", "64.4 Hz", "68.1 Hz", "72.0 Hz", "76.2 Hz", "80.5 Hz", "85.1 Hz", "90.0 Hz", "95.2 Hz", "101 Hz",
       "106 Hz", "112 Hz", "119 Hz", "126 Hz", "133 Hz", "141 Hz", "149 Hz", "157 Hz", "166 Hz", "176 Hz",
@@ -4958,35 +4975,67 @@
       btnEqBypass.classList.toggle('on', eq.on === 1);
       btnEqBypass.textContent = eq.on === 1 ? 'EQ: ATIVO (ON)' : 'EQ: BYPASS (OFF)';
 
-      // Sincroniza HPF (Banda LOW)
-      const isHpfActive = eq.hpf === 1 || eq.low.type === 'hpf';
-      btnEqHpf.classList.toggle('active', isHpfActive);
+      // Sincroniza estado de LOW (HPF / Shelf / Peaking)
+      const isLowHpf = eq.low.type === 'hpf' || eq.hpf === 1;
+      const isLowShelf = eq.low.type === 'shelf';
+      const isLowPeaking = !isLowHpf && !isLowShelf;
+
+      btnEqHpf.classList.toggle('active', isLowHpf);
       if (lblHpfStatus) {
-        lblHpfStatus.textContent = isHpfActive ? EQ_FREQ_VALUES[eq.low.freq] : 'OFF';
+        lblHpfStatus.textContent = isLowHpf ? (EQ_FREQ_VALUES[eq.low.freq] || 'ON') : 'OFF';
       }
       if (lblLowGainTitle) {
-        lblLowGainTitle.textContent = isHpfActive ? 'CORTE HPF' : 'GANHO';
+        lblLowGainTitle.textContent = isLowHpf ? 'CORTE HPF' : 'GANHO';
       }
       if (lblLowFreqTitle) {
-        lblLowFreqTitle.textContent = isHpfActive ? 'FREQ (HPF)' : 'FREQ';
+        lblLowFreqTitle.textContent = isLowHpf ? 'FREQ (HPF)' : 'FREQ';
       }
-      eqControls.low.gain.rng.disabled = isHpfActive;
-      eqControls.low.gain.rng.style.opacity = isHpfActive ? '0.35' : '1';
 
-      // Sincroniza LPF (Banda HIGH)
-      const isLpfActive = eq.lpf === 1 || eq.high.type === 'lpf';
-      btnEqLpf.classList.toggle('active', isLpfActive);
+      // Ganho LOW: desabilitado em HPF, habilitado em Shelf e Peaking
+      eqControls.low.gain.rng.disabled = isLowHpf;
+      eqControls.low.gain.rng.style.opacity = isLowHpf ? '0.35' : '1';
+      eqControls.low.gain.rng.style.pointerEvents = isLowHpf ? 'none' : 'auto';
+
+      // Q LOW: habilitado APENAS em Peaking; desabilitado em HPF e Shelf
+      eqControls.low.q.rng.disabled = !isLowPeaking;
+      eqControls.low.q.rng.style.opacity = isLowPeaking ? '1' : '0.35';
+      eqControls.low.q.rng.style.pointerEvents = isLowPeaking ? 'auto' : 'none';
+
+      // Frequência LOW: sempre habilitada
+      eqControls.low.freq.rng.disabled = false;
+      eqControls.low.freq.rng.style.opacity = '1';
+      eqControls.low.freq.rng.style.pointerEvents = 'auto';
+
+      // Sincroniza estado de HIGH (LPF / Shelf / Peaking)
+      const isHighLpf = eq.high.type === 'lpf' || eq.lpf === 1;
+      const isHighShelf = eq.high.type === 'shelf';
+      const isHighPeaking = !isHighLpf && !isHighShelf;
+
+      btnEqLpf.classList.toggle('active', isHighLpf);
       if (lblLpfStatus) {
-        lblLpfStatus.textContent = isLpfActive ? EQ_FREQ_VALUES[eq.high.freq] : 'OFF';
+        lblLpfStatus.textContent = isHighLpf ? (EQ_FREQ_VALUES[eq.high.freq] || 'ON') : 'OFF';
       }
       if (lblHighGainTitle) {
-        lblHighGainTitle.textContent = isLpfActive ? 'CORTE LPF' : 'GANHO';
+        lblHighGainTitle.textContent = isHighLpf ? 'CORTE LPF' : 'GANHO';
       }
       if (lblHighFreqTitle) {
-        lblHighFreqTitle.textContent = isLpfActive ? 'FREQ (LPF)' : 'FREQ';
+        lblHighFreqTitle.textContent = isHighLpf ? 'FREQ (LPF)' : 'FREQ';
       }
-      eqControls.high.gain.rng.disabled = isLpfActive;
-      eqControls.high.gain.rng.style.opacity = isLpfActive ? '0.35' : '1';
+
+      // Ganho HIGH: desabilitado em LPF, habilitado em Shelf e Peaking
+      eqControls.high.gain.rng.disabled = isHighLpf;
+      eqControls.high.gain.rng.style.opacity = isHighLpf ? '0.35' : '1';
+      eqControls.high.gain.rng.style.pointerEvents = isHighLpf ? 'none' : 'auto';
+
+      // Q HIGH: habilitado APENAS em Peaking; desabilitado em LPF e Shelf
+      eqControls.high.q.rng.disabled = !isHighPeaking;
+      eqControls.high.q.rng.style.opacity = isHighPeaking ? '1' : '0.35';
+      eqControls.high.q.rng.style.pointerEvents = isHighPeaking ? 'auto' : 'none';
+
+      // Frequência HIGH: sempre habilitada
+      eqControls.high.freq.rng.disabled = false;
+      eqControls.high.freq.rng.style.opacity = '1';
+      eqControls.high.freq.rng.style.pointerEvents = 'auto';
 
       // Sincroniza Atenuador Digital (Elemento 0x1D) - apenas canais de entrada 1-32
       const attContainer = document.getElementById('eqAttContainer');
@@ -5011,19 +5060,37 @@
         const ctrl = eqControls[bKey];
 
         ctrl.gain.rng.value = bState.gain;
-        if (bKey === 'low' && isHpfActive) {
-          ctrl.gain.lbl.textContent = 'CORTE ATIVO';
-        } else if (bKey === 'high' && isLpfActive) {
-          ctrl.gain.lbl.textContent = 'CORTE ATIVO';
+        if (bKey === 'low') {
+          if (isLowHpf) {
+            ctrl.gain.lbl.textContent = 'ATIVO';
+            ctrl.q.lbl.textContent = 'HPF';
+          } else if (isLowShelf) {
+            ctrl.gain.lbl.textContent = rawGainToDb(bState.gain);
+            ctrl.q.lbl.textContent = 'SHELF';
+          } else {
+            ctrl.gain.lbl.textContent = rawGainToDb(bState.gain);
+            ctrl.q.lbl.textContent = formatQDisplay(bState.q);
+          }
+        } else if (bKey === 'high') {
+          if (isHighLpf) {
+            ctrl.gain.lbl.textContent = 'ATIVO';
+            ctrl.q.lbl.textContent = 'LPF';
+          } else if (isHighShelf) {
+            ctrl.gain.lbl.textContent = rawGainToDb(bState.gain);
+            ctrl.q.lbl.textContent = 'SHELF';
+          } else {
+            ctrl.gain.lbl.textContent = rawGainToDb(bState.gain);
+            ctrl.q.lbl.textContent = formatQDisplay(bState.q);
+          }
         } else {
           ctrl.gain.lbl.textContent = rawGainToDb(bState.gain);
+          ctrl.q.lbl.textContent = formatQDisplay(bState.q);
         }
 
         ctrl.freq.rng.value = bState.freq;
         ctrl.freq.lbl.textContent = EQ_FREQ_VALUES[bState.freq] || `${bState.freq}`;
 
         ctrl.q.rng.value = bState.q;
-        ctrl.q.lbl.textContent = formatQDisplay(bState.q);
       });
     }
 
@@ -5052,29 +5119,41 @@
       sendEqParam(0x0F, eq.on);
     });
 
-    // Toggle HPF (Banda LOW via Q param 0x01: 0x00 = HPF, 41 = Shelf)
+    // Toggle HPF (Banda LOW)
     btnEqHpf.addEventListener('click', () => {
       const eq = getChannelEq(currentSelectedCh);
-      eq.hpf = eq.hpf === 1 ? 0 : 1;
-      eq.low.type = eq.hpf === 1 ? 'hpf' : 'shelf';
-      if (eq.hpf === 1) {
-        sendEqParam(0x01, 0x00);
+      if (eq.low.type === 'hpf' || eq.hpf === 1) {
+        eq.low.type = 'shelf';
+        eq.hpf = 0;
+        sendEqParam(0x04, 0);  // Desliga chave do filtro HPF
+        sendEqParam(0x01, 41); // Low Shelf (0x29)
+        sendEqParam(0x03, eq.low.gain - 180); // Restaura ganho
       } else {
-        sendEqParam(0x01, 41); // 0x29
+        eq.low.type = 'hpf';
+        eq.hpf = 1;
+        sendEqParam(0x01, 44); // 0x2C = HPF
+        sendEqParam(0x04, 1);  // Liga chave do filtro HPF
+        sendEqParam(0x03, 1);  // Ganho em modo filtro
       }
       syncEqModalFromState(currentSelectedCh);
       requestEqRedraw();
     });
 
-    // Toggle LPF (Banda HIGH via Q param 0x0B: 43 = LPF, 42 = Shelf)
+    // Toggle LPF (Banda HIGH)
     btnEqLpf.addEventListener('click', () => {
       const eq = getChannelEq(currentSelectedCh);
-      eq.lpf = eq.lpf === 1 ? 0 : 1;
-      eq.high.type = eq.lpf === 1 ? 'lpf' : 'shelf';
-      if (eq.lpf === 1) {
-        sendEqParam(0x0B, 43); // 0x2B
+      if (eq.high.type === 'lpf' || eq.lpf === 1) {
+        eq.high.type = 'shelf';
+        eq.lpf = 0;
+        sendEqParam(0x0E, 0);  // Desliga chave do filtro LPF
+        sendEqParam(0x0B, 42); // High Shelf (0x2A)
+        sendEqParam(0x0D, eq.high.gain - 180); // Restaura ganho
       } else {
-        sendEqParam(0x0B, 42); // 0x2A
+        eq.high.type = 'lpf';
+        eq.lpf = 1;
+        sendEqParam(0x0B, 43); // 0x2B = LPF
+        sendEqParam(0x0E, 1);  // Liga chave do filtro LPF
+        sendEqParam(0x0D, 1);  // Ganho em modo filtro
       }
       syncEqModalFromState(currentSelectedCh);
       requestEqRedraw();
@@ -5095,32 +5174,47 @@
       showToast(`EQ de ${chLabel} zerado (Flat 0.0 dB) ⚡`, '⚡');
     });
 
-    // Tipos de Filtro LOW e HIGH (LOW: 0x01 [0=hpf, 41=shelf, 40-q=peaking]; HIGH: 0x0B [43=lpf, 42=shelf, 40-q=peaking])
+    // Tipos de Filtro LOW (LOW: 0x01 [44=hpf (0x2C), 41=shelf (0x29), 40-q=peaking]; Chave Filtro: 0x04; Ganho: 0x03)
     eqControls.low.type.addEventListener('change', (e) => {
       const eq = getChannelEq(currentSelectedCh);
-      eq.low.type = e.target.value;
-      eq.hpf = eq.low.type === 'hpf' ? 1 : 0;
-      if (eq.low.type === 'hpf') {
-        sendEqParam(0x01, 0x00);
-      } else if (eq.low.type === 'shelf') {
-        sendEqParam(0x01, 41); // 0x29
+      const val = e.target.value;
+      eq.low.type = val;
+      eq.hpf = (val === 'hpf') ? 1 : 0;
+      if (val === 'hpf') {
+        sendEqParam(0x01, 44); // 0x2C = HPF da Yamaha 01V96
+        sendEqParam(0x04, 1);  // 0x04 = 1 (Chave HPF ativa)
+        sendEqParam(0x03, 1);  // Ganho em modo filtro
+      } else if (val === 'shelf') {
+        sendEqParam(0x04, 0);  // Desliga filtro HPF
+        sendEqParam(0x01, 41); // 0x29 = Low Shelf
+        sendEqParam(0x03, eq.low.gain - 180); // Restaura ganho da UI
       } else {
-        sendEqParam(0x01, 40 - eq.low.q);
+        sendEqParam(0x04, 0);  // Desliga filtro HPF
+        sendEqParam(0x01, 40 - eq.low.q); // Peaking com o Q atual
+        sendEqParam(0x03, eq.low.gain - 180); // Restaura ganho da UI
       }
       syncEqModalFromState(currentSelectedCh);
       requestEqRedraw();
     });
 
+    // Tipos de Filtro HIGH (HIGH: 0x0B [43=lpf (0x2B), 42=shelf (0x2A), 40-q=peaking]; Chave Filtro: 0x0E; Ganho: 0x0D)
     eqControls.high.type.addEventListener('change', (e) => {
       const eq = getChannelEq(currentSelectedCh);
-      eq.high.type = e.target.value;
-      eq.lpf = eq.high.type === 'lpf' ? 1 : 0;
-      if (eq.high.type === 'lpf') {
-        sendEqParam(0x0B, 43); // 0x2B
-      } else if (eq.high.type === 'shelf') {
-        sendEqParam(0x0B, 42); // 0x2A
+      const val = e.target.value;
+      eq.high.type = val;
+      eq.lpf = (val === 'lpf') ? 1 : 0;
+      if (val === 'lpf') {
+        sendEqParam(0x0B, 43); // 0x2B = LPF
+        sendEqParam(0x0E, 1);  // 0x0E = 1 (Chave LPF ativa)
+        sendEqParam(0x0D, 1);  // Ganho em modo filtro
+      } else if (val === 'shelf') {
+        sendEqParam(0x0E, 0);  // Desliga filtro LPF
+        sendEqParam(0x0B, 42); // 0x2A = High Shelf
+        sendEqParam(0x0D, eq.high.gain - 180); // Restaura ganho da UI
       } else {
-        sendEqParam(0x0B, 40 - eq.high.q);
+        sendEqParam(0x0E, 0);  // Desliga filtro LPF
+        sendEqParam(0x0B, 40 - eq.high.q); // Peaking com o Q atual
+        sendEqParam(0x0D, eq.high.gain - 180); // Restaura ganho da UI
       }
       syncEqModalFromState(currentSelectedCh);
       requestEqRedraw();
@@ -5188,33 +5282,17 @@
 
       // Q (Largura de Banda)
       ctrl.q.rng.addEventListener('input', (e) => {
-        const val = parseInt(e.target.value, 10);
         const eq = getChannelEq(currentSelectedCh);
+        if (bKey === 'low' && eq.low.type !== 'peaking') return;
+        if (bKey === 'high' && eq.high.type !== 'peaking') return;
+
+        const val = parseInt(e.target.value, 10);
         eq[bKey].q = val;
         ctrl.q.lbl.textContent = formatQDisplay(val);
 
-        // Se mover Q em LOW ou HIGH enquanto estiver em shelf ou filter, automaticamente comuta para Peaking
-        if (bKey === 'low' && eq.low.type !== 'peaking') {
-          eq.low.type = 'peaking';
-          eq.hpf = 0;
-          eqControls.low.type.value = 'peaking';
-          btnEqHpf.classList.remove('active');
-          if (lblHpfStatus) lblHpfStatus.textContent = 'OFF';
-          eqControls.low.gain.rng.disabled = false;
-          eqControls.low.gain.rng.style.opacity = '1';
-        } else if (bKey === 'high' && eq.high.type !== 'peaking') {
-          eq.high.type = 'peaking';
-          eq.lpf = 0;
-          eqControls.high.type.value = 'peaking';
-          btnEqLpf.classList.remove('active');
-          if (lblLpfStatus) lblLpfStatus.textContent = 'OFF';
-          eqControls.high.gain.rng.disabled = false;
-          eqControls.high.gain.rng.style.opacity = '1';
-        }
-
         // Na tabela de parâmetros SysEx da 01V96 (Tabela 4), 0x00 = Q 10.0 e 0x28 (40) = Q 0.10.
-        // O slider da UI vai naturalmente de 0 (0.10 largo) a 40 (10 estreito), então enviamos (40 - val):
-        const midiVal = 40 - val;
+        // O slider da UI vai estritamente de 0 (0.10 largo) a 40 (10 estreito) no modo peaking:
+        const midiVal = Math.max(0, Math.min(40, 40 - val));
         sendEqParam(ctrl.q.param, midiVal);
       });
     });
@@ -5480,6 +5558,7 @@
     // Estado do Compressor para todos os 32 canais
     const compState = Array.from({ length: TOTAL_CHANNELS }, () => ({
       on: 1,           // 1 = Ativo (ON), 0 = Bypass (OFF)
+      position: 1,     // 0 = PRE EQ, 1 = PRE FADER, 2 = POST FADER (0x00)
       threshold: 340,  // -20.0 dB (0 = -54.0 dB, 540 = 0.0 dB)
       ratio: 7,        // 4.0:1 (Índice de 0 a 15)
       attack: 20,      // 20 ms (0 a 120 ms)
@@ -5566,6 +5645,12 @@
       // Gain
       compControls.gain.rng.value = comp.gain;
       compControls.gain.lbl.textContent = rawGainToCompDb(comp.gain);
+
+      // Posição no Rack (PRE EQ, PRE FADER, POST FADER)
+      const compPosSelect = document.getElementById('compPosSelect');
+      if (compPosSelect) {
+        compPosSelect.value = comp.position !== undefined ? comp.position : 1;
+      }
     }
 
     // Envia comandos SysEx de Compressor (Element 0x1F para CH 1-32, 0x51 para Stereo Master)
@@ -5785,6 +5870,7 @@
     btnCompReset.addEventListener('click', () => {
       const def = COMP_PRESETS.default;
       const comp = getChannelComp(currentSelectedCh);
+      comp.position = 1;
       comp.threshold = def.threshold;
       comp.ratio = def.ratio;
       comp.attack = def.attack;
@@ -5793,6 +5879,7 @@
       comp.gain = def.gain;
 
       syncCompModalFromState(currentSelectedCh);
+      sendCompParam(0x00, 1);
       sendCompParam(0x09, def.threshold - 540);
       sendCompParam(0x06, def.ratio);
       sendCompParam(0x04, def.attack);
@@ -5803,6 +5890,17 @@
       const chLabel = typeof currentSelectedCh === 'number' ? `CH ${currentSelectedCh + 1}` : currentSelectedCh;
       showToast(`Compressor de ${chLabel} restaurado para o padrão ⚡`, '⚡');
     });
+
+    // Posição do Compressor no Rack (0x00: 0 = PRE EQ, 1 = PRE FADER, 2 = POST FADER)
+    const compPosSelect = document.getElementById('compPosSelect');
+    if (compPosSelect) {
+      compPosSelect.addEventListener('change', (e) => {
+        const val = parseInt(e.target.value, 10);
+        const comp = getChannelComp(currentSelectedCh);
+        if (comp) comp.position = val;
+        sendCompParam(0x00, val);
+      });
+    }
 
     // Seleção de Presets de Compressão
     compPresetSelect.addEventListener('change', (e) => {

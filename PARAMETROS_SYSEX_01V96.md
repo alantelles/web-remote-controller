@@ -124,18 +124,20 @@ if (raw & 0x08000000) != 0 {
 | Param (`pp`) | Parâmetro | Faixa de Valores | Descrição |
 |---|---|---|---|
 | `0x0F` | **EQ ON / Bypass** | `0` ou `1` | `0` = Bypass (Desligado), `1` = EQ Ativo (Ligado) |
-| `0x01` | **LOW Q / Filter Type** | `0` a `41` | `0x00` = HPF (Passa-Altas), `0x29` (41) = L.SHELF, `0..40` (`40 - Q`) = Peaking (0.10 a 10.0) |
-| `0x02` | **LOW Frequency** | `0` a `124` | 125 passos logarítmicos (20.0 Hz a 20.0 kHz, `0`=20.0 Hz, `124`=20.0 kHz) |
-| `0x03` | **LOW Gain** | `-180` a `+180` | Ganho de -18.0 dB a +18.0 dB em décimos de dB (`0` = 0.0 dB). Chave ON/OFF quando em HPF |
+| `0x01` | **LOW Q / Filter Type** | `0` a `44` | `0x2C` (44) = HPF (Passa-Altas), `0x29` (41) = L.SHELF, `0..40` (`40 - Q`) = Peaking (0.10 a 10.0) |
+| `0x02` | **LOW Frequency** | `0` a `124` | 125 passos logarítmicos (21.2 Hz a 20.0 kHz, `0`=21.2 Hz, `124`=20.0 kHz) |
+| `0x03` | **LOW Gain** | `-180` a `+180` | Ganho de -18.0 dB a +18.0 dB em décimos de dB (`0` = 0.0 dB) |
+| `0x04` | **LOW HPF ON / OFF** | `0` ou `1` | `0` = HPF Desligado, `1` = HPF Ativo (Chave do filtro corta-grave) |
 | `0x05` | **LO-MID Q** | `0` a `40` | Fator Q de 0.10 a 10.0 (`40 - Q`) |
-| `0x06` | **LO-MID Frequency**| `0` a `124` | 125 passos logarítmicos (20.0 Hz a 20.0 kHz) |
+| `0x06` | **LO-MID Frequency**| `0` a `124` | 125 passos logarítmicos (21.2 Hz a 20.0 kHz) |
 | `0x07` | **LO-MID Gain** | `-180` a `+180` | Ganho em décimos de dB |
 | `0x08` | **HI-MID Q** | `0` a `40` | Fator Q de 0.10 a 10.0 (`40 - Q`) |
-| `0x09` | **HI-MID Frequency**| `0` a `124` | 125 passos logarítmicos (20.0 Hz a 20.0 kHz) |
+| `0x09` | **HI-MID Frequency**| `0` a `124` | 125 passos logarítmicos (21.2 Hz a 20.0 kHz) |
 | `0x0A` | **HI-MID Gain** | `-180` a `+180` | Ganho em décimos de dB |
 | `0x0B` | **HIGH Q / Filter Type**| `0` a `43` | `0x2B` (43) = LPF (Passa-Baixas), `0x2A` (42) = H.SHELF, `0..40` (`40 - Q`) = Peaking |
-| `0x0C` | **HIGH Frequency** | `0` a `124` | 125 passos logarítmicos (20.0 Hz a 20.0 kHz) |
-| `0x0D` | **HIGH Gain** | `-180` a `+180` | Ganho em décimos de dB. Chave ON/OFF quando em LPF |
+| `0x0C` | **HIGH Frequency** | `0` a `124` | 125 passos logarítmicos (21.2 Hz a 20.0 kHz) |
+| `0x0D` | **HIGH Gain** | `-180` a `+180` | Ganho em décimos de dB |
+| `0x0E` | **HIGH LPF ON / OFF** | `0` ou `1` | `0` = LPF Desligado, `1` = LPF Ativo (Chave do filtro corta-agudo) |
 
 #### Atenuador Digital de Entrada (Elemento `0x1D`)
 * `ee = 0x1D`, `pp = 0x00`, `cc = 0x00..0x1F` (Canais 1 a 32)
@@ -149,6 +151,7 @@ if (raw & 0x08000000) != 0 {
 
 | Param (`pp`) | Parâmetro | Faixa de Valores | Descrição |
 |---|---|---|---|
+| `0x00` | **Position (Insert / Routing)** | `0`, `1` ou `2` | `0` = Pre EQ, `1` = Pre Fader (Post EQ), `2` = Post Fader |
 | `0x01` | **COMP ON / Bypass** | `0` ou `1` | `0` = Bypass, `1` = Compressor Ativo |
 | `0x09` | **Threshold** | `-540` a `0` | Limiar de -54.0 dB a 0.0 dB em décimos de dB negativos |
 | `0x06` | **Ratio** | `0` a `15` | `0`=1.0:1 até `15`=∞:1 |

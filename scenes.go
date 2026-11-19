@@ -40,13 +40,14 @@ type EQState struct {
 
 // CompState representa o compressor de canal ou saída
 type CompState struct {
-	On        int `json:"on"`        // 0 = Bypass, 1 = On (0x00)
-	Threshold int `json:"threshold"` // 0 (-54dB) a 54 (0dB) (0x01)
-	Ratio     int `json:"ratio"`     // 0 a 15 (0x02)
-	Attack    int `json:"attack"`    // 0 a 120 ms (0x03)
-	Release   int `json:"release"`   // 0 a 79 (0x04)
-	Knee      int `json:"knee"`      // 0 (hard) a 5 (soft) (0x05)
-	Gain      int `json:"gain"`      // 0 a 36 (0dB a +18dB) (0x06)
+	On        int `json:"on"`        // 0 = Bypass, 1 = On (0x01)
+	Position  int `json:"position"`  // 0 = Pre EQ, 1 = Pre Fader, 2 = Post Fader (0x00)
+	Threshold int `json:"threshold"` // -540 a 0 décimos de dB (0x09)
+	Ratio     int `json:"ratio"`     // 0 a 15 (0x06)
+	Attack    int `json:"attack"`    // 0 a 120 ms (0x04)
+	Release   int `json:"release"`   // 0 a 159 (0x05)
+	Knee      int `json:"knee"`      // 0 (hard) a 5 (soft) (0x08)
+	Gain      int `json:"gain"`      // 0 a 180 (0dB a +18dB) (0x07)
 }
 
 // AuxSend representa o envio de um canal para um auxiliar
@@ -152,6 +153,7 @@ func newDefaultEQState() EQState {
 func newDefaultCompState() CompState {
 	return CompState{
 		On:        1,
+		Position:  1,    // Pre Fader (Post EQ)
 		Threshold: -200, // -20.0 dB
 		Ratio:     7,    // 4.0:1
 		Attack:    20,   // 20 ms
@@ -315,10 +317,17 @@ func applyEQParam(eq *EQState, param byte, value int) {
 		eq.On = value
 	case 0x01:
 		eq.Low.Q = value
+		if value == 44 {
+			eq.HPFOn = 1
+		} else {
+			eq.HPFOn = 0
+		}
 	case 0x02:
 		eq.Low.Freq = value
 	case 0x03:
 		eq.Low.Gain = value
+	case 0x04:
+		eq.HPFOn = value
 	case 0x05:
 		eq.LowMid.Q = value
 	case 0x06:
@@ -333,15 +342,24 @@ func applyEQParam(eq *EQState, param byte, value int) {
 		eq.HiMid.Gain = value
 	case 0x0B:
 		eq.High.Q = value
+		if value == 43 {
+			eq.LPFOn = 1
+		} else {
+			eq.LPFOn = 0
+		}
 	case 0x0C:
 		eq.High.Freq = value
 	case 0x0D:
 		eq.High.Gain = value
+	case 0x0E:
+		eq.LPFOn = value
 	}
 }
 
 func applyCompParam(comp *CompState, param byte, value int) {
 	switch param {
+	case 0x00:
+		comp.Position = value
 	case 0x01:
 		comp.On = value
 	case 0x09:
@@ -738,6 +756,7 @@ func generateEQSysEx(element, channel byte, eq *EQState) []sysexMessage {
 
 func generateCompSysEx(element, channel byte, comp *CompState) []sysexMessage {
 	return []sysexMessage{
+		{element: element, param: 0x00, channel: channel, value: comp.Position},
 		{element: element, param: 0x01, channel: channel, value: comp.On},
 		{element: element, param: 0x09, channel: channel, value: comp.Threshold},
 		{element: element, param: 0x06, channel: channel, value: comp.Ratio},
