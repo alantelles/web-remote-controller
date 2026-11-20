@@ -3324,6 +3324,31 @@
   </div>
 
   <script>
+    // Suporte a subcaminho reverso (ex: /mixer)
+    const BASE_PATH = window.location.pathname.startsWith('/mixer') ? '/mixer' : '';
+    if (BASE_PATH) {
+      const _origFetch = window.fetch;
+      window.fetch = function(input, init) {
+        if (typeof input === 'string' && input.startsWith('/') && !input.startsWith(BASE_PATH)) {
+          input = BASE_PATH + input;
+        }
+        return _origFetch(input, init);
+      };
+      const updateLinks = () => {
+        document.querySelectorAll('a[href^="/"]').forEach(a => {
+          const h = a.getAttribute('href');
+          if (h && !h.startsWith(BASE_PATH)) {
+            a.setAttribute('href', BASE_PATH + h);
+          }
+        });
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updateLinks);
+      } else {
+        updateLinks();
+      }
+    }
+
     // ==========================================
     // ESTADO E CONSTANTES
     // ==========================================
@@ -3553,7 +3578,7 @@
       try {
         const res = await fetch('/api/me');
         if (res.status === 401) {
-          window.location.href = '/login?error=session';
+          window.location.href = `${BASE_PATH}/login?error=session`;
           return;
         }
         if (res.ok) {
@@ -3590,7 +3615,7 @@
       }
 
       const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-      ws = new WebSocket(`${proto}//${location.host}/ws`);
+      ws = new WebSocket(`${proto}//${location.host}${BASE_PATH}/ws`);
 
       ws.onopen = () => {
         wsStatusText.textContent = 'Conectado';
@@ -3605,7 +3630,7 @@
         // Verifica se a sessão expirou
         fetch('/api/me').then(res => {
           if (res.status === 401) {
-            window.location.href = '/login?error=session';
+            window.location.href = `${BASE_PATH}/login?error=session`;
             return;
           }
           wsReconnectTimer = setTimeout(connectWebSocket, 2000);
@@ -6599,7 +6624,7 @@
             <span class="scene-item-date">${dateStr}</span>
             <div class="scene-item-actions">
               <button type="button" class="btn-scene-action primary sm btn-recall" data-id="${scene.id}" data-name="${escapeHTML(scene.name)}" title="Carregar parâmetros na mesa física">▶ Recall</button>
-              <a href="/api/scenes/${scene.id}?download=1" class="btn-scene-action secondary sm" style="text-decoration:none;" title="Baixar arquivo JSON">⬇ JSON</a>
+              <a href="${BASE_PATH}/api/scenes/${scene.id}?download=1" class="btn-scene-action secondary sm" style="text-decoration:none;" title="Baixar arquivo JSON">⬇ JSON</a>
               <button type="button" class="btn-scene-action danger sm btn-delete" data-id="${scene.id}" data-name="${escapeHTML(scene.name)}" title="Excluir cena">🗑</button>
             </div>
           `;

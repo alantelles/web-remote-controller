@@ -2539,6 +2539,31 @@
   <div class="toast-msg" id="toastMsg">Salvo com sucesso!</div>
 
   <script>
+    // Suporte a subcaminho reverso (ex: /mixer)
+    const BASE_PATH = window.location.pathname.startsWith('/mixer') ? '/mixer' : '';
+    if (BASE_PATH) {
+      const _origFetch = window.fetch;
+      window.fetch = function(input, init) {
+        if (typeof input === 'string' && input.startsWith('/') && !input.startsWith(BASE_PATH)) {
+          input = BASE_PATH + input;
+        }
+        return _origFetch(input, init);
+      };
+      const updateLinks = () => {
+        document.querySelectorAll('a[href^="/"]').forEach(a => {
+          const h = a.getAttribute('href');
+          if (h && !h.startsWith(BASE_PATH)) {
+            a.setAttribute('href', BASE_PATH + h);
+          }
+        });
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updateLinks);
+      } else {
+        updateLinks();
+      }
+    }
+
     // ==========================================
     // CONSTANTES E MAPEAMENTO DE SYSEX (01V96V2)
     // ==========================================
@@ -3017,7 +3042,7 @@
     function connectWebSocket() {
       const loc = window.location;
       const proto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${proto}//${loc.host}/ws`;
+      const wsUrl = `${proto}//${loc.host}${BASE_PATH}/ws`;
 
       ws = new WebSocket(wsUrl);
 
@@ -3037,7 +3062,7 @@
 
         fetch('/api/me').then(res => {
           if (res.status === 401) {
-            window.location.href = '/login?error=session';
+            window.location.href = `${BASE_PATH}/login?error=session`;
             return;
           }
           setTimeout(connectWebSocket, 2000);
@@ -4481,7 +4506,7 @@
               </div>
               <div class="mobile-scene-card-actions">
                 <button type="button" class="btn-mobile-scene-action primary sm btn-mob-recall" data-id="${scene.id}" data-name="${escapeHTMLMobile(scene.name)}">▶ Recall</button>
-                <a href="/api/scenes/${scene.id}?download=1" class="btn-mobile-scene-action secondary sm">⬇ JSON</a>
+                <a href="${BASE_PATH}/api/scenes/${scene.id}?download=1" class="btn-mobile-scene-action secondary sm">⬇ JSON</a>
                 <button type="button" class="btn-mobile-scene-action danger sm btn-mob-delete" data-id="${scene.id}" data-name="${escapeHTMLMobile(scene.name)}" title="Excluir cena">🗑</button>
               </div>
             `;

@@ -349,6 +349,12 @@
       }
     }
 
+    // Suporte a subcaminho reverso (ex: /mixer)
+    const BASE_PATH = window.location.pathname.startsWith('/mixer') ? '/mixer' : '';
+    if (BASE_PATH) {
+      if (loginForm) loginForm.action = BASE_PATH + '/login';
+    }
+
     // Toggle exibir/ocultar senha
     btnTogglePwd.addEventListener('click', () => {
       const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
@@ -370,7 +376,7 @@
       alertError.classList.remove('visible');
 
       try {
-        const response = await fetch('/login', {
+        const response = await fetch(`${BASE_PATH}/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -387,7 +393,7 @@
           if (isMobileClient && dest === '/') {
             dest = '/m';
           }
-          window.location.href = dest;
+          window.location.href = dest.startsWith('/') ? (BASE_PATH + dest) : dest;
         } else {
           alertErrorText.textContent = data.error || 'Usuário ou senha incorretos.';
           alertError.classList.add('visible');

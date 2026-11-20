@@ -1,0 +1,24 @@
+[Unit]
+Description=01V96 Remote Controller (Yamaha 01V96 / 01V96V2 Web Remote)
+After=network.target sound.target
+
+[Service]
+Type=simple
+# Altere para o usuário do sistema no Ubuntu 20.04
+User=alantelles
+Group=audio
+
+# Diretório onde o binário e arquivos (index.html, usuarios.csv, data) residem
+WorkingDirectory=/home/alantelles/development/midi-test-go
+ExecStart=/home/alantelles/development/midi-test-go/01v96-controller -addr :8080
+
+# Reinicialização automática em caso de falha
+Restart=always
+RestartSec=3
+LimitNOFILE=65536
+
+# Variáveis de ambiente opcionais
+Environment=LANG=pt_BR.UTF-8
+
+[Install]
+WantedBy=multi-user.target
