@@ -198,13 +198,14 @@ O **Web Remote Controller** é uma solução moderna e leve para controle remoto
 11. **Proteção contra Loopback e Eco Local:** Filtro de supressão de reflexão que descarta mensagens emitidas pela própria aplicação que retornam via portas ALSA como `Midi Through` ou `VirMIDI`.
 12. **Ambiente de Desenvolvimento Sem Mesa:** Simulador multi-fader e logs detalhados de decodificação SysEx no console.
 13. **Estabilidade de Tráfego:** Throttling ativo protegendo a saída MIDI contra estouro de buffer, com bypass automático para eventos discretos (Mute, On, Flat, Bypass de EQ, Comp e Gate).
-14. **Navegação de Canais por Teclado no Desktop (Modo Shift 2x):**
+14. **Navegação de Canais por Teclado no Desktop (Modo Shift 2x) & Seleção Múltipla:**
     * Pressionar a tecla `Shift` duas vezes consecutivas ativa o modo de seleção tátil no console web.
     * O canal em foco recebe uma aura luminosa (idêntica ao seletor mobile) e seu cabeçalho é destacado.
     * As setas `←` / `→` alternam o canal selecionado, realizando rolagem horizontal suave da viewport sempre que o canal estiver fora da área visível.
-    * As setas `↑` / `↓` controlam diretamente o volume do fader para a mix ativa (Master ou Auxiliar).
-    * `Ctrl+↑`: no Desktop, ajusta instantaneamente o canal focado para `0.0 dB` (823 nos canais ou 1023 no Master out).
-    * `Ctrl+↓`: no Desktop, ajusta instantaneamente o canal focado para `-∞ dB` (0 / mute de fader).
+    * **Seleção de Canais Contíguos (Bloco):** ao segurar `Shift` e navegar com `←` / `→` (ou `↑` / `↓` no Mobile), seleciona uma faixa contígua de canais com a aura luminosa.
+    * **Ajuste de Volume em Bloco:** `↑` / `↓` no PC (ou `←` / `→` no Mobile) altera o volume de **todos os canais selecionados simultaneamente**, preservando o equilíbrio relativo entre eles.
+    * `Ctrl+↑`: no Desktop, ajusta instantaneamente o canal focado (ou bloco) para `0.0 dB` (823 nos canais ou 1023 no Master out).
+    * `Ctrl+↓`: no Desktop, ajusta instantaneamente o canal focado (ou bloco) para `-∞ dB` (0 / mute de fader).
     * No Mobile (`/m`), como os faders são horizontais, os atalhos seguem o eixo do slider: `Ctrl+→` ajusta para `0.0 dB` e `Ctrl+←` para `-∞ dB`.
     * Teclas `0` e `1` a `8` continuam funcionais para comutação rápida de saída, e pressionar `Shift 2x` novamente (ou `Escape`) encerra o modo.
 

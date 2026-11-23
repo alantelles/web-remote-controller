@@ -3931,22 +3931,32 @@
       }
     }
 
-    function setSelectedChannel(ch) {
-      selectedChannel = ch;
+    let selectedChannelsMobile = new Set([0]);
+    let mobileAnchorChannel = 0;
+
+    function renderSelectedChannelsMobile() {
       for (let i = 0; i < TOTAL_CHANNELS; i++) {
         const btn = document.getElementById(`selBtn_${i}`);
         const card = document.getElementById(`channelCard_${i}`);
+        const isSel = selectedChannelsMobile.has(i);
         if (btn) {
-          if (i === ch) btn.classList.add('selected');
+          if (isSel) btn.classList.add('selected');
           else btn.classList.remove('selected');
         }
         if (card) {
-          if (i === ch) card.classList.add('selected');
+          if (isSel) card.classList.add('selected');
           else card.classList.remove('selected');
         }
       }
       const masterSel = document.getElementById('masterSelBtn');
       if (masterSel) masterSel.classList.remove('selected');
+    }
+
+    function setSelectedChannel(ch) {
+      selectedChannel = ch;
+      mobileAnchorChannel = ch;
+      selectedChannelsMobile = new Set([ch]);
+      renderSelectedChannelsMobile();
     }
 
     function setSelectedMaster() {
@@ -7026,14 +7036,24 @@
         if (e.ctrlKey || e.metaKey) {
           if (e.key === 'ArrowRight') {
             e.preventDefault();
-            if (typeof selectedChannel === 'number') {
+            if (selectedChannelsMobile.size > 1) {
+              selectedChannelsMobile.forEach(ch => {
+                setChannelFader(ch, NOMINAL_VALUE);
+              });
+              showToast(`${selectedChannelsMobile.size} canais → 0.0 dB`);
+            } else if (typeof selectedChannel === 'number') {
               setChannelFader(selectedChannel, NOMINAL_VALUE);
               showToast(`CH ${selectedChannel + 1} → 0.0 dB`);
             }
             return;
           } else if (e.key === 'ArrowLeft') {
             e.preventDefault();
-            if (typeof selectedChannel === 'number') {
+            if (selectedChannelsMobile.size > 1) {
+              selectedChannelsMobile.forEach(ch => {
+                setChannelFader(ch, MIN_VALUE);
+              });
+              showToast(`${selectedChannelsMobile.size} canais → -∞ dB`);
+            } else if (typeof selectedChannel === 'number') {
               setChannelFader(selectedChannel, MIN_VALUE);
               showToast(`CH ${selectedChannel + 1} → -∞ dB`);
             }
@@ -7073,56 +7093,72 @@
         }
         if (visibleChannels.length === 0) return;
 
-        // Setas Cima / Baixo: seleciona o canal verticalmente
+        // Setas Cima / Baixo: seleciona o canal verticalmente (Shift seleciona contíguos)
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
           e.preventDefault();
           let curIdx = visibleChannels.indexOf(selectedChannel);
-          let nextCh;
+          if (curIdx === -1) curIdx = 0;
+          let nextIdx;
 
-          if (e.key === 'ArrowDown') {
-            if (curIdx === -1 || curIdx >= visibleChannels.length - 1) {
-              nextCh = visibleChannels[0];
-            } else {
-              nextCh = visibleChannels[curIdx + 1];
-            }
+          if (e.shiftKey) {
+            nextIdx = (e.key === 'ArrowDown')
+              ? Math.min(visibleChannels.length - 1, curIdx + 1)
+              : Math.max(0, curIdx - 1);
           } else {
-            if (curIdx <= 0) {
-              nextCh = visibleChannels[visibleChannels.length - 1];
+            if (e.key === 'ArrowDown') {
+              nextIdx = (curIdx >= visibleChannels.length - 1) ? 0 : curIdx + 1;
             } else {
-              nextCh = visibleChannels[curIdx - 1];
+              nextIdx = (curIdx <= 0) ? visibleChannels.length - 1 : curIdx - 1;
             }
           }
 
-          setSelectedChannel(nextCh);
+          const nextCh = visibleChannels[nextIdx];
+          selectedChannel = nextCh;
+
+          if (e.shiftKey) {
+            if (typeof mobileAnchorChannel !== 'number' || !visibleChannels.includes(mobileAnchorChannel)) {
+              mobileAnchorChannel = visibleChannels[curIdx];
+            }
+            const anchorIdx = visibleChannels.indexOf(mobileAnchorChannel);
+            const leadIdx = visibleChannels.indexOf(nextCh);
+            const minI = Math.min(anchorIdx, leadIdx);
+            const maxI = Math.max(anchorIdx, leadIdx);
+
+            selectedChannelsMobile = new Set(visibleChannels.slice(minI, maxI + 1));
+            renderSelectedChannelsMobile();
+
+            if (selectedChannelsMobile.size > 1) {
+              const firstCh = visibleChannels[minI] + 1;
+              const lastCh = visibleChannels[maxI] + 1;
+              showToast(`${selectedChannelsMobile.size} canais selecionados (CH ${firstCh} a CH ${lastCh})`);
+            }
+          } else {
+            setSelectedChannel(nextCh);
+          }
+
           const card = document.getElementById(`channelCard_${nextCh}`);
           if (card) {
             card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
           }
         }
-        // Setas Esquerda / Direita: ajusta o volume horizontalmente
+        // Setas Esquerda / Direita: ajusta o volume horizontalmente (de todos os canais selecionados)
         else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
           e.preventDefault();
-          let ch = selectedChannel;
-          if (typeof ch !== 'number' || !visibleChannels.includes(ch)) {
-            ch = visibleChannels[0];
-            setSelectedChannel(ch);
+          if (selectedChannelsMobile.size === 0) {
+            setSelectedChannel(visibleChannels[0]);
           }
 
-          const currentVal = (state.faders[currentMix] && state.faders[currentMix][ch] !== undefined)
-            ? state.faders[currentMix][ch]
-            : 0;
+          const step = 16;
+          const delta = (e.key === 'ArrowRight') ? step : -step;
 
-          // Passo: 10 unidades (~1 dB) padrão; 30 unidades (~3 dB) com Shift
-          const step = e.shiftKey ? 30 : 10;
-          let newVal;
-
-          if (e.key === 'ArrowRight') {
-            newVal = Math.min(MAX_VALUE, currentVal + step);
-          } else {
-            newVal = Math.max(MIN_VALUE, currentVal - step);
-          }
-
-          setChannelFader(ch, newVal);
+          selectedChannelsMobile.forEach(ch => {
+            if (!visibleChannels.includes(ch)) return;
+            const currentVal = (state.faders[currentMix] && state.faders[currentMix][ch] !== undefined)
+              ? state.faders[currentMix][ch]
+              : 0;
+            const newVal = Math.max(MIN_VALUE, Math.min(MAX_VALUE, currentVal + delta));
+            setChannelFader(ch, newVal);
+          });
         }
       });
 
