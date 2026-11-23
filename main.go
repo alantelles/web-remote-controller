@@ -29,17 +29,21 @@ import (
 )
 
 type WSMessage struct {
-	Type    string `json:"type,omitempty"`    // "init", "param", "simulation_status"
-	Port    string `json:"port,omitempty"`    // Nome da porta MIDI
-	Hex     string `json:"hex,omitempty"`     // SysEx em hexadecimal
-	Element byte   `json:"element"`           // 0x1C (Fader), 0x1A (Mute/ON)
-	Param   byte   `json:"param"`             // 0x00
-	Channel byte   `json:"channel"`           // 0x00 a 0x1F (0 a 31)
-	Value   int    `json:"value"`             // 0 a 1023
-	Running *bool  `json:"running,omitempty"` // status da simulação
-	Action  string `json:"action,omitempty"`  // "toggle_sim", "sync_main", "sync_aux", "sync_fx"
-	Aux     int    `json:"aux,omitempty"`     // 1 a 8 para sync_aux
-	Target  string `json:"target,omitempty"`  // Identificador do canal/saída para sync_fx
+	Type    string  `json:"type,omitempty"`    // "init", "param", "simulation_status"
+	Port    string  `json:"port,omitempty"`    // Nome da porta MIDI
+	Hex     string  `json:"hex,omitempty"`     // SysEx em hexadecimal
+	Element byte    `json:"element"`           // 0x1C (Fader), 0x1A (Mute/ON)
+	Param   byte    `json:"param"`             // 0x00
+	Channel byte    `json:"channel"`           // 0x00 a 0x1F (0 a 31)
+	Value   int     `json:"value"`             // 0 a 1023
+	Running *bool   `json:"running,omitempty"` // status da simulação
+	Action  string  `json:"action,omitempty"`  // "toggle_sim", "sync_main", "sync_aux", "sync_fx", "personal_mix_joystick"
+	Aux     int     `json:"aux,omitempty"`     // 1 a 8 para sync_aux
+	Target  string  `json:"target,omitempty"`  // Identificador do canal/saída para sync_fx
+	MixID   string  `json:"mix_id,omitempty"`  // ID da mix pessoal para personal_mix_joystick
+	JoyX    float64 `json:"x,omitempty"`       // Coordenada X (-1..1) do joystick 3 eixos
+	JoyY    float64 `json:"y,omitempty"`       // Coordenada Y (-1..1) do joystick 3 eixos
+	Persist bool    `json:"persist,omitempty"` // Salvar posição do joystick em disco (ex: ao soltar o toque)
 }
 
 var (
@@ -1022,6 +1026,28 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 
 		userRole := strings.ToUpper(sess.User.Role)
 
+		// Movimento do Joystick 3 Eixos da Mix Pessoal ("Eu", "Vozes", "Outros")
+		if msg.Action == "personal_mix_joystick" {
+			targetMixID := sanitizeSlug(msg.MixID)
+			if userRole == "PERFORMER" {
+				myMix := GetPersonalMixForPerformer(sess.User.Username)
+				if myMix == nil && sess.User.MixID != "" {
+					myMix, _ = GetPersonalMix(sess.User.MixID)
+				}
+				if myMix == nil || (targetMixID != "" && myMix.ID != targetMixID) {
+					log.Printf("WebSocket: acesso negado à mix '%s' para PERFORMER '%s'", targetMixID, sess.User.Username)
+					continue
+				}
+				targetMixID = myMix.ID
+			}
+			if targetMixID != "" {
+				if _, _, _, err := ApplyPersonalMixJoystick(targetMixID, msg.JoyX, msg.JoyY, msg.Persist); err != nil {
+					log.Printf("WebSocket: erro ao aplicar joystick na mix '%s': %v", targetMixID, err)
+				}
+			}
+			continue
+		}
+
 		// 1. Usuário PERFORMER não possui permissão para emitir comandos no console principal
 		if userRole == "PERFORMER" {
 			log.Printf("WebSocket: comando ignorado para usuário PERFORMER '%s'", sess.User.Username)
@@ -1688,6 +1714,8 @@ func main() {
 	http.HandleFunc("/api/scenes", handleAPIScenes)
 	http.HandleFunc("/api/scenes/", handleAPISceneDetail)
 	http.HandleFunc("/api/scenes/import", handleAPIImportScene)
+	http.HandleFunc("/api/personal-mixes", handleAPIPersonalMixes)
+	http.HandleFunc("/api/personal-mixes/", handleAPIPersonalMixDetail)
 	http.HandleFunc("/api/state/status", handleAPIStateStatus)
 	http.HandleFunc("/api/state/restore-last", handleAPIRestoreLastState)
 	http.HandleFunc("/api/state/sync-mixer", handleAPISyncMixer)

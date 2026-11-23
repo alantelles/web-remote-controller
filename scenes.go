@@ -253,6 +253,7 @@ func ApplyParamToState(element, param, channel byte, value int) {
 					currentMixer.Inputs[chIdx].AuxSends[auxIdx].Pre = value
 				case 2: // LEVEL (0 a 1023)
 					currentMixer.Inputs[chIdx].AuxSends[auxIdx].Level = value
+					UpdateBaseLevelFromConsole(auxIdx, chIdx, value)
 				}
 			}
 		}
@@ -452,6 +453,8 @@ func InitSceneManager(baseDir string) {
 	mixerStateLock.Lock()
 	stateDirty = false
 	mixerStateLock.Unlock()
+
+	InitPersonalMixManager(dataDirRoot)
 
 	startAutoSaveLoop(5 * time.Second)
 }

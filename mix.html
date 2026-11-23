@@ -2,189 +2,379 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yamaha 01V96V2 — Mixagem Pessoal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Yamaha 01V96V2 — Mix Pessoal</title>
+  <!-- Personal Monitor Mix Route Active: It works! -->
   <style>
     :root {
-      --bg-chassis: #0b0d11;
-      --bg-card: #141720;
-      --bg-panel: #1a1e29;
-      --border-color: rgba(255, 255, 255, 0.12);
-      --border-glow: rgba(56, 189, 248, 0.35);
+      --bg-chassis: #090b10;
+      --bg-card: #121621;
+      --bg-panel: #171c29;
+      --border-color: rgba(255, 255, 255, 0.11);
       --text-main: #f1f5f9;
       --text-dim: #94a3b8;
       --text-faint: #64748b;
-      --primary-blue: #0284c7;
-      --primary-cyan: #38bdf8;
-      --amber-accent: #f59e0b;
+      --color-me: #a855f7;
+      --color-voices: #f59e0b;
+      --color-others: #38bdf8;
       --green-accent: #10b981;
-      --purple-accent: #a855f7;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
 
     html, body {
-      width: 100vw;
+      width: 100%;
       min-height: 100vh;
       background: var(--bg-chassis);
-      background-image: 
-        radial-gradient(ellipse at 50% 15%, rgba(168, 85, 247, 0.1) 0%, transparent 60%),
-        radial-gradient(ellipse at 50% 85%, rgba(2, 132, 199, 0.08) 0%, transparent 60%);
+      background-image:
+        radial-gradient(circle at 50% 12%, rgba(168, 85, 247, 0.12) 0%, transparent 55%),
+        radial-gradient(circle at 20% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.09) 0%, transparent 50%);
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 20px;
+      padding: 12px;
+      overflow-x: hidden;
     }
 
     .mix-container {
       width: 100%;
-      max-width: 580px;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
       margin: auto;
     }
 
     .mix-card {
-      background: linear-gradient(180deg, #1c202d 0%, #131620 100%);
+      background: linear-gradient(180deg, #181d2a 0%, #10131c 100%);
       border: 1px solid var(--border-color);
-      border-radius: 16px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(0, 0, 0, 0.8);
+      border-radius: 18px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 0, 0, 0.85);
       overflow: hidden;
       position: relative;
     }
 
     .card-top-glow {
       height: 4px;
-      background: linear-gradient(90deg, #a855f7 0%, #38bdf8 50%, #10b981 100%);
+      background: linear-gradient(90deg, var(--color-me) 0%, var(--color-voices) 50%, var(--color-others) 100%);
     }
 
+    /* Cabeçalho Compacto */
     .mix-header {
-      padding: 28px 28px 20px 28px;
-      text-align: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .brand-title {
-      font-size: 20px;
-      font-weight: 900;
-      letter-spacing: 2.5px;
-      color: #fff;
-      text-transform: uppercase;
-      background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 6px;
-    }
-
-    .brand-sub {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      color: #c084fc;
-      background: rgba(168, 85, 247, 0.15);
-      border: 1px solid rgba(168, 85, 247, 0.4);
-      padding: 4px 12px;
-      border-radius: 20px;
-      text-transform: uppercase;
-    }
-
-    .mix-body {
-      padding: 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .hero-banner {
-      background: rgba(168, 85, 247, 0.08);
-      border: 1px dashed rgba(168, 85, 247, 0.35);
-      border-radius: 12px;
-      padding: 22px;
-      text-align: center;
-    }
-
-    .hero-banner h1 {
-      font-size: 32px;
-      font-weight: 800;
-      color: #f3e8ff;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
+      padding: 14px 18px;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      background: rgba(0, 0, 0, 0.2);
       gap: 10px;
     }
 
-    .hero-banner p {
-      font-size: 14px;
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: #fff;
+      text-transform: uppercase;
+    }
+
+    .ws-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      display: inline-block;
+    }
+    .ws-dot.connected {
+      background: #10b981;
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
+    }
+
+    .mix-subtitle {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .aux-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 900;
+      background: rgba(56, 189, 248, 0.16);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      letter-spacing: 0.5px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-chip {
+      font-size: 11px;
+      font-weight: 700;
+      color: #e2e8f0;
+      background: #0d1017;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 5px 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .mix-body {
+      padding: 16px 18px 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Seletor de Mix para Admin / Operador testando a tela */
+    .admin-mix-selector-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #0d1017;
+      border: 1px solid #263147;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+    .admin-mix-selector-bar select {
+      background: #171d2b;
+      color: #f1f5f9;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      outline: none;
+      flex: 1;
+    }
+
+    /* Aviso quando a Mix não está disponível ou desabilitada */
+    .mix-unavailable-box {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 10px;
+      padding: 36px 20px;
+      background: rgba(239, 68, 68, 0.07);
+      border: 1px dashed rgba(239, 68, 68, 0.35);
+      border-radius: 14px;
+    }
+    .mix-unavailable-box h3 {
+      font-size: 17px;
+      color: #fca5a5;
+    }
+    .mix-unavailable-box p {
+      font-size: 13px;
       color: var(--text-dim);
       line-height: 1.5;
+      max-width: 360px;
     }
 
-    .mix-info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    /* ÁREA DO DISCO / JOYSTICK DE 3 EIXOS */
+    .joystick-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       gap: 12px;
+      position: relative;
     }
 
-    @media (max-width: 480px) {
-      .mix-info-grid {
+    .joystick-canvas-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 340px;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      touch-action: none;
+    }
+
+    #joystickCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+      touch-action: none;
+    }
+    #joystickCanvas:active {
+      cursor: grabbing;
+    }
+
+    .joystick-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .btn-joy-preset {
+      background: #151a26;
+      border: 1px solid #293246;
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 7px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.14s ease;
+    }
+    .btn-joy-preset:hover {
+      background: #1e2638;
+      color: #fff;
+      border-color: #475569;
+    }
+    .btn-joy-preset.center-btn {
+      border-color: rgba(16, 185, 129, 0.45);
+      color: #6ee7b7;
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    /* CARTÕES DOS 3 EIXOS (EU, VOZES, OUTROS) */
+    .groups-meters-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 420px) {
+      .groups-meters-grid {
         grid-template-columns: 1fr;
       }
     }
 
-    .info-box {
-      background: #0f1218;
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      border-radius: 10px;
-      padding: 14px 16px;
+    .group-meter-card {
+      background: #0d1018;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 10px 12px;
       display: flex;
       flex-direction: column;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .group-meter-card.card-me {
+      border-top: 3px solid var(--color-me);
+    }
+    .group-meter-card.card-voices {
+      border-top: 3px solid var(--color-voices);
+    }
+    .group-meter-card.card-others {
+      border-top: 3px solid var(--color-others);
+    }
+
+    .group-meter-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 4px;
     }
 
-    .info-label {
+    .group-meter-label {
       font-size: 11px;
-      font-weight: 700;
-      color: var(--text-faint);
+      font-weight: 900;
+      letter-spacing: 0.6px;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
+    }
+    .card-me .group-meter-label { color: #d8b4fe; }
+    .card-voices .group-meter-label { color: #fde68a; }
+    .card-others .group-meter-label { color: #bae6fd; }
+
+    .group-meter-pct {
+      font-size: 14px;
+      font-weight: 900;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+    }
+    .card-me .group-meter-pct { color: var(--color-me); }
+    .card-voices .group-meter-pct { color: var(--color-voices); }
+    .card-others .group-meter-pct { color: var(--color-others); }
+
+    .group-bar-track {
+      width: 100%;
+      height: 6px;
+      background: #171c28;
+      border-radius: 3px;
+      overflow: hidden;
     }
 
-    .info-value {
-      font-size: 16px;
-      font-weight: 700;
-      color: #38bdf8;
-      word-break: break-all;
+    .group-bar-fill {
+      height: 100%;
+      width: 57.7%;
+      border-radius: 3px;
+      transition: width 0.05s linear;
+    }
+    .card-me .group-bar-fill {
+      background: linear-gradient(90deg, #7e22ce, #c084fc);
+      box-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+    }
+    .card-voices .group-bar-fill {
+      background: linear-gradient(90deg, #d97706, #fbbf24);
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+    }
+    .card-others .group-bar-fill {
+      background: linear-gradient(90deg, #0284c7, #38bdf8);
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
     }
 
-    .info-value.role-badge {
-      color: #a855f7;
+    .group-channels-tags {
+      font-size: 10px;
+      color: var(--text-faint);
+      line-height: 1.35;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .notice-box {
-      background: #11141c;
-      border-left: 4px solid #38bdf8;
-      padding: 14px 16px;
-      border-radius: 0 8px 8px 0;
-      font-size: 13px;
-      color: var(--text-dim);
-      line-height: 1.5;
-    }
-
+    /* Rodapé e Ações */
     .mix-actions {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-top: 6px;
+      gap: 8px;
+      margin-top: 2px;
     }
 
     .btn-action {
@@ -192,9 +382,9 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 12px 18px;
+      padding: 10px 14px;
       border-radius: 8px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       text-decoration: none;
       cursor: pointer;
@@ -207,7 +397,6 @@
       border-color: rgba(239, 68, 68, 0.35);
       color: #fca5a5;
     }
-
     .btn-logout:hover {
       background: rgba(239, 68, 68, 0.25);
       color: #fff;
@@ -218,17 +407,16 @@
       border-color: rgba(2, 132, 199, 0.4);
       color: #38bdf8;
     }
-
     .btn-console:hover {
       background: rgba(2, 132, 199, 0.3);
       color: #fff;
     }
 
     .mix-footer {
-      padding: 16px 28px;
+      padding: 12px 18px;
       text-align: center;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-faint);
     }
   </style>
@@ -240,94 +428,634 @@
       <div class="card-top-glow"></div>
 
       <header class="mix-header">
-        <h2 class="brand-title">Yamaha 01V96V2</h2>
-        <span class="brand-sub">🎧 Personal Monitor Mix</span>
+        <div class="header-left">
+          <div class="brand-row">
+            <span class="ws-dot" id="wsDot" title="Status da conexão em tempo real"></span>
+            <span class="aux-pill" id="displayAuxOutput">AUX -</span>
+          </div>
+          <div class="mix-subtitle">
+            <span>🎧</span>
+            <span id="displayMixName">Carregando Mix Pessoal...</span>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="user-chip" title="Usuário autenticado">
+            <span>👤</span>
+            <span id="displayUserName">...</span>
+          </div>
+        </div>
       </header>
 
       <main class="mix-body">
-        <div class="hero-banner">
-          <h1>🎉 It works!</h1>
-          <p>A rota da sua mixagem pessoal foi configurada e está ativa.</p>
+        <!-- Seletor de Mix visível apenas para ADMIN/OPERATOR ao inspecionar /mix -->
+        <div class="admin-mix-selector-bar" id="adminMixSelectorBar">
+          <span style="color: #94a3b8; font-weight: 700;">Mix Ativa:</span>
+          <select id="adminMixSelect"></select>
         </div>
 
-        <div class="mix-info-grid">
-          <div class="info-box">
-            <span class="info-label">Mix Cadastrada (ID)</span>
-            <span class="info-value" id="displayMixId">Carregando...</span>
-          </div>
-
-          <div class="info-box">
-            <span class="info-label">Papel de Acesso</span>
-            <span class="info-value role-badge" id="displayUserRole">PERFORMER</span>
-          </div>
-
-          <div class="info-box">
-            <span class="info-label">Nome do Usuário</span>
-            <span class="info-value" id="displayUserName">Carregando...</span>
-          </div>
-
-          <div class="info-box">
-            <span class="info-label">Login do Usuário</span>
-            <span class="info-value" id="displayUserLogin">Carregando...</span>
-          </div>
+        <!-- Caixa exibida quando não há mix habilitada para este Performer -->
+        <div class="mix-unavailable-box" id="mixUnavailableBox">
+          <h3 id="mixUnavailableTitle">Mix Pessoal Indisponível</h3>
+          <p id="mixUnavailableDesc">Nenhuma mix pessoal habilitada foi encontrada para o seu usuário. Solicite ao administrador para vincular e habilitar sua mix no painel Admin.</p>
         </div>
 
-        <div class="notice-box">
-          <strong>Área de Mixagem Pessoal:</strong> Esta tela é dedicada exclusivamente aos músicos e performers para ajuste de retornos e fones. Os controles táteis e faders da sua mixagem pessoal serão ativados nas próximas fases da aplicação.
+        <!-- Palco Interativo do Joystick 3 Eixos (Eu, Vozes, Outros) -->
+        <div id="mixInteractiveArea" style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="joystick-stage">
+            <div class="joystick-canvas-wrap">
+              <canvas id="joystickCanvas" width="680" height="680"></canvas>
+            </div>
+
+            <div class="joystick-actions-row">
+              <button type="button" class="btn-joy-preset center-btn" id="btnJoyCenter" title="Centralizar equilíbrio entre os 3 grupos">
+                🎯 Equilíbrio Central
+              </button>
+              <button type="button" class="btn-joy-preset" id="btnJoyFocusMe" title="Destacar grupo Eu">
+                👤 +Eu
+              </button>
+              <button type="button" class="btn-joy-preset" id="btnJoyFocusVoices" title="Destacar grupo Vozes">
+                🎤 +Vozes
+              </button>
+              <button type="button" class="btn-joy-preset" id="btnJoyFocusOthers" title="Destacar grupo Outros">
+                🎸 +Outros
+              </button>
+            </div>
+          </div>
+
+          <!-- Medidores de Peso Equal Power dos 3 Grupos -->
+          <div class="groups-meters-grid">
+            <div class="group-meter-card card-me">
+              <div class="group-meter-top">
+                <span class="group-meter-label">👤 EU</span>
+                <span class="group-meter-pct" id="pctMe">58%</span>
+              </div>
+              <div class="group-bar-track">
+                <div class="group-bar-fill" id="barMe"></div>
+              </div>
+              <div class="group-channels-tags" id="chListMe">Canais: —</div>
+            </div>
+
+            <div class="group-meter-card card-voices">
+              <div class="group-meter-top">
+                <span class="group-meter-label">🎤 VOZES</span>
+                <span class="group-meter-pct" id="pctVoices">58%</span>
+              </div>
+              <div class="group-bar-track">
+                <div class="group-bar-fill" id="barVoices"></div>
+              </div>
+              <div class="group-channels-tags" id="chListVoices">Canais: —</div>
+            </div>
+
+            <div class="group-meter-card card-others">
+              <div class="group-meter-top">
+                <span class="group-meter-label">🎸 OUTROS</span>
+                <span class="group-meter-pct" id="pctOthers">58%</span>
+              </div>
+              <div class="group-bar-track">
+                <div class="group-bar-fill" id="barOthers"></div>
+              </div>
+              <div class="group-channels-tags" id="chListOthers">Canais: —</div>
+            </div>
+          </div>
         </div>
 
         <div class="mix-actions">
-          <div id="adminNavOptions" style="display: none; flex-direction: column; gap: 8px;">
-            <a href="/" class="btn-action btn-console" title="Acessar Superfície de Controle Geral (FOH)">🎛️ Abrir Console Geral (Desktop)</a>
-            <a href="/m" class="btn-action btn-console" style="color: #4ade80; border-color: rgba(74, 222, 128, 0.4);" title="Acessar Console Mobile">📱 Abrir Console Mobile</a>
+          <div id="adminNavOptions" style="display: none; gap: 8px;">
+            <a href="/" class="btn-action btn-console" style="flex: 1;">🎛️ Console Desktop</a>
+            <a href="/m" class="btn-action btn-console" style="flex: 1; color: #4ade80; border-color: rgba(74, 222, 128, 0.4);">📱 Console Mobile</a>
           </div>
-
-          <a href="/logout" class="btn-action btn-logout" title="Encerrar sessão com segurança">Sair da Sessão ↪</a>
+          <a href="/logout" class="btn-action btn-logout">Sair da Sessão ↪</a>
         </div>
       </main>
 
       <footer class="mix-footer">
-        Yamaha 01V96 / 01V96V2 Web Remote Controller &bull; Controle de Acesso Baseado em Papéis (RBAC)
+        3-Axis Personal Monitor Mix
       </footer>
     </div>
   </div>
 
   <script>
+    const BASE_PATH = window.location.pathname.replace(/\/(mix|m|mobile|login)\/?$/, '');
     const urlParams = new URLSearchParams(window.location.search);
-    const mixIdParam = urlParams.get('id') || '1';
-    
-    document.getElementById('displayMixId').textContent = '#' + mixIdParam;
+    let requestedMixId = urlParams.get('id') || '';
 
-    // Busca perfil da sessão atual
-    fetch('/api/me')
-      .then(res => {
-        if (res.status === 401) {
-          window.location.href = '/login?error=session';
-          return null;
-        }
-        return res.json();
-      })
-      .then(data => {
-        if (!data) return;
-        document.getElementById('displayUserName').textContent = data.name || data.username;
-        document.getElementById('displayUserLogin').textContent = data.username;
-        document.getElementById('displayUserRole').textContent = data.role || 'PERFORMER';
+    const wsDot = document.getElementById('wsDot');
+    const displayAuxOutput = document.getElementById('displayAuxOutput');
+    const displayMixName = document.getElementById('displayMixName');
+    const displayUserName = document.getElementById('displayUserName');
+    const adminMixSelectorBar = document.getElementById('adminMixSelectorBar');
+    const adminMixSelect = document.getElementById('adminMixSelect');
+    const mixUnavailableBox = document.getElementById('mixUnavailableBox');
+    const mixUnavailableTitle = document.getElementById('mixUnavailableTitle');
+    const mixUnavailableDesc = document.getElementById('mixUnavailableDesc');
+    const mixInteractiveArea = document.getElementById('mixInteractiveArea');
+    const adminNavOptions = document.getElementById('adminNavOptions');
 
-        // Se a mix cadastrada for retornada pelo backend e não houver param na URL:
-        if (!urlParams.get('id') && data.mix_id) {
-          document.getElementById('displayMixId').textContent = '#' + data.mix_id;
-        }
+    const canvas = document.getElementById('joystickCanvas');
+    const ctx = canvas.getContext('2d');
+    const pctMeEl = document.getElementById('pctMe');
+    const pctVoicesEl = document.getElementById('pctVoices');
+    const pctOthersEl = document.getElementById('pctOthers');
+    const barMeEl = document.getElementById('barMe');
+    const barVoicesEl = document.getElementById('barVoices');
+    const barOthersEl = document.getElementById('barOthers');
+    const chListMeEl = document.getElementById('chListMe');
+    const chListVoicesEl = document.getElementById('chListVoices');
+    const chListOthersEl = document.getElementById('chListOthers');
 
-        // Se for ADMIN ou OPERATOR, exibe atalhos para os consoles completos
-        const role = (data.role || '').toUpperCase();
-        if (role === 'ADMIN' || role === 'OPERATOR') {
-          const nav = document.getElementById('adminNavOptions');
-          if (nav) nav.style.display = 'flex';
-        }
-      })
-      .catch(err => {
-        console.warn('Erro ao carregar sessão em /mix:', err);
+    let currentUser = null;
+    let activeMix = null;
+    let allMixes = [];
+    let channelNames = [];
+    let auxNames = [];
+
+    // Posição normalizada do joystick no círculo unitário:
+    // joyX em [-1, 1] (+direita = Outros, -esquerda = Vozes)
+    // joyY em [-1, 1] (+cima = Eu, -baixo = Vozes/Outros)
+    let joyX = 0.0;
+    let joyY = 0.0;
+    let isDragging = false;
+    let ws = null;
+    let lastRestFallbackTime = 0;
+
+    const SQRT3_OVER_2 = 0.8660254037844386;
+
+    // Coordenadas dos 3 pólos no círculo unitário (cartesiano com +Y para cima)
+    const POLE_ME = { x: 0, y: 1, label: 'EU', color: '#a855f7' };
+    const POLE_VOICES = { x: -SQRT3_OVER_2, y: -0.5, label: 'VOZES', color: '#f59e0b' };
+    const POLE_OTHERS = { x: SQRT3_OVER_2, y: -0.5, label: 'OUTROS', color: '#38bdf8' };
+
+    // Calcula os pesos de amplitude por Equal Power (wMe² + wVoices² + wOthers² = 1)
+    function calculateEqualPowerWeights(x, y) {
+      let cx = x;
+      let cy = y;
+      const r = Math.hypot(cx, cy);
+      if (r > 1.0) {
+        cx /= r;
+        cy /= r;
+      }
+
+      const dotMe = cy;
+      const dotVoices = -SQRT3_OVER_2 * cx - 0.5 * cy;
+      const dotOthers = +SQRT3_OVER_2 * cx - 0.5 * cy;
+
+      const aMe = Math.max(0, 1.0 + 2.0 * dotMe);
+      const aVoices = Math.max(0, 1.0 + 2.0 * dotVoices);
+      const aOthers = Math.max(0, 1.0 + 2.0 * dotOthers);
+
+      const sumPower = aMe + aVoices + aOthers;
+      if (sumPower <= 1e-9) {
+        const eq = Math.sqrt(1.0 / 3.0);
+        return { wMe: eq, wVoices: eq, wOthers: eq, cx, cy };
+      }
+
+      return {
+        wMe: Math.sqrt(aMe / sumPower),
+        wVoices: Math.sqrt(aVoices / sumPower),
+        wOthers: Math.sqrt(aOthers / sumPower),
+        cx,
+        cy
+      };
+    }
+
+    function formatChannelList(chArray) {
+      if (!chArray || chArray.length === 0) return 'Nenhum canal';
+      return chArray.map(ch => {
+        const custom = channelNames[ch - 1];
+        return custom ? `${custom}` : `CH ${String(ch).padStart(2, '0')}`;
+      }).join(', ');
+    }
+
+    function updateGroupMetersUI(weights) {
+      const pMe = Math.round(weights.wMe * 100);
+      const pVoices = Math.round(weights.wVoices * 100);
+      const pOthers = Math.round(weights.wOthers * 100);
+
+      if (pctMeEl) pctMeEl.textContent = `${pMe}%`;
+      if (pctVoicesEl) pctVoicesEl.textContent = `${pVoices}%`;
+      if (pctOthersEl) pctOthersEl.textContent = `${pOthers}%`;
+
+      if (barMeEl) barMeEl.style.width = `${Math.min(100, pMe)}%`;
+      if (barVoicesEl) barVoicesEl.style.width = `${Math.min(100, pVoices)}%`;
+      if (barOthersEl) barOthersEl.style.width = `${Math.min(100, pOthers)}%`;
+    }
+
+    function drawJoystickDisc() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const centerX = w / 2;
+      const centerY = h / 2;
+      const discRadius = w * 0.37;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const weights = calculateEqualPowerWeights(joyX, joyY);
+
+      // Converte coordenada unitária (x, y com +y para cima) para pixels no canvas
+      const toCanvas = (ux, uy, rad = discRadius) => ({
+        x: centerX + ux * rad,
+        y: centerY - uy * rad
       });
+
+      const ptMe = toCanvas(POLE_ME.x, POLE_ME.y);
+      const ptVoices = toCanvas(POLE_VOICES.x, POLE_VOICES.y);
+      const ptOthers = toCanvas(POLE_OTHERS.x, POLE_OTHERS.y);
+      const ptPuck = toCanvas(weights.cx, weights.cy);
+
+      // 1. Sombra e Fundo do Disco
+      const bgGrad = ctx.createRadialGradient(centerX, centerY, 10, centerX, centerY, discRadius);
+      bgGrad.addColorStop(0, '#161c2b');
+      bgGrad.addColorStop(0.75, '#0e121c');
+      bgGrad.addColorStop(1, '#090c13');
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, discRadius, 0, Math.PI * 2);
+      ctx.fillStyle = bgGrad;
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+      ctx.stroke();
+      ctx.restore();
+
+      // 2. Brilhos Coloridos nos 3 Pólos proporcionais ao peso Equal Power de cada eixo
+      const drawPoleGlow = (pt, rgbStr, weight) => {
+        const glowRad = discRadius * (0.45 + 0.55 * weight);
+        const g = ctx.createRadialGradient(pt.x, pt.y, 4, pt.x, pt.y, glowRad);
+        g.addColorStop(0, `rgba(${rgbStr}, ${0.12 + 0.38 * weight})`);
+        g.addColorStop(1, `rgba(${rgbStr}, 0)`);
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, discRadius - 2, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, w, h);
+        ctx.restore();
+      };
+
+      drawPoleGlow(ptMe, '168, 85, 247', weights.wMe);
+      drawPoleGlow(ptVoices, '245, 158, 11', weights.wVoices);
+      drawPoleGlow(ptOthers, '56, 189, 248', weights.wOthers);
+
+      // 3. Anéis Concêntricos de Referência
+      [0.33, 0.66, 1.0].forEach(frac => {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, discRadius * frac, 0, Math.PI * 2);
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
+        ctx.stroke();
+      });
+
+      // 4. Eixos dos 3 Pólos (120°)
+      const drawAxisLine = (pt, color) => {
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(pt.x, pt.y);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = color;
+        ctx.setLineDash([6, 6]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      };
+
+      drawAxisLine(ptMe, 'rgba(168, 85, 247, 0.45)');
+      drawAxisLine(ptVoices, 'rgba(245, 158, 11, 0.45)');
+      drawAxisLine(ptOthers, 'rgba(56, 189, 248, 0.45)');
+
+      // 5. Linhas de Tensão Elástica do Puck até os 3 Pólos
+      const drawTensionLine = (ptPole, rgbStr, weight) => {
+        ctx.beginPath();
+        ctx.moveTo(ptPuck.x, ptPuck.y);
+        ctx.lineTo(ptPole.x, ptPole.y);
+        ctx.lineWidth = 1.5 + 3.5 * weight;
+        ctx.strokeStyle = `rgba(${rgbStr}, ${0.2 + 0.65 * weight})`;
+        ctx.stroke();
+      };
+
+      drawTensionLine(ptMe, '168, 85, 247', weights.wMe);
+      drawTensionLine(ptVoices, '245, 158, 11', weights.wVoices);
+      drawTensionLine(ptOthers, '56, 189, 248', weights.wOthers);
+
+      // 6. Marcadores e Rótulos Externos dos 3 Pólos
+      const drawPoleNode = (pole, pt, weight) => {
+        const labelPt = toCanvas(pole.x, pole.y, discRadius + 46);
+
+        // Nó na borda do disco
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 10 + 4 * weight, 0, Math.PI * 2);
+        ctx.fillStyle = pole.color;
+        ctx.shadowColor = pole.color;
+        ctx.shadowBlur = 14 * weight;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+
+        // Texto do Pólo
+        ctx.save();
+        ctx.font = '900 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.fillStyle = pole.color;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(pole.label, labelPt.x, labelPt.y - 10);
+
+        ctx.font = '800 17px ui-monospace, SFMono-Regular, monospace';
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillText(`${Math.round(weight * 100)}%`, labelPt.x, labelPt.y + 12);
+        ctx.restore();
+      };
+
+      drawPoleNode(POLE_ME, ptMe, weights.wMe);
+      drawPoleNode(POLE_VOICES, ptVoices, weights.wVoices);
+      drawPoleNode(POLE_OTHERS, ptOthers, weights.wOthers);
+
+      // 7. Manopla / Puck Central do Joystick
+      const puckRadius = 32;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(ptPuck.x, ptPuck.y, puckRadius + 8, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.fill();
+
+      const puckGrad = ctx.createRadialGradient(
+        ptPuck.x - 8, ptPuck.y - 8, 4,
+        ptPuck.x, ptPuck.y, puckRadius
+      );
+      puckGrad.addColorStop(0, '#ffffff');
+      puckGrad.addColorStop(0.35, '#cbd5e1');
+      puckGrad.addColorStop(0.85, '#334155');
+      puckGrad.addColorStop(1, '#0f172a');
+
+      ctx.beginPath();
+      ctx.arc(ptPuck.x, ptPuck.y, puckRadius, 0, Math.PI * 2);
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+      ctx.shadowBlur = 18;
+      ctx.fillStyle = puckGrad;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#f8fafc';
+      ctx.stroke();
+
+      // Ponto luminoso no centro da manopla
+      ctx.beginPath();
+      ctx.arc(ptPuck.x, ptPuck.y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = '#0f172a';
+      ctx.fill();
+      ctx.restore();
+
+      updateGroupMetersUI(weights);
+    }
+
+    // Emite a nova posição do joystick para o backend calcular via Equal Power e enviar os SysEx
+    function transmitJoystickPosition(persistToDisk) {
+      if (!activeMix || !activeMix.enabled) return;
+
+      const weights = calculateEqualPowerWeights(joyX, joyY);
+      joyX = weights.cx;
+      joyY = weights.cy;
+
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          action: 'personal_mix_joystick',
+          mix_id: activeMix.id,
+          x: joyX,
+          y: joyY,
+          persist: Boolean(persistToDisk)
+        }));
+        return;
+      }
+
+      // Fallback via HTTP POST caso o WebSocket esteja reconectando
+      const now = performance.now();
+      if (persistToDisk || now - lastRestFallbackTime >= 40) {
+        lastRestFallbackTime = now;
+        fetch(`${BASE_PATH}/api/personal-mixes/${encodeURIComponent(activeMix.id)}/joystick`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            x: joyX,
+            y: joyY,
+            persist: Boolean(persistToDisk)
+          })
+        }).catch(() => {});
+      }
+    }
+
+    function setJoystickFromPointerEvent(e, persist) {
+      if (!activeMix || !activeMix.enabled) return;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      const px = (e.clientX - rect.left) * scaleX;
+      const py = (e.clientY - rect.top) * scaleY;
+
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const discRadius = canvas.width * 0.37;
+
+      let ux = (px - centerX) / discRadius;
+      let uy = (centerY - py) / discRadius;
+
+      const r = Math.hypot(ux, uy);
+      if (r > 1.0) {
+        ux /= r;
+        uy /= r;
+      }
+
+      joyX = ux;
+      joyY = uy;
+      drawJoystickDisc();
+      transmitJoystickPosition(persist);
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+      if (!activeMix || !activeMix.enabled) return;
+      isDragging = true;
+      canvas.setPointerCapture(e.pointerId);
+      setJoystickFromPointerEvent(e, false);
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      setJoystickFromPointerEvent(e, false);
+    });
+
+    const endPointerDrag = (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      try {
+        canvas.releasePointerCapture(e.pointerId);
+      } catch (_) {}
+      transmitJoystickPosition(true);
+    };
+
+    canvas.addEventListener('pointerup', endPointerDrag);
+    canvas.addEventListener('pointercancel', endPointerDrag);
+
+    // Duplo clique no disco centraliza o joystick em (0, 0)
+    canvas.addEventListener('dblclick', () => {
+      if (!activeMix || !activeMix.enabled) return;
+      joyX = 0;
+      joyY = 0;
+      drawJoystickDisc();
+      transmitJoystickPosition(true);
+    });
+
+    // Botões de posicionamento rápido
+    document.getElementById('btnJoyCenter').addEventListener('click', () => {
+      if (!activeMix || !activeMix.enabled) return;
+      joyX = 0;
+      joyY = 0;
+      drawJoystickDisc();
+      transmitJoystickPosition(true);
+    });
+
+    document.getElementById('btnJoyFocusMe').addEventListener('click', () => {
+      if (!activeMix || !activeMix.enabled) return;
+      joyX = POLE_ME.x * 0.55;
+      joyY = POLE_ME.y * 0.55;
+      drawJoystickDisc();
+      transmitJoystickPosition(true);
+    });
+
+    document.getElementById('btnJoyFocusVoices').addEventListener('click', () => {
+      if (!activeMix || !activeMix.enabled) return;
+      joyX = POLE_VOICES.x * 0.55;
+      joyY = POLE_VOICES.y * 0.55;
+      drawJoystickDisc();
+      transmitJoystickPosition(true);
+    });
+
+    document.getElementById('btnJoyFocusOthers').addEventListener('click', () => {
+      if (!activeMix || !activeMix.enabled) return;
+      joyX = POLE_OTHERS.x * 0.55;
+      joyY = POLE_OTHERS.y * 0.55;
+      drawJoystickDisc();
+      transmitJoystickPosition(true);
+    });
+
+    function applyLoadedMixToUI(mix) {
+      activeMix = mix;
+
+      if (!mix) {
+        displayMixName.textContent = 'Sem Mix Vinculada';
+        displayAuxOutput.textContent = 'AUX -';
+        mixUnavailableTitle.textContent = 'Nenhuma Mix Pessoal Vinculada';
+        mixUnavailableDesc.textContent = 'O seu perfil PERFORMER ainda não possui uma mix pessoal configurada. Solicite ao administrador que crie e vincule sua mix na seção Admin.';
+        mixUnavailableBox.style.display = 'flex';
+        mixInteractiveArea.style.display = 'none';
+        return;
+      }
+
+      displayMixName.textContent = mix.name || `Mix #${mix.id}`;
+      const auxCustom = auxNames[(mix.output_aux || 1) - 1];
+      displayAuxOutput.textContent = auxCustom ? `AUX ${mix.output_aux} · ${auxCustom}` : `AUX ${mix.output_aux}`;
+
+      if (!mix.enabled) {
+        mixUnavailableTitle.textContent = 'Mix Pessoal Desabilitada';
+        mixUnavailableDesc.textContent = `A mix "${mix.name}" (AUX ${mix.output_aux}) está temporariamente desabilitada pelo administrador.`;
+        mixUnavailableBox.style.display = 'flex';
+        mixInteractiveArea.style.display = 'none';
+        return;
+      }
+
+      mixUnavailableBox.style.display = 'none';
+      mixInteractiveArea.style.display = 'flex';
+
+      const g = mix.groups || {};
+      chListMeEl.textContent = formatChannelList(g.me || []);
+      chListMeEl.title = chListMeEl.textContent;
+      chListVoicesEl.textContent = formatChannelList(g.voices || []);
+      chListVoicesEl.title = chListVoicesEl.textContent;
+      chListOthersEl.textContent = formatChannelList(g.others || []);
+      chListOthersEl.title = chListOthersEl.textContent;
+
+      joyX = typeof mix.joystick_x === 'number' ? mix.joystick_x : 0;
+      joyY = typeof mix.joystick_y === 'number' ? mix.joystick_y : 0;
+      drawJoystickDisc();
+    }
+
+    async function initPerformerScreen() {
+      try {
+        const meRes = await fetch(`${BASE_PATH}/api/me`);
+        if (meRes.status === 401) {
+          window.location.href = `${BASE_PATH}/login?error=session`;
+          return;
+        }
+        currentUser = await meRes.json();
+        displayUserName.textContent = currentUser.name || currentUser.username;
+
+        const role = (currentUser.role || '').toUpperCase();
+        if (role === 'ADMIN' || role === 'OPERATOR') {
+          adminNavOptions.style.display = 'flex';
+        }
+
+        const mixRes = await fetch(`${BASE_PATH}/api/personal-mixes`);
+        if (!mixRes.ok) {
+          applyLoadedMixToUI(null);
+          return;
+        }
+        const mixData = await mixRes.json();
+        channelNames = mixData.channel_names || [];
+        auxNames = mixData.aux_names || [];
+
+        if (role === 'PERFORMER') {
+          applyLoadedMixToUI(mixData.mix || null);
+        } else {
+          // ADMIN ou OPERATOR visualizando /mix
+          allMixes = mixData.mixes || [];
+          if (allMixes.length > 0) {
+            adminMixSelectorBar.style.display = 'flex';
+            adminMixSelect.innerHTML = '';
+            allMixes.forEach(m => {
+              const opt = document.createElement('option');
+              opt.value = m.id;
+              opt.textContent = `${m.name} (AUX ${m.output_aux})${m.enabled ? '' : ' [Inativa]'}`;
+              adminMixSelect.appendChild(opt);
+            });
+            const found = allMixes.find(m => m.id === requestedMixId) || allMixes[0];
+            adminMixSelect.value = found.id;
+            applyLoadedMixToUI(found);
+
+            adminMixSelect.addEventListener('change', () => {
+              const sel = allMixes.find(m => m.id === adminMixSelect.value);
+              if (sel) applyLoadedMixToUI(sel);
+            });
+          } else {
+            applyLoadedMixToUI(null);
+          }
+        }
+      } catch (err) {
+        console.warn('Erro ao inicializar tela de mix pessoal:', err);
+      }
+    }
+
+    function connectWebSocket() {
+      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${proto}//${window.location.host}${BASE_PATH}/ws`;
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        wsDot.classList.add('connected');
+      };
+
+      ws.onclose = () => {
+        wsDot.classList.remove('connected');
+        setTimeout(connectWebSocket, 2000);
+      };
+
+      ws.onerror = () => {
+        wsDot.classList.remove('connected');
+      };
+    }
+
+    drawJoystickDisc();
+    initPerformerScreen();
+    connectWebSocket();
   </script>
 </body>
 </html>

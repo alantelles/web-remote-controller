@@ -918,9 +918,9 @@
       background: #131722;
       border: 1px solid #2a3348;
       border-radius: 12px;
-      width: 760px;
-      max-width: 95vw;
-      max-height: 88vh;
+      width: 860px;
+      max-width: 96vw;
+      max-height: 90vh;
       display: flex;
       flex-direction: column;
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
@@ -1294,6 +1294,367 @@
       font-size: 11px;
       color: #94a3b8;
     }
+
+    /* ==========================================
+       ESTILOS: ABA MIXES PESSOAIS (ADMIN)
+       ========================================== */
+    .pm-editor-card {
+      background: #0f131c;
+      border: 1px solid #2a3449;
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .pm-editor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1e2638;
+      padding-bottom: 10px;
+    }
+    .pm-editor-header h4 {
+      margin: 0;
+      font-size: 13px;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .pm-form-grid {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1.3fr auto;
+      gap: 12px;
+      align-items: end;
+    }
+    @media (max-width: 720px) {
+      .pm-form-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .pm-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .pm-field label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+    .pm-field input[type="text"],
+    .pm-field select {
+      background: #171d2b;
+      border: 1px solid #334155;
+      color: #f1f5f9;
+      font-size: 12px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      outline: none;
+    }
+    .pm-field input[type="text"]:focus,
+    .pm-field select:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.25);
+    }
+    .pm-toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #171d2b;
+      border: 1px solid #334155;
+      padding: 7px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+      height: 34px;
+    }
+    .pm-toggle-wrap input[type="checkbox"] {
+      accent-color: #10b981;
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+    .pm-toggle-wrap span {
+      font-size: 12px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    /* Seletor de Grupos Contextuais (Eu, Vozes, Outros) */
+    .pm-groups-box {
+      background: #131824;
+      border: 1px solid #222b3d;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .pm-groups-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pm-group-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-pm-group-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      border: 1px solid #2d374d;
+      background: #1a202e;
+      color: #94a3b8;
+      transition: all 0.15s ease;
+    }
+    .btn-pm-group-tab .pm-count-pill {
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 10px;
+      background: rgba(0, 0, 0, 0.35);
+    }
+    .btn-pm-group-tab[data-group="me"].active {
+      background: rgba(168, 85, 247, 0.22);
+      border-color: #a855f7;
+      color: #e9d5ff;
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.35);
+    }
+    .btn-pm-group-tab[data-group="voices"].active {
+      background: rgba(245, 158, 11, 0.22);
+      border-color: #f59e0b;
+      color: #fef3c7;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.35);
+    }
+    .btn-pm-group-tab[data-group="others"].active {
+      background: rgba(56, 189, 248, 0.22);
+      border-color: #38bdf8;
+      color: #e0f2fe;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+    }
+
+    .pm-channels-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+    }
+    @media (max-width: 720px) {
+      .pm-channels-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    .btn-pm-ch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 4px;
+      border-radius: 6px;
+      background: #0d1017;
+      border: 1px solid #232a3b;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      user-select: none;
+      position: relative;
+      min-height: 44px;
+    }
+    .btn-pm-ch:hover {
+      border-color: #475569;
+      color: #cbd5e1;
+    }
+    .btn-pm-ch .pm-ch-num {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+    }
+    .btn-pm-ch .pm-ch-name {
+      font-size: 10px;
+      font-weight: 600;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 2px;
+    }
+    .btn-pm-ch .pm-ch-tag {
+      font-size: 8px;
+      font-weight: 900;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-top: 2px;
+      text-transform: uppercase;
+      background: rgba(255, 255, 255, 0.04);
+      color: #475569;
+    }
+    .btn-pm-ch.in-me {
+      background: rgba(168, 85, 247, 0.18);
+      border-color: #a855f7;
+      color: #f3e8ff;
+    }
+    .btn-pm-ch.in-me .pm-ch-tag {
+      background: #a855f7;
+      color: #fff;
+    }
+    .btn-pm-ch.in-voices {
+      background: rgba(245, 158, 11, 0.18);
+      border-color: #f59e0b;
+      color: #fef3c7;
+    }
+    .btn-pm-ch.in-voices .pm-ch-tag {
+      background: #f59e0b;
+      color: #1c1917;
+    }
+    .btn-pm-ch.in-others {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: #38bdf8;
+      color: #e0f2fe;
+    }
+    .btn-pm-ch.in-others .pm-ch-tag {
+      background: #0284c7;
+      color: #fff;
+    }
+
+    .pm-groups-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 2px;
+    }
+    .pm-summary-card {
+      background: #0b0e15;
+      border: 1px solid #1e2636;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .pm-summary-title {
+      font-weight: 800;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .pm-summary-list {
+      color: #94a3b8;
+      font-size: 11px;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    /* Lista de Mixes Pessoais Cadastradas */
+    .pm-list-container {
+      background: #0d1017;
+      border: 1px solid #222938;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: 330px;
+    }
+    .pm-list-header {
+      display: grid;
+      grid-template-columns: 1.5fr 0.7fr 1.1fr 1.8fr 0.8fr 1.3fr;
+      padding: 8px 14px;
+      background: #161c28;
+      border-bottom: 1px solid #222938;
+      font-size: 10px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      gap: 8px;
+    }
+    .pm-row {
+      display: grid;
+      grid-template-columns: 1.5fr 0.7fr 1.1fr 1.8fr 0.8fr 1.3fr;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .pm-row:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .pm-aux-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 800;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      width: fit-content;
+    }
+    .pm-performer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(168, 85, 247, 0.15);
+      color: #d8b4fe;
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      width: fit-content;
+    }
+    .pm-performer-badge.unassigned {
+      background: rgba(100, 116, 139, 0.12);
+      color: #64748b;
+      border-color: rgba(100, 116, 139, 0.25);
+    }
+    .btn-pm-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+    .btn-pm-status.enabled {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+    .btn-pm-status.disabled {
+      background: rgba(239, 68, 68, 0.12);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    .pm-groups-mini {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      font-size: 10px;
+    }
+    .pm-mini-pill {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .pm-mini-pill.me { background: rgba(168, 85, 247, 0.2); color: #e9d5ff; }
+    .pm-mini-pill.voices { background: rgba(245, 158, 11, 0.2); color: #fde68a; }
+    .pm-mini-pill.others { background: rgba(56, 189, 248, 0.2); color: #bae6fd; }
 
     /* Botão de Simulação 01V96 */
     .btn-sim {
@@ -2865,6 +3226,10 @@
           <span>🎬</span>
           <span>Cenas & Snapshots</span>
         </button>
+        <button type="button" class="admin-tab-btn" data-admin-tab="mixes" id="adminTabBtn_mixes">
+          <span>🎧</span>
+          <span>Mixes Pessoais (Performer)</span>
+        </button>
         <button type="button" class="admin-tab-btn" data-admin-tab="system" id="adminTabBtn_system">
           <span>🛡️</span>
           <span>Sistema & Auto-Save</span>
@@ -2995,6 +3360,146 @@
 
           <!-- Resposta do Comando de Desligamento -->
           <div id="adminShutdownFeedback" style="display: none; padding: 12px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; line-height: 1.5;"></div>
+        </div>
+
+        <!-- ABA 3: MIXES PESSOAIS & GRUPOS DE PERFORMER -->
+        <div class="admin-tab-pane" id="adminPane_mixes">
+          <div class="admin-section-banner">
+            <div class="admin-section-banner-info">
+              <h4>🎧 Administração de Mixes Pessoais (3 Eixos: Eu · Vozes · Outros)</h4>
+              <p>Configure os 3 grupos contextuais de canais, defina o Auxiliar de saída e vincule a um usuário PERFORMER (máx. 1 mix por performer).</p>
+            </div>
+            <div class="scenes-actions-bar">
+              <button type="button" class="btn-scene-action primary" id="btnOpenNewPersonalMix">
+                ➕ Nova Mix Pessoal
+              </button>
+            </div>
+          </div>
+
+          <!-- Editor / Formulário de Criação e Edição de Mix Pessoal -->
+          <div class="pm-editor-card" id="pmEditorCard" style="display: none;">
+            <div class="pm-editor-header">
+              <h4 id="pmEditorTitle">Nova Mix Pessoal</h4>
+              <span style="font-size: 11px; color: #94a3b8;" id="pmEditorIdBadge"></span>
+            </div>
+
+            <div class="pm-form-grid">
+              <div class="pm-field">
+                <label for="pmMixName">Nome da Mix:</label>
+                <input type="text" id="pmMixName" placeholder="Ex: Mix Vocal Principal" maxlength="50" autocomplete="off">
+              </div>
+
+              <div class="pm-field">
+                <label for="pmOutputAux">Canal de Saída (Auxiliar):</label>
+                <select id="pmOutputAux">
+                  <option value="1">AUX 1</option>
+                  <option value="2">AUX 2</option>
+                  <option value="3">AUX 3</option>
+                  <option value="4">AUX 4</option>
+                  <option value="5">AUX 5</option>
+                  <option value="6">AUX 6</option>
+                  <option value="7">AUX 7</option>
+                  <option value="8">AUX 8</option>
+                </select>
+              </div>
+
+              <div class="pm-field">
+                <label for="pmPerformerUser">Usuário PERFORMER (1 Mix por usuário):</label>
+                <select id="pmPerformerUser">
+                  <option value="">— Nenhum Performer vinculado —</option>
+                </select>
+              </div>
+
+              <label class="pm-toggle-wrap" title="Habilitar ou desabilitar esta mix para o usuário PERFORMER">
+                <input type="checkbox" id="pmEnabled" checked>
+                <span>Habilitada</span>
+              </label>
+            </div>
+
+            <div class="pm-field">
+              <label for="pmMixDesc">Descrição / Contexto (opcional):</label>
+              <input type="text" id="pmMixDesc" placeholder="Ex: Monitor In-Ear do vocalista principal (multiplicador relativo ao Aux)" maxlength="120" autocomplete="off">
+            </div>
+
+            <!-- Configuração dos 3 Grupos que formam a Mix (Eu, Vozes, Outros) -->
+            <div class="pm-groups-box">
+              <div class="pm-groups-toolbar">
+                <div style="display: flex; flex-direction: column; gap: 3px;">
+                  <span style="font-size: 11px; font-weight: 800; color: #e2e8f0;">
+                    1. Escolha o grupo abaixo e clique nos canais (1–32) para adicioná-los:
+                  </span>
+                  <span style="font-size: 10px; color: #64748b;">
+                    Cada canal é exclusivo de um único grupo dentro da mesma mix.
+                  </span>
+                </div>
+
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                  <button type="button" class="btn-scene-action sm secondary" id="btnPmAssignRestOthers" title="Atribuir todos os canais ainda sem grupo ao grupo 'Outros'">
+                    ⚡ Livres → Outros
+                  </button>
+                  <button type="button" class="btn-scene-action sm" id="btnPmClearCurrentGroup" title="Remover todos os canais do grupo selecionado no momento">
+                    🧹 Limpar Grupo Ativo
+                  </button>
+                </div>
+              </div>
+
+              <div class="pm-group-tabs" id="pmGroupTabs">
+                <button type="button" class="btn-pm-group-tab active" data-group="me">
+                  <span>👤 Grupo "EU"</span>
+                  <span class="pm-count-pill" id="pmCountMe">0</span>
+                </button>
+                <button type="button" class="btn-pm-group-tab" data-group="voices">
+                  <span>🎤 Grupo "VOZES"</span>
+                  <span class="pm-count-pill" id="pmCountVoices">0</span>
+                </button>
+                <button type="button" class="btn-pm-group-tab" data-group="others">
+                  <span>🎸 Grupo "OUTROS"</span>
+                  <span class="pm-count-pill" id="pmCountOthers">0</span>
+                </button>
+              </div>
+
+              <!-- Grade de 32 Canais -->
+              <div class="pm-channels-grid" id="pmChannelsGrid">
+                <!-- Gerado via JS -->
+              </div>
+
+              <!-- Resumo dos 3 Grupos -->
+              <div class="pm-groups-summary">
+                <div class="pm-summary-card">
+                  <span class="pm-summary-title" style="color: #c084fc;">👤 EU</span>
+                  <div class="pm-summary-list" id="pmSummaryMe">Nenhum canal</div>
+                </div>
+                <div class="pm-summary-card">
+                  <span class="pm-summary-title" style="color: #fbbf24;">🎤 VOZES</span>
+                  <div class="pm-summary-list" id="pmSummaryVoices">Nenhum canal</div>
+                </div>
+                <div class="pm-summary-card">
+                  <span class="pm-summary-title" style="color: #38bdf8;">🎸 OUTROS</span>
+                  <div class="pm-summary-list" id="pmSummaryOthers">Nenhum canal</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-buttons" style="display: flex; gap: 8px; justify-content: flex-end;">
+              <button type="button" class="btn-scene-action" id="btnCancelPersonalMix">Cancelar</button>
+              <button type="button" class="btn-scene-action primary" id="btnSavePersonalMix">💾 Salvar Mix Pessoal</button>
+            </div>
+          </div>
+
+          <!-- Lista de Mixes Pessoais Cadastradas -->
+          <div class="pm-list-container">
+            <div class="pm-list-header">
+              <span>Mix Pessoal</span>
+              <span>Saída</span>
+              <span>Performer</span>
+              <span>Grupos (Eu · Vozes · Outros)</span>
+              <span>Status</span>
+              <span style="text-align: right;">Ações</span>
+            </div>
+            <div class="scenes-list-items" id="personalMixesListItems">
+              <div class="scenes-loading">Carregando mixes pessoais...</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -6331,6 +6836,7 @@
     const btnAdminClose = document.getElementById('btnAdminClose');
     const adminTabBtns = document.querySelectorAll('.admin-tab-btn');
     const adminPaneScenes = document.getElementById('adminPane_scenes');
+    const adminPaneMixes = document.getElementById('adminPane_mixes');
     const adminPaneSystem = document.getElementById('adminPane_system');
     const adminSysMidiPort = document.getElementById('adminSysMidiPort');
     const adminSysAutoSaveInfo = document.getElementById('adminSysAutoSaveInfo');
@@ -6366,7 +6872,11 @@
         btn.classList.toggle('active', btn.dataset.adminTab === tabId);
       });
       if (adminPaneScenes) adminPaneScenes.classList.toggle('active', tabId === 'scenes');
+      if (adminPaneMixes) adminPaneMixes.classList.toggle('active', tabId === 'mixes');
       if (adminPaneSystem) adminPaneSystem.classList.toggle('active', tabId === 'system');
+      if (tabId === 'mixes') {
+        loadPersonalMixesData();
+      }
       if (tabId === 'system') {
         if (adminSysMidiPort && midiPortBadge) {
           adminSysMidiPort.textContent = midiPortBadge.textContent;
@@ -6539,6 +7049,7 @@
         adminSysMidiPort.textContent = midiPortBadge.textContent;
       }
       loadScenesList();
+      loadPersonalMixesData();
       loadAutoSaveStatus();
     }
 
@@ -6546,6 +7057,7 @@
       if (adminModalOverlay) adminModalOverlay.classList.remove('open');
       if (sceneSaveForm) sceneSaveForm.style.display = 'none';
       if (adminShutdownForm) adminShutdownForm.style.display = 'none';
+      if (typeof closePmEditor === 'function') closePmEditor();
     }
 
     function openConfirmRecallModal(message, onConfirm) {
@@ -6834,6 +7346,431 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+    }
+
+    // ==========================================
+    // ADMINISTRAÇÃO DE MIXES PESSOAIS (PERFORMER)
+    // ==========================================
+    const btnOpenNewPersonalMix = document.getElementById('btnOpenNewPersonalMix');
+    const pmEditorCard = document.getElementById('pmEditorCard');
+    const pmEditorTitle = document.getElementById('pmEditorTitle');
+    const pmEditorIdBadge = document.getElementById('pmEditorIdBadge');
+    const pmMixNameInput = document.getElementById('pmMixName');
+    const pmMixDescInput = document.getElementById('pmMixDesc');
+    const pmOutputAuxSelect = document.getElementById('pmOutputAux');
+    const pmPerformerUserSelect = document.getElementById('pmPerformerUser');
+    const pmEnabledCheckbox = document.getElementById('pmEnabled');
+    const pmGroupTabs = document.getElementById('pmGroupTabs');
+    const pmChannelsGrid = document.getElementById('pmChannelsGrid');
+    const pmCountMe = document.getElementById('pmCountMe');
+    const pmCountVoices = document.getElementById('pmCountVoices');
+    const pmCountOthers = document.getElementById('pmCountOthers');
+    const pmSummaryMe = document.getElementById('pmSummaryMe');
+    const pmSummaryVoices = document.getElementById('pmSummaryVoices');
+    const pmSummaryOthers = document.getElementById('pmSummaryOthers');
+    const btnPmAssignRestOthers = document.getElementById('btnPmAssignRestOthers');
+    const btnPmClearCurrentGroup = document.getElementById('btnPmClearCurrentGroup');
+    const btnCancelPersonalMix = document.getElementById('btnCancelPersonalMix');
+    const btnSavePersonalMix = document.getElementById('btnSavePersonalMix');
+    const personalMixesListItems = document.getElementById('personalMixesListItems');
+
+    let pmEditingId = ''; // vazio = criando nova mix
+    let pmActiveGroup = 'me'; // 'me' | 'voices' | 'others'
+    let pmChannelGroupMap = {}; // { 1: 'me', 2: 'voices', ... }
+    let pmCachedMixes = [];
+    let pmCachedPerformers = [];
+    let pmCachedChannelNames = [];
+
+    function getPmChannelLabel(chNum) {
+      const idx = chNum - 1;
+      const customFromServer = pmCachedChannelNames[idx];
+      const customFromLocal = (channelsState[idx] && channelsState[idx].name) ? channelsState[idx].name : '';
+      const name = customFromServer || customFromLocal || `CH ${String(chNum).padStart(2, '0')}`;
+      return name;
+    }
+
+    function setPmActiveGroup(groupName) {
+      pmActiveGroup = groupName;
+      if (pmGroupTabs) {
+        pmGroupTabs.querySelectorAll('.btn-pm-group-tab').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.group === groupName);
+        });
+      }
+    }
+
+    if (pmGroupTabs) {
+      pmGroupTabs.querySelectorAll('.btn-pm-group-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          setPmActiveGroup(btn.dataset.group);
+        });
+      });
+    }
+
+    function renderPmChannelsEditor() {
+      if (!pmChannelsGrid) return;
+      pmChannelsGrid.innerHTML = '';
+
+      const meList = [];
+      const voicesList = [];
+      const othersList = [];
+
+      for (let ch = 1; ch <= 32; ch++) {
+        const g = pmChannelGroupMap[ch] || '';
+        if (g === 'me') meList.push(ch);
+        else if (g === 'voices') voicesList.push(ch);
+        else if (g === 'others') othersList.push(ch);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-pm-ch';
+        if (g === 'me') btn.classList.add('in-me');
+        else if (g === 'voices') btn.classList.add('in-voices');
+        else if (g === 'others') btn.classList.add('in-others');
+
+        const chNumStr = String(ch).padStart(2, '0');
+        const chName = getPmChannelLabel(ch);
+        let tagText = 'Livre';
+        if (g === 'me') tagText = '👤 EU';
+        else if (g === 'voices') tagText = '🎤 VOZES';
+        else if (g === 'others') tagText = '🎸 OUTROS';
+
+        btn.innerHTML = `
+          <span class="pm-ch-num">CH ${chNumStr}</span>
+          <span class="pm-ch-name" title="${escapeHTML(chName)}">${escapeHTML(chName)}</span>
+          <span class="pm-ch-tag">${tagText}</span>
+        `;
+
+        btn.addEventListener('click', () => {
+          if (pmChannelGroupMap[ch] === pmActiveGroup) {
+            delete pmChannelGroupMap[ch];
+          } else {
+            // Exclusividade: ao clicar, o canal vai para o grupo ativo e sai de qualquer outro
+            pmChannelGroupMap[ch] = pmActiveGroup;
+          }
+          renderPmChannelsEditor();
+        });
+
+        pmChannelsGrid.appendChild(btn);
+      }
+
+      if (pmCountMe) pmCountMe.textContent = meList.length;
+      if (pmCountVoices) pmCountVoices.textContent = voicesList.length;
+      if (pmCountOthers) pmCountOthers.textContent = othersList.length;
+
+      const formatChSummary = (arr) => {
+        if (!arr || arr.length === 0) return 'Nenhum canal selecionado';
+        return arr.map(c => `CH ${String(c).padStart(2, '0')} (${escapeHTML(getPmChannelLabel(c))})`).join(', ');
+      };
+
+      if (pmSummaryMe) pmSummaryMe.innerHTML = formatChSummary(meList);
+      if (pmSummaryVoices) pmSummaryVoices.innerHTML = formatChSummary(voicesList);
+      if (pmSummaryOthers) pmSummaryOthers.innerHTML = formatChSummary(othersList);
+    }
+
+    if (btnPmAssignRestOthers) {
+      btnPmAssignRestOthers.addEventListener('click', () => {
+        for (let ch = 1; ch <= 32; ch++) {
+          if (!pmChannelGroupMap[ch]) {
+            pmChannelGroupMap[ch] = 'others';
+          }
+        }
+        renderPmChannelsEditor();
+      });
+    }
+
+    if (btnPmClearCurrentGroup) {
+      btnPmClearCurrentGroup.addEventListener('click', () => {
+        for (let ch = 1; ch <= 32; ch++) {
+          if (pmChannelGroupMap[ch] === pmActiveGroup) {
+            delete pmChannelGroupMap[ch];
+          }
+        }
+        renderPmChannelsEditor();
+      });
+    }
+
+    function populatePmPerformersDropdown(selectedUsername, currentMixId) {
+      if (!pmPerformerUserSelect) return;
+      pmPerformerUserSelect.innerHTML = '<option value="">— Nenhum Performer vinculado —</option>';
+      pmCachedPerformers.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.username;
+        let suffix = '';
+        if (p.assigned_mix_id && p.assigned_mix_id !== currentMixId) {
+          suffix = ` (vinculado a #${p.assigned_mix_id} — será transferido)`;
+        } else if (p.assigned_mix_id && p.assigned_mix_id === currentMixId) {
+          suffix = ' (atual)';
+        }
+        opt.textContent = `${p.name} (@${p.username})${suffix}`;
+        if (selectedUsername && p.username.toLowerCase() === selectedUsername.toLowerCase()) {
+          opt.selected = true;
+        }
+        pmPerformerUserSelect.appendChild(opt);
+      });
+    }
+
+    function openPmEditor(mixToEdit) {
+      if (!pmEditorCard) return;
+      pmChannelGroupMap = {};
+      setPmActiveGroup('me');
+
+      if (mixToEdit) {
+        pmEditingId = mixToEdit.id;
+        if (pmEditorTitle) pmEditorTitle.textContent = `Editar Mix Pessoal: ${mixToEdit.name}`;
+        if (pmEditorIdBadge) pmEditorIdBadge.textContent = `ID: #${mixToEdit.id}`;
+        if (pmMixNameInput) pmMixNameInput.value = mixToEdit.name || '';
+        if (pmMixDescInput) pmMixDescInput.value = mixToEdit.description || '';
+        if (pmOutputAuxSelect) pmOutputAuxSelect.value = String(mixToEdit.output_aux || 1);
+        if (pmEnabledCheckbox) pmEnabledCheckbox.checked = Boolean(mixToEdit.enabled);
+        populatePmPerformersDropdown(mixToEdit.performer_username || '', mixToEdit.id);
+
+        const groups = mixToEdit.groups || {};
+        (groups.me || []).forEach(ch => { pmChannelGroupMap[ch] = 'me'; });
+        (groups.voices || []).forEach(ch => { pmChannelGroupMap[ch] = 'voices'; });
+        (groups.others || []).forEach(ch => { pmChannelGroupMap[ch] = 'others'; });
+      } else {
+        pmEditingId = '';
+        if (pmEditorTitle) pmEditorTitle.textContent = 'Criar Nova Mix Pessoal';
+        if (pmEditorIdBadge) pmEditorIdBadge.textContent = '';
+        if (pmMixNameInput) pmMixNameInput.value = '';
+        if (pmMixDescInput) pmMixDescInput.value = '';
+        if (pmOutputAuxSelect) pmOutputAuxSelect.value = '1';
+        if (pmEnabledCheckbox) pmEnabledCheckbox.checked = true;
+        populatePmPerformersDropdown('', '');
+      }
+
+      renderPmChannelsEditor();
+      pmEditorCard.style.display = 'flex';
+      if (pmMixNameInput) pmMixNameInput.focus();
+    }
+
+    function closePmEditor() {
+      if (pmEditorCard) pmEditorCard.style.display = 'none';
+      pmEditingId = '';
+    }
+
+    if (btnOpenNewPersonalMix) {
+      btnOpenNewPersonalMix.addEventListener('click', () => {
+        openPmEditor(null);
+      });
+    }
+
+    if (btnCancelPersonalMix) {
+      btnCancelPersonalMix.addEventListener('click', closePmEditor);
+    }
+
+    if (btnSavePersonalMix) {
+      btnSavePersonalMix.addEventListener('click', async () => {
+        const name = (pmMixNameInput ? pmMixNameInput.value : '').trim();
+        if (!name) {
+          alert('Informe um nome para a Mix Pessoal.');
+          if (pmMixNameInput) pmMixNameInput.focus();
+          return;
+        }
+
+        const outputAux = parseInt(pmOutputAuxSelect ? pmOutputAuxSelect.value : '1', 10) || 1;
+        const performerUsername = pmPerformerUserSelect ? pmPerformerUserSelect.value : '';
+        const enabled = pmEnabledCheckbox ? pmEnabledCheckbox.checked : true;
+        const description = (pmMixDescInput ? pmMixDescInput.value : '').trim();
+
+        const me = [];
+        const voices = [];
+        const others = [];
+        for (let ch = 1; ch <= 32; ch++) {
+          if (pmChannelGroupMap[ch] === 'me') me.push(ch);
+          else if (pmChannelGroupMap[ch] === 'voices') voices.push(ch);
+          else if (pmChannelGroupMap[ch] === 'others') others.push(ch);
+        }
+
+        const payload = {
+          name,
+          description,
+          output_aux: outputAux,
+          performer_username: performerUsername,
+          enabled,
+          groups: { me, voices, others }
+        };
+
+        btnSavePersonalMix.disabled = true;
+        btnSavePersonalMix.textContent = 'Salvando...';
+
+        try {
+          const url = pmEditingId
+            ? `/api/personal-mixes/${encodeURIComponent(pmEditingId)}`
+            : '/api/personal-mixes';
+          const method = pmEditingId ? 'PUT' : 'POST';
+
+          const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const result = await res.json();
+          if (res.ok && result.success) {
+            showToast(result.message || `Mix '${name}' salva com sucesso! 🎧`, '🎧');
+            closePmEditor();
+            await loadPersonalMixesData();
+          } else {
+            alert(`Erro ao salvar Mix Pessoal: ${result.error || 'Erro desconhecido'}`);
+          }
+        } catch (err) {
+          alert('Erro de comunicação com o servidor ao salvar Mix Pessoal.');
+        } finally {
+          btnSavePersonalMix.disabled = false;
+          btnSavePersonalMix.textContent = '💾 Salvar Mix Pessoal';
+        }
+      });
+    }
+
+    async function loadPersonalMixesData() {
+      if (!personalMixesListItems) return;
+      personalMixesListItems.innerHTML = '<div class="scenes-loading">Carregando mixes pessoais...</div>';
+
+      try {
+        const res = await fetch('/api/personal-mixes');
+        if (!res.ok) {
+          personalMixesListItems.innerHTML = '<div class="scenes-empty">Erro ao carregar mixes pessoais do servidor.</div>';
+          return;
+        }
+        const data = await res.json();
+        pmCachedMixes = data.mixes || [];
+        pmCachedPerformers = data.performers || [];
+        pmCachedChannelNames = data.channel_names || [];
+
+        renderPersonalMixesList();
+      } catch (err) {
+        personalMixesListItems.innerHTML = '<div class="scenes-empty">Falha de conexão com o servidor.</div>';
+      }
+    }
+
+    function renderPersonalMixesList() {
+      if (!personalMixesListItems) return;
+      if (pmCachedMixes.length === 0) {
+        personalMixesListItems.innerHTML = '<div class="scenes-empty">Nenhuma Mix Pessoal criada. Clique em "➕ Nova Mix Pessoal" acima para criar os 3 grupos (Eu, Vozes, Outros).</div>';
+        return;
+      }
+
+      personalMixesListItems.innerHTML = '';
+      pmCachedMixes.forEach(mix => {
+        const row = document.createElement('div');
+        row.className = 'pm-row';
+
+        const g = mix.groups || {};
+        const meArr = g.me || [];
+        const voicesArr = g.voices || [];
+        const othersArr = g.others || [];
+
+        const performerObj = pmCachedPerformers.find(p => p.username && mix.performer_username && p.username.toLowerCase() === mix.performer_username.toLowerCase());
+        const performerLabel = mix.performer_username
+          ? `👤 ${performerObj ? performerObj.name : mix.performer_username}`
+          : 'Não vinculado';
+
+        row.innerHTML = `
+          <div class="scene-info-wrap">
+            <span class="scene-item-name">${escapeHTML(mix.name)} <span style="font-size:10px; color:#64748b; font-weight:600;">(#${escapeHTML(mix.id)})</span></span>
+            ${mix.description ? `<span class="scene-item-desc" title="${escapeHTML(mix.description)}">${escapeHTML(mix.description)}</span>` : ''}
+          </div>
+          <div>
+            <span class="pm-aux-badge">AUX ${mix.output_aux}</span>
+          </div>
+          <div>
+            <span class="pm-performer-badge ${mix.performer_username ? '' : 'unassigned'}">${escapeHTML(performerLabel)}</span>
+          </div>
+          <div class="pm-groups-mini">
+            <span class="pm-mini-pill me" title="Canais Eu: ${meArr.join(', ') || 'nenhum'}">Eu: ${meArr.length} ch</span>
+            <span class="pm-mini-pill voices" title="Canais Vozes: ${voicesArr.join(', ') || 'nenhum'}">Vozes: ${voicesArr.length} ch</span>
+            <span class="pm-mini-pill others" title="Canais Outros: ${othersArr.join(', ') || 'nenhum'}">Outros: ${othersArr.length} ch</span>
+          </div>
+          <div>
+            <button type="button" class="btn-pm-status ${mix.enabled ? 'enabled' : 'disabled'}" data-id="${escapeHTML(mix.id)}" title="Clique para alternar entre Habilitada e Desabilitada">
+              <span>${mix.enabled ? '🟢 Ativa' : '🔴 Inativa'}</span>
+            </button>
+          </div>
+          <div class="scene-item-actions">
+            <button type="button" class="btn-scene-action secondary sm btn-pm-edit" data-id="${escapeHTML(mix.id)}" title="Editar grupos, saída e performer">✏️ Editar</button>
+            <button type="button" class="btn-scene-action sm btn-pm-capture" data-id="${escapeHTML(mix.id)}" title="Capturar volumes atuais do AUX ${mix.output_aux} como referência base">📸 Base</button>
+            <button type="button" class="btn-scene-action danger sm btn-pm-delete" data-id="${escapeHTML(mix.id)}" title="Excluir Mix Pessoal">🗑</button>
+          </div>
+        `;
+
+        personalMixesListItems.appendChild(row);
+      });
+
+      // Eventos da lista
+      personalMixesListItems.querySelectorAll('.btn-pm-edit').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mix = pmCachedMixes.find(m => m.id === btn.dataset.id);
+          if (mix) openPmEditor(mix);
+        });
+      });
+
+      personalMixesListItems.querySelectorAll('.btn-pm-status').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const mix = pmCachedMixes.find(m => m.id === btn.dataset.id);
+          if (!mix) return;
+          const updatedPayload = {
+            ...mix,
+            enabled: !mix.enabled
+          };
+          try {
+            const res = await fetch(`/api/personal-mixes/${encodeURIComponent(mix.id)}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(updatedPayload)
+            });
+            const result = await res.json();
+            if (res.ok && result.success) {
+              showToast(`Mix '${mix.name}' ${result.mix.enabled ? 'habilitada 🟢' : 'desabilitada 🔴'}`, '🎧');
+              loadPersonalMixesData();
+            }
+          } catch (err) {
+            alert('Erro ao alternar status da mix.');
+          }
+        });
+      });
+
+      personalMixesListItems.querySelectorAll('.btn-pm-capture').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const mix = pmCachedMixes.find(m => m.id === btn.dataset.id);
+          if (!mix) return;
+          try {
+            const res = await fetch(`/api/personal-mixes/${encodeURIComponent(mix.id)}/capture-base`, {
+              method: 'POST'
+            });
+            const result = await res.json();
+            if (res.ok && result.success) {
+              showToast(result.message || `Volumes base do AUX ${mix.output_aux} capturados! 📸`, '📸');
+            } else {
+              alert(result.error || 'Falha ao capturar volumes base.');
+            }
+          } catch (err) {
+            alert('Erro ao capturar volumes base do Auxiliar.');
+          }
+        });
+      });
+
+      personalMixesListItems.querySelectorAll('.btn-pm-delete').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const mix = pmCachedMixes.find(m => m.id === btn.dataset.id);
+          if (!mix) return;
+          if (!confirm(`Tem certeza que deseja excluir a Mix Pessoal "${mix.name}"?`)) return;
+          try {
+            const res = await fetch(`/api/personal-mixes/${encodeURIComponent(mix.id)}`, {
+              method: 'DELETE'
+            });
+            const result = await res.json();
+            if (res.ok && result.success) {
+              showToast(`Mix '${mix.name}' excluída.`, '🗑');
+              if (pmEditingId === mix.id) closePmEditor();
+              loadPersonalMixesData();
+            } else {
+              alert(result.error || 'Falha ao excluir mix.');
+            }
+          } catch (err) {
+            alert('Erro de comunicação ao excluir mix.');
+          }
+        });
+      });
     }
 
     // Tecla ESC para fechar modais de administração e cenas

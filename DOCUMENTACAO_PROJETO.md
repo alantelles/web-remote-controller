@@ -110,6 +110,16 @@ O **Web Remote Controller** é uma solução moderna e leve para controle remoto
   * **Filtros Integrados:** Sem botões avulsos de HPF/LPF — o filtro corte passa-altas (HPF) é selecionado diretamente no dropdown da banda `LOW`, e o passa-baixas (LPF) na banda `HIGH`, desabilitando e esmaecendo automaticamente Ganho e Q.
   * **Ações de Cabeçalho:** Alternador `EQ: ON` / `BYPASS` e botão `⚡ FLAT` para zerar as 4 bandas instantaneamente.
 
+### Etapa 10: Mixagem Pessoal para Performers (Joystick 3 Eixos Equal Power & Admin)
+* **Gerenciamento na Seção Admin (`🎧 Mixes Pessoais` no Desktop):**
+  * Criação, edição, ativação/desativação e exclusão de Mixes Pessoais persistidas em `data/personal_mixes.json`.
+  * Definição do canal de saída (`AUX 1` a `AUX 8`) e vínculo exclusivo de **1 Mix por usuário `PERFORMER`** (sincronizado automaticamente com `usuarios.csv` e sessões ativas).
+  * Matriz visual interativa de 32 canais para distribuir os canais nos **3 grupos contextuais exclusivos**: **👤 Eu**, **🎤 Vozes** e **🎸 Outros** (com atalho `⚡ Livres → Outros`).
+  * Captura e atualização automática dos **Volumes Base de Referência (`BaseLevels`)** configurados pelo Admin no respectivo Auxiliar.
+* **Tela do Performer (`/mix` — Disco/Joystick de 3 Eixos):**
+  * Controle circular interativo em Canvas (`touch-action: none`) com 3 pólos defasados em $120^\circ$ (**EU**, **VOZES**, **OUTROS**).
+  * **Cálculo Equal Power ($w_{\text{eu}}^2 + w_{\text{vozes}}^2 + w_{\text{outros}}^2 = 1$):** Atua como multiplicador relativo sobre os `BaseLevels` ajustados pelo Admin naquele Auxiliar, emitindo os novos níveis de envio (`0x23`) em tempo real via WebSocket e barramento MIDI com throttling de 20 ms.
+
 ---
 
 ## 3. Em que Ponto Estamos Hoje (Status Atual)
