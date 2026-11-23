@@ -759,6 +759,12 @@
       box-shadow: inset 0 6px 14px -3px rgba(6, 182, 212, 0.4), 0 3px 8px rgba(0, 0, 0, 0.35);
     }
 
+    /* Destaque do Canal Selecionado com Teclado ou Toque */
+    .fader-card.selected {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4), inset 0 0 10px rgba(56, 189, 248, 0.15) !important;
+    }
+
     /* Card do Master da Mix (Primeiro elemento, rola junto) */
     .fader-card-master {
       background: linear-gradient(180deg, rgba(239, 68, 68, 0.2) 0%, rgba(26, 30, 41, 0.95) 100%);
@@ -3926,9 +3932,14 @@
       selectedChannel = ch;
       for (let i = 0; i < TOTAL_CHANNELS; i++) {
         const btn = document.getElementById(`selBtn_${i}`);
+        const card = document.getElementById(`channelCard_${i}`);
         if (btn) {
           if (i === ch) btn.classList.add('selected');
           else btn.classList.remove('selected');
+        }
+        if (card) {
+          if (i === ch) card.classList.add('selected');
+          else card.classList.remove('selected');
         }
       }
       const masterSel = document.getElementById('masterSelBtn');
@@ -3938,7 +3949,9 @@
     function setSelectedMaster() {
       for (let i = 0; i < TOTAL_CHANNELS; i++) {
         const btn = document.getElementById(`selBtn_${i}`);
+        const card = document.getElementById(`channelCard_${i}`);
         if (btn) btn.classList.remove('selected');
+        if (card) card.classList.remove('selected');
       }
       const masterSel = document.getElementById('masterSelBtn');
       if (masterSel) masterSel.classList.add('selected');
@@ -6818,14 +6831,25 @@
         });
       });
 
-      // Teclas de atalho para troca rápida de mixagem: 0 ou M = MASTER, 1 a 8 = AUX 1 a 8
+      // Atalhos de teclado no Mobile:
+      // - 0 ou M: MASTER / 1 a 8: AUX 1 a 8 (com toggle)
+      // - Seta Cima / Baixo: seleciona o canal anterior / próximo visível
+      // - Seta Esquerda / Direita: ajusta o volume do canal selecionado
       document.addEventListener('keydown', (e) => {
         if (e.target.matches('input, select, textarea')) return;
         if (e.ctrlKey || e.altKey || e.metaKey) return;
 
+        // Se o modal de EQ estiver aberto, ele já trata seus próprios atalhos
+        if (isEqModalOpen) return;
+
+        // Se houver algum modal interativo aberto, ignora
+        const openModal = document.querySelector('.modal-overlay.open, #channelsModal.open, #mobileMuteGroupsModal.open, #mobileAdminModal.open, #mobileShutdownModal.open');
+        if (openModal) return;
+
         const key = e.key.toLowerCase();
         if (key === '0' || key === 'm') {
           setMixTarget('MASTER');
+          return;
         } else if (key >= '1' && key <= '8') {
           const auxTarget = 'AUX' + key;
           // Toggle: se pressionar a tecla do mesmo AUX já ativo, retorna para MASTER
@@ -6834,6 +6858,69 @@
           } else {
             setMixTarget(auxTarget);
           }
+          return;
+        }
+
+        // Obtém a lista dos canais atualmente visíveis na tela
+        const visibleChannels = [];
+        for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
+          const card = document.getElementById(`channelCard_${ch}`);
+          if (card && card.style.display !== 'none') {
+            visibleChannels.push(ch);
+          }
+        }
+        if (visibleChannels.length === 0) return;
+
+        // Setas Cima / Baixo: seleciona o canal verticalmente
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          let curIdx = visibleChannels.indexOf(selectedChannel);
+          let nextCh;
+
+          if (e.key === 'ArrowDown') {
+            if (curIdx === -1 || curIdx >= visibleChannels.length - 1) {
+              nextCh = visibleChannels[0];
+            } else {
+              nextCh = visibleChannels[curIdx + 1];
+            }
+          } else {
+            if (curIdx <= 0) {
+              nextCh = visibleChannels[visibleChannels.length - 1];
+            } else {
+              nextCh = visibleChannels[curIdx - 1];
+            }
+          }
+
+          setSelectedChannel(nextCh);
+          const card = document.getElementById(`channelCard_${nextCh}`);
+          if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }
+        // Setas Esquerda / Direita: ajusta o volume horizontalmente
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          e.preventDefault();
+          let ch = selectedChannel;
+          if (typeof ch !== 'number' || !visibleChannels.includes(ch)) {
+            ch = visibleChannels[0];
+            setSelectedChannel(ch);
+          }
+
+          const currentVal = (state.faders[currentMix] && state.faders[currentMix][ch] !== undefined)
+            ? state.faders[currentMix][ch]
+            : 0;
+
+          // Passo: 10 unidades (~1 dB) padrão; 30 unidades (~3 dB) com Shift
+          const step = e.shiftKey ? 30 : 10;
+          let newVal;
+
+          if (e.key === 'ArrowRight') {
+            newVal = Math.min(MAX_VALUE, currentVal + step);
+          } else {
+            newVal = Math.max(MIN_VALUE, currentVal - step);
+          }
+
+          setChannelFader(ch, newVal);
         }
       });
 
