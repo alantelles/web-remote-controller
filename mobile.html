@@ -6808,8 +6808,33 @@
       // Botões de Saída (Bloco 2)
       document.querySelectorAll('.btn-out').forEach(btn => {
         btn.addEventListener('click', () => {
-          setMixTarget(btn.getAttribute('data-mix'));
+          const mix = btn.getAttribute('data-mix');
+          // Toggle: se clicar no mesmo AUX que já está selecionado, retorna para MASTER
+          if (mix && mix !== 'MASTER' && mix === currentMix) {
+            setMixTarget('MASTER');
+          } else if (mix) {
+            setMixTarget(mix);
+          }
         });
+      });
+
+      // Teclas de atalho para troca rápida de mixagem: 0 ou M = MASTER, 1 a 8 = AUX 1 a 8
+      document.addEventListener('keydown', (e) => {
+        if (e.target.matches('input, select, textarea')) return;
+        if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+        const key = e.key.toLowerCase();
+        if (key === '0' || key === 'm') {
+          setMixTarget('MASTER');
+        } else if (key >= '1' && key <= '8') {
+          const auxTarget = 'AUX' + key;
+          // Toggle: se pressionar a tecla do mesmo AUX já ativo, retorna para MASTER
+          if (auxTarget === currentMix) {
+            setMixTarget('MASTER');
+          } else {
+            setMixTarget(auxTarget);
+          }
+        }
       });
 
       // Botões de Banco (Bloco 3)

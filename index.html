@@ -5631,7 +5631,12 @@
       btn.addEventListener('click', () => {
         const mix = btn.dataset.mix;
         if (mix && MIX_TARGETS[mix]) {
-          selectMix(mix, true);
+          // Toggle: se clicar no mesmo AUX que já está selecionado, retorna para MASTER
+          if (mix !== 'MASTER' && mix === currentMixTarget) {
+            selectMix('MASTER', true);
+          } else {
+            selectMix(mix, true);
+          }
         }
       });
     });
@@ -5645,7 +5650,13 @@
       if (key === '0' || key === 'm') {
         selectMix('MASTER', true);
       } else if (key >= '1' && key <= '8') {
-        selectMix('AUX' + key, true);
+        const auxTarget = 'AUX' + key;
+        // Toggle: se pressionar a tecla do mesmo AUX já ativo, retorna para MASTER
+        if (auxTarget === currentMixTarget) {
+          selectMix('MASTER', true);
+        } else {
+          selectMix(auxTarget, true);
+        }
       }
     });
 
