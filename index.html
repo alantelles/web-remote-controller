@@ -51,6 +51,7 @@
 
     /* Topo: Console Header */
     .console-header {
+      position: relative;
       flex-shrink: 0;
       background: linear-gradient(180deg, #1f232d 0%, #151820 100%);
       border-bottom: 1px solid #000;
@@ -60,7 +61,7 @@
       justify-content: space-between;
       align-items: center;
       gap: 16px;
-      z-index: 20;
+      z-index: 50;
     }
 
     .brand-section {
@@ -239,6 +240,7 @@
 
     /* BARRA DE SELEÇÃO DE MIXAGEM (MASTER E AUX 1-8 / SENDS ON FADER) */
     .mix-selector-bar {
+      position: relative;
       flex-shrink: 0;
       background: linear-gradient(180deg, #181c25 0%, #11141b 100%);
       border-bottom: 2px solid #000;
@@ -249,7 +251,7 @@
       justify-content: space-between;
       gap: 16px;
       flex-wrap: wrap;
-      z-index: 18;
+      z-index: 20;
     }
 
     .mix-bar-left {
@@ -805,31 +807,105 @@
 
     /* Barra de Controle de Canais (Toolbar) */
     .console-toolbar {
+      position: relative;
       flex-shrink: 0;
       background: #14171f;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      padding: 8px 18px;
+      padding: 6px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      flex-wrap: wrap;
-      z-index: 15;
+      flex-wrap: nowrap;
+      z-index: 40;
     }
 
     .toolbar-left {
       display: flex;
       align-items: center;
       gap: 10px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
 
     .toolbar-label {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.8px;
       color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    /* Dropdown de Bancos de Canais */
+    .bank-dropdown-wrap {
+      position: relative;
+    }
+
+    .btn-bank-menu {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #0d0f14;
+      border: 1px solid #283142;
+      border-radius: 6px;
+      color: #38bdf8;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      min-width: 140px;
+      justify-content: space-between;
+    }
+
+    .btn-bank-menu:hover,
+    .btn-bank-menu.open {
+      background: #151821;
+      border-color: #38bdf8;
+      color: #ffffff;
+    }
+
+    .bank-dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 6px;
+      background: #151821;
+      border: 1px solid #333b4d;
+      border-radius: 8px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.85);
+      padding: 6px;
+      min-width: 195px;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 100;
+      animation: modalFadeIn 0.12s ease-out;
+    }
+
+    .bank-dropdown-menu.open {
+      display: flex;
+    }
+
+    .bank-menu-item.active {
+      background: #1e3a8a;
+      border-color: #3b82f6;
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .bank-menu-item.btn-bank-saved {
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    .bank-menu-item.btn-bank-saved:hover,
+    .bank-menu-item.btn-bank-saved.active {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #ffffff;
     }
 
     /* Select Multiple Nativo estilizado */
@@ -874,6 +950,7 @@
       align-items: center;
       gap: 6px;
       transition: all 0.15s ease;
+      white-space: nowrap;
     }
 
     .btn-multiselect-dropdown:hover {
@@ -1019,6 +1096,111 @@
       background: #7f1d1d;
       border-color: #991b1b;
       color: #fee2e2;
+    }
+
+    /* Dropdown de Ações Globais */
+    .global-actions-wrap {
+      position: relative;
+    }
+
+    .btn-global-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #1a1e28;
+      border: 1px solid #2e3646;
+      border-radius: 6px;
+      color: #e2e8f0;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-global-actions:hover,
+    .btn-global-actions.open {
+      background: #242a38;
+      border-color: #3b82f6;
+      color: #ffffff;
+    }
+
+    .global-actions-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #64748b;
+      transition: all 0.2s ease;
+    }
+
+    .global-actions-dot.active {
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+    }
+
+    .actions-dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 6px;
+      background: #151821;
+      border: 1px solid #333b4d;
+      border-radius: 8px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.85);
+      padding: 6px;
+      min-width: 215px;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 100;
+      animation: modalFadeIn 0.12s ease-out;
+    }
+
+    .actions-dropdown-menu.open {
+      display: flex;
+    }
+
+    .action-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: 5px;
+      border: 1px solid transparent;
+      background: #1c202d;
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .action-menu-item:hover {
+      background: #2a3142;
+      color: #ffffff;
+      border-color: #3b82f6;
+    }
+
+    .action-menu-item.btn-sim.active {
+      background: #14532d;
+      border-color: #22c55e;
+      color: #86efac;
+    }
+
+    .action-menu-item.btn-danger:hover {
+      background: #7f1d1d;
+      border-color: #ef4444;
+      color: #fee2e2;
+    }
+
+    .action-menu-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 3px 0;
     }
 
     /* Modal de Alerta / Confirmação */
@@ -3287,19 +3469,14 @@
       </div>
     </header>
 
-    <!-- BARRA DE CONTROLE: SELECT MULTIPLE E FILTROS -->
+    <!-- BARRA DE CONTROLE: SELEÇÃO DE CANAIS E AÇÕES GLOBAIS -->
     <div class="console-toolbar">
       <div class="toolbar-left">
         <span class="toolbar-label">Exibir Canais:</span>
 
-        <!-- SELECT MULTIPLE NATIVO -->
+        <!-- Botão Dropdown Rápido com Popover -->
         <div class="channel-select-wrap">
-          <select id="channelMultiSelect" multiple class="native-multi-select" title="Segure Ctrl / Cmd para múltiplos">
-            <!-- 32 options geradas dinamicamente via JS -->
-          </select>
-
-          <!-- Botão Dropdown Rápido com Popover -->
-          <button id="btnTogglePopover" class="btn-multiselect-dropdown" type="button">
+          <button id="btnTogglePopover" class="btn-multiselect-dropdown" type="button" title="Abrir seleção de canais visíveis">
             <span id="selectedCountBadge">32 de 32 visíveis</span>
             <span>▾</span>
           </button>
@@ -3320,39 +3497,80 @@
           </div>
         </div>
 
-        <!-- Atalhos rápidos de bancos -->
-        <div class="bank-buttons">
-          <button class="btn-bank btn-bank-saved" data-bank="saved" id="btnBankSaved" type="button" title="Minha visualização personalizada de canais">⭐ Salvo</button>
-          <button class="btn-bank active" data-bank="all" type="button">Todos (1-32)</button>
-          <button class="btn-bank" data-bank="1-16" type="button">CH 1–16</button>
-          <button class="btn-bank" data-bank="17-32" type="button">CH 17–32</button>
-          <button class="btn-bank" data-bank="1-8" type="button">CH 1–8</button>
-          <button class="btn-bank" data-bank="9-16" type="button">CH 9–16</button>
-          <button class="btn-bank" data-bank="17-24" type="button">CH 17–24</button>
-          <button class="btn-bank" data-bank="25-32" type="button">CH 25–32</button>
+        <!-- Dropdown de Bancos de Canais -->
+        <div class="bank-dropdown-wrap">
+          <button id="btnToggleBankMenu" class="btn-action btn-bank-menu" type="button" title="Selecione a visualização dos canais">
+            <span id="currentBankLabel">Todos (1-32)</span>
+            <span style="font-size: 10px; opacity: 0.8;">▾</span>
+          </button>
+
+          <!-- Menu Dropdown de Bancos -->
+          <div id="bankDropdownMenu" class="bank-dropdown-menu">
+            <button class="action-menu-item bank-menu-item active" data-bank="all" type="button">
+              <span>📑</span> Todos (1-32)
+            </button>
+            <button class="action-menu-item bank-menu-item" data-bank="1-16" type="button">
+              <span>🎚️</span> CH 1–16
+            </button>
+            <button class="action-menu-item bank-menu-item" data-bank="17-32" type="button">
+              <span>🎚️</span> CH 17–32
+            </button>
+            <div class="action-menu-divider"></div>
+            <button class="action-menu-item bank-menu-item" data-bank="1-8" type="button">
+              <span>🔹</span> CH 1–8
+            </button>
+            <button class="action-menu-item bank-menu-item" data-bank="9-16" type="button">
+              <span>🔹</span> CH 9–16
+            </button>
+            <button class="action-menu-item bank-menu-item" data-bank="17-24" type="button">
+              <span>🔹</span> CH 17–24
+            </button>
+            <button class="action-menu-item bank-menu-item" data-bank="25-32" type="button">
+              <span>🔹</span> CH 25–32
+            </button>
+            <div class="action-menu-divider"></div>
+            <button class="action-menu-item bank-menu-item btn-bank-saved" data-bank="saved" type="button" title="Minha visualização personalizada de canais">
+              <span>⭐</span> Minha Visão Salva
+            </button>
+          </div>
         </div>
 
         <!-- Salvar Estado no Navegador -->
-        <div style="display: flex; align-items: center; gap: 6px; margin-left: 6px;">
-          <button class="btn-action btn-view-save" id="btnSaveView" type="button" title="Salvar a seleção atual como Minha Visualização Salva">
-            <span>💾</span> Salvar visão
-          </button>
-        </div>
+        <button class="btn-action btn-view-save" id="btnSaveView" type="button" title="Salvar a seleção atual como Minha Visualização Salva">
+          <span>💾</span> Salvar visão
+        </button>
       </div>
 
       <div class="toolbar-right">
-        <button class="btn-action btn-sim" id="btnToggleSim" type="button" title="Alternar simulação em tempo real da Yamaha 01V96">
-          <span id="simIcon">🎲</span> <span id="simStatusText">Simulação 01V96: OFF</span>
-        </button>
-        <button class="btn-action" id="btnAllZeroDb" type="button">
-          <span>⚡</span> Todos em 0.0 dB
-        </button>
-        <button class="btn-action" id="btnUnmuteAll" type="button">
-          <span>🔔</span> Desmutar Todos (ON)
-        </button>
-        <button class="btn-action btn-danger" id="btnMuteAll" type="button">
-          <span>🔇</span> Mutar Todos
-        </button>
+        <!-- Dropdown de Ações Globais -->
+        <div class="global-actions-wrap">
+          <button id="btnToggleGlobalActions" class="btn-action btn-global-actions" type="button" title="Ações globais da mesa e canais">
+            <span id="globalActionsIndicator" class="global-actions-dot"></span>
+            <span>⚡ Ações Globais</span>
+            <span style="font-size: 10px; opacity: 0.8;">▾</span>
+          </button>
+
+          <!-- Menu Dropdown Popover de Ações -->
+          <div id="globalActionsMenu" class="actions-dropdown-menu">
+            <button class="action-menu-item btn-sim" id="btnToggleSim" type="button" title="Alternar simulação em tempo real da Yamaha 01V96">
+              <span id="simIcon">🎲</span>
+              <span id="simStatusText">Simulação 01V96: OFF</span>
+            </button>
+            <div class="action-menu-divider"></div>
+            <button class="action-menu-item" id="btnAllZeroDb" type="button" title="Ajustar todos os faders da mixagem ativa para 0.0 dB">
+              <span>⚡</span>
+              <span>Todos em 0.0 dB</span>
+            </button>
+            <button class="action-menu-item" id="btnUnmuteAll" type="button" title="Ligar (desmutar) todos os 32 canais">
+              <span>🔔</span>
+              <span>Desmutar Todos (ON)</span>
+            </button>
+            <button class="action-menu-item btn-danger" id="btnMuteAll" type="button" title="Mutar todos os 32 canais">
+              <span>🔇</span>
+              <span>Mutar Todos</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -4625,21 +4843,34 @@
       ws.onmessage = handleWebSocketMessage;
     }
 
-    // Elementos do Botão de Simulação 01V96
+    // Elementos do Botão de Simulação 01V96 e Dropdown de Ações Globais
     const btnToggleSim = document.getElementById('btnToggleSim');
     const simIcon = document.getElementById('simIcon');
     const simStatusText = document.getElementById('simStatusText');
+    const btnToggleGlobalActions = document.getElementById('btnToggleGlobalActions');
+    const globalActionsMenu = document.getElementById('globalActionsMenu');
+    const globalActionsIndicator = document.getElementById('globalActionsIndicator');
 
     function updateSimButtonUI(isRunning) {
-      if (!btnToggleSim) return;
-      if (isRunning) {
-        btnToggleSim.classList.add('active');
-        simIcon.textContent = '⚡';
-        simStatusText.textContent = 'Simulação 01V96: ATIVA';
-      } else {
-        btnToggleSim.classList.remove('active');
-        simIcon.textContent = '🎲';
-        simStatusText.textContent = 'Simulação 01V96: OFF';
+      if (btnToggleSim) {
+        if (isRunning) {
+          btnToggleSim.classList.add('active');
+          if (simIcon) simIcon.textContent = '⚡';
+          if (simStatusText) simStatusText.textContent = 'Simulação 01V96: ATIVA';
+        } else {
+          btnToggleSim.classList.remove('active');
+          if (simIcon) simIcon.textContent = '🎲';
+          if (simStatusText) simStatusText.textContent = 'Simulação 01V96: OFF';
+        }
+      }
+      if (globalActionsIndicator) {
+        if (isRunning) {
+          globalActionsIndicator.classList.add('active');
+          globalActionsIndicator.title = 'Simulação 01V96 Ativa';
+        } else {
+          globalActionsIndicator.classList.remove('active');
+          globalActionsIndicator.title = '';
+        }
       }
     }
 
@@ -4647,6 +4878,30 @@
       btnToggleSim.addEventListener('click', () => {
         if (ws && ws.readyState === WebSocket.OPEN) {
           ws.send(JSON.stringify({ action: 'toggle_sim' }));
+        }
+      });
+    }
+
+    // Toggle e controle do menu dropdown de Ações Globais
+    if (btnToggleGlobalActions && globalActionsMenu) {
+      btnToggleGlobalActions.addEventListener('click', (e) => {
+        e.stopPropagation();
+        globalActionsMenu.classList.toggle('open');
+        btnToggleGlobalActions.classList.toggle('open', globalActionsMenu.classList.contains('open'));
+      });
+
+      // Fechar menu ao acionar qualquer item de ação
+      globalActionsMenu.addEventListener('click', (e) => {
+        if (e.target.closest('.action-menu-item')) {
+          globalActionsMenu.classList.remove('open');
+          btnToggleGlobalActions.classList.remove('open');
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!globalActionsMenu.contains(e.target) && !btnToggleGlobalActions.contains(e.target)) {
+          globalActionsMenu.classList.remove('open');
+          btnToggleGlobalActions.classList.remove('open');
         }
       });
     }
@@ -4981,12 +5236,14 @@
       // 1. Adiciona Strip ao Rack
       mixerRack.appendChild(createChannelStrip(ch));
 
-      // 2. Adiciona ao Select Multiple
-      const opt = document.createElement('option');
-      opt.value = i;
-      opt.textContent = ch.name;
-      opt.selected = true;
-      channelMultiSelect.appendChild(opt);
+      // 2. Adiciona ao Select Multiple (se presente)
+      if (channelMultiSelect) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = ch.name;
+        opt.selected = true;
+        channelMultiSelect.appendChild(opt);
+      }
 
       // 3. Adiciona ao Popover de Checkboxes
       const popItem = document.createElement('label');
@@ -5565,10 +5822,12 @@
         if (isVis) count++;
       }
 
-      // Sincroniza Select Multiple Nativo
-      Array.from(channelMultiSelect.options).forEach(opt => {
-        opt.selected = selectedIndices.includes(parseInt(opt.value, 10));
-      });
+      // Sincroniza Select Multiple Nativo (se presente)
+      if (channelMultiSelect) {
+        Array.from(channelMultiSelect.options).forEach(opt => {
+          opt.selected = selectedIndices.includes(parseInt(opt.value, 10));
+        });
+      }
 
       // Sincroniza Checkboxes do Popover
       for (let i = 0; i < TOTAL_CHANNELS; i++) {
@@ -5588,12 +5847,14 @@
       });
     }
 
-    // Evento de alteração no Select Multiple Nativo (alteração manual em tela)
-    channelMultiSelect.addEventListener('change', () => {
-      const selected = Array.from(channelMultiSelect.selectedOptions).map(o => parseInt(o.value, 10));
-      updateChannelsVisibility(selected);
-      updateBankButtonsActiveState(selected);
-    });
+    // Evento de alteração no Select Multiple Nativo (se presente)
+    if (channelMultiSelect) {
+      channelMultiSelect.addEventListener('change', () => {
+        const selected = Array.from(channelMultiSelect.selectedOptions).map(o => parseInt(o.value, 10));
+        updateChannelsVisibility(selected);
+        updateBankButtonsActiveState(selected);
+      });
+    }
 
     // Evento de alteração nos checkboxes do Popover (alteração manual em tela)
     popoverCheckboxGrid.addEventListener('change', (e) => {
@@ -5633,7 +5894,11 @@
       updateBankButtonsActiveState(none);
     });
 
-    // Botões Rápidos de Bancos
+    // Dropdown e Controle de Bancos de Canais
+    const btnToggleBankMenu = document.getElementById('btnToggleBankMenu');
+    const bankDropdownMenu = document.getElementById('bankDropdownMenu');
+    const currentBankLabel = document.getElementById('currentBankLabel');
+    const bankMenuItems = document.querySelectorAll('.bank-menu-item');
     const bankButtons = document.querySelectorAll('.btn-bank');
     const STANDARD_BANKS = ['all', '1-16', '17-32', '1-8', '9-16', '17-24', '25-32'];
 
@@ -5651,7 +5916,7 @@
 
     function getBankLabel(bank) {
       switch (bank) {
-        case 'saved': return '⭐ Minha Visualização Salva';
+        case 'saved': return '⭐ Minha Visão Salva';
         case '1-16': return 'CH 1–16';
         case '17-32': return 'CH 17–32';
         case '1-8': return 'CH 1–8';
@@ -5665,7 +5930,32 @@
     function updateBankButtonsActiveState(selected) {
       const saved = getSavedVisibleChannels();
       const isSavedMatch = saved && isSameSelection(selected, saved);
+      let activeBank = 'custom';
 
+      if (isSavedMatch) {
+        activeBank = 'saved';
+      } else {
+        const matchingBank = STANDARD_BANKS.find(b => isSameSelection(selected, getBankIndices(b)));
+        if (matchingBank) {
+          activeBank = matchingBank;
+        }
+      }
+
+      // Atualiza o texto do botão de bancos
+      if (currentBankLabel) {
+        if (activeBank === 'custom') {
+          currentBankLabel.textContent = '(Personalizado)';
+        } else {
+          currentBankLabel.textContent = getBankLabel(activeBank);
+        }
+      }
+
+      // Atualiza classe active nos itens do dropdown
+      bankMenuItems.forEach(item => {
+        item.classList.toggle('active', item.dataset.bank === activeBank);
+      });
+
+      // Atualiza botões legados se existirem
       bankButtons.forEach(btn => {
         const bank = btn.dataset.bank;
         if (bank === 'saved') {
@@ -5678,24 +5968,57 @@
       });
     }
 
-    bankButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const bank = btn.dataset.bank;
-        if (bank === 'saved') {
-          const saved = getSavedVisibleChannels();
-          if (!saved || saved.length === 0) {
-            showToast('Nenhuma visualização salva ainda! Selecione os canais e clique em "Salvar como Salvo".', '⚠️');
-            return;
-          }
-          updateChannelsVisibility(saved);
-          updateBankButtonsActiveState(saved);
-          showToast('Minha visualização salva ativa! ⭐', '⭐');
+    // Toggle para abrir e fechar o menu de bancos
+    if (btnToggleBankMenu && bankDropdownMenu) {
+      btnToggleBankMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+        bankDropdownMenu.classList.toggle('open');
+        btnToggleBankMenu.classList.toggle('open', bankDropdownMenu.classList.contains('open'));
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!bankDropdownMenu.contains(e.target) && !btnToggleBankMenu.contains(e.target)) {
+          bankDropdownMenu.classList.remove('open');
+          btnToggleBankMenu.classList.remove('open');
+        }
+      });
+    }
+
+    // Aplica seleção do banco (somente mediante clique)
+    function applyBankSelection(bank) {
+      if (bank === 'saved') {
+        const saved = getSavedVisibleChannels();
+        if (!saved || saved.length === 0) {
+          showToast('Nenhuma visualização salva ainda! Selecione os canais e clique em "Salvar visão".', '⚠️');
           return;
         }
+        updateChannelsVisibility(saved);
+        updateBankButtonsActiveState(saved);
+        showToast('Minha visualização salva ativa! ⭐', '⭐');
+        return;
+      }
 
-        const targetIndices = getBankIndices(bank);
-        updateChannelsVisibility(targetIndices);
-        updateBankButtonsActiveState(targetIndices);
+      const targetIndices = getBankIndices(bank);
+      updateChannelsVisibility(targetIndices);
+      updateBankButtonsActiveState(targetIndices);
+    }
+
+    // Interatividade nos itens: apenas altera a tela mediante CLIQUE
+    bankMenuItems.forEach(item => {
+      item.addEventListener('click', () => {
+        applyBankSelection(item.dataset.bank);
+        if (bankDropdownMenu) {
+          bankDropdownMenu.classList.remove('open');
+        }
+        if (btnToggleBankMenu) {
+          btnToggleBankMenu.classList.remove('open');
+        }
+      });
+    });
+
+    bankButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        applyBankSelection(btn.dataset.bank);
       });
     });
 
