@@ -41,7 +41,7 @@ O **Web Remote Controller** é uma solução moderna e leve para controle remoto
 * **Design de Mesa Digital:** Interface inspirada nos consoles modernos, com faders deslizantes de alta sensibilidade, botões iluminados de `ON/MUTE`, `SOLO`, e `SEL`.
 * **Escala de Decibéis (dB) Calibrada:** Mapeamento não linear de 0 a 1023 convertido para a escala oficial da Yamaha (-∞ dB até +10 dB, com ponto 0.0 dB em 823).
 * **Suporte a 32 Canais de Entrada:** Estrutura flexível para exibição e controle de até 32 canais de entrada, além do Master Stereo e Auxiliares Masters.
-* **Seleção Dinâmica de Canais Visíveis:** Filtro por blocos (Canais 1-8, 9-16, 17-24, 25-32 ou customizados) persistido no `localStorage`.
+* **Seleção Dinâmica de Canais Visíveis & Visualização Salva:** Filtro por blocos (Canais 1-8, 9-16, 17-24, 25-32 ou customizados) e botão `⭐ Salvo` dedicado em ambas as interfaces (Desktop e Mobile). Inversão ergonômica de blocos (painel de filtros de canais no topo e seletor de Mix/Auxiliares imediatamente acima dos faders). Persistência de visualização customizada unificada via `localStorage` com proteção contra sobreposição acidental por bancos padrão.
 
 ### Etapa 4: Sends on Faders (Mixagens de Auxiliares)
 * **Chaveamento Rápido de Mix:** Seletor de destino de mixagem permitindo operar tanto o **MASTER Stereo** quanto os **AUX 1 a 8** no mesmo layout de faders.
