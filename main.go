@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	crand "crypto/rand"
 	"encoding/csv"
@@ -16,6 +17,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -341,11 +343,187 @@ var (
 )
 
 type User struct {
-	Name     string `json:"name"`
-	Username string `json:"username"`
-	Password string `json:"-"`
-	Role     string `json:"role"`
-	MixID    string `json:"mix_id,omitempty"`
+	Name            string `json:"name"`
+	Username        string `json:"username"`
+	Password        string `json:"-"`
+	Role            string `json:"role"`
+	MixID           string `json:"mix_id,omitempty"`
+	AllowedChannels string `json:"allowed_channels,omitempty"` // Lista/Faixa (ex: "1-8,12" ou "" para todos)
+	AllowedOutputs  string `json:"allowed_outputs,omitempty"`  // Lista (ex: "MASTER,AUX1,AUX2" ou "" para todos)
+}
+
+var allStandardOutputs = []string{"MASTER", "AUX1", "AUX2", "AUX3", "AUX4", "AUX5", "AUX6", "AUX7", "AUX8"}
+
+// parseChannelsList interpreta strings como "1-8,12,14-16" ou "ALL" ou "*" e retorna os canais de 1 a 32.
+func parseChannelsList(raw string) []int {
+	raw = strings.TrimSpace(strings.ToUpper(raw))
+	if raw == "" || raw == "*" || raw == "ALL" || raw == "TODOS" {
+		all := make([]int, 32)
+		for i := 0; i < 32; i++ {
+			all[i] = i + 1
+		}
+		return all
+	}
+
+	seen := make(map[int]bool)
+	var result []int
+
+	// Aceita separadores ';', ',', ':', espaços ou tabulações
+	parts := strings.FieldsFunc(raw, func(r rune) bool {
+		return r == ';' || r == ',' || r == ':' || r == ' ' || r == '\t'
+	})
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		if strings.Contains(p, "-") {
+			rangeParts := strings.Split(p, "-")
+			if len(rangeParts) == 2 {
+				start, err1 := strconv.Atoi(strings.TrimSpace(rangeParts[0]))
+				end, err2 := strconv.Atoi(strings.TrimSpace(rangeParts[1]))
+				if err1 == nil && err2 == nil {
+					if start > end {
+						start, end = end, start
+					}
+					for ch := start; ch <= end; ch++ {
+						if ch >= 1 && ch <= 32 && !seen[ch] {
+							seen[ch] = true
+							result = append(result, ch)
+						}
+					}
+				}
+			}
+		} else {
+			ch, err := strconv.Atoi(p)
+			if err == nil && ch >= 1 && ch <= 32 && !seen[ch] {
+				seen[ch] = true
+				result = append(result, ch)
+			}
+		}
+	}
+
+	if len(result) == 0 {
+		all := make([]int, 32)
+		for i := 0; i < 32; i++ {
+			all[i] = i + 1
+		}
+		return all
+	}
+
+	sort.Ints(result)
+	return result
+}
+
+// parseOutputsList interpreta strings como "MASTER,AUX1,AUX2" ou "AUX1-AUX4" e retorna lista normalizada.
+func parseOutputsList(raw string) []string {
+	raw = strings.TrimSpace(strings.ToUpper(raw))
+	if raw == "" || raw == "*" || raw == "ALL" || raw == "TODAS" || raw == "TODOS" {
+		return append([]string(nil), allStandardOutputs...)
+	}
+
+	seen := make(map[string]bool)
+	var result []string
+
+	// Aceita separadores ';', ',', ':', espaços ou tabulações
+	parts := strings.FieldsFunc(raw, func(r rune) bool {
+		return r == ';' || r == ',' || r == ':' || r == ' ' || r == '\t'
+	})
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		if p == "STEREO" || p == "MAIN" {
+			p = "MASTER"
+		}
+		if strings.HasPrefix(p, "AUX") && strings.Contains(p, "-") {
+			rangeParts := strings.Split(p, "-")
+			if len(rangeParts) == 2 {
+				sStr := strings.TrimPrefix(strings.TrimSpace(rangeParts[0]), "AUX")
+				eStr := strings.TrimPrefix(strings.TrimSpace(rangeParts[1]), "AUX")
+				start, err1 := strconv.Atoi(sStr)
+				end, err2 := strconv.Atoi(eStr)
+				if err1 == nil && err2 == nil {
+					if start > end {
+						start, end = end, start
+					}
+					for a := start; a <= end; a++ {
+						if a >= 1 && a <= 8 {
+							outName := fmt.Sprintf("AUX%d", a)
+							if !seen[outName] {
+								seen[outName] = true
+								result = append(result, outName)
+							}
+						}
+					}
+				}
+			}
+			continue
+		}
+
+		for _, valid := range allStandardOutputs {
+			if p == valid && !seen[p] {
+				seen[p] = true
+				result = append(result, p)
+				break
+			}
+		}
+	}
+
+	if len(result) == 0 {
+		return append([]string(nil), allStandardOutputs...)
+	}
+
+	return result
+}
+
+func (u User) GetAllowedChannelsList() []int {
+	if !strings.EqualFold(u.Role, "BASIC") {
+		all := make([]int, 32)
+		for i := 0; i < 32; i++ {
+			all[i] = i + 1
+		}
+		return all
+	}
+	return parseChannelsList(u.AllowedChannels)
+}
+
+func (u User) GetAllowedOutputsList() []string {
+	if !strings.EqualFold(u.Role, "BASIC") {
+		return append([]string(nil), allStandardOutputs...)
+	}
+	return parseOutputsList(u.AllowedOutputs)
+}
+
+func (u User) IsChannelAllowed(ch1Based int) bool {
+	if !strings.EqualFold(u.Role, "BASIC") {
+		return true
+	}
+	allowed := u.GetAllowedChannelsList()
+	for _, ch := range allowed {
+		if ch == ch1Based {
+			return true
+		}
+	}
+	return false
+}
+
+func (u User) IsOutputAllowed(outName string) bool {
+	if !strings.EqualFold(u.Role, "BASIC") {
+		return true
+	}
+	outUpper := strings.ToUpper(strings.TrimSpace(outName))
+	if outUpper == "STEREO" || outUpper == "MAIN" {
+		outUpper = "MASTER"
+	}
+	allowed := u.GetAllowedOutputsList()
+	for _, out := range allowed {
+		if out == outUpper {
+			return true
+		}
+	}
+	return false
 }
 
 type Session struct {
@@ -451,13 +629,72 @@ func getUsersCSVFile() string {
 func ensureUsersCSV() {
 	filePath := getUsersCSVFile()
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		defaultContent := "nome,usuario,senha,papel,mix\nAdministrador,admin,admin,ADMIN,\n"
+		defaultContent := "nome,usuario,senha,papel,mix,canais,saidas\nAdministrador,admin,admin,ADMIN,,,\n"
 		if err := os.WriteFile(filePath, []byte(defaultContent), 0644); err != nil {
 			log.Printf("Aviso: Falha ao inicializar %s: %v", filePath, err)
 		} else {
 			log.Printf("Arquivo '%s' criado com sucesso com usuário padrão (admin / admin / papel: ADMIN)", filePath)
 		}
 	}
+}
+
+// saveUsers persiste a lista de usuários no arquivo CSV de forma atômica e atualiza sessões ativas.
+func saveUsers(users []User) error {
+	filePath := getUsersCSVFile()
+	usersLock.Lock()
+	defer usersLock.Unlock()
+
+	var buf bytes.Buffer
+	writer := csv.NewWriter(&buf)
+	if err := writer.Write([]string{"nome", "usuario", "senha", "papel", "mix", "canais", "saidas"}); err != nil {
+		return err
+	}
+
+	for _, u := range users {
+		record := []string{
+			u.Name,
+			u.Username,
+			u.Password,
+			u.Role,
+			u.MixID,
+			u.AllowedChannels,
+			u.AllowedOutputs,
+		}
+		if err := writer.Write(record); err != nil {
+			return err
+		}
+	}
+	writer.Flush()
+	if err := writer.Error(); err != nil {
+		return err
+	}
+
+	tmpFile := filePath + ".tmp"
+	if err := os.WriteFile(tmpFile, buf.Bytes(), 0644); err != nil {
+		return err
+	}
+	if err := os.Rename(tmpFile, filePath); err != nil {
+		return err
+	}
+
+	// Atualiza as sessões ativas correspondentes em memória
+	sessionsLock.Lock()
+	for _, s := range sessions {
+		for _, u := range users {
+			if strings.EqualFold(s.User.Username, u.Username) {
+				s.User.Name = u.Name
+				s.User.Role = u.Role
+				s.User.MixID = u.MixID
+				s.User.AllowedChannels = u.AllowedChannels
+				s.User.AllowedOutputs = u.AllowedOutputs
+				break
+			}
+		}
+	}
+	saveSessionsLocked()
+	sessionsLock.Unlock()
+
+	return nil
 }
 
 // loadUsers lê o arquivo CSV de usuários diretamente a cada verificação para refletir alterações sem reiniciar o servidor.
@@ -493,6 +730,27 @@ func loadUsers() ([]User, error) {
 		if len(record) >= 5 {
 			mixID = strings.TrimSpace(record[4])
 		}
+		allowedChannels := ""
+		if len(record) >= 6 {
+			allowedChannels = strings.TrimSpace(record[5])
+		}
+		allowedOutputs := ""
+		if len(record) == 7 {
+			allowedOutputs = strings.TrimSpace(record[6])
+		} else if len(record) > 7 {
+			// Auto-cura: se o CSV contiver vírgulas sem aspas na coluna de saídas (ex: ...,1-8,MASTER,AUX1,AUX2)
+			var outParts []string
+			for _, p := range record[6:] {
+				if trimmed := strings.TrimSpace(p); trimmed != "" {
+					outParts = append(outParts, trimmed)
+				}
+			}
+			allowedOutputs = strings.Join(outParts, ";")
+		}
+
+		// Normaliza delimitadores internos para ';' no carregamento
+		allowedChannels = strings.ReplaceAll(allowedChannels, ",", ";")
+		allowedOutputs = strings.ReplaceAll(allowedOutputs, ",", ";")
 
 		// Ignora linha de cabeçalho caso exista
 		if i == 0 {
@@ -517,11 +775,13 @@ func loadUsers() ([]User, error) {
 		}
 
 		users = append(users, User{
-			Name:     name,
-			Username: username,
-			Password: password,
-			Role:     role,
-			MixID:    mixID,
+			Name:            name,
+			Username:        username,
+			Password:        password,
+			Role:            role,
+			MixID:           mixID,
+			AllowedChannels: allowedChannels,
+			AllowedOutputs:  allowedOutputs,
 		})
 	}
 
@@ -768,12 +1028,113 @@ func handleMe(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"authenticated": true,
-		"name":          sess.User.Name,
-		"username":      sess.User.Username,
-		"role":          strings.ToUpper(sess.User.Role),
-		"mix_id":        sess.User.MixID,
+		"authenticated":    true,
+		"name":             sess.User.Name,
+		"username":         sess.User.Username,
+		"role":             strings.ToUpper(sess.User.Role),
+		"mix_id":           sess.User.MixID,
+		"allowed_channels": sess.User.GetAllowedChannelsList(),
+		"allowed_outputs":  sess.User.GetAllowedOutputsList(),
 	})
+}
+
+// handleAPIUsers gerencia a listagem e atualização de permissões de canais/saídas de usuários (exclusivo ADMIN)
+func handleAPIUsers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	sess := requireAdminRole(w, r)
+	if sess == nil {
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		users, err := loadUsers()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+			return
+		}
+		type SafeUserResp struct {
+			Name            string   `json:"name"`
+			Username        string   `json:"username"`
+			Role            string   `json:"role"`
+			MixID           string   `json:"mix_id,omitempty"`
+			AllowedChannels string   `json:"allowed_channels,omitempty"`
+			AllowedOutputs  string   `json:"allowed_outputs,omitempty"`
+			ChannelsList    []int    `json:"channels_list"`
+			OutputsList     []string `json:"outputs_list"`
+		}
+		var list []SafeUserResp
+		for _, u := range users {
+			list = append(list, SafeUserResp{
+				Name:            u.Name,
+				Username:        u.Username,
+				Role:            u.Role,
+				MixID:           u.MixID,
+				AllowedChannels: u.AllowedChannels,
+				AllowedOutputs:  u.AllowedOutputs,
+				ChannelsList:    u.GetAllowedChannelsList(),
+				OutputsList:     u.GetAllowedOutputsList(),
+			})
+		}
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": true,
+			"users":   list,
+		})
+
+	case http.MethodPost:
+		var req struct {
+			Username        string `json:"username"`
+			AllowedChannels string `json:"allowed_channels"`
+			AllowedOutputs  string `json:"allowed_outputs"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Requisição JSON inválida"})
+			return
+		}
+
+		users, err := loadUsers()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+			return
+		}
+
+		found := false
+		for i := range users {
+			if strings.EqualFold(users[i].Username, req.Username) {
+				cleanCh := strings.ReplaceAll(strings.TrimSpace(req.AllowedChannels), ",", ";")
+				cleanOut := strings.ReplaceAll(strings.TrimSpace(req.AllowedOutputs), ",", ";")
+				users[i].AllowedChannels = cleanCh
+				users[i].AllowedOutputs = cleanOut
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Usuário não encontrado"})
+			return
+		}
+
+		if err := saveUsers(users); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+			return
+		}
+
+		log.Printf("[ADMIN] Limites de canais/saídas do usuário '%s' atualizados por '%s'", req.Username, sess.User.Username)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": true,
+			"message": fmt.Sprintf("Limites do usuário '%s' salvos com sucesso!", req.Username),
+		})
+
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Método não permitido"})
+	}
 }
 
 func handleMobile(w http.ResponseWriter, r *http.Request) {
@@ -1080,6 +1441,7 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// 3. Usuário BASIC pode alterar apenas volumes e mute (sem ações de sync/simulação, sem EQ/Comp/Gate/Pan)
+		// e apenas nas entradas e saídas delimitadas pelo administrador para ele
 		if userRole == "BASIC" {
 			if msg.Action != "" {
 				log.Printf("WebSocket: ação '%s' negada para usuário BASIC '%s'", msg.Action, sess.User.Username)
@@ -1088,6 +1450,49 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 			if !isVolumeOrMuteParam(msg.Element, msg.Param) {
 				log.Printf("WebSocket: alteração de parâmetro [elem: 0x%02X, param: 0x%02X] negada para usuário BASIC '%s'", msg.Element, msg.Param, sess.User.Username)
 				continue
+			}
+
+			// Validação de limites de Canais de Entrada e Saídas:
+			// A) Fader ou Mute de canal de entrada (0x1C ou 0x1A)
+			if msg.Element == 0x1C || msg.Element == 0x1A {
+				ch1Based := int(msg.Channel) + 1
+				if !sess.User.IsChannelAllowed(ch1Based) {
+					log.Printf("WebSocket: acesso ao canal CH %02d negado para usuário BASIC '%s' (fora do limite configurado)", ch1Based, sess.User.Username)
+					continue
+				}
+			}
+
+			// B) Fader ou Mute de envio para Auxiliar (0x23)
+			if msg.Element == 0x23 {
+				ch1Based := int(msg.Channel) + 1
+				auxNum := int(msg.Param/3) + 1
+				auxName := fmt.Sprintf("AUX%d", auxNum)
+				if !sess.User.IsChannelAllowed(ch1Based) {
+					log.Printf("WebSocket: envio do canal CH %02d negado para usuário BASIC '%s' (fora do limite)", ch1Based, sess.User.Username)
+					continue
+				}
+				if !sess.User.IsOutputAllowed(auxName) {
+					log.Printf("WebSocket: envio para saída '%s' negado para usuário BASIC '%s' (fora do limite)", auxName, sess.User.Username)
+					continue
+				}
+			}
+
+			// C) Stereo Master Fader ou ON (0x4F, 0x4D, 0x4B)
+			if msg.Element == 0x4F || msg.Element == 0x4D || msg.Element == 0x4B {
+				if !sess.User.IsOutputAllowed("MASTER") {
+					log.Printf("WebSocket: controle da saída MASTER negado para usuário BASIC '%s' (fora do limite)", sess.User.Username)
+					continue
+				}
+			}
+
+			// D) Aux Master Fader ou ON (0x39, 0x31, 0x36, 0x2F)
+			if msg.Element == 0x39 || msg.Element == 0x31 || msg.Element == 0x36 || msg.Element == 0x2F {
+				auxNum := int(msg.Channel) + 1
+				auxName := fmt.Sprintf("AUX%d", auxNum)
+				if !sess.User.IsOutputAllowed(auxName) {
+					log.Printf("WebSocket: controle da saída '%s' negado para usuário BASIC '%s' (fora do limite)", auxName, sess.User.Username)
+					continue
+				}
 			}
 		}
 
@@ -1728,6 +2133,7 @@ func main() {
 	http.HandleFunc("/login", handleLogin)
 	http.HandleFunc("/logout", handleLogout)
 	http.HandleFunc("/api/me", handleMe)
+	http.HandleFunc("/api/users", handleAPIUsers)
 	http.HandleFunc("/api/scenes", handleAPIScenes)
 	http.HandleFunc("/api/scenes/", handleAPISceneDetail)
 	http.HandleFunc("/api/scenes/import", handleAPIImportScene)

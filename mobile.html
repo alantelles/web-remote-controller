@@ -2029,9 +2029,12 @@
     }
 
     /* Regras visuais para o perfil BASIC no Mobile (apenas volumes e mute) */
+    body.role-basic .btn-ch-sel,
+    body.role-basic #masterSelBtn,
+    body.role-basic .btn-ch-pre-post,
     body.role-basic .channel-eq-btn,
     body.role-basic .master-eq-btn {
-      opacity: 0.35 !important;
+      opacity: 0.25 !important;
       cursor: not-allowed !important;
       pointer-events: none !important;
       filter: grayscale(1);
@@ -4127,6 +4130,9 @@
     // ==========================================
     function setMixTarget(mixId) {
       if (!MIX_TARGETS[mixId]) return;
+      if (currentMobileUserRole === 'BASIC' && currentMobileAllowedOutputs && !currentMobileAllowedOutputs.has(mixId)) {
+        return;
+      }
       currentMix = mixId;
 
       // Atualiza botões do Bloco 2
@@ -4209,6 +4215,13 @@
       }
     }
 
+    function isChAllowedMobile(ch) {
+      if (currentMobileUserRole === 'BASIC' && currentMobileAllowedChannels) {
+        return currentMobileAllowedChannels.has(ch);
+      }
+      return true;
+    }
+
     function applyChannelFilter(filter) {
       document.querySelectorAll('.btn-nav[data-bank]').forEach(btn => {
         if (btn.getAttribute('data-bank') === filter) btn.classList.add('active');
@@ -4219,20 +4232,26 @@
 
       state.visibleChannels.clear();
 
+      function addAllowedRange(start, end) {
+        for (let i = start; i < end; i++) {
+          if (isChAllowedMobile(i)) state.visibleChannels.add(i);
+        }
+      }
+
       if (filter === 'all') {
-        for (let i = 0; i < TOTAL_CHANNELS; i++) state.visibleChannels.add(i);
+        addAllowedRange(0, TOTAL_CHANNELS);
       } else if (filter === '1-16') {
-        for (let i = 0; i < 16; i++) state.visibleChannels.add(i);
+        addAllowedRange(0, 16);
       } else if (filter === '17-32') {
-        for (let i = 16; i < 32; i++) state.visibleChannels.add(i);
+        addAllowedRange(16, 32);
       } else if (filter === '1-8') {
-        for (let i = 0; i < 8; i++) state.visibleChannels.add(i);
+        addAllowedRange(0, 8);
       } else if (filter === '9-16') {
-        for (let i = 8; i < 16; i++) state.visibleChannels.add(i);
+        addAllowedRange(8, 16);
       } else if (filter === '17-24') {
-        for (let i = 16; i < 24; i++) state.visibleChannels.add(i);
+        addAllowedRange(16, 24);
       } else if (filter === '25-32') {
-        for (let i = 24; i < 32; i++) state.visibleChannels.add(i);
+        addAllowedRange(24, 32);
       }
 
       renderChannelVisibility();
@@ -4244,7 +4263,8 @@
         if (showNotice) showToast('Nenhuma seleção salva ainda! Toque em "Editar Minha Seleção" para salvar seus canais.');
         return false;
       }
-      state.visibleChannels = new Set(saved);
+      const filtered = saved.filter(ch => isChAllowedMobile(ch));
+      state.visibleChannels = new Set(filtered);
       renderChannelVisibility();
       clearActiveBankButtons();
       document.getElementById('btnRestoreSaved').classList.add('active');
@@ -4256,14 +4276,18 @@
     function renderChannelVisibility() {
       for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
         const card = document.getElementById(`channelCard_${ch}`);
-        const isVisible = state.visibleChannels.has(ch);
+        const isAllowed = isChAllowedMobile(ch);
+        const isVisible = isAllowed && state.visibleChannels.has(ch);
         if (card) {
           card.style.display = isVisible ? 'flex' : 'none';
         }
       }
 
       const count = state.visibleChannels.size;
-      const countLabel = `Editar Minha Seleção (${count}/32) ⭐`;
+      const totalAllowed = (currentMobileUserRole === 'BASIC' && currentMobileAllowedChannels)
+        ? currentMobileAllowedChannels.size
+        : 32;
+      const countLabel = `Editar Minha Seleção (${count}/${totalAllowed}) ⭐`;
       const navBtn = document.getElementById('navChannelsCount');
       if (navBtn) navBtn.innerText = countLabel;
       const pill = document.getElementById('navSummaryPill');
@@ -4312,7 +4336,15 @@
         const saved = getSavedMobileChannels() || Array.from(state.visibleChannels);
         for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
           const chk = document.getElementById(`modalChk_${ch}`);
-          if (chk) chk.checked = saved.includes(ch);
+          const label = chk ? chk.closest('.channel-chk-item') : null;
+          const isAllowed = isChAllowedMobile(ch);
+          if (label) {
+            label.style.display = isAllowed ? 'flex' : 'none';
+          }
+          if (chk) {
+            chk.checked = isAllowed && saved.includes(ch);
+            chk.disabled = !isAllowed;
+          }
         }
       }
 
@@ -4332,6 +4364,7 @@
       // Botões do Modal
       document.getElementById('btnModalSelectAll').addEventListener('click', () => {
         for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
+          if (!isChAllowedMobile(ch)) continue;
           const chk = document.getElementById(`modalChk_${ch}`);
           if (chk) chk.checked = true;
         }
@@ -4430,9 +4463,122 @@
     }
 
     // ==========================================
-    // MENU DO USUÁRIO (/api/me) E PERMISSÃO ADMIN
+    // MENU DO USUÁRIO (/api/me) E PERMISSÃO ADMIN & LIMITES BASIC
     // ==========================================
     let currentMobileUserRole = '';
+    let currentMobileAllowedChannels = null;
+    let currentMobileAllowedOutputs = null;
+
+    function parseChannelIndicesMobile(input) {
+      const set = new Set();
+      if (!input) return set;
+      if (Array.isArray(input)) {
+        input.forEach(item => {
+          const num = parseInt(item, 10);
+          if (!isNaN(num) && num >= 1 && num <= TOTAL_CHANNELS) {
+            set.add(num - 1); // Converte 1-based (backend) para 0-based (mobile)
+          }
+        });
+        return set;
+      }
+      const s = String(input).trim().toUpperCase();
+      if (s === '*' || s === 'ALL' || s === 'TODOS') {
+        for (let i = 0; i < TOTAL_CHANNELS; i++) set.add(i);
+        return set;
+      }
+      const parts = s.split(/[,;:\s+]+/);
+      parts.forEach(p => {
+        if (!p) return;
+        if (p.includes('-')) {
+          const [a, b] = p.split('-').map(x => parseInt(x.trim(), 10));
+          if (!isNaN(a) && !isNaN(b)) {
+            const min = Math.max(1, Math.min(a, b));
+            const max = Math.min(TOTAL_CHANNELS, Math.max(a, b));
+            for (let i = min; i <= max; i++) set.add(i - 1);
+          }
+        } else {
+          const num = parseInt(p, 10);
+          if (!isNaN(num) && num >= 1 && num <= TOTAL_CHANNELS) set.add(num - 1);
+        }
+      });
+      return set;
+    }
+
+    function parseOutputKeysMobile(input) {
+      const set = new Set();
+      if (!input) return set;
+      const allKeys = ['MASTER', 'AUX1', 'AUX2', 'AUX3', 'AUX4', 'AUX5', 'AUX6', 'AUX7', 'AUX8'];
+      if (Array.isArray(input)) {
+        input.forEach(item => {
+          let clean = String(item).replace(/\s+/g, '').toUpperCase();
+          if (clean === 'MAIN' || clean === 'ST' || clean === 'STEREO' || clean === 'MASTER') {
+            set.add('MASTER');
+          } else if (clean.startsWith('AUX')) {
+            const num = parseInt(clean.replace('AUX', ''), 10);
+            if (!isNaN(num) && num >= 1 && num <= 8) set.add(`AUX${num}`);
+          }
+        });
+        return set;
+      }
+      const s = String(input).trim().toUpperCase();
+      if (s === '*' || s === 'ALL' || s === 'TODOS') {
+        allKeys.forEach(k => set.add(k));
+        return set;
+      }
+      const parts = s.split(/[,;:\s+]+/);
+      parts.forEach(p => {
+        if (!p) return;
+        let clean = p.replace(/\s+/g, '').toUpperCase();
+        if (clean === 'MAIN' || clean === 'ST' || clean === 'STEREO' || clean === 'MASTER') {
+          set.add('MASTER');
+        } else if (clean.startsWith('AUX')) {
+          const num = parseInt(clean.replace('AUX', ''), 10);
+          if (!isNaN(num) && num >= 1 && num <= 8) set.add(`AUX${num}`);
+        }
+      });
+      return set;
+    }
+
+    function applyMobileBasicLimitsToUI() {
+      if (currentMobileUserRole !== 'BASIC') return;
+
+      // 1. Ocultar saídas não permitidas
+      if (currentMobileAllowedOutputs) {
+        let hasActiveValid = false;
+        let firstAllowed = null;
+
+        document.querySelectorAll('.btn-out[data-mix]').forEach(btn => {
+          const mix = btn.getAttribute('data-mix');
+          const isAllowed = currentMobileAllowedOutputs.has(mix);
+          btn.style.display = isAllowed ? '' : 'none';
+          if (isAllowed) {
+            if (!firstAllowed) firstAllowed = mix;
+            if (mix === currentMix) hasActiveValid = true;
+          }
+        });
+
+        if (!hasActiveValid && firstAllowed) {
+          setMixTarget(firstAllowed);
+        }
+      }
+
+      // 2. Limpar canais visíveis não permitidos
+      if (currentMobileAllowedChannels) {
+        state.visibleChannels.forEach(ch => {
+          if (!currentMobileAllowedChannels.has(ch)) {
+            state.visibleChannels.delete(ch);
+          }
+        });
+        if (typeof selectedChannel === 'number' && !currentMobileAllowedChannels.has(selectedChannel)) {
+          const firstAllowedCh = Array.from(currentMobileAllowedChannels).sort((a,b) => a-b)[0];
+          if (typeof firstAllowedCh === 'number') {
+            setSelectedChannel(firstAllowedCh);
+          }
+        }
+      }
+
+      renderChannelVisibility();
+    }
 
     async function initUserMenu() {
       const popover = document.getElementById('userPopover');
@@ -4484,8 +4630,17 @@
 
           if (currentMobileUserRole === 'BASIC') {
             document.body.classList.add('role-basic');
+            if (u.allowed_channels) {
+              currentMobileAllowedChannels = parseChannelIndicesMobile(u.allowed_channels);
+            }
+            if (u.allowed_outputs) {
+              currentMobileAllowedOutputs = parseOutputKeysMobile(u.allowed_outputs);
+            }
+            applyMobileBasicLimitsToUI();
           } else {
             document.body.classList.remove('role-basic');
+            currentMobileAllowedChannels = null;
+            currentMobileAllowedOutputs = null;
           }
         }
       } catch (e) {
@@ -6818,26 +6973,47 @@
       initMobileMuteGroups();
       initEqModal();
 
+      function isOutAllowedMobile(mix) {
+        if (currentMobileUserRole === 'BASIC' && currentMobileAllowedOutputs) {
+          return currentMobileAllowedOutputs.has(mix);
+        }
+        return true;
+      }
+
+      function getFallbackOutputMobile() {
+        if (currentMobileUserRole === 'BASIC' && currentMobileAllowedOutputs) {
+          if (currentMobileAllowedOutputs.has('MASTER')) return 'MASTER';
+          const first = Array.from(currentMobileAllowedOutputs)[0];
+          return first || 'MASTER';
+        }
+        return 'MASTER';
+      }
+
       // Botões de Saída (Bloco 2)
       document.querySelectorAll('.btn-out').forEach(btn => {
         btn.addEventListener('click', () => {
           const mix = btn.getAttribute('data-mix');
-          // Toggle: se clicar no mesmo AUX que já está selecionado, retorna para MASTER
-          if (mix && mix !== 'MASTER' && mix === currentMix) {
-            setMixTarget('MASTER');
-          } else if (mix) {
+          if (!mix || !isOutAllowedMobile(mix)) return;
+          // Toggle: se clicar no mesmo AUX que já está selecionado:
+          // Só retorna para MASTER se MASTER for permitido! Se não for permitido, não faz nada
+          if (mix !== 'MASTER' && mix === currentMix) {
+            if (isOutAllowedMobile('MASTER')) {
+              setMixTarget('MASTER');
+            }
+          } else {
             setMixTarget(mix);
           }
         });
       });
 
       // Atalhos de teclado no Mobile:
-      // - 0 ou M: MASTER / 1 a 8: AUX 1 a 8 (com toggle)
+      // - 0: MASTER / 1 a 8: AUX 1 a 8 (com toggle)
       // - Seta Cima / Baixo: seleciona o canal anterior / próximo visível
       // - Seta Esquerda / Direita: ajusta o volume do canal selecionado
+      // - Ctrl+Direita: ajusta o canal selecionado para 0.0 dB
+      // - Ctrl+Esquerda: muta o canal selecionado em -∞ dB
       document.addEventListener('keydown', (e) => {
         if (e.target.matches('input, select, textarea')) return;
-        if (e.ctrlKey || e.altKey || e.metaKey) return;
 
         // Se o modal de EQ estiver aberto, ele já trata seus próprios atalhos
         if (isEqModalOpen) return;
@@ -6846,15 +7022,41 @@
         const openModal = document.querySelector('.modal-overlay.open, #channelsModal.open, #mobileMuteGroupsModal.open, #mobileAdminModal.open, #mobileShutdownModal.open');
         if (openModal) return;
 
+        // Atalhos com Ctrl/Cmd (0.0 dB e -∞ dB no sentido do fader horizontal)
+        if (e.ctrlKey || e.metaKey) {
+          if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            if (typeof selectedChannel === 'number') {
+              setChannelFader(selectedChannel, NOMINAL_VALUE);
+              showToast(`CH ${selectedChannel + 1} → 0.0 dB`);
+            }
+            return;
+          } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            if (typeof selectedChannel === 'number') {
+              setChannelFader(selectedChannel, MIN_VALUE);
+              showToast(`CH ${selectedChannel + 1} → -∞ dB`);
+            }
+            return;
+          }
+          return;
+        }
+
+        if (e.altKey) return;
+
         const key = e.key.toLowerCase();
-        if (key === '0' || key === 'm') {
+        if (key === '0') {
+          if (!isOutAllowedMobile('MASTER')) return;
           setMixTarget('MASTER');
           return;
         } else if (key >= '1' && key <= '8') {
           const auxTarget = 'AUX' + key;
-          // Toggle: se pressionar a tecla do mesmo AUX já ativo, retorna para MASTER
+          if (!isOutAllowedMobile(auxTarget)) return;
+          // Toggle: se pressionar a tecla do mesmo AUX já ativo, só retorna para MASTER se permitido
           if (auxTarget === currentMix) {
-            setMixTarget('MASTER');
+            if (isOutAllowedMobile('MASTER')) {
+              setMixTarget('MASTER');
+            }
           } else {
             setMixTarget(auxTarget);
           }

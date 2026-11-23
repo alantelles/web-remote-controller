@@ -644,3 +644,201 @@ func TestAPISyncMixerRBAC(t *testing.T) {
 		t.Errorf("Esperava 200 OK para ADMIN em /api/state/sync-mixer, obteve %d", rrAdmin.Code)
 	}
 }
+
+func TestBasicUserLimitsAndChannelsParsing(t *testing.T) {
+	// 1. Testa parseChannelsList
+	allChs := parseChannelsList("")
+	if len(allChs) != 32 {
+		t.Fatalf("Esperava 32 canais para string vazia, obteve %d", len(allChs))
+	}
+
+	rangeChs := parseChannelsList("1-4,9,11-12")
+	expected := []int{1, 2, 3, 4, 9, 11, 12}
+	if len(rangeChs) != len(expected) {
+		t.Fatalf("Esperava %d canais, obteve %d (%v)", len(expected), len(rangeChs), rangeChs)
+	}
+	for i, v := range expected {
+		if rangeChs[i] != v {
+			t.Errorf("Esperava canal %d na pos %d, obteve %d", v, i, rangeChs[i])
+		}
+	}
+
+	// Testa parseChannelsList com ponto-e-vírgula ';' e dois pontos ':'
+	semiChs := parseChannelsList("1-4;9;11-12")
+	if len(semiChs) != len(expected) {
+		t.Fatalf("Esperava %d canais com ponto-e-vírgula, obteve %d (%v)", len(expected), len(semiChs), semiChs)
+	}
+	colonChs := parseChannelsList("1-4:9:11-12")
+	if len(colonChs) != len(expected) {
+		t.Fatalf("Esperava %d canais com dois pontos, obteve %d (%v)", len(expected), len(colonChs), colonChs)
+	}
+
+	// 2. Testa parseOutputsList
+	allOuts := parseOutputsList("")
+	if len(allOuts) != 9 {
+		t.Fatalf("Esperava 9 saídas para string vazia, obteve %d", len(allOuts))
+	}
+
+	rangeOuts := parseOutputsList("MASTER,AUX1-AUX3")
+	if len(rangeOuts) != 4 {
+		t.Fatalf("Esperava 4 saídas, obteve %d (%v)", len(rangeOuts), rangeOuts)
+	}
+	semiOuts := parseOutputsList("MASTER;AUX1-AUX3")
+	if len(semiOuts) != 4 {
+		t.Fatalf("Esperava 4 saídas com ponto-e-vírgula, obteve %d (%v)", len(semiOuts), semiOuts)
+	}
+	colonOuts := parseOutputsList("MASTER:AUX1:AUX2")
+	if len(colonOuts) != 3 {
+		t.Fatalf("Esperava 3 saídas com dois pontos, obteve %d (%v)", len(colonOuts), colonOuts)
+	}
+
+	// 3. Validação do User BASIC
+	uBasic := User{
+		Username:        "operador_vol",
+		Role:            "BASIC",
+		AllowedChannels: "1-4",
+		AllowedOutputs:  "MASTER;AUX1",
+	}
+
+	if !uBasic.IsChannelAllowed(1) || !uBasic.IsChannelAllowed(4) {
+		t.Errorf("Deveria permitir canais 1 e 4")
+	}
+	if uBasic.IsChannelAllowed(5) || uBasic.IsChannelAllowed(32) {
+		t.Errorf("Não deveria permitir canais 5 ou 32")
+	}
+
+	if !uBasic.IsOutputAllowed("MASTER") || !uBasic.IsOutputAllowed("AUX1") {
+		t.Errorf("Deveria permitir MASTER e AUX1")
+	}
+	if uBasic.IsOutputAllowed("AUX2") || uBasic.IsOutputAllowed("AUX8") {
+		t.Errorf("Não deveria permitir AUX2 ou AUX8")
+	}
+
+	// 4. Validação de canais avulsos não sequenciais (intercalados)
+	sparseChs := parseChannelsList("1;4;7;10;15;22;31")
+	expectedSparse := []int{1, 4, 7, 10, 15, 22, 31}
+	if len(sparseChs) != len(expectedSparse) {
+		t.Fatalf("Esperava %d canais intercalados, obteve %d (%v)", len(expectedSparse), len(sparseChs), sparseChs)
+	}
+	for i, v := range expectedSparse {
+		if sparseChs[i] != v {
+			t.Errorf("Esperava canal intercalado %d, obteve %d", v, sparseChs[i])
+		}
+	}
+
+	uSparse := User{
+		Username:        "operador_sparse",
+		Role:            "BASIC",
+		AllowedChannels: "1;4;7;10;15;22;31",
+		AllowedOutputs:  "MASTER;AUX2;AUX5;AUX8",
+	}
+	for _, ch := range expectedSparse {
+		if !uSparse.IsChannelAllowed(ch) {
+			t.Errorf("Deveria permitir canal avulso %d", ch)
+		}
+	}
+	for _, ch := range []int{2, 3, 5, 6, 8, 9, 11, 14, 16, 21, 32} {
+		if uSparse.IsChannelAllowed(ch) {
+			t.Errorf("Não deveria permitir canal não listado %d", ch)
+		}
+	}
+	if !uSparse.IsOutputAllowed("AUX2") || !uSparse.IsOutputAllowed("AUX5") || !uSparse.IsOutputAllowed("AUX8") {
+		t.Errorf("Deveria permitir saídas avulsas AUX2, AUX5, AUX8")
+	}
+	if uSparse.IsOutputAllowed("AUX1") || uSparse.IsOutputAllowed("AUX3") || uSparse.IsOutputAllowed("AUX7") {
+		t.Errorf("Não deveria permitir saídas não listadas AUX1, AUX3, AUX7")
+	}
+
+	// 5. Usuário ADMIN ou OPERATOR tem acesso irrestrito
+	uAdmin := User{Role: "ADMIN", AllowedChannels: "1-2"}
+	if !uAdmin.IsChannelAllowed(32) || !uAdmin.IsOutputAllowed("AUX8") {
+		t.Errorf("ADMIN deve ter acesso irrestrito independentemente de string")
+	}
+}
+
+func TestAPIUsersListAndUpdatePermissions(t *testing.T) {
+	testFile := "test_api_users.csv"
+	defer os.Remove(testFile)
+	origCSV := getUsersCSVFile()
+	setUsersCSVFile(testFile)
+	defer setUsersCSVFile(origCSV)
+
+	content := `nome,usuario,senha,papel,mix,canais,saidas
+Admin,admin,admin123,ADMIN,,,
+Basico,basico,basico123,BASIC,,1-8,MASTER
+`
+	if err := os.WriteFile(testFile, []byte(content), 0644); err != nil {
+		t.Fatalf("Erro ao criar CSV: %v", err)
+	}
+
+	adminToken := createSession(User{Username: "admin", Role: "ADMIN"})
+	basicToken := createSession(User{Username: "basico", Role: "BASIC"})
+
+	// 1. Não-admin tentando acessar GET /api/users -> 403 Forbidden
+	reqAnon := httptest.NewRequest(http.MethodGet, "/api/users", nil)
+	reqAnon.AddCookie(&http.Cookie{Name: sessionCookieName, Value: basicToken})
+	rrAnon := httptest.NewRecorder()
+	handleAPIUsers(rrAnon, reqAnon)
+	if rrAnon.Code != http.StatusForbidden {
+		t.Errorf("Esperava 403 para BASIC em /api/users, obteve %d", rrAnon.Code)
+	}
+
+	// 2. Admin acessando GET /api/users -> 200 OK com lista
+	reqAdmin := httptest.NewRequest(http.MethodGet, "/api/users", nil)
+	reqAdmin.AddCookie(&http.Cookie{Name: sessionCookieName, Value: adminToken})
+	rrAdmin := httptest.NewRecorder()
+	handleAPIUsers(rrAdmin, reqAdmin)
+	if rrAdmin.Code != http.StatusOK {
+		t.Fatalf("Esperava 200 OK para ADMIN em /api/users, obteve %d", rrAdmin.Code)
+	}
+
+	var listResp struct {
+		Success bool `json:"success"`
+		Users   []struct {
+			Username        string `json:"username"`
+			Role            string `json:"role"`
+			AllowedChannels string `json:"allowed_channels"`
+			AllowedOutputs  string `json:"allowed_outputs"`
+		} `json:"users"`
+	}
+	if err := json.Unmarshal(rrAdmin.Body.Bytes(), &listResp); err != nil || len(listResp.Users) != 2 {
+		t.Fatalf("Falha ao decodificar usuários: %v (len: %d)", err, len(listResp.Users))
+	}
+
+	// 3. Atualizar permissões do usuário basico via POST /api/users
+	updatePayload := bytes.NewBufferString(`{
+		"username": "basico",
+		"allowed_channels": "1-16",
+		"allowed_outputs": "MASTER,AUX1,AUX2"
+	}`)
+	reqPost := httptest.NewRequest(http.MethodPost, "/api/users", updatePayload)
+	reqPost.AddCookie(&http.Cookie{Name: sessionCookieName, Value: adminToken})
+	rrPost := httptest.NewRecorder()
+	handleAPIUsers(rrPost, reqPost)
+	if rrPost.Code != http.StatusOK {
+		t.Fatalf("Esperava 200 OK ao atualizar usuário, obteve %d (body: %s)", rrPost.Code, rrPost.Body.String())
+	}
+
+	// 4. Recarrega os usuários do CSV e confere se gravou
+	users, err := loadUsers()
+	if err != nil {
+		t.Fatalf("loadUsers falhou: %v", err)
+	}
+	var updatedBasico *User
+	for _, u := range users {
+		if u.Username == "basico" {
+			updatedBasico = &u
+			break
+		}
+	}
+	if updatedBasico == nil {
+		t.Fatalf("Usuário basico não encontrado após update")
+	}
+	if updatedBasico.AllowedChannels != "1-16" || updatedBasico.AllowedOutputs != "MASTER;AUX1;AUX2" {
+		t.Errorf("Esperava allowed_channels='1-16' e outputs='MASTER;AUX1;AUX2', obteve: channels=%s, outputs=%s",
+			updatedBasico.AllowedChannels, updatedBasico.AllowedOutputs)
+	}
+	if !updatedBasico.IsChannelAllowed(16) || updatedBasico.IsChannelAllowed(17) {
+		t.Errorf("Canal 16 deveria ser permitido e 17 bloqueado")
+	}
+}

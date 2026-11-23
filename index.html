@@ -2956,6 +2956,7 @@
       padding: 8px 4px;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 2px 0 6px rgba(0, 0, 0, 0.4);
       position: relative;
+      transition: outline 0.15s ease, box-shadow 0.15s ease;
     }
 
     .channel-strip:nth-child(even) {
@@ -3431,6 +3432,123 @@
       border-color: rgba(56, 189, 248, 0.4);
       background: rgba(56, 189, 248, 0.09);
     }
+
+    /* Tabela e Cards de Gerenciamento de Usuários (Admin) */
+    .admin-users-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    .admin-users-table th,
+    .admin-users-table td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 13px;
+    }
+    .admin-users-table th {
+      background: #11141b;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .admin-users-table tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .limits-chip-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: #1a1e28;
+      border: 1px solid #333d4f;
+      color: #cbd5e1;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .limits-chip-badge.all {
+      color: #10b981;
+      border-color: rgba(16, 185, 129, 0.35);
+      background: rgba(16, 185, 129, 0.1);
+    }
+    .limits-chip-badge.restricted {
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.35);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    /* Editor de Limites do Usuário */
+    .user-limits-editor-card {
+      background: #11141c;
+      border: 1px solid #293244;
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .user-limits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+      gap: 6px;
+    }
+    .limits-checkbox-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 6px 4px;
+      border-radius: 6px;
+      background: #191d29;
+      border: 1px solid #2d3648;
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+    .limits-checkbox-item:hover {
+      background: #232a3b;
+      color: #fff;
+    }
+    .limits-checkbox-item.checked {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: #38bdf8;
+      color: #38bdf8;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.25);
+    }
+    .limits-checkbox-item.out-checked {
+      background: rgba(168, 85, 247, 0.18);
+      border-color: #c084fc;
+      color: #c084fc;
+      box-shadow: 0 0 8px rgba(168, 85, 247, 0.25);
+    }
+
+    /* Seletor de Canal por Teclado (Modo Shift 2x) com Aura estilo Mobile */
+    .channel-strip.keyboard-selected {
+      outline: 2px solid #38bdf8 !important;
+      outline-offset: -2px;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.55), inset 0 0 10px rgba(56, 189, 248, 0.2) !important;
+      z-index: 5;
+    }
+    .channel-strip.keyboard-selected .ch-badge {
+      background: #0d2847 !important;
+      border-color: #38bdf8 !important;
+      color: #38bdf8 !important;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.45) !important;
+    }
+    .channel-strip.keyboard-selected .btn-ch-sel {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.3) !important;
+    }
   </style>
 </head>
 <body>
@@ -3581,7 +3699,7 @@
 
         <!-- 9 BOTÕES DE MIXAGEM FÍSICA: MASTER + AUX 1 A AUX 8 -->
         <div class="mix-buttons-group" id="mixButtonsGroup">
-          <button type="button" class="btn-mix btn-mix-master active" data-mix="MASTER" title="Mix Principal Stereo Out (Teclas: 0 ou M)">
+          <button type="button" class="btn-mix btn-mix-master active" data-mix="MASTER" title="Mix Principal Stereo Out (Tecla: 0)">
             <span class="mix-led"></span>
             <span class="mix-label">MASTER</span>
           </button>
@@ -3711,8 +3829,8 @@
           <div class="ch-footer">
             <div class="ch-db-readout db-master-red" id="dbReadout_masterOut">-∞ dB</div>
             <div class="ch-quick-actions">
-              <button type="button" class="btn-ch-snap" id="btnSnap0db_masterOut" title="Ajustar Saída para 0.0 dB">0dB</button>
-              <button type="button" class="btn-ch-snap" id="btnSnapInf_masterOut" title="Mutar Saída em -∞ dB">-∞</button>
+              <button type="button" class="btn-ch-snap" id="btnSnap0db_masterOut" title="Ajustar Saída para 0.0 dB (Atalho: Ctrl+↑)">0dB</button>
+              <button type="button" class="btn-ch-snap" id="btnSnapInf_masterOut" title="Mutar Saída em -∞ dB (Atalho: Ctrl+↓)">-∞</button>
             </div>
           </div>
         </div>
@@ -3721,7 +3839,7 @@
 
     <!-- BARRA INFERIOR DE INFORMAÇÕES -->
     <footer class="console-footer-bar">
-      <div>Yamaha 01V96V2 Protocol: MASTER → 1CH/00H (Fader) · 1AH/00H (ON) &nbsp;|&nbsp; AUX 1-8 → 23H/00-07H (Send) · 23H/08-0FH (ON) &nbsp;|&nbsp; Teclas 0/M=MASTER · 1-8=AUX</div>
+      <div>Yamaha 01V96V2 Protocol: MASTER → 1CH/00H (Fader) · 1AH/00H (ON) &nbsp;|&nbsp; AUX 1-8 → 23H/00-07H (Send) · 23H/08-0FH (ON) &nbsp;|&nbsp; Tecla 0=MASTER · 1-8=AUX &nbsp;|&nbsp; Shift 2x=Navegar Canais (←/→ Canal · ↑/↓ Vol · Ctrl+↑=0dB · Ctrl+↓=-∞)</div>
       <div id="footerChannelCount">Exibindo 32 canais | Arraste ou use a roda do mouse nos faders | Duplo clique para 0 dB</div>
     </footer>
 
@@ -3768,6 +3886,10 @@
         <button type="button" class="admin-tab-btn" data-admin-tab="mixes" id="adminTabBtn_mixes">
           <span>🎧</span>
           <span>Mixes Pessoais (Performer)</span>
+        </button>
+        <button type="button" class="admin-tab-btn" data-admin-tab="users" id="adminTabBtn_users">
+          <span>👥</span>
+          <span>Operadores &amp; Limites</span>
         </button>
         <button type="button" class="admin-tab-btn" data-admin-tab="system" id="adminTabBtn_system">
           <span>🛡️</span>
@@ -4037,6 +4159,103 @@
             </div>
             <div class="scenes-list-items" id="personalMixesListItems">
               <div class="scenes-loading">Carregando mixes pessoais...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 4: OPERADORES & LIMITES (PERFIL BASIC) -->
+        <div class="admin-tab-pane" id="adminPane_users">
+          <div class="admin-section-banner">
+            <div class="admin-section-banner-info">
+              <h4>👥 Limites de Uso de Canais &amp; Saídas (Perfil BASIC)</h4>
+              <p>Configure quais entradas (Canais 1–32) e saídas (Master e Aux 1–8) cada operador Básico pode acessar no console.</p>
+            </div>
+          </div>
+
+          <!-- Tabela de Usuários -->
+          <div class="pm-list-container">
+            <div class="pm-list-header" style="grid-template-columns: 1.2fr 1fr 1fr 1.6fr 1.6fr auto;">
+              <span>Nome</span>
+              <span>Login</span>
+              <span>Papel</span>
+              <span>Entradas Permitidas</span>
+              <span>Saídas Permitidas</span>
+              <span style="text-align: right;">Ações</span>
+            </div>
+            <div class="scenes-list-items" id="adminUsersListItems">
+              <div class="scenes-loading">Carregando operadores...</div>
+            </div>
+          </div>
+
+          <!-- Editor de Limites de Canais e Saídas -->
+          <div class="user-limits-editor-card" id="userLimitsEditorCard" style="display: none;">
+            <div class="pm-editor-header" style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h4 style="color: #38bdf8; font-size: 15px;" id="userLimitsEditorTitle">Delimitar Canais &amp; Saídas</h4>
+                <p style="color: #94a3b8; font-size: 12px;" id="userLimitsEditorSubtitle">Operador: -</p>
+              </div>
+              <button type="button" class="btn-admin-close" id="btnCloseUserLimitsEditor" style="font-size: 14px;">✕</button>
+            </div>
+
+            <div class="user-limits-body" style="display: flex; flex-direction: column; gap: 14px;">
+              <!-- Barra de Ações Rápidas com o BOTÃO SELECIONAR TODOS -->
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; background: #0f1218; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+                <span style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Ações Rápidas:</span>
+                <button type="button" class="btn-scene-action primary sm" id="btnAdminSelectAllLimits" style="font-weight: 800;" title="Marcar todas as entradas (1-32) e todas as saídas (Master e Aux 1-8)">
+                  ✅ Selecionar Todos
+                </button>
+                <button type="button" class="btn-scene-action secondary sm" id="btnAdminDeselectAllLimits" title="Desmarcar todos">
+                  ❌ Desmarcar Todos
+                </button>
+                <button type="button" class="btn-scene-action secondary sm" id="btnAdminSelect1to16" title="Marcar apenas Canais 1 a 16">
+                  CH 1–16
+                </button>
+                <button type="button" class="btn-scene-action secondary sm" id="btnAdminSelect17to32" title="Marcar apenas Canais 17 a 32">
+                  CH 17–32
+                </button>
+                <button type="button" class="btn-scene-action secondary sm" id="btnAdminSelectOdd" title="Marcar canais ímpares intercalados (1, 3, 5... 31)">
+                  Ímpares
+                </button>
+                <button type="button" class="btn-scene-action secondary sm" id="btnAdminSelectEven" title="Marcar canais pares intercalados (2, 4, 6... 32)">
+                  Pares
+                </button>
+                <button type="button" class="btn-scene-action secondary sm" id="btnAdminSelectAuxOnly" title="Marcar apenas saídas auxiliares">
+                  Apenas Auxiliares
+                </button>
+              </div>
+
+              <!-- Seção de Entradas (Canais 1 a 32) -->
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <span style="font-size: 12px; font-weight: 800; color: #cbd5e1; letter-spacing: 0.5px;">ENTRADAS (CANAIS 1 A 32)</span>
+                  <span style="font-size: 11px; font-weight: 700; color: #38bdf8;" id="adminLimitsChCount">0 de 32 selecionados</span>
+                </div>
+                <div style="margin-bottom: 8px;">
+                  <input type="text" id="adminLimitsManualChannelsInput" placeholder="Digitar canais avulsos ou faixas (ex: 1;3;5;7;10;14 ou 1:3:5:7 ou 1-4;8;12)" style="width: 100%; box-sizing: border-box; background: #0f1218; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 7px 10px; color: #38bdf8; font-size: 12px; font-family: monospace;" title="Você pode digitar canais intercalados ou sequenciais usando ';' ou ':' como separador" />
+                </div>
+                <div class="user-limits-grid" id="adminLimitsChannelsGrid">
+                  <!-- Gerado via JS -->
+                </div>
+              </div>
+
+              <!-- Seção de Saídas (Master e Aux 1 a 8) -->
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <span style="font-size: 12px; font-weight: 800; color: #cbd5e1; letter-spacing: 0.5px;">SAÍDAS (MASTER &amp; AUXILIARES 1 A 8)</span>
+                  <span style="font-size: 11px; font-weight: 700; color: #c084fc;" id="adminLimitsOutCount">0 de 9 selecionadas</span>
+                </div>
+                <div style="margin-bottom: 8px;">
+                  <input type="text" id="adminLimitsManualOutputsInput" placeholder="Digitar saídas avulsas (ex: MASTER;AUX1;AUX3 ou MASTER:AUX1)" style="width: 100%; box-sizing: border-box; background: #0f1218; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 7px 10px; color: #c084fc; font-size: 12px; font-family: monospace;" title="Você pode digitar saídas avulsas usando ';' ou ':' como separador" />
+                </div>
+                <div class="user-limits-grid" id="adminLimitsOutputsGrid" style="grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));">
+                  <!-- Gerado via JS -->
+                </div>
+              </div>
+
+              <div class="form-buttons" style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px;">
+                <button type="button" class="btn-scene-action" id="btnCancelUserLimits">Cancelar</button>
+                <button type="button" class="btn-scene-action primary" id="btnSaveUserLimits">💾 Salvar Limites</button>
+              </div>
             </div>
           </div>
         </div>
@@ -4728,7 +4947,10 @@
       }
     }
 
-    // Estado de visibilidade dos 32 canais
+    // Estado de visibilidade e limites dos 32 canais
+    let currentUserAllowedChannels = new Set(Array.from({ length: TOTAL_CHANNELS }, (_, i) => i + 1));
+    let currentUserAllowedOutputs = new Set(['MASTER', 'AUX1', 'AUX2', 'AUX3', 'AUX4', 'AUX5', 'AUX6', 'AUX7', 'AUX8']);
+
     const channelsState = Array.from({ length: TOTAL_CHANNELS }, (_, i) => ({
       index: i,
       channelHex: i, // 0x00 a 0x1F
@@ -4755,6 +4977,13 @@
             const mixId = encodeURIComponent(user.mix_id || '1');
             window.location.href = `${BASE_PATH}/mix?id=${mixId}`;
             return;
+          }
+
+          if (Array.isArray(user.allowed_channels) && user.allowed_channels.length > 0) {
+            currentUserAllowedChannels = new Set(user.allowed_channels);
+          }
+          if (Array.isArray(user.allowed_outputs) && user.allowed_outputs.length > 0) {
+            currentUserAllowedOutputs = new Set(user.allowed_outputs.map(o => o.toUpperCase()));
           }
 
           const nameEl = document.getElementById('userDisplayName');
@@ -4786,12 +5015,61 @@
 
           if (currentUserRole === 'BASIC') {
             document.body.classList.add('role-basic');
+            applyBasicUserLimitsToUI();
           } else {
             document.body.classList.remove('role-basic');
           }
         }
       } catch (err) {
         console.warn('Erro ao carregar dados do usuário:', err);
+      }
+    }
+
+    function applyBasicUserLimitsToUI() {
+      // 1. Aplica restrições de Saídas na Barra de Mix
+      const mixButtons = document.querySelectorAll('.btn-mix');
+      mixButtons.forEach(btn => {
+        const mix = btn.dataset.mix;
+        if (currentUserAllowedOutputs.has(mix)) {
+          btn.style.display = '';
+        } else {
+          btn.style.display = 'none';
+        }
+      });
+
+      // Se a mix ativa atual não for permitida para o BASIC, comuta para a primeira permitida
+      if (!currentUserAllowedOutputs.has(currentMixTarget)) {
+        for (const out of ['MASTER', 'AUX1', 'AUX2', 'AUX3', 'AUX4', 'AUX5', 'AUX6', 'AUX7', 'AUX8']) {
+          if (currentUserAllowedOutputs.has(out)) {
+            selectMix(out, false);
+            break;
+          }
+        }
+      }
+
+      // 2. Aplica restrições nos Canais de Entrada
+      for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        const ch1 = i + 1;
+        const strip = document.getElementById(`channelStrip_${i}`);
+        const popItem = document.getElementById(`popCheck_${i}`);
+        const popWrap = popItem ? popItem.closest('.popover-item') : null;
+
+        if (currentUserAllowedChannels.has(ch1)) {
+          if (popWrap) popWrap.style.display = '';
+        } else {
+          channelsState[i].visible = false;
+          if (strip) strip.style.display = 'none';
+          if (popItem) popItem.checked = false;
+          if (popWrap) popWrap.style.display = 'none';
+        }
+      }
+
+      // Atualiza o contador de canais visíveis
+      const allowedCount = currentUserAllowedChannels.size;
+      const visibleCount = channelsState.filter(c => c.visible && currentUserAllowedChannels.has(c.index + 1)).length;
+      const badge = document.getElementById('selectedCountBadge');
+      if (badge) {
+        badge.textContent = `${visibleCount} de ${allowedCount} visíveis`;
       }
     }
     loadCurrentUser();
@@ -5221,8 +5499,8 @@
         <div class="ch-footer">
           <div class="ch-db-readout" id="dbReadout_${ch.index}">-∞ dB</div>
           <div class="ch-quick-actions">
-            <button type="button" class="btn-ch-snap" data-action="0db" data-ch="${ch.index}">0dB</button>
-            <button type="button" class="btn-ch-snap" data-action="inf" data-ch="${ch.index}">-∞</button>
+            <button type="button" class="btn-ch-snap" data-action="0db" data-ch="${ch.index}" title="Ajustar para 0.0 dB (Atalho: Ctrl+↑)">0dB</button>
+            <button type="button" class="btn-ch-snap" data-action="inf" data-ch="${ch.index}" title="Mutar em -∞ dB (Atalho: Ctrl+↓)">-∞</button>
           </div>
         </div>
       `;
@@ -5354,6 +5632,9 @@
     // ==========================================
     function selectMix(targetId, notify = false) {
       if (!MIX_TARGETS[targetId]) return;
+      if (currentUserRole === 'BASIC' && currentUserAllowedOutputs && !currentUserAllowedOutputs.has(targetId)) {
+        return;
+      }
       currentMixTarget = targetId;
       const target = MIX_TARGETS[targetId];
 
@@ -5631,8 +5912,16 @@
       btn.addEventListener('click', () => {
         const mix = btn.dataset.mix;
         if (mix && MIX_TARGETS[mix]) {
-          // Toggle: se clicar no mesmo AUX que já está selecionado, retorna para MASTER
+          // Se for perfil BASIC e a saída não for autorizada, ignora
+          if (currentUserRole === 'BASIC' && currentUserAllowedOutputs && !currentUserAllowedOutputs.has(mix)) {
+            return;
+          }
+          // Toggle: se clicar no mesmo AUX que já está selecionado:
+          // Só retorna para MASTER se MASTER for permitido para o usuário!
           if (mix !== 'MASTER' && mix === currentMixTarget) {
+            if (currentUserRole === 'BASIC' && currentUserAllowedOutputs && !currentUserAllowedOutputs.has('MASTER')) {
+              return;
+            }
             selectMix('MASTER', true);
           } else {
             selectMix(mix, true);
@@ -5641,18 +5930,260 @@
       });
     });
 
-    // Teclas de atalho para troca rápida de mixagem: 0 ou M = MASTER, 1 a 8 = AUX 1 a 8
+    // ==========================================
+    // NAVEGAÇÃO DE CANAIS POR TECLADO (MODO SHIFT 2X)
+    // ==========================================
+    let isChannelKeyboardNavActive = false;
+    let keyboardSelectedChannel = null;
+    let lastShiftPressTime = 0;
+
+    function getActiveVisibleChannelIndices() {
+      const visible = [];
+      for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        const strip = document.getElementById(`channelStrip_${i}`);
+        if (strip && strip.style.display !== 'none' && channelsState[i] && channelsState[i].visible !== false) {
+          if (currentUserRole === 'BASIC' && currentUserAllowedChannels && !currentUserAllowedChannels.has(i + 1)) {
+            continue;
+          }
+          visible.push(i);
+        }
+      }
+      return visible;
+    }
+
+    function ensureChannelInView(chIndex) {
+      const strip = document.getElementById(`channelStrip_${chIndex}`);
+      const viewport = document.getElementById('channelsViewport');
+      if (!strip || !viewport) return;
+
+      const stripRect = strip.getBoundingClientRect();
+      const vpRect = viewport.getBoundingClientRect();
+      const margin = 20;
+
+      if (stripRect.left < vpRect.left + margin) {
+        viewport.scrollBy({
+          left: stripRect.left - (vpRect.left + margin),
+          behavior: 'smooth'
+        });
+      } else if (stripRect.right > vpRect.right - margin) {
+        viewport.scrollBy({
+          left: stripRect.right - (vpRect.right - margin),
+          behavior: 'smooth'
+        });
+      }
+    }
+
+    function setKeyboardSelectedChannel(chIndex) {
+      keyboardSelectedChannel = chIndex;
+      for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        const strip = document.getElementById(`channelStrip_${i}`);
+        if (strip) {
+          if (i === chIndex) {
+            strip.classList.add('keyboard-selected');
+          } else {
+            strip.classList.remove('keyboard-selected');
+          }
+        }
+      }
+      ensureChannelInView(chIndex);
+    }
+
+    function clearKeyboardSelection() {
+      for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        const strip = document.getElementById(`channelStrip_${i}`);
+        if (strip) strip.classList.remove('keyboard-selected');
+      }
+    }
+
+    function activateChannelKeyboardNav() {
+      const visibleList = getActiveVisibleChannelIndices();
+      if (visibleList.length === 0) {
+        showToast('Nenhum canal visível para navegação', '⚠️');
+        return;
+      }
+      isChannelKeyboardNavActive = true;
+      if (keyboardSelectedChannel === null || !visibleList.includes(keyboardSelectedChannel)) {
+        keyboardSelectedChannel = visibleList[0];
+      }
+      setKeyboardSelectedChannel(keyboardSelectedChannel);
+      showToast('Navegador de Canais Ativado (←/→ seleciona · ↑/↓ volume · Shift 2x sai)', '⌨️');
+    }
+
+    function deactivateChannelKeyboardNav() {
+      isChannelKeyboardNavActive = false;
+      clearKeyboardSelection();
+      showToast('Navegador de Canais Desativado', '⌨️');
+    }
+
+    function toggleChannelKeyboardNav() {
+      if (isChannelKeyboardNavActive) {
+        deactivateChannelKeyboardNav();
+      } else {
+        activateChannelKeyboardNav();
+      }
+    }
+
+    function navigateKeyboardChannel(direction) {
+      const visibleList = getActiveVisibleChannelIndices();
+      if (visibleList.length === 0) return;
+
+      let curIdx = visibleList.indexOf(keyboardSelectedChannel);
+      if (curIdx === -1) {
+        curIdx = 0;
+      } else {
+        curIdx = (curIdx + direction + visibleList.length) % visibleList.length;
+      }
+      setKeyboardSelectedChannel(visibleList[curIdx]);
+    }
+
+    function adjustKeyboardChannelVolume(direction) {
+      const visibleList = getActiveVisibleChannelIndices();
+      if (visibleList.length === 0) return;
+
+      if (keyboardSelectedChannel === null || !visibleList.includes(keyboardSelectedChannel)) {
+        setKeyboardSelectedChannel(visibleList[0]);
+      }
+
+      const ch = keyboardSelectedChannel;
+      const currentVal = (mixData[currentMixTarget] && mixData[currentMixTarget].volumes && mixData[currentMixTarget].volumes[ch] !== undefined)
+        ? mixData[currentMixTarget].volumes[ch]
+        : 0;
+
+      const step = 16;
+      const newVal = (direction > 0)
+        ? Math.min(MAX_VALUE, currentVal + step)
+        : Math.max(0, currentVal - step);
+
+      setChannelVolume(ch, newVal, true);
+    }
+
+    function getTargetChannelForShortcut() {
+      // 1. Se o cursor estiver sobre o fader Master de saída:
+      const masterStrip = document.getElementById('masterOutputStrip');
+      if (masterStrip && masterStrip.matches(':hover')) {
+        return 'MASTER';
+      }
+      // 2. Se estiver no modo de navegação por teclado e houver canal selecionado:
+      if (isChannelKeyboardNavActive && typeof keyboardSelectedChannel === 'number') {
+        return keyboardSelectedChannel;
+      }
+      // 3. Se o cursor estiver sobre um canal de entrada específico:
+      const hoveredStrip = document.querySelector('.channel-strip:hover');
+      if (hoveredStrip && hoveredStrip.dataset.index !== undefined) {
+        const idx = parseInt(hoveredStrip.dataset.index, 10);
+        if (!isNaN(idx)) return idx;
+      }
+      // 4. Se houver um canal selecionado previamente que ainda esteja visível:
+      if (typeof keyboardSelectedChannel === 'number') {
+        const strip = document.getElementById(`channelStrip_${keyboardSelectedChannel}`);
+        if (strip && strip.style.display !== 'none') return keyboardSelectedChannel;
+      }
+      // 5. Se o modo teclado estiver ativo e nenhum selecionado ainda:
+      if (isChannelKeyboardNavActive) {
+        const visibleList = getActiveVisibleChannelIndices();
+        if (visibleList.length > 0) return visibleList[0];
+      }
+      return null;
+    }
+
+    // Teclas de atalho para troca rápida de mixagem e navegação por teclado
     document.addEventListener('keydown', (e) => {
       if (e.target.matches('input, select, textarea')) return;
-      if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+      // Se houver algum modal interativo aberto, ignora atalhos de navegação do console
+      const openModal = document.querySelector('.modal-overlay.open');
+      if (openModal) return;
+
+      // Detecção de Shift 2x para ativar/desativar seletor com aura
+      if (e.key === 'Shift') {
+        if (e.repeat) return;
+        const now = Date.now();
+        if (now - lastShiftPressTime < 450) {
+          toggleChannelKeyboardNav();
+          lastShiftPressTime = 0;
+        } else {
+          lastShiftPressTime = now;
+        }
+        return;
+      }
+
+      // Qualquer tecla diferente de Shift zera a detecção de duplo Shift
+      if (e.key !== 'Shift') {
+        lastShiftPressTime = 0;
+      }
+
+      // Atalhos rápidos com Ctrl/Cmd (0.0 dB e -∞ dB):
+      // - Ctrl+Cima: define o fader do canal focado para 0.0 dB
+      // - Ctrl+Baixo: muta o fader do canal focado em -∞ dB
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          const ch = getTargetChannelForShortcut();
+          if (ch === 'MASTER') {
+            setMasterOutputVolume(MAX_VALUE, true);
+            showToast('Master Out → 0.0 dB', '🎚️');
+          } else if (typeof ch === 'number') {
+            setChannelVolume(ch, NOMINAL_VALUE, true);
+            const name = (channelsState[ch] && channelsState[ch].name) ? channelsState[ch].name : `CH ${ch + 1}`;
+            showToast(`${name} → 0.0 dB`, '🎚️');
+          }
+          return;
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          const ch = getTargetChannelForShortcut();
+          if (ch === 'MASTER') {
+            setMasterOutputVolume(MIN_VALUE, true);
+            showToast('Master Out → -∞ dB', '🔇');
+          } else if (typeof ch === 'number') {
+            setChannelVolume(ch, MIN_VALUE, true);
+            const name = (channelsState[ch] && channelsState[ch].name) ? channelsState[ch].name : `CH ${ch + 1}`;
+            showToast(`${name} → -∞ dB`, '🔇');
+          }
+          return;
+        }
+        return;
+      }
+
+      if (e.altKey) return;
+
+      // Se o modo de navegação estiver ativo, trata setas e ESC
+      if (isChannelKeyboardNavActive) {
+        if (e.key === 'Escape') {
+          deactivateChannelKeyboardNav();
+          return;
+        }
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          navigateKeyboardChannel(-1);
+          return;
+        }
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          navigateKeyboardChannel(1);
+          return;
+        }
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          adjustKeyboardChannelVolume(1);
+          return;
+        }
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          adjustKeyboardChannelVolume(-1);
+          return;
+        }
+      }
 
       const key = e.key.toLowerCase();
-      if (key === '0' || key === 'm') {
+      if (key === '0') {
+        if (currentUserRole === 'BASIC' && currentUserAllowedOutputs && !currentUserAllowedOutputs.has('MASTER')) return;
         selectMix('MASTER', true);
       } else if (key >= '1' && key <= '8') {
         const auxTarget = 'AUX' + key;
-        // Toggle: se pressionar a tecla do mesmo AUX já ativo, retorna para MASTER
+        if (currentUserRole === 'BASIC' && currentUserAllowedOutputs && !currentUserAllowedOutputs.has(auxTarget)) return;
+        // Toggle: se pressionar a tecla do mesmo AUX já ativo, só retorna para MASTER se MASTER for permitido
         if (auxTarget === currentMixTarget) {
+          if (currentUserRole === 'BASIC' && currentUserAllowedOutputs && !currentUserAllowedOutputs.has('MASTER')) return;
           selectMix('MASTER', true);
         } else {
           selectMix(auxTarget, true);
@@ -5824,12 +6355,23 @@
     }
 
     function updateChannelsVisibility(selectedIndices) {
+      const selectedSet = new Set(selectedIndices);
       let count = 0;
       for (let i = 0; i < TOTAL_CHANNELS; i++) {
         const strip = document.getElementById(`channelStrip_${i}`);
-        const isVis = selectedIndices.includes(i);
+
+        // Se for perfil BASIC, nunca exibe canais que estão fora da lista autorizada
+        if (currentUserRole === 'BASIC' && !currentUserAllowedChannels.has(i + 1)) {
+          channelsState[i].visible = false;
+          if (strip) strip.style.display = 'none';
+          const chk = document.getElementById(`popCheck_${i}`);
+          if (chk) chk.checked = false;
+          continue;
+        }
+
+        const isVis = selectedSet.has(i);
         channelsState[i].visible = isVis;
-        strip.style.display = isVis ? 'flex' : 'none';
+        if (strip) strip.style.display = isVis ? 'flex' : 'none';
         if (isVis) count++;
       }
 
@@ -5842,18 +6384,34 @@
 
       // Sincroniza Checkboxes do Popover
       for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        if (currentUserRole === 'BASIC' && !currentUserAllowedChannels.has(i + 1)) continue;
         const chk = document.getElementById(`popCheck_${i}`);
         if (chk) chk.checked = selectedIndices.includes(i);
       }
 
-      selectedCountBadge.textContent = `${count} de ${TOTAL_CHANNELS} visíveis`;
-      footerCount.textContent = `Exibindo ${count} de ${TOTAL_CHANNELS} canais | Arraste ou use a roda do mouse nos faders | Duplo clique para 0 dB`;
+      const totalAllowed = (currentUserRole === 'BASIC') ? currentUserAllowedChannels.size : TOTAL_CHANNELS;
+      selectedCountBadge.textContent = `${count} de ${totalAllowed} visíveis`;
+      footerCount.textContent = `Exibindo ${count} de ${totalAllowed} canais | Arraste ou use a roda do mouse nos faders | Duplo clique para 0 dB`;
+
+      // Se modo teclado estiver ativo e o canal selecionado foi ocultado, ajusta seleção
+      if (isChannelKeyboardNavActive && typeof keyboardSelectedChannel === 'number') {
+        const visibleList = getActiveVisibleChannelIndices();
+        if (!visibleList.includes(keyboardSelectedChannel)) {
+          if (visibleList.length > 0) {
+            setKeyboardSelectedChannel(visibleList[0]);
+          } else {
+            clearKeyboardSelection();
+          }
+        }
+      }
 
       // Atualiza posições dos faders e botões ON ao ficarem visíveis
       requestAnimationFrame(() => {
         selectedIndices.forEach(idx => {
-          updateFaderUI(idx, mixData[currentMixTarget].volumes[idx]);
-          updateChannelOnUI(idx, mixData[currentMixTarget].on[idx] === 1);
+          if (currentUserRole !== 'BASIC' || currentUserAllowedChannels.has(idx + 1)) {
+            updateFaderUI(idx, mixData[currentMixTarget].volumes[idx]);
+            updateChannelOnUI(idx, mixData[currentMixTarget].on[idx] === 1);
+          }
         });
       });
     }
@@ -5894,7 +6452,14 @@
 
     // Ações de "Todos" e "Nenhum" no Popover
     document.getElementById('btnPopoverAll').addEventListener('click', () => {
-      const all = Array.from({ length: TOTAL_CHANNELS }, (_, i) => i);
+      let all;
+      if (currentUserRole === 'BASIC') {
+        all = Array.from(currentUserAllowedChannels)
+          .map(ch => ch - 1)
+          .filter(idx => idx >= 0 && idx < TOTAL_CHANNELS);
+      } else {
+        all = Array.from({ length: TOTAL_CHANNELS }, (_, i) => i);
+      }
       updateChannelsVisibility(all);
       updateBankButtonsActiveState(all);
     });
@@ -7414,8 +7979,17 @@
       sendCompParam(0x07, val);
     });
 
-    // Evento de clique no botão SEL dos canais
+    // Evento de clique no botão SEL dos canais e foco por clique no modo teclado
     mixerRack.addEventListener('click', (e) => {
+      if (isChannelKeyboardNavActive) {
+        const strip = e.target.closest('.channel-strip');
+        if (strip && strip.dataset.index !== undefined) {
+          const ch = parseInt(strip.dataset.index, 10);
+          if (!isNaN(ch)) {
+            setKeyboardSelectedChannel(ch);
+          }
+        }
+      }
       const btnSel = e.target.closest('.btn-ch-sel');
       if (btnSel) {
         const ch = parseInt(btnSel.dataset.ch, 10);
@@ -7431,8 +8005,17 @@
       // 1. Carrega estados de mixagem salvos no navegador (se houver)
       loadSavedMixData();
 
-      // 2. Inicializa mixagem Master na interface
-      selectMix('MASTER', false);
+      // 2. Inicializa mixagem inicial na interface (respeita bloqueio do MASTER para perfil BASIC)
+      let initialMix = 'MASTER';
+      if (currentUserRole === 'BASIC' && currentUserAllowedOutputs && !currentUserAllowedOutputs.has('MASTER')) {
+        for (const out of ['AUX1', 'AUX2', 'AUX3', 'AUX4', 'AUX5', 'AUX6', 'AUX7', 'AUX8']) {
+          if (currentUserAllowedOutputs.has(out)) {
+            initialMix = out;
+            break;
+          }
+        }
+      }
+      selectMix(initialMix, false);
 
       // 3. Carrega visualização salva no navegador (ou padrão Todos se não houver)
       const savedChannels = getSavedVisibleChannels();
@@ -7578,6 +8161,7 @@
     const adminPaneScenes = document.getElementById('adminPane_scenes');
     const adminPaneMixes = document.getElementById('adminPane_mixes');
     const adminPaneSystem = document.getElementById('adminPane_system');
+    const adminPaneUsers = document.getElementById('adminPane_users');
     const adminSysMidiPort = document.getElementById('adminSysMidiPort');
     const adminSysAutoSaveInfo = document.getElementById('adminSysAutoSaveInfo');
     const btnAdminSyncState = document.getElementById('btnAdminSyncState');
@@ -7614,8 +8198,12 @@
       if (adminPaneScenes) adminPaneScenes.classList.toggle('active', tabId === 'scenes');
       if (adminPaneMixes) adminPaneMixes.classList.toggle('active', tabId === 'mixes');
       if (adminPaneSystem) adminPaneSystem.classList.toggle('active', tabId === 'system');
+      if (adminPaneUsers) adminPaneUsers.classList.toggle('active', tabId === 'users');
       if (tabId === 'mixes') {
         loadPersonalMixesData();
+      }
+      if (tabId === 'users') {
+        loadAdminUsers();
       }
       if (tabId === 'system') {
         if (adminSysMidiPort && midiPortBadge) {
@@ -8510,6 +9098,443 @@
             alert('Erro de comunicação ao excluir mix.');
           }
         });
+      });
+    }
+
+    // ==========================================
+    // ADMIN - GERENCIAMENTO DE OPERADORES & LIMITES (PERFIL BASIC)
+    // ==========================================
+    const adminUsersListItems = document.getElementById('adminUsersListItems');
+    const userLimitsEditorCard = document.getElementById('userLimitsEditorCard');
+    const userLimitsEditorTitle = document.getElementById('userLimitsEditorTitle');
+    const userLimitsEditorSubtitle = document.getElementById('userLimitsEditorSubtitle');
+    const btnCloseUserLimitsEditor = document.getElementById('btnCloseUserLimitsEditor');
+    const btnCancelUserLimits = document.getElementById('btnCancelUserLimits');
+    const btnSaveUserLimits = document.getElementById('btnSaveUserLimits');
+    const adminLimitsChannelsGrid = document.getElementById('adminLimitsChannelsGrid');
+    const adminLimitsOutputsGrid = document.getElementById('adminLimitsOutputsGrid');
+    const adminLimitsChCount = document.getElementById('adminLimitsChCount');
+    const adminLimitsOutCount = document.getElementById('adminLimitsOutCount');
+    const adminLimitsManualChannelsInput = document.getElementById('adminLimitsManualChannelsInput');
+    const adminLimitsManualOutputsInput = document.getElementById('adminLimitsManualOutputsInput');
+    const btnAdminSelectAllLimits = document.getElementById('btnAdminSelectAllLimits');
+    const btnAdminDeselectAllLimits = document.getElementById('btnAdminDeselectAllLimits');
+    const btnAdminSelect1to16 = document.getElementById('btnAdminSelect1to16');
+    const btnAdminSelect17to32 = document.getElementById('btnAdminSelect17to32');
+    const btnAdminSelectOdd = document.getElementById('btnAdminSelectOdd');
+    const btnAdminSelectEven = document.getElementById('btnAdminSelectEven');
+    const btnAdminSelectAuxOnly = document.getElementById('btnAdminSelectAuxOnly');
+
+    let adminCachedUsers = [];
+    let adminEditingUser = null;
+    let tempAllowedChannels = new Set();
+    let tempAllowedOutputs = new Set();
+    const ALL_OUTPUT_KEYS = ['MASTER', 'AUX1', 'AUX2', 'AUX3', 'AUX4', 'AUX5', 'AUX6', 'AUX7', 'AUX8'];
+
+    function parseChannelRanges(str) {
+      const set = new Set();
+      if (!str) return set;
+      const s = str.trim().toUpperCase();
+      if (s === '*' || s === 'ALL' || s === 'TODOS') {
+        for (let i = 1; i <= 32; i++) set.add(i);
+        return set;
+      }
+      const parts = s.split(/[,;:\s+]+/);
+      parts.forEach(p => {
+        if (!p) return;
+        if (p.includes('-')) {
+          const [a, b] = p.split('-').map(x => parseInt(x.trim(), 10));
+          if (!isNaN(a) && !isNaN(b)) {
+            const min = Math.max(1, Math.min(a, b));
+            const max = Math.min(32, Math.max(a, b));
+            for (let i = min; i <= max; i++) set.add(i);
+          }
+        } else {
+          const num = parseInt(p, 10);
+          if (!isNaN(num) && num >= 1 && num <= 32) set.add(num);
+        }
+      });
+      return set;
+    }
+
+    function formatChannelRanges(chSet) {
+      if (!chSet || chSet.size === 0) return '';
+      const arr = Array.from(chSet).map(Number).sort((a, b) => a - b);
+      if (arr.length === 32) return '1-32';
+      const ranges = [];
+      let start = arr[0];
+      let prev = arr[0];
+      for (let i = 1; i < arr.length; i++) {
+        if (arr[i] === prev + 1) {
+          prev = arr[i];
+        } else {
+          ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+          start = arr[i];
+          prev = arr[i];
+        }
+      }
+      ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+      return ranges.join(';');
+    }
+
+    function parseOutputRanges(str) {
+      const set = new Set();
+      if (!str) return set;
+      const s = str.trim().toUpperCase();
+      if (s === '*' || s === 'ALL' || s === 'TODOS') {
+        ALL_OUTPUT_KEYS.forEach(k => set.add(k));
+        return set;
+      }
+      const parts = s.split(/[,;:\s+]+/);
+      parts.forEach(p => {
+        if (!p) return;
+        let clean = p.replace(/\s+/g, '').toUpperCase();
+        if (clean === 'MAIN' || clean === 'ST' || clean === 'STEREO' || clean === 'MASTER') {
+          set.add('MASTER');
+        } else if (clean.startsWith('AUX')) {
+          const num = parseInt(clean.replace('AUX', ''), 10);
+          if (!isNaN(num) && num >= 1 && num <= 8) set.add(`AUX${num}`);
+        }
+      });
+      return set;
+    }
+
+    async function loadAdminUsers() {
+      if (!adminUsersListItems) return;
+      adminUsersListItems.innerHTML = '<div class="scenes-loading">Carregando operadores...</div>';
+
+      try {
+        const res = await fetch('/api/users');
+        if (!res.ok) {
+          const errData = await res.json().catch(() => null);
+          const msg = (errData && errData.error) ? errData.error : `HTTP ${res.status}`;
+          adminUsersListItems.innerHTML = `<div class="scenes-empty">Erro ao carregar lista de usuários (${escapeHTML(msg)}).</div>`;
+          return;
+        }
+        const data = await res.json();
+        adminCachedUsers = data.users || [];
+        renderAdminUsersList();
+      } catch (err) {
+        adminUsersListItems.innerHTML = '<div class="scenes-empty">Falha ao comunicar com o servidor.</div>';
+      }
+    }
+
+    function renderAdminUsersList() {
+      if (!adminUsersListItems) return;
+      if (adminCachedUsers.length === 0) {
+        adminUsersListItems.innerHTML = '<div class="scenes-empty">Nenhum operador encontrado no sistema.</div>';
+        return;
+      }
+
+      adminUsersListItems.innerHTML = '';
+      adminCachedUsers.forEach(u => {
+        const row = document.createElement('div');
+        row.className = 'pm-row';
+        row.style.gridTemplateColumns = '1.2fr 1fr 1fr 1.6fr 1.6fr auto';
+
+        const roleLower = (u.role || '').toLowerCase();
+        let roleBadgeClass = 'basic';
+        if (roleLower === 'admin') roleBadgeClass = 'admin';
+        else if (roleLower === 'operator') roleBadgeClass = 'operator';
+        else if (roleLower === 'performer') roleBadgeClass = 'performer';
+
+        const isBasic = (u.role || '').toUpperCase() === 'BASIC';
+        const chFormatted = (u.allowed_channels || '').replace(/[;:,\s]+/g, ', ').replace(/^,\s*|,\s*$/g, '');
+        const outFormatted = (u.allowed_outputs || '').replace(/[;:,\s]+/g, ', ').replace(/^,\s*|,\s*$/g, '');
+        const chDisplay = isBasic
+          ? `<span class="limits-chip-badge channels" title="Canais autorizados: ${escapeHTML(u.allowed_channels || 'Nenhum')}">${escapeHTML(chFormatted || 'Nenhum')}</span>`
+          : '<span style="color:#64748b; font-size:11px;">Todas (1–32)</span>';
+
+        const outDisplay = isBasic
+          ? `<span class="limits-chip-badge outputs" title="Saídas autorizadas: ${escapeHTML(u.allowed_outputs || 'Nenhuma')}">${escapeHTML(outFormatted || 'Nenhuma')}</span>`
+          : '<span style="color:#64748b; font-size:11px;">Todas (Master & Aux 1-8)</span>';
+
+        row.innerHTML = `
+          <div class="scene-info-wrap">
+            <span class="scene-item-name" style="font-size:13px;">${escapeHTML(u.name || u.username)}</span>
+          </div>
+          <div>
+            <code style="font-size:12px; color:#94a3b8; background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px;">${escapeHTML(u.username)}</code>
+          </div>
+          <div>
+            <span class="role-badge ${roleBadgeClass}">${escapeHTML(u.role || 'BASIC')}</span>
+          </div>
+          <div>
+            ${chDisplay}
+          </div>
+          <div>
+            ${outDisplay}
+          </div>
+          <div class="scene-item-actions">
+            ${isBasic
+              ? `<button type="button" class="btn-scene-action secondary sm btn-edit-user-limits" data-username="${escapeHTML(u.username)}" title="Definir canais e saídas permitidos">⚙️ Delimitar</button>`
+              : `<button type="button" class="btn-scene-action secondary sm" disabled style="opacity:0.35; cursor:not-allowed;" title="Limites aplicam-se apenas a operadores BASIC">⚙️ Delimitar</button>`
+            }
+          </div>
+        `;
+
+        adminUsersListItems.appendChild(row);
+      });
+
+      adminUsersListItems.querySelectorAll('.btn-edit-user-limits').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const user = adminCachedUsers.find(x => x.username === btn.dataset.username);
+          if (user) openUserLimitsEditor(user);
+        });
+      });
+    }
+
+    function openUserLimitsEditor(user) {
+      adminEditingUser = user;
+      if (userLimitsEditorTitle) {
+        userLimitsEditorTitle.textContent = `Delimitar Canais & Saídas: ${user.name || user.username}`;
+      }
+      if (userLimitsEditorSubtitle) {
+        userLimitsEditorSubtitle.textContent = `Login: @${user.username} | Perfil: ${user.role}`;
+      }
+
+      tempAllowedChannels = parseChannelRanges(user.allowed_channels);
+      tempAllowedOutputs = parseOutputRanges(user.allowed_outputs);
+
+      renderLimitsGrids();
+      if (adminLimitsManualChannelsInput) {
+        adminLimitsManualChannelsInput.value = formatChannelRanges(tempAllowedChannels);
+      }
+      if (adminLimitsManualOutputsInput) {
+        adminLimitsManualOutputsInput.value = ALL_OUTPUT_KEYS.filter(k => tempAllowedOutputs.has(k)).join(';');
+      }
+
+      if (userLimitsEditorCard) {
+        userLimitsEditorCard.style.display = 'block';
+        userLimitsEditorCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    function closeUserLimitsEditor() {
+      adminEditingUser = null;
+      if (userLimitsEditorCard) {
+        userLimitsEditorCard.style.display = 'none';
+      }
+    }
+
+    function renderLimitsGrids() {
+      if (!adminLimitsChannelsGrid || !adminLimitsOutputsGrid) return;
+
+      // Canais 1 a 32
+      adminLimitsChannelsGrid.innerHTML = '';
+      for (let ch = 1; ch <= 32; ch++) {
+        const isChecked = tempAllowedChannels.has(ch);
+        const item = document.createElement('div');
+        item.className = `limits-checkbox-item ${isChecked ? 'checked' : ''}`;
+        item.innerHTML = `
+          <input type="checkbox" id="chkAdminCh_${ch}" ${isChecked ? 'checked' : ''} style="cursor:pointer;" />
+          <label for="chkAdminCh_${ch}" style="cursor:pointer; font-weight:700;">CH ${ch}</label>
+        `;
+
+        const chk = item.querySelector('input');
+        item.addEventListener('click', (e) => {
+          if (e.target !== chk) {
+            chk.checked = !chk.checked;
+          }
+          if (chk.checked) {
+            tempAllowedChannels.add(ch);
+            item.classList.add('checked');
+          } else {
+            tempAllowedChannels.delete(ch);
+            item.classList.remove('checked');
+          }
+          updateLimitsCounters();
+        });
+
+        adminLimitsChannelsGrid.appendChild(item);
+      }
+
+      // Saídas: Master e Aux 1 a 8
+      adminLimitsOutputsGrid.innerHTML = '';
+      ALL_OUTPUT_KEYS.forEach(outKey => {
+        const isChecked = tempAllowedOutputs.has(outKey);
+        const label = outKey === 'MASTER' ? 'MASTER ST' : outKey.replace('AUX', 'AUX ');
+        const item = document.createElement('div');
+        item.className = `limits-checkbox-item ${isChecked ? 'checked' : ''}`;
+        item.innerHTML = `
+          <input type="checkbox" id="chkAdminOut_${outKey}" ${isChecked ? 'checked' : ''} style="cursor:pointer;" />
+          <label for="chkAdminOut_${outKey}" style="cursor:pointer; font-weight:700;">${label}</label>
+        `;
+
+        const chk = item.querySelector('input');
+        item.addEventListener('click', (e) => {
+          if (e.target !== chk) {
+            chk.checked = !chk.checked;
+          }
+          if (chk.checked) {
+            tempAllowedOutputs.add(outKey);
+            item.classList.add('checked');
+          } else {
+            tempAllowedOutputs.delete(outKey);
+            item.classList.remove('checked');
+          }
+          updateLimitsCounters();
+        });
+
+        adminLimitsOutputsGrid.appendChild(item);
+      });
+
+      updateLimitsCounters();
+    }
+
+    function updateLimitsCounters() {
+      if (adminLimitsChCount) {
+        adminLimitsChCount.textContent = `${tempAllowedChannels.size} de 32 selecionados`;
+      }
+      if (adminLimitsOutCount) {
+        adminLimitsOutCount.textContent = `${tempAllowedOutputs.size} de 9 selecionadas`;
+      }
+      if (adminLimitsManualChannelsInput && document.activeElement !== adminLimitsManualChannelsInput) {
+        adminLimitsManualChannelsInput.value = formatChannelRanges(tempAllowedChannels);
+      }
+      if (adminLimitsManualOutputsInput && document.activeElement !== adminLimitsManualOutputsInput) {
+        adminLimitsManualOutputsInput.value = ALL_OUTPUT_KEYS.filter(k => tempAllowedOutputs.has(k)).join(';');
+      }
+    }
+
+    // Digitação Manual em Tempo Real
+    if (adminLimitsManualChannelsInput) {
+      adminLimitsManualChannelsInput.addEventListener('input', () => {
+        tempAllowedChannels = parseChannelRanges(adminLimitsManualChannelsInput.value);
+        for (let ch = 1; ch <= 32; ch++) {
+          const chk = document.getElementById(`chkAdminCh_${ch}`);
+          const item = chk ? chk.closest('.limits-checkbox-item') : null;
+          const isChecked = tempAllowedChannels.has(ch);
+          if (chk) chk.checked = isChecked;
+          if (item) item.classList.toggle('checked', isChecked);
+        }
+        if (adminLimitsChCount) {
+          adminLimitsChCount.textContent = `${tempAllowedChannels.size} de 32 selecionados`;
+        }
+      });
+    }
+
+    if (adminLimitsManualOutputsInput) {
+      adminLimitsManualOutputsInput.addEventListener('input', () => {
+        tempAllowedOutputs = parseOutputRanges(adminLimitsManualOutputsInput.value);
+        ALL_OUTPUT_KEYS.forEach(outKey => {
+          const chk = document.getElementById(`chkAdminOut_${outKey}`);
+          const item = chk ? chk.closest('.limits-checkbox-item') : null;
+          const isChecked = tempAllowedOutputs.has(outKey);
+          if (chk) chk.checked = isChecked;
+          if (item) item.classList.toggle('checked', isChecked);
+        });
+        if (adminLimitsOutCount) {
+          adminLimitsOutCount.textContent = `${tempAllowedOutputs.size} de 9 selecionadas`;
+        }
+      });
+    }
+
+    // Ações Rápidas
+    if (btnAdminSelectAllLimits) {
+      btnAdminSelectAllLimits.addEventListener('click', () => {
+        for (let ch = 1; ch <= 32; ch++) tempAllowedChannels.add(ch);
+        ALL_OUTPUT_KEYS.forEach(k => tempAllowedOutputs.add(k));
+        renderLimitsGrids();
+        showToast('Todas as entradas e saídas foram selecionadas!', '✅');
+      });
+    }
+
+    if (btnAdminDeselectAllLimits) {
+      btnAdminDeselectAllLimits.addEventListener('click', () => {
+        tempAllowedChannels.clear();
+        tempAllowedOutputs.clear();
+        renderLimitsGrids();
+      });
+    }
+
+    if (btnAdminSelect1to16) {
+      btnAdminSelect1to16.addEventListener('click', () => {
+        tempAllowedChannels.clear();
+        for (let ch = 1; ch <= 16; ch++) tempAllowedChannels.add(ch);
+        renderLimitsGrids();
+      });
+    }
+
+    if (btnAdminSelect17to32) {
+      btnAdminSelect17to32.addEventListener('click', () => {
+        tempAllowedChannels.clear();
+        for (let ch = 17; ch <= 32; ch++) tempAllowedChannels.add(ch);
+        renderLimitsGrids();
+      });
+    }
+
+    if (btnAdminSelectOdd) {
+      btnAdminSelectOdd.addEventListener('click', () => {
+        tempAllowedChannels.clear();
+        for (let ch = 1; ch <= 32; ch += 2) tempAllowedChannels.add(ch);
+        renderLimitsGrids();
+      });
+    }
+
+    if (btnAdminSelectEven) {
+      btnAdminSelectEven.addEventListener('click', () => {
+        tempAllowedChannels.clear();
+        for (let ch = 2; ch <= 32; ch += 2) tempAllowedChannels.add(ch);
+        renderLimitsGrids();
+      });
+    }
+
+    if (btnAdminSelectAuxOnly) {
+      btnAdminSelectAuxOnly.addEventListener('click', () => {
+        tempAllowedOutputs.clear();
+        for (let a = 1; a <= 8; a++) tempAllowedOutputs.add(`AUX${a}`);
+        renderLimitsGrids();
+      });
+    }
+
+    if (btnCloseUserLimitsEditor) {
+      btnCloseUserLimitsEditor.addEventListener('click', closeUserLimitsEditor);
+    }
+    if (btnCancelUserLimits) {
+      btnCancelUserLimits.addEventListener('click', closeUserLimitsEditor);
+    }
+
+    if (btnSaveUserLimits) {
+      btnSaveUserLimits.addEventListener('click', async () => {
+        if (!adminEditingUser) return;
+
+        const formattedChannels = formatChannelRanges(tempAllowedChannels);
+        const formattedOutputs = ALL_OUTPUT_KEYS.filter(k => tempAllowedOutputs.has(k)).join(';');
+
+        btnSaveUserLimits.disabled = true;
+        btnSaveUserLimits.textContent = '💾 Salvando...';
+
+        try {
+          const res = await fetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: adminEditingUser.username,
+              allowed_channels: formattedChannels,
+              allowed_outputs: formattedOutputs
+            })
+          });
+
+          const result = await res.json();
+          if (res.ok && result.success) {
+            const savedUsername = adminEditingUser ? adminEditingUser.username : '';
+            showToast(`Limites de @${savedUsername} salvos com sucesso!`, '💾');
+            closeUserLimitsEditor();
+            await loadAdminUsers();
+            // Se o usuário editado for o próprio usuário logado, atualiza a interface imediatamente
+            if (currentUser && currentUser.username === savedUsername) {
+              await loadCurrentUser();
+            }
+          } else {
+            alert(`Erro ao salvar limites: ${result.error || 'Erro desconhecido'}`);
+          }
+        } catch (err) {
+          alert('Erro de comunicação ao salvar limites no servidor.');
+        } finally {
+          btnSaveUserLimits.disabled = false;
+          btnSaveUserLimits.textContent = '💾 Salvar Limites';
+        }
       });
     }
 

@@ -39,6 +39,8 @@ go.work.sum
 *.csv
 sessions.json*
 data/last_state.json*
+data/mute_groups.json
+data/personal_mixes.json
 
 # Arquivos gerados por sistemas operacionais
 .DS_Store

@@ -67,11 +67,14 @@ O **Web Remote Controller** é uma solução moderna e leve para controle remoto
 
 ### Etapa 7: Sistema de Autenticação e Perfis de Usuário (RBAC)
 * **Segurança Multi-usuário:** Autenticação baseada em sessões seguras criptográficas via cookie `remote_session` (validade de 24 horas, proteção HttpOnly).
-* **Gerenciamento Desacoplado via CSV:** Arquivo `usuarios.csv` contendo `nome,usuario,senha,papel,mix`. O arquivo é relido em tempo de execução sem necessitar reiniciar o servidor.
+* **Gerenciamento Desacoplado via CSV:** Arquivo `usuarios.csv` contendo `nome,usuario,senha,papel,mix,canais,saidas`. O arquivo é relido em tempo de execução sem necessitar reiniciar o servidor.
 * **Controle de Acesso Baseado em Papéis (RBAC de Tela e Backend):**
-  * `ADMIN`: Acesso total irrestrito (FOH completo, sincronização geral com a mesa física, painel administrativo, salvamento/recall de cenas, snapshots, auto-save e desligamento do sistema).
+  * `ADMIN`: Acesso total irrestrito (FOH completo, sincronização geral com a mesa física, painel administrativo, salvamento/recall de cenas, snapshots, auto-save, gestão de operadores/limites e desligamento do sistema).
   * `OPERATOR`: Opera toda a superfície de controle física e virtual (faders, pans, equalizadores 4 bandas, compressores, gates, sends on fader), mas não acessa a seção administrativa nem dispara sincronização geral.
   * `BASIC`: Permissão estrita apenas para ajuste de **Volumes e Mute** (faders e botões ON/MUTE de canais, masters e envios aux). Controles de EQ, Dinâmica (Comp/Gate), Pan e Admin desabilitados na interface e estritamente filtrados no backend (WebSocket).
+    * **Delimitação Granular de Entradas e Saídas:** O administrador pode delimitar exatamente quais canais de entrada (1 a 32) e saídas (Master Stereo e Auxiliares 1 a 8) o operador Básico pode acessar.
+    * **Botão "Selecionar Todos":** Presente na interface administrativa para rápida concessão total de canais/saídas e na toolbar do console do operador (onde "Todos" seleciona todos os canais delimitados para aquele usuário).
+    * **Aba Administrativa "👥 Operadores & Limites":** Gestão de operadores com badges visuais de limites e editor interativo em grade com ações rápidas (`CH 1–16`, `CH 17–32`, `Apenas Auxiliares`, `Selecionar Todos`). Endpoint dedicado `GET/POST /api/users`.
   * `PERFORMER`: Direcionado exclusivamente à futura tela de mixagem pessoal. Redirecionado automaticamente no login e nas rotas principais para `/mix?id=<mix_id>`, servindo a página dedicada `mix.html` ("It works!").
 * **Telas Dedicadas:** Página de login profissional (`login.html`), rota `/logout`, endpoint de perfil `/api/me`, console geral (`index.html`), console mobile (`mobile.html`) e área de mix pessoal (`mix.html`).
 * **Suíte de Testes Automatizados:** Testes unitários completos cobrindo autenticação, leitura de CSV com mix_id, RBAC por papel, bloqueios de endpoints administrativos e validação de comandos em `auth_test.go`.
@@ -195,6 +198,15 @@ O **Web Remote Controller** é uma solução moderna e leve para controle remoto
 11. **Proteção contra Loopback e Eco Local:** Filtro de supressão de reflexão que descarta mensagens emitidas pela própria aplicação que retornam via portas ALSA como `Midi Through` ou `VirMIDI`.
 12. **Ambiente de Desenvolvimento Sem Mesa:** Simulador multi-fader e logs detalhados de decodificação SysEx no console.
 13. **Estabilidade de Tráfego:** Throttling ativo protegendo a saída MIDI contra estouro de buffer, com bypass automático para eventos discretos (Mute, On, Flat, Bypass de EQ, Comp e Gate).
+14. **Navegação de Canais por Teclado no Desktop (Modo Shift 2x):**
+    * Pressionar a tecla `Shift` duas vezes consecutivas ativa o modo de seleção tátil no console web.
+    * O canal em foco recebe uma aura luminosa (idêntica ao seletor mobile) e seu cabeçalho é destacado.
+    * As setas `←` / `→` alternam o canal selecionado, realizando rolagem horizontal suave da viewport sempre que o canal estiver fora da área visível.
+    * As setas `↑` / `↓` controlam diretamente o volume do fader para a mix ativa (Master ou Auxiliar).
+    * `Ctrl+↑`: no Desktop, ajusta instantaneamente o canal focado para `0.0 dB` (823 nos canais ou 1023 no Master out).
+    * `Ctrl+↓`: no Desktop, ajusta instantaneamente o canal focado para `-∞ dB` (0 / mute de fader).
+    * No Mobile (`/m`), como os faders são horizontais, os atalhos seguem o eixo do slider: `Ctrl+→` ajusta para `0.0 dB` e `Ctrl+←` para `-∞ dB`.
+    * Teclas `0` e `1` a `8` continuam funcionais para comutação rápida de saída, e pressionar `Shift 2x` novamente (ou `Escape`) encerra o modo.
 
 ---
 
