@@ -385,3 +385,262 @@ func TestSystemShutdownEndpoint(t *testing.T) {
 		t.Errorf("Função de desligamento não foi acionada após comando válido com flag ativa")
 	}
 }
+
+func TestRBACRolesAndLoadUsers(t *testing.T) {
+	testCSV := "test_rbac_usuarios.csv"
+	defer os.Remove(testCSV)
+	origCSV := getUsersCSVFile()
+	setUsersCSVFile(testCSV)
+	defer setUsersCSVFile(origCSV)
+
+	content := `nome,usuario,senha,papel,mix
+Administrador Geral,admin,admin123,ADMIN,
+Operador de Mesa,operador,op123,OPERATOR,
+Operador Basico,basico,basico123,BASIC,
+Musico Vocalista,musico,musico123,PERFORMER,aux1
+Musico Baterista,batera,batera123,PERFORMER,
+`
+	if err := os.WriteFile(testCSV, []byte(content), 0644); err != nil {
+		t.Fatalf("Erro ao criar arquivo de teste: %v", err)
+	}
+
+	users, err := loadUsers()
+	if err != nil {
+		t.Fatalf("loadUsers falhou: %v", err)
+	}
+	if len(users) != 5 {
+		t.Fatalf("Esperava 5 usuários, obteve %d", len(users))
+	}
+
+	// Verifica admin
+	uAdmin, _ := authenticateUser("admin", "admin123")
+	if uAdmin == nil || uAdmin.Role != "ADMIN" {
+		t.Fatalf("Esperava admin com papel ADMIN, obteve: %+v", uAdmin)
+	}
+
+	// Verifica operador
+	uOp, _ := authenticateUser("operador", "op123")
+	if uOp == nil || uOp.Role != "OPERATOR" {
+		t.Fatalf("Esperava operador com papel OPERATOR, obteve: %+v", uOp)
+	}
+
+	// Verifica basic
+	uBasic, _ := authenticateUser("basico", "basico123")
+	if uBasic == nil || uBasic.Role != "BASIC" {
+		t.Fatalf("Esperava basic com papel BASIC, obteve: %+v", uBasic)
+	}
+
+	// Verifica performer com mix customizada
+	uPerformer, _ := authenticateUser("musico", "musico123")
+	if uPerformer == nil || uPerformer.Role != "PERFORMER" || uPerformer.MixID != "aux1" {
+		t.Fatalf("Esperava musico com papel PERFORMER e mix_id 'aux1', obteve: %+v", uPerformer)
+	}
+
+	// Verifica performer sem mix informada (deve cair no fallback "1")
+	uBatera, _ := authenticateUser("batera", "batera123")
+	if uBatera == nil || uBatera.Role != "PERFORMER" || uBatera.MixID != "1" {
+		t.Fatalf("Esperava batera com mix_id fallback '1', obteve: %+v", uBatera)
+	}
+}
+
+func TestPerformerRedirectAndMixEndpoint(t *testing.T) {
+	testCSV := "test_performer_usuarios.csv"
+	testSess := "test_performer_sessions.json"
+	defer os.Remove(testCSV)
+	defer os.Remove(testSess)
+
+	origCSV := getUsersCSVFile()
+	origSess := getSessionsFile()
+	setUsersCSVFile(testCSV)
+	setSessionsFile(testSess)
+	defer func() {
+		setUsersCSVFile(origCSV)
+		setSessionsFile(origSess)
+	}()
+
+	csvContent := `nome,usuario,senha,papel,mix
+Cantor Principal,cantor,senha123,PERFORMER,vocal1
+Operador,operador,op123,OPERATOR,
+`
+	if err := os.WriteFile(testCSV, []byte(csvContent), 0644); err != nil {
+		t.Fatalf("Erro ao criar CSV de teste: %v", err)
+	}
+
+	// 1. Login JSON com PERFORMER -> deve retornar redirect para "/mix?id=vocal1"
+	body, _ := json.Marshal(map[string]string{
+		"username": "cantor",
+		"password": "senha123",
+	})
+	req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	handleLogin(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("Esperava 200 OK no login de cantor, obteve %d", rr.Code)
+	}
+	var loginResp map[string]interface{}
+	if err := json.Unmarshal(rr.Body.Bytes(), &loginResp); err != nil {
+		t.Fatalf("Erro ao decodificar resposta JSON: %v", err)
+	}
+	if loginResp["redirect"] != "/mix?id=vocal1" {
+		t.Errorf("Esperava redirect para '/mix?id=vocal1', obteve: %v", loginResp["redirect"])
+	}
+
+	// Recupera cookie
+	cookies := rr.Result().Cookies()
+	var sessCookie *http.Cookie
+	for _, c := range cookies {
+		if c.Name == sessionCookieName {
+			sessCookie = c
+			break
+		}
+	}
+	if sessCookie == nil {
+		t.Fatalf("Cookie de sessão não retornado")
+	}
+
+	// 2. GET /login com sessão já autenticada de PERFORMER -> redirect 303 para "/mix?id=vocal1"
+	reqGetLogin := httptest.NewRequest(http.MethodGet, "/login", nil)
+	reqGetLogin.AddCookie(sessCookie)
+	rrGetLogin := httptest.NewRecorder()
+	handleLogin(rrGetLogin, reqGetLogin)
+	if rrGetLogin.Code != http.StatusSeeOther {
+		t.Errorf("Esperava 303 no GET /login de performer autenticado, obteve %d", rrGetLogin.Code)
+	}
+	if loc := rrGetLogin.Header().Get("Location"); loc != "/mix?id=vocal1" {
+		t.Errorf("Esperava redirect para '/mix?id=vocal1', obteve %s", loc)
+	}
+
+	// 3. GET /m com sessão de PERFORMER -> redirect para "/mix?id=vocal1"
+	reqMobile := httptest.NewRequest(http.MethodGet, "/m", nil)
+	reqMobile.AddCookie(sessCookie)
+	rrMobile := httptest.NewRecorder()
+	handleMobile(rrMobile, reqMobile)
+	if rrMobile.Code != http.StatusSeeOther {
+		t.Errorf("Esperava 303 no GET /m para performer, obteve %d", rrMobile.Code)
+	}
+	if loc := rrMobile.Header().Get("Location"); loc != "/mix?id=vocal1" {
+		t.Errorf("Esperava redirect para '/mix?id=vocal1', obteve %s", loc)
+	}
+
+	// 4. GET /mix sem autenticação -> redirect para /login
+	reqAnonMix := httptest.NewRequest(http.MethodGet, "/mix", nil)
+	rrAnonMix := httptest.NewRecorder()
+	handleMix(rrAnonMix, reqAnonMix)
+	if rrAnonMix.Code != http.StatusSeeOther {
+		t.Errorf("Esperava 303 no GET /mix anônimo, obteve %d", rrAnonMix.Code)
+	}
+
+	// 5. GET /mix autenticado -> 200 OK (serve mix.html)
+	reqAuthMix := httptest.NewRequest(http.MethodGet, "/mix?id=vocal1", nil)
+	reqAuthMix.AddCookie(sessCookie)
+	rrAuthMix := httptest.NewRecorder()
+	handleMix(rrAuthMix, reqAuthMix)
+	if rrAuthMix.Code != http.StatusOK {
+		t.Errorf("Esperava 200 OK no GET /mix autenticado, obteve %d", rrAuthMix.Code)
+	}
+	if !bytes.Contains(rrAuthMix.Body.Bytes(), []byte("It works!")) {
+		t.Errorf("Esperava conteúdo 'It works!' na resposta de mix.html")
+	}
+
+	// 6. GET /api/me para PERFORMER retorna mix_id
+	reqMe := httptest.NewRequest(http.MethodGet, "/api/me", nil)
+	reqMe.AddCookie(sessCookie)
+	rrMe := httptest.NewRecorder()
+	handleMe(rrMe, reqMe)
+	var meData map[string]interface{}
+	_ = json.Unmarshal(rrMe.Body.Bytes(), &meData)
+	if meData["role"] != "PERFORMER" || meData["mix_id"] != "vocal1" {
+		t.Errorf("Esperava role=PERFORMER e mix_id=vocal1, obteve: %v", meData)
+	}
+}
+
+func TestIsVolumeOrMuteParam(t *testing.T) {
+	// Casos que DEVEM ser aceitos para o perfil BASIC (apenas volumes e mute)
+	allowed := []struct {
+		elem  byte
+		param byte
+		desc  string
+	}{
+		{0x1C, 0x00, "Input Fader"},
+		{0x1A, 0x00, "Input ON/MUTE"},
+		{0x4F, 0x00, "Stereo Master Fader"},
+		{0x4D, 0x00, "Stereo Master ON"},
+		{0x4B, 0x00, "Stereo Master ON alt"},
+		{0x39, 0x00, "Aux Master Fader"},
+		{0x31, 0x00, "Aux Master Fader alt"},
+		{0x36, 0x00, "Aux Master ON"},
+		{0x2F, 0x00, "Aux Master ON alt"},
+		{0x23, 0x00, "Aux 1 Send ON (pp=0)"},
+		{0x23, 0x02, "Aux 1 Send Level (pp=2)"},
+		{0x23, 0x03, "Aux 2 Send ON (pp=3)"},
+		{0x23, 0x05, "Aux 2 Send Level (pp=5)"},
+		{0x23, 0x17, "Aux 8 Send Level (pp=23)"},
+	}
+
+	for _, tc := range allowed {
+		if !isVolumeOrMuteParam(tc.elem, tc.param) {
+			t.Errorf("Esperava permissão para %s (elem 0x%02X, param 0x%02X)", tc.desc, tc.elem, tc.param)
+		}
+	}
+
+	// Casos que DEVEM ser bloqueados para o perfil BASIC
+	blocked := []struct {
+		elem  byte
+		param byte
+		desc  string
+	}{
+		{0x1B, 0x00, "Input Pan"},
+		{0x1D, 0x00, "Input Attenuator"},
+		{0x20, 0x00, "Input EQ Param"},
+		{0x21, 0x00, "Input Gate Param"},
+		{0x1F, 0x00, "Input Comp Param"},
+		{0x22, 0x00, "Input Comp Param alt"},
+		{0x35, 0x00, "Aux EQ Param"},
+		{0x50, 0x00, "Stereo EQ Param"},
+		{0x51, 0x00, "Stereo Comp Param"},
+		{0x23, 0x01, "Aux 1 Send Pre/Post (pp=1)"},
+		{0x23, 0x04, "Aux 2 Send Pre/Post (pp=4)"},
+	}
+
+	for _, tc := range blocked {
+		if isVolumeOrMuteParam(tc.elem, tc.param) {
+			t.Errorf("Esperava bloqueio para %s (elem 0x%02X, param 0x%02X)", tc.desc, tc.elem, tc.param)
+		}
+	}
+}
+
+func TestAPISyncMixerRBAC(t *testing.T) {
+	// Cria sessões com diferentes papéis
+	tokenAdmin := createSession(User{Username: "admin_test", Role: "ADMIN"})
+	tokenOp := createSession(User{Username: "op_test", Role: "OPERATOR"})
+	tokenBasic := createSession(User{Username: "basic_test", Role: "BASIC"})
+
+	// 1. Operador não pode fazer sincronização geral -> 403 Forbidden
+	reqOp := httptest.NewRequest(http.MethodPost, "/api/state/sync-mixer", nil)
+	reqOp.AddCookie(&http.Cookie{Name: sessionCookieName, Value: tokenOp})
+	rrOp := httptest.NewRecorder()
+	handleAPISyncMixer(rrOp, reqOp)
+	if rrOp.Code != http.StatusForbidden {
+		t.Errorf("Esperava 403 Forbidden para OPERATOR em /api/state/sync-mixer, obteve %d", rrOp.Code)
+	}
+
+	// 2. Usuário Básico não pode fazer sincronização geral -> 403 Forbidden
+	reqBasic := httptest.NewRequest(http.MethodPost, "/api/state/sync-mixer", nil)
+	reqBasic.AddCookie(&http.Cookie{Name: sessionCookieName, Value: tokenBasic})
+	rrBasic := httptest.NewRecorder()
+	handleAPISyncMixer(rrBasic, reqBasic)
+	if rrBasic.Code != http.StatusForbidden {
+		t.Errorf("Esperava 403 Forbidden para BASIC em /api/state/sync-mixer, obteve %d", rrBasic.Code)
+	}
+
+	// 3. Admin pode fazer sincronização geral -> 200 OK
+	reqAdmin := httptest.NewRequest(http.MethodPost, "/api/state/sync-mixer", nil)
+	reqAdmin.AddCookie(&http.Cookie{Name: sessionCookieName, Value: tokenAdmin})
+	rrAdmin := httptest.NewRecorder()
+	handleAPISyncMixer(rrAdmin, reqAdmin)
+	if rrAdmin.Code != http.StatusOK {
+		t.Errorf("Esperava 200 OK para ADMIN em /api/state/sync-mixer, obteve %d", rrAdmin.Code)
+	}
+}

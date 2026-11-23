@@ -339,6 +339,7 @@ type User struct {
 	Username string `json:"username"`
 	Password string `json:"-"`
 	Role     string `json:"role"`
+	MixID    string `json:"mix_id,omitempty"`
 }
 
 type Session struct {
@@ -444,7 +445,7 @@ func getUsersCSVFile() string {
 func ensureUsersCSV() {
 	filePath := getUsersCSVFile()
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		defaultContent := "nome,usuario,senha,papel\nAdministrador,admin,admin,ADMIN\n"
+		defaultContent := "nome,usuario,senha,papel,mix\nAdministrador,admin,admin,ADMIN,\n"
 		if err := os.WriteFile(filePath, []byte(defaultContent), 0644); err != nil {
 			log.Printf("Aviso: Falha ao inicializar %s: %v", filePath, err)
 		} else {
@@ -481,7 +482,11 @@ func loadUsers() ([]User, error) {
 		name := strings.TrimSpace(record[0])
 		username := strings.TrimSpace(record[1])
 		password := strings.TrimSpace(record[2])
-		role := strings.TrimSpace(record[3])
+		role := strings.ToUpper(strings.TrimSpace(record[3]))
+		mixID := ""
+		if len(record) >= 5 {
+			mixID = strings.TrimSpace(record[4])
+		}
 
 		// Ignora linha de cabeçalho caso exista
 		if i == 0 {
@@ -501,11 +506,16 @@ func loadUsers() ([]User, error) {
 			role = "ADMIN"
 		}
 
+		if role == "PERFORMER" && mixID == "" {
+			mixID = "1"
+		}
+
 		users = append(users, User{
 			Name:     name,
 			Username: username,
 			Password: password,
 			Role:     role,
+			MixID:    mixID,
 		})
 	}
 
@@ -623,6 +633,13 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 		if sess := getSessionFromRequest(r); sess != nil {
+			if strings.EqualFold(sess.User.Role, "PERFORMER") {
+				mixID := sess.User.MixID
+				if mixID == "" {
+					mixID = "1"
+				}
+				target = "/mix?id=" + mixID
+			}
 			http.Redirect(w, r, target, http.StatusSeeOther)
 			return
 		}
@@ -685,6 +702,14 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 
 		log.Printf("Usuário autenticado com sucesso: %s (%s, Papel: %s)", user.Name, user.Username, user.Role)
 
+		if strings.EqualFold(user.Role, "PERFORMER") {
+			mixID := user.MixID
+			if mixID == "" {
+				mixID = "1"
+			}
+			target = "/mix?id=" + mixID
+		}
+
 		if isJSON {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]interface{}{
@@ -694,6 +719,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 					"name":     user.Name,
 					"username": user.Username,
 					"role":     user.Role,
+					"mix_id":   user.MixID,
 				},
 			})
 			return
@@ -739,7 +765,8 @@ func handleMe(w http.ResponseWriter, r *http.Request) {
 		"authenticated": true,
 		"name":          sess.User.Name,
 		"username":      sess.User.Username,
-		"role":          sess.User.Role,
+		"role":          strings.ToUpper(sess.User.Role),
+		"mix_id":        sess.User.MixID,
 	})
 }
 
@@ -749,7 +776,24 @@ func handleMobile(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
+	if strings.EqualFold(sess.User.Role, "PERFORMER") {
+		mixID := sess.User.MixID
+		if mixID == "" {
+			mixID = "1"
+		}
+		http.Redirect(w, r, "/mix?id="+mixID, http.StatusSeeOther)
+		return
+	}
 	http.ServeFile(w, r, "mobile.html")
+}
+
+func handleMix(w http.ResponseWriter, r *http.Request) {
+	sess := getSessionFromRequest(r)
+	if sess == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	http.ServeFile(w, r, "mix.html")
 }
 
 func executeSystemShutdown() {
@@ -901,6 +945,32 @@ func handleAPISystemShutdown(w http.ResponseWriter, r *http.Request) {
 	go shutdownExecFunc()
 }
 
+// isVolumeOrMuteParam determina se um comando SysEx (elemento/parâmetro) refere-se estritamente
+// a volume (fader) ou chave ON/MUTE, permitido para usuários com perfil BASIC.
+func isVolumeOrMuteParam(element, param byte) bool {
+	switch element {
+	case 0x1C: // Input Fader (Canal 1 a 32)
+		return true
+	case 0x1A: // Input Channel ON / MUTE (Canal 1 a 32)
+		return true
+	case 0x4F, 0x4D: // Stereo Master Out Fader (0x4F) / Stereo Master ON (0x4D)
+		return true
+	case 0x4B: // Stereo Master ON (0x4B)
+		return true
+	case 0x39, 0x31: // Aux Master Fader (Aux 1 a 8)
+		return true
+	case 0x36, 0x2F: // Aux Master ON (Aux 1 a 8)
+		return true
+	case 0x23: // Aux Sends por canal
+		// pp % 3 == 0: Chave ON/MUTE do envio
+		// pp % 3 == 2: Nível (Fader) do envio
+		// pp % 3 == 1: Pre/Post (não é volume nem mute)
+		return (param%3 == 0) || (param%3 == 2)
+	default:
+		return false
+	}
+}
+
 func handleWS(w http.ResponseWriter, r *http.Request) {
 	sess := getSessionFromRequest(r)
 	if sess == nil {
@@ -948,6 +1018,34 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		if err := conn.ReadJSON(&msg); err != nil {
 			log.Println("Cliente WebSocket desconectado:", err)
 			break
+		}
+
+		userRole := strings.ToUpper(sess.User.Role)
+
+		// 1. Usuário PERFORMER não possui permissão para emitir comandos no console principal
+		if userRole == "PERFORMER" {
+			log.Printf("WebSocket: comando ignorado para usuário PERFORMER '%s'", sess.User.Username)
+			continue
+		}
+
+		// 2. Ações de simulação ou sincronização geral são exclusivas de administradores (ADMIN)
+		if msg.Action == "toggle_sim" || msg.Action == "sync_mixer" || msg.Action == "sync_main" {
+			if userRole != "ADMIN" {
+				log.Printf("WebSocket: ação administrativa '%s' negada para usuário '%s' (Papel: %s)", msg.Action, sess.User.Username, userRole)
+				continue
+			}
+		}
+
+		// 3. Usuário BASIC pode alterar apenas volumes e mute (sem ações de sync/simulação, sem EQ/Comp/Gate/Pan)
+		if userRole == "BASIC" {
+			if msg.Action != "" {
+				log.Printf("WebSocket: ação '%s' negada para usuário BASIC '%s'", msg.Action, sess.User.Username)
+				continue
+			}
+			if !isVolumeOrMuteParam(msg.Element, msg.Param) {
+				log.Printf("WebSocket: alteração de parâmetro [elem: 0x%02X, param: 0x%02X] negada para usuário BASIC '%s'", msg.Element, msg.Param, sess.User.Username)
+				continue
+			}
 		}
 
 		// Ação de alternar simulação solicitada pela tela
@@ -1595,6 +1693,7 @@ func main() {
 	http.HandleFunc("/api/state/sync-mixer", handleAPISyncMixer)
 	http.HandleFunc("/api/state", handleAPIGetCurrentState)
 	http.HandleFunc("/api/system/shutdown", handleAPISystemShutdown)
+	http.HandleFunc("/mix", handleMix)
 	http.HandleFunc("/m", handleMobile)
 	http.HandleFunc("/mobile", handleMobile)
 
@@ -1606,6 +1705,14 @@ func main() {
 		sess := getSessionFromRequest(r)
 		if sess == nil {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		if strings.EqualFold(sess.User.Role, "PERFORMER") {
+			mixID := sess.User.MixID
+			if mixID == "" {
+				mixID = "1"
+			}
+			http.Redirect(w, r, "/mix?id="+mixID, http.StatusSeeOther)
 			return
 		}
 		// Se o usuário estiver no celular e não tiver solicitado explicitamente a visão desktop, redireciona para /m

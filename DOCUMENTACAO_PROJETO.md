@@ -65,11 +65,16 @@ O **Web Remote Controller** é uma solução moderna e leve para controle remoto
   * Medidor de redução de ganho (Gain Reduction - GR).
 * **Disponibilidade Global:** Implementado para Canais 1 a 32 (Element `0x22`), Auxiliares 1 a 8 (Element `0x36`) e Master Stereo (Element `0x51`).
 
-### Etapa 7: Sistema de Autenticação e Perfis de Usuário
+### Etapa 7: Sistema de Autenticação e Perfis de Usuário (RBAC)
 * **Segurança Multi-usuário:** Autenticação baseada em sessões seguras criptográficas via cookie `remote_session` (validade de 24 horas, proteção HttpOnly).
-* **Gerenciamento Desacoplado via CSV:** Arquivo `usuarios.csv` contendo `nome,usuario,senha,papel`. O arquivo é relido em tempo de execução sem necessitar reiniciar o servidor.
-* **Telas Dedicadas:** Página de login profissional (`login.html`), suporte a login via formulário e API REST JSON, rota `/logout` e endpoint `/api/me`.
-* **Suíte de Testes Automatizados:** Testes unitários completos cobrindo autenticação, leitura de CSV e sessões em `auth_test.go`.
+* **Gerenciamento Desacoplado via CSV:** Arquivo `usuarios.csv` contendo `nome,usuario,senha,papel,mix`. O arquivo é relido em tempo de execução sem necessitar reiniciar o servidor.
+* **Controle de Acesso Baseado em Papéis (RBAC de Tela e Backend):**
+  * `ADMIN`: Acesso total irrestrito (FOH completo, sincronização geral com a mesa física, painel administrativo, salvamento/recall de cenas, snapshots, auto-save e desligamento do sistema).
+  * `OPERATOR`: Opera toda a superfície de controle física e virtual (faders, pans, equalizadores 4 bandas, compressores, gates, sends on fader), mas não acessa a seção administrativa nem dispara sincronização geral.
+  * `BASIC`: Permissão estrita apenas para ajuste de **Volumes e Mute** (faders e botões ON/MUTE de canais, masters e envios aux). Controles de EQ, Dinâmica (Comp/Gate), Pan e Admin desabilitados na interface e estritamente filtrados no backend (WebSocket).
+  * `PERFORMER`: Direcionado exclusivamente à futura tela de mixagem pessoal. Redirecionado automaticamente no login e nas rotas principais para `/mix?id=<mix_id>`, servindo a página dedicada `mix.html` ("It works!").
+* **Telas Dedicadas:** Página de login profissional (`login.html`), rota `/logout`, endpoint de perfil `/api/me`, console geral (`index.html`), console mobile (`mobile.html`) e área de mix pessoal (`mix.html`).
+* **Suíte de Testes Automatizados:** Testes unitários completos cobrindo autenticação, leitura de CSV com mix_id, RBAC por papel, bloqueios de endpoints administrativos e validação de comandos em `auth_test.go`.
 
 ### Etapa 8: Motor de Simulação e Controle de Tráfego (Throttling)
 * **Simulador Multi-canal e Multi-mixagem:** Goroutine interna no Go que simula a movimentação simultânea e realista de faders nos Canais 1 a 8 em todas as 9 mixagens (Master + 8 Auxiliares), permitindo testes de UI e carga mesmo sem a mesa física conectada.

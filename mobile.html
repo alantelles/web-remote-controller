@@ -1892,6 +1892,15 @@
       font-weight: 700;
       color: var(--text-main);
     }
+
+    /* Regras visuais para o perfil BASIC no Mobile (apenas volumes e mute) */
+    body.role-basic .channel-eq-btn,
+    body.role-basic .master-eq-btn {
+      opacity: 0.35 !important;
+      cursor: not-allowed !important;
+      pointer-events: none !important;
+      filter: grayscale(1);
+    }
   </style>
 </head>
 <body>
@@ -4222,6 +4231,13 @@
         if (res.ok) {
           const u = await res.json();
           currentMobileUserRole = (u.role || '').toUpperCase();
+
+          if (currentMobileUserRole === 'PERFORMER') {
+            const mixId = encodeURIComponent(u.mix_id || '1');
+            window.location.href = `${BASE_PATH}/mix?id=${mixId}`;
+            return;
+          }
+
           document.getElementById('headerUserName').innerText = u.name || u.username;
           document.getElementById('popoverUserName').innerText = u.name;
           document.getElementById('popoverUserLogin').innerText = u.username;
@@ -4233,6 +4249,16 @@
           }
           if (btnPopoverAdmin) {
             btnPopoverAdmin.style.display = isAdmin ? 'block' : 'none';
+          }
+          const btnMobileSync = document.getElementById('btnMobileSyncMixer');
+          if (btnMobileSync) {
+            btnMobileSync.style.display = isAdmin ? 'inline-flex' : 'none';
+          }
+
+          if (currentMobileUserRole === 'BASIC') {
+            document.body.classList.add('role-basic');
+          } else {
+            document.body.classList.remove('role-basic');
           }
         }
       } catch (e) {
@@ -5488,6 +5514,10 @@
     }
 
     function openEqModal(target) {
+      if (currentMobileUserRole === 'BASIC') {
+        showToast('Perfil Básico: permitido apenas ajustes de Volume e Mute.');
+        return;
+      }
       currentEqTarget = target;
       isEqModalOpen = true;
 

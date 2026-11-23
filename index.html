@@ -177,6 +177,43 @@
       text-transform: uppercase;
     }
 
+    .user-role-badge.badge-admin {
+      background: rgba(245, 158, 11, 0.18);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.45);
+    }
+
+    .user-role-badge.badge-operator {
+      background: rgba(56, 189, 248, 0.18);
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.45);
+    }
+
+    .user-role-badge.badge-basic {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.45);
+    }
+
+    .user-role-badge.badge-performer {
+      background: rgba(168, 85, 247, 0.18);
+      color: #c084fc;
+      border-color: rgba(168, 85, 247, 0.45);
+    }
+
+    /* Regras visuais para o perfil BASIC (apenas volumes e mute) */
+    body.role-basic .btn-ch-sel,
+    body.role-basic .btn-master-sel {
+      opacity: 0.35 !important;
+      cursor: not-allowed !important;
+      filter: grayscale(1);
+    }
+    body.role-basic .btn-ch-sel:hover,
+    body.role-basic .btn-master-sel:hover {
+      box-shadow: none !important;
+      border-color: inherit !important;
+    }
+
     .btn-logout {
       display: inline-flex;
       align-items: center;
@@ -3601,13 +3638,41 @@
         if (res.ok) {
           const user = await res.json();
           currentUserRole = (user.role || '').toUpperCase();
+
+          // Se for PERFORMER, redireciona para a mix cadastrada
+          if (currentUserRole === 'PERFORMER') {
+            const mixId = encodeURIComponent(user.mix_id || '1');
+            window.location.href = `${BASE_PATH}/mix?id=${mixId}`;
+            return;
+          }
+
           const nameEl = document.getElementById('userDisplayName');
           const roleEl = document.getElementById('userRoleBadge');
           const btnAdminPanel = document.getElementById('btnAdminPanel');
+          const btnSyncMixer = document.getElementById('btnSyncMixer');
+
           if (nameEl) nameEl.textContent = user.name || user.username;
-          if (roleEl) roleEl.textContent = user.role || 'ADMIN';
+          if (roleEl) {
+            roleEl.textContent = currentUserRole || 'ADMIN';
+            roleEl.className = 'user-role-badge';
+            if (currentUserRole === 'ADMIN') roleEl.classList.add('badge-admin');
+            else if (currentUserRole === 'OPERATOR') roleEl.classList.add('badge-operator');
+            else if (currentUserRole === 'BASIC') roleEl.classList.add('badge-basic');
+            else if (currentUserRole === 'PERFORMER') roleEl.classList.add('badge-performer');
+          }
+
+          const isAdmin = currentUserRole === 'ADMIN';
           if (btnAdminPanel) {
-            btnAdminPanel.style.display = (currentUserRole === 'ADMIN') ? 'inline-flex' : 'none';
+            btnAdminPanel.style.display = isAdmin ? 'inline-flex' : 'none';
+          }
+          if (btnSyncMixer) {
+            btnSyncMixer.style.display = isAdmin ? 'inline-flex' : 'none';
+          }
+
+          if (currentUserRole === 'BASIC') {
+            document.body.classList.add('role-basic');
+          } else {
+            document.body.classList.remove('role-basic');
           }
         }
       } catch (err) {
@@ -4960,6 +5025,10 @@
     }
 
     function openFxModal(target) {
+      if (currentUserRole === 'BASIC') {
+        showToast('Perfil Básico: permitido apenas ajustes de Volume e Mute.', '⚠️');
+        return;
+      }
       currentSelectedCh = target;
       const tabGateBtn = document.querySelector('[data-tab="gate"]');
 

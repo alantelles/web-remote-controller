@@ -1151,10 +1151,8 @@ func handleAPIGetCurrentState(w http.ResponseWriter, r *http.Request) {
 func handleAPISyncMixer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	sess := getSessionFromRequest(r)
+	sess := requireAdminRole(w, r)
 	if sess == nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Não autenticado"})
 		return
 	}
 
