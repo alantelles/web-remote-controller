@@ -193,15 +193,15 @@
     }
 
     /* ==========================================
-       BLOCO 2: BOTÕES COM AS SAÍDAS (MIX TARGETS)
+       BLOCO: BOTÕES COM AS SAÍDAS (MIX TARGETS)
        ========================================== */
     .outputs-block {
-      padding: 10px 10px 4px 10px;
+      padding: 8px 10px 10px 10px;
       display: flex;
       flex-direction: column;
       gap: 6px;
       background: #11141c;
-      border-bottom: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-strong);
     }
 
     .btn-out {
@@ -292,15 +292,15 @@
     }
 
     /* ==========================================
-       BLOCO 3: BOTÕES DE NAVEGAÇÃO DE CANAIS
+       BLOCO: NAVEGAÇÃO E FILTROS DE CANAIS (COLAPSÁVEL)
        ========================================== */
     .nav-block {
-      padding: 6px 10px 10px 10px;
+      padding: 8px 10px 8px 10px;
       display: flex;
       flex-direction: column;
       gap: 6px;
       background: #11141c;
-      border-bottom: 1px solid var(--border-strong);
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .nav-collapse-bar {
@@ -408,6 +408,20 @@
       background: #1e293b;
       color: #38bdf8;
       border-color: #38bdf8;
+    }
+
+    .btn-nav-saved {
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(56, 189, 248, 0.08);
+      font-weight: 700;
+    }
+
+    .btn-nav-saved.active {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #fff;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.45);
     }
 
     /* Linha 4: Ações Globais */
@@ -1929,7 +1943,54 @@
   </div>
 
   <!-- ==========================================
-       BLOCO 2: BOTÕES COM AS SAÍDAS (MIX TARGETS)
+       BLOCO: NAVEGAÇÃO E FILTROS DE CANAIS (COLAPSÁVEL)
+       ========================================== -->
+  <section class="nav-block" id="navBlock">
+    <!-- Barra de Controle de Colapso -->
+    <div class="nav-collapse-bar" id="btnToggleNavCollapse" role="button" tabindex="0" title="Toque para ocultar/exibir funções">
+      <div class="nav-collapse-title">
+        <span>⚙️ Filtro de Canais & Funções</span>
+        <span class="nav-summary-pill" id="navSummaryPill">32 canais</span>
+      </div>
+      <span class="nav-chevron" id="navChevron">▲</span>
+    </div>
+
+    <!-- Conteúdo Colapsável -->
+    <div class="nav-collapsible-body" id="navCollapsibleBody">
+      <!-- Linha 1: Botão que abre diálogo de visualização -->
+      <button class="btn-dialog-trigger" id="btnOpenChannelsModal" type="button">
+        <span id="navChannelsCount">Editar Minha Seleção de Canais ⭐</span>
+        <span>▾</span>
+      </button>
+
+      <!-- Linha 2: Salvo, Todos, 1-16, 17-32 -->
+      <div class="nav-grid-4">
+        <button class="btn-nav btn-nav-saved active" id="btnRestoreSaved" type="button">⭐ Salvo</button>
+        <button class="btn-nav" data-bank="all" type="button">Todos</button>
+        <button class="btn-nav" data-bank="1-16" type="button">1–16</button>
+        <button class="btn-nav" data-bank="17-32" type="button">17–32</button>
+      </div>
+
+      <!-- Linha 3: 1-8, 9-16, 17-24, 25-32 -->
+      <div class="nav-grid-4">
+        <button class="btn-nav" data-bank="1-8" type="button">1–8</button>
+        <button class="btn-nav" data-bank="9-16" type="button">9–16</button>
+        <button class="btn-nav" data-bank="17-24" type="button">17–24</button>
+        <button class="btn-nav" data-bank="25-32" type="button">25–32</button>
+      </div>
+
+      <!-- Linha 4: Simulação e Ações Globais -->
+      <div class="nav-grid-4">
+        <button class="btn-nav btn-action-sim" id="btnToggleSim" type="button">🎲 Sim</button>
+        <button class="btn-nav" id="btnAllZeroDb" type="button">⚡ 0dB</button>
+        <button class="btn-nav btn-action-unmute" id="btnUnmuteAll" type="button">🔔 ON</button>
+        <button class="btn-nav btn-action-mute" id="btnMuteAll" type="button">🔇 MUTE</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       BLOCO: BOTÕES COM AS SAÍDAS (MIX TARGETS)
        ========================================== -->
   <section class="outputs-block">
     <!-- Linha 1: Master (3/4) e Botão Ver/Ocultar Saída (1/4) -->
@@ -1960,71 +2021,27 @@
   </section>
 
   <!-- ==========================================
-       BLOCO 3: BOTÕES DE NAVEGAÇÃO DE PÁGINAS (COLAPSÁVEL)
-       ========================================== -->
-  <section class="nav-block" id="navBlock">
-    <!-- Barra de Controle de Colapso -->
-    <div class="nav-collapse-bar" id="btnToggleNavCollapse" role="button" tabindex="0" title="Toque para ocultar/exibir funções">
-      <div class="nav-collapse-title">
-        <span>⚙️ Funções & Filtros</span>
-        <span class="nav-summary-pill" id="navSummaryPill">32 canais</span>
-      </div>
-      <span class="nav-chevron" id="navChevron">▲</span>
-    </div>
-
-    <!-- Conteúdo Colapsável -->
-    <div class="nav-collapsible-body" id="navCollapsibleBody">
-      <!-- Linha 1: Botão que abre diálogo de visualização -->
-      <button class="btn-dialog-trigger" id="btnOpenChannelsModal" type="button">
-        <span id="navChannelsCount">Selecionar Canais Individuais (32/32)</span>
-        <span>▾</span>
-      </button>
-
-      <!-- Linha 2: Todos, 1-16, 17-32, Salvo -->
-      <div class="nav-grid-4">
-        <button class="btn-nav active" data-bank="all" type="button">Todos</button>
-        <button class="btn-nav" data-bank="1-16" type="button">1–16</button>
-        <button class="btn-nav" data-bank="17-32" type="button">17–32</button>
-        <button class="btn-nav" id="btnRestoreSaved" type="button">Salvo</button>
-      </div>
-
-      <!-- Linha 3: 1-8, 9-16, 17-24, 25-32 -->
-      <div class="nav-grid-4">
-        <button class="btn-nav" data-bank="1-8" type="button">1–8</button>
-        <button class="btn-nav" data-bank="9-16" type="button">9–16</button>
-        <button class="btn-nav" data-bank="17-24" type="button">17–24</button>
-        <button class="btn-nav" data-bank="25-32" type="button">25–32</button>
-      </div>
-
-      <!-- Linha 4: Simulação e Ações Globais -->
-      <div class="nav-grid-4">
-        <button class="btn-nav btn-action-sim" id="btnToggleSim" type="button">🎲 Sim</button>
-        <button class="btn-nav" id="btnAllZeroDb" type="button">⚡ 0dB</button>
-        <button class="btn-nav btn-action-unmute" id="btnUnmuteAll" type="button">🔔 ON</button>
-        <button class="btn-nav btn-action-mute" id="btnMuteAll" type="button">🔇 MUTE</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==========================================
        MODAL DE SELEÇÃO DE CANAIS VISÍVEIS
        ========================================== -->
   <div class="modal-backdrop" id="channelsModal">
     <div class="modal-container">
       <div class="modal-header">
-        <span>Canais Visíveis na Tela</span>
+        <span>Personalizar Minha Seleção (⭐ Salvo)</span>
         <button id="btnCloseChannelsModal" type="button">✕</button>
       </div>
       <div class="modal-body">
+        <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 8px;">
+          Selecione os canais que deseja ver no modo <strong>⭐ Salvo</strong>:
+        </div>
         <div class="channels-checkbox-grid" id="modalCheckboxGrid">
           <!-- Gerado via JS (CH 1 a 32) -->
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn-modal-action" id="btnModalSelectAll" type="button">Marcar Todos</button>
-        <button class="btn-modal-action" id="btnModalSelectNone" type="button">Desmarcar Todos</button>
+        <button class="btn-modal-action" id="btnModalSelectNone" type="button">Desmarcar</button>
         <button class="btn-modal-action btn-modal-save modal-footer-save" id="btnModalSaveCurrent" type="button">
-          💾 Salvar Seleção Atual no Celular
+          💾 Salvar Minha Visualização
         </button>
       </div>
     </div>
@@ -3759,7 +3776,7 @@
         isMasterOutVisible = !isMasterOutVisible;
         localStorage.setItem('01v96_mobile_show_master_out', isMasterOutVisible);
         syncUI();
-        showToast(isMasterOutVisible ? 'Fader de saída exibido' : 'Fader de saída recolhido (badge ativo)');
+        showToast(isMasterOutVisible ? 'Fader de saída exibido' : 'Fader de saída recolhido');
       });
 
       if (badge) {
@@ -3927,14 +3944,46 @@
     }
 
     // ==========================================
-    // FILTROS DE BANCOS E CANAIS VISÍVEIS
+    // ARMAZENAMENTO E FILTROS DE CANAIS VISÍVEIS
     // ==========================================
+    const MOBILE_STORAGE_KEY = 'yamaha_01v96_custom_view';
+    const MOBILE_LEGACY_KEY = '01v96_mobile_channels';
+    const DESKTOP_LEGACY_KEY = 'yamaha_01v96_visible_channels';
+
+    function getSavedMobileChannels() {
+      try {
+        const raw = localStorage.getItem(MOBILE_STORAGE_KEY) ||
+                    localStorage.getItem(MOBILE_LEGACY_KEY) ||
+                    localStorage.getItem(DESKTOP_LEGACY_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.map(Number);
+          }
+        }
+      } catch (err) {
+        console.warn('Erro ao ler seleção salva:', err);
+      }
+      return null;
+    }
+
+    function saveMobileChannels(indices) {
+      try {
+        const jsonStr = JSON.stringify(indices);
+        localStorage.setItem(MOBILE_STORAGE_KEY, jsonStr);
+        localStorage.setItem(MOBILE_LEGACY_KEY, jsonStr);
+      } catch (err) {
+        console.error('Erro ao salvar no localStorage:', err);
+      }
+    }
+
     function applyChannelFilter(filter) {
       document.querySelectorAll('.btn-nav[data-bank]').forEach(btn => {
         if (btn.getAttribute('data-bank') === filter) btn.classList.add('active');
         else btn.classList.remove('active');
       });
       document.getElementById('btnRestoreSaved').classList.remove('active');
+      localStorage.setItem('01v96_mobile_active_bank', filter);
 
       state.visibleChannels.clear();
 
@@ -3957,22 +4006,32 @@
       renderChannelVisibility();
     }
 
+    function applySavedView(showNotice = false) {
+      const saved = getSavedMobileChannels();
+      if (!saved || saved.length === 0) {
+        if (showNotice) showToast('Nenhuma seleção salva ainda! Toque em "Editar Minha Seleção" para salvar seus canais.');
+        return false;
+      }
+      state.visibleChannels = new Set(saved);
+      renderChannelVisibility();
+      clearActiveBankButtons();
+      document.getElementById('btnRestoreSaved').classList.add('active');
+      localStorage.setItem('01v96_mobile_active_bank', 'saved');
+      if (showNotice) showToast('Visualização salva ativa! ⭐');
+      return true;
+    }
+
     function renderChannelVisibility() {
       for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
         const card = document.getElementById(`channelCard_${ch}`);
-        const chk = document.getElementById(`modalChk_${ch}`);
         const isVisible = state.visibleChannels.has(ch);
-
         if (card) {
           card.style.display = isVisible ? 'flex' : 'none';
-        }
-        if (chk) {
-          chk.checked = isVisible;
         }
       }
 
       const count = state.visibleChannels.size;
-      const countLabel = `Selecionar Canais Individuais (${count}/32)`;
+      const countLabel = `Editar Minha Seleção (${count}/32) ⭐`;
       const navBtn = document.getElementById('navChannelsCount');
       if (navBtn) navBtn.innerText = countLabel;
       const pill = document.getElementById('navSummaryPill');
@@ -4010,23 +4069,25 @@
         const item = document.createElement('label');
         item.className = 'channel-chk-item';
         item.innerHTML = `
-          <input type="checkbox" id="modalChk_${ch}" checked>
+          <input type="checkbox" id="modalChk_${ch}">
           <span>CH ${chNumStr}</span>
         `;
-
-        item.querySelector('input').addEventListener('change', (e) => {
-          if (e.target.checked) state.visibleChannels.add(ch);
-          else state.visibleChannels.delete(ch);
-          renderChannelVisibility();
-          clearActiveBankButtons();
-        });
-
         grid.appendChild(item);
+      }
+
+      // Sincroniza checkboxes do modal com a seleção salva atual (ou a atual se não houver)
+      function syncModalWithSaved() {
+        const saved = getSavedMobileChannels() || Array.from(state.visibleChannels);
+        for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
+          const chk = document.getElementById(`modalChk_${ch}`);
+          if (chk) chk.checked = saved.includes(ch);
+        }
       }
 
       // Abrir/Fechar Modal
       const modal = document.getElementById('channelsModal');
       document.getElementById('btnOpenChannelsModal').addEventListener('click', () => {
+        syncModalWithSaved();
         modal.classList.add('open');
       });
       document.getElementById('btnCloseChannelsModal').addEventListener('click', () => {
@@ -4038,41 +4099,44 @@
 
       // Botões do Modal
       document.getElementById('btnModalSelectAll').addEventListener('click', () => {
-        for (let i = 0; i < TOTAL_CHANNELS; i++) state.visibleChannels.add(i);
-        renderChannelVisibility();
-        clearActiveBankButtons();
+        for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
+          const chk = document.getElementById(`modalChk_${ch}`);
+          if (chk) chk.checked = true;
+        }
       });
 
       document.getElementById('btnModalSelectNone').addEventListener('click', () => {
-        state.visibleChannels.clear();
-        renderChannelVisibility();
-        clearActiveBankButtons();
+        for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
+          const chk = document.getElementById(`modalChk_${ch}`);
+          if (chk) chk.checked = false;
+        }
       });
 
+      // Salva explicitamente a Minha Visualização Salva
       document.getElementById('btnModalSaveCurrent').addEventListener('click', () => {
-        const arr = Array.from(state.visibleChannels);
-        localStorage.setItem('01v96_mobile_channels', JSON.stringify(arr));
-        showToast('Seleção salva no navegador!');
+        const selected = [];
+        for (let ch = 0; ch < TOTAL_CHANNELS; ch++) {
+          const chk = document.getElementById(`modalChk_${ch}`);
+          if (chk && chk.checked) selected.push(ch);
+        }
+        if (selected.length === 0) {
+          showToast('Selecione pelo menos um canal! ⚠️');
+          return;
+        }
+
+        saveMobileChannels(selected);
+        state.visibleChannels = new Set(selected);
+        renderChannelVisibility();
+        clearActiveBankButtons();
+        document.getElementById('btnRestoreSaved').classList.add('active');
+        localStorage.setItem('01v96_mobile_active_bank', 'saved');
+        showToast('Minha visualização salva atualizada! ⭐');
         modal.classList.remove('open');
       });
 
       // Botão Recuperar Salvo na Toolbar
       document.getElementById('btnRestoreSaved').addEventListener('click', () => {
-        const raw = localStorage.getItem('01v96_mobile_channels');
-        if (!raw) {
-          showToast('Nenhuma seleção salva ainda!');
-          return;
-        }
-        try {
-          const arr = JSON.parse(raw);
-          state.visibleChannels = new Set(arr);
-          renderChannelVisibility();
-          clearActiveBankButtons();
-          document.getElementById('btnRestoreSaved').classList.add('active');
-          showToast('Seleção restaurada!');
-        } catch (e) {
-          showToast('Erro ao ler seleção salva.');
-        }
+        applySavedView(true);
       });
     }
 
@@ -6286,10 +6350,20 @@
         });
       });
 
-      // Inicializa com Master e Todos os Canais Visíveis
+      // Inicializa mixagem Master
       setMixTarget('MASTER');
-      renderChannelVisibility();
       setSelectedChannel(0);
+
+      // Inicializa visualização de canais: respeita a visualização salva ou o último banco ativo
+      const savedBank = localStorage.getItem('01v96_mobile_active_bank');
+      if (savedBank && savedBank !== 'saved') {
+        applyChannelFilter(savedBank);
+      } else {
+        const loadedSaved = applySavedView(false);
+        if (!loadedSaved) {
+          applyChannelFilter('all');
+        }
+      }
 
       // Inicia Conexão WebSocket
       connectWebSocket();

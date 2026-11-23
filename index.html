@@ -642,6 +642,25 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.4);
     }
 
+    .btn-bank-saved {
+      color: #38bdf8;
+      font-weight: 700;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    .btn-bank-saved:hover {
+      background: rgba(56, 189, 248, 0.18);
+      color: #fff;
+    }
+
+    .btn-bank-saved.active {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #fff;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.45);
+    }
+
     .toolbar-right {
       display: flex;
       align-items: center;
@@ -2579,6 +2598,75 @@
       </div>
     </header>
 
+    <!-- BARRA DE CONTROLE: SELECT MULTIPLE E FILTROS -->
+    <div class="console-toolbar">
+      <div class="toolbar-left">
+        <span class="toolbar-label">Exibir Canais:</span>
+
+        <!-- SELECT MULTIPLE NATIVO -->
+        <div class="channel-select-wrap">
+          <select id="channelMultiSelect" multiple class="native-multi-select" title="Segure Ctrl / Cmd para múltiplos">
+            <!-- 32 options geradas dinamicamente via JS -->
+          </select>
+
+          <!-- Botão Dropdown Rápido com Popover -->
+          <button id="btnTogglePopover" class="btn-multiselect-dropdown" type="button">
+            <span id="selectedCountBadge">32 de 32 visíveis</span>
+            <span>▾</span>
+          </button>
+
+          <!-- Popover Interativo com Checkboxes -->
+          <div id="channelDropdownPopover" class="dropdown-popover">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 11px; font-weight: 700; color: #cbd5e1;">Selecionar Canais</span>
+              <span style="font-size: 10px; color: #64748b;">(Clique para alternar)</span>
+            </div>
+            <div class="popover-grid" id="popoverCheckboxGrid">
+              <!-- Gerado via JS -->
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px;">
+              <button class="btn-action" id="btnPopoverAll" type="button">Todos</button>
+              <button class="btn-action" id="btnPopoverNone" type="button">Nenhum</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Atalhos rápidos de bancos -->
+        <div class="bank-buttons">
+          <button class="btn-bank btn-bank-saved" data-bank="saved" id="btnBankSaved" type="button" title="Minha visualização personalizada de canais">⭐ Salvo</button>
+          <button class="btn-bank active" data-bank="all" type="button">Todos (1-32)</button>
+          <button class="btn-bank" data-bank="1-16" type="button">CH 1–16</button>
+          <button class="btn-bank" data-bank="17-32" type="button">CH 17–32</button>
+          <button class="btn-bank" data-bank="1-8" type="button">CH 1–8</button>
+          <button class="btn-bank" data-bank="9-16" type="button">CH 9–16</button>
+          <button class="btn-bank" data-bank="17-24" type="button">CH 17–24</button>
+          <button class="btn-bank" data-bank="25-32" type="button">CH 25–32</button>
+        </div>
+
+        <!-- Salvar Estado no Navegador -->
+        <div style="display: flex; align-items: center; gap: 6px; margin-left: 6px;">
+          <button class="btn-action btn-view-save" id="btnSaveView" type="button" title="Salvar a seleção atual como Minha Visualização Salva">
+            <span>💾</span> Salvar visão
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar-right">
+        <button class="btn-action btn-sim" id="btnToggleSim" type="button" title="Alternar simulação em tempo real da Yamaha 01V96">
+          <span id="simIcon">🎲</span> <span id="simStatusText">Simulação 01V96: OFF</span>
+        </button>
+        <button class="btn-action" id="btnAllZeroDb" type="button">
+          <span>⚡</span> Todos em 0.0 dB
+        </button>
+        <button class="btn-action" id="btnUnmuteAll" type="button">
+          <span>🔔</span> Desmutar Todos (ON)
+        </button>
+        <button class="btn-action btn-danger" id="btnMuteAll" type="button">
+          <span>🔇</span> Mutar Todos
+        </button>
+      </div>
+    </div>
+
     <!-- BARRA DE SELEÇÃO DE MIXAGEM (MASTER E AUX 1 A 8 / SENDS ON FADER) -->
     <div class="mix-selector-bar">
       <div class="mix-bar-left">
@@ -2635,77 +2723,6 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- BARRA DE CONTROLE: SELECT MULTIPLE E FILTROS -->
-    <div class="console-toolbar">
-      <div class="toolbar-left">
-        <span class="toolbar-label">Exibir Canais:</span>
-
-        <!-- SELECT MULTIPLE NATIVO -->
-        <div class="channel-select-wrap">
-          <select id="channelMultiSelect" multiple class="native-multi-select" title="Segure Ctrl / Cmd para múltiplos">
-            <!-- 32 options geradas dinamicamente via JS -->
-          </select>
-
-          <!-- Botão Dropdown Rápido com Popover -->
-          <button id="btnTogglePopover" class="btn-multiselect-dropdown" type="button">
-            <span id="selectedCountBadge">32 de 32 visíveis</span>
-            <span>▾</span>
-          </button>
-
-          <!-- Popover Interativo com Checkboxes -->
-          <div id="channelDropdownPopover" class="dropdown-popover">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <span style="font-size: 11px; font-weight: 700; color: #cbd5e1;">Selecionar Canais</span>
-              <span style="font-size: 10px; color: #64748b;">(Clique para alternar)</span>
-            </div>
-            <div class="popover-grid" id="popoverCheckboxGrid">
-              <!-- Gerado via JS -->
-            </div>
-            <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px;">
-              <button class="btn-action" id="btnPopoverAll" type="button">Todos</button>
-              <button class="btn-action" id="btnPopoverNone" type="button">Nenhum</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Atalhos rápidos de bancos -->
-        <div class="bank-buttons">
-          <button class="btn-bank active" data-bank="all" type="button">Todos (1-32)</button>
-          <button class="btn-bank" data-bank="1-16" type="button">CH 1–16</button>
-          <button class="btn-bank" data-bank="17-32" type="button">CH 17–32</button>
-          <button class="btn-bank" data-bank="1-8" type="button">CH 1–8</button>
-          <button class="btn-bank" data-bank="9-16" type="button">CH 9–16</button>
-          <button class="btn-bank" data-bank="17-24" type="button">CH 17–24</button>
-          <button class="btn-bank" data-bank="25-32" type="button">CH 25–32</button>
-        </div>
-
-        <!-- Recuperar / Salvar Estado no Navegador -->
-        <div style="display: flex; align-items: center; gap: 6px; margin-left: 6px;">
-          <button class="btn-action btn-view-restore" id="btnRestoreView" type="button" title="Recuperar a seleção de canais salva no navegador">
-            <span>↺</span> Recuperar Salvo
-          </button>
-          <button class="btn-action btn-view-save" id="btnSaveView" type="button" title="Salvar a seleção atual de canais no navegador">
-            <span>💾</span> Salvar Atual
-          </button>
-        </div>
-      </div>
-
-      <div class="toolbar-right">
-        <button class="btn-action btn-sim" id="btnToggleSim" type="button" title="Alternar simulação em tempo real da Yamaha 01V96">
-          <span id="simIcon">🎲</span> <span id="simStatusText">Simulação 01V96: OFF</span>
-        </button>
-        <button class="btn-action" id="btnAllZeroDb" type="button">
-          <span>⚡</span> Todos em 0.0 dB
-        </button>
-        <button class="btn-action" id="btnUnmuteAll" type="button">
-          <span>🔔</span> Desmutar Todos (ON)
-        </button>
-        <button class="btn-action btn-danger" id="btnMuteAll" type="button">
-          <span>🔇</span> Mutar Todos
-        </button>
       </div>
     </div>
 
@@ -4499,7 +4516,9 @@
     // ==========================================
     // CONTROLE DE VISIBILIDADE / SELECT MULTIPLE & STORAGE
     // ==========================================
-    const STORAGE_KEY = 'yamaha_01v96_visible_channels';
+    const STORAGE_KEY = 'yamaha_01v96_custom_view';
+    const DESKTOP_LEGACY_KEY = 'yamaha_01v96_visible_channels';
+    const MOBILE_LEGACY_KEY = '01v96_mobile_channels';
     const selectedCountBadge = document.getElementById('selectedCountBadge');
     const popover = document.getElementById('channelDropdownPopover');
     const btnTogglePopover = document.getElementById('btnTogglePopover');
@@ -4508,11 +4527,13 @@
     // Funções de Armazenamento Local
     function getSavedVisibleChannels() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = localStorage.getItem(STORAGE_KEY) ||
+                    localStorage.getItem(DESKTOP_LEGACY_KEY) ||
+                    localStorage.getItem(MOBILE_LEGACY_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed) && parsed.length >= 0) {
-            return parsed;
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.map(Number);
           }
         }
       } catch (err) {
@@ -4523,8 +4544,10 @@
 
     function saveVisibleChannels(indices) {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(indices));
-        showToast('Visualização salva no navegador! 💾');
+        const jsonStr = JSON.stringify(indices);
+        localStorage.setItem(STORAGE_KEY, jsonStr);
+        localStorage.setItem(DESKTOP_LEGACY_KEY, jsonStr);
+        showToast('Visualização salva no navegador! ⭐', '⭐');
       } catch (err) {
         console.error('Erro ao salvar no localStorage:', err);
       }
@@ -4553,47 +4576,11 @@
     }
 
     function isSameSelection(arrA, arrB) {
+      if (!arrA || !arrB) return false;
       if (arrA.length !== arrB.length) return false;
       const sortedA = [...arrA].sort((a, b) => a - b);
       const sortedB = [...arrB].sort((a, b) => a - b);
       return sortedA.every((val, idx) => val === sortedB[idx]);
-    }
-
-    // Modal de Confirmação para Mudança de Visualizações Padrão
-    function confirmChangePreset(targetName, onConfirm) {
-      const modal = document.getElementById('confirmModalOverlay');
-      const modalMsg = document.getElementById('confirmModalMessage');
-      const btnConfirm = document.getElementById('btnModalConfirm');
-      const btnCancel = document.getElementById('btnModalCancel');
-
-      modalMsg.innerHTML = `Você está prestes a mudar para a visualização padrão <strong>"${targetName}"</strong>.<br><br>Essa ação substituirá os canais visíveis na tela no momento.<br><br>Deseja realmente trocar?`;
-      btnConfirm.textContent = 'Sim, Trocar';
-      modal.classList.add('open');
-
-      function cleanup() {
-        modal.classList.remove('open');
-        btnConfirm.removeEventListener('click', handleConfirm);
-        btnCancel.removeEventListener('click', handleCancel);
-        document.removeEventListener('keydown', handleKey);
-      }
-
-      function handleConfirm() {
-        cleanup();
-        onConfirm();
-      }
-
-      function handleCancel() {
-        cleanup();
-      }
-
-      function handleKey(e) {
-        if (e.key === 'Escape') handleCancel();
-        if (e.key === 'Enter') handleConfirm();
-      }
-
-      btnConfirm.addEventListener('click', handleConfirm);
-      btnCancel.addEventListener('click', handleCancel);
-      document.addEventListener('keydown', handleKey);
     }
 
     function updateChannelsVisibility(selectedIndices) {
@@ -4661,33 +4648,17 @@
       }
     });
 
-    // Ações de "Todos" e "Nenhum" no Popover protegidas pelo alerta
+    // Ações de "Todos" e "Nenhum" no Popover
     document.getElementById('btnPopoverAll').addEventListener('click', () => {
       const all = Array.from({ length: TOTAL_CHANNELS }, (_, i) => i);
-      const current = getCurrentVisibleIndices();
-      if (isSameSelection(current, all)) return;
-
-      if (isStandardPreset(current)) {
-        updateChannelsVisibility(all);
-        updateBankButtonsActiveState(all);
-        return;
-      }
-
-      confirmChangePreset('Todos os Canais (1-32)', () => {
-        updateChannelsVisibility(all);
-        updateBankButtonsActiveState(all);
-      });
+      updateChannelsVisibility(all);
+      updateBankButtonsActiveState(all);
     });
 
     document.getElementById('btnPopoverNone').addEventListener('click', () => {
       const none = [];
-      const current = getCurrentVisibleIndices();
-      if (isSameSelection(current, none)) return;
-
-      confirmChangePreset('Nenhum Canal', () => {
-        updateChannelsVisibility(none);
-        updateBankButtonsActiveState(none);
-      });
+      updateChannelsVisibility(none);
+      updateBankButtonsActiveState(none);
     });
 
     // Botões Rápidos de Bancos
@@ -4708,6 +4679,7 @@
 
     function getBankLabel(bank) {
       switch (bank) {
+        case 'saved': return '⭐ Minha Visualização Salva';
         case '1-16': return 'CH 1–16';
         case '17-32': return 'CH 17–32';
         case '1-8': return 'CH 1–8';
@@ -4718,64 +4690,78 @@
       }
     }
 
-    function isStandardPreset(indices) {
-      return STANDARD_BANKS.some(bKey => isSameSelection(indices, getBankIndices(bKey)));
-    }
-
     function updateBankButtonsActiveState(selected) {
+      const saved = getSavedVisibleChannels();
+      const isSavedMatch = saved && isSameSelection(selected, saved);
+
       bankButtons.forEach(btn => {
         const bank = btn.dataset.bank;
-        const bIndices = getBankIndices(bank);
-        const isMatch = isSameSelection(selected, bIndices);
-        btn.classList.toggle('active', isMatch);
+        if (bank === 'saved') {
+          btn.classList.toggle('active', !!isSavedMatch);
+        } else {
+          const bIndices = getBankIndices(bank);
+          const isMatch = !isSavedMatch && isSameSelection(selected, bIndices);
+          btn.classList.toggle('active', isMatch);
+        }
       });
     }
 
     bankButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         const bank = btn.dataset.bank;
+        if (bank === 'saved') {
+          const saved = getSavedVisibleChannels();
+          if (!saved || saved.length === 0) {
+            showToast('Nenhuma visualização salva ainda! Selecione os canais e clique em "Salvar como Salvo".', '⚠️');
+            return;
+          }
+          updateChannelsVisibility(saved);
+          updateBankButtonsActiveState(saved);
+          showToast('Minha visualização salva ativa! ⭐', '⭐');
+          return;
+        }
+
         const targetIndices = getBankIndices(bank);
-        const currentIndices = getCurrentVisibleIndices();
-
-        // Se já está na mesma seleção, nada a fazer
-        if (isSameSelection(currentIndices, targetIndices)) {
-          return;
-        }
-
-        // Se a visualização atual já é um preset padrão (ex: trocar de página de canais na mesa),
-        // não precisa do diálogo de alerta, troca diretamente!
-        if (isStandardPreset(currentIndices)) {
-          updateChannelsVisibility(targetIndices);
-          updateBankButtonsActiveState(targetIndices);
-          return;
-        }
-
-        // Só alerta se o usuário estava com uma seleção customizada na tela
-        const bankLabel = getBankLabel(bank);
-        confirmChangePreset(bankLabel, () => {
-          updateChannelsVisibility(targetIndices);
-          updateBankButtonsActiveState(targetIndices);
-        });
+        updateChannelsVisibility(targetIndices);
+        updateBankButtonsActiveState(targetIndices);
       });
     });
 
-    // Botão para Salvar Manualmente a Seleção Atual
+    // Botão para Salvar Manualmente a Seleção Atual como Salvo
     document.getElementById('btnSaveView').addEventListener('click', () => {
       const current = getCurrentVisibleIndices();
+      if (current.length === 0) {
+        showToast('Selecione pelo menos um canal antes de salvar! ⚠️', '⚠️');
+        return;
+      }
+
+      // Proteção contra sobrescrever acidentalmente com um banco padrão completo
+      const matchingBank = STANDARD_BANKS.find(b => isSameSelection(current, getBankIndices(b)));
+      if (matchingBank) {
+        const bankName = getBankLabel(matchingBank);
+        if (!confirm(`Atenção: A seleção atual na tela é o banco padrão "${bankName}".\n\nDeseja realmente salvar este banco padrão como sua visualização salva pessoal?`)) {
+          return;
+        }
+      }
+
       saveVisibleChannels(current);
+      updateBankButtonsActiveState(current);
     });
 
-    // Botão para Recuperar o que foi Salvo
-    document.getElementById('btnRestoreView').addEventListener('click', () => {
-      const saved = getSavedVisibleChannels();
-      if (saved) {
-        updateChannelsVisibility(saved);
-        updateBankButtonsActiveState(saved);
-        showToast('Visualização salva recuperada! ↺', '↺');
-      } else {
-        showToast('Nenhuma visualização salva encontrada.', '⚠️');
-      }
-    });
+    // Suporte caso btnRestoreView exista no DOM
+    const btnRestoreViewLegacy = document.getElementById('btnRestoreView');
+    if (btnRestoreViewLegacy) {
+      btnRestoreViewLegacy.addEventListener('click', () => {
+        const saved = getSavedVisibleChannels();
+        if (saved) {
+          updateChannelsVisibility(saved);
+          updateBankButtonsActiveState(saved);
+          showToast('Visualização salva recuperada! ⭐', '⭐');
+        } else {
+          showToast('Nenhuma visualização salva encontrada.', '⚠️');
+        }
+      });
+    }
 
     // ==========================================
     // AÇÕES MESTRAS DA TOOLBAR (Mixagem Ativa)
