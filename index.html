@@ -381,6 +381,297 @@
       color: #bae6fd;
     }
 
+    /* BARRA DE MUTE GROUPS DA APLICAÇÃO (DIRETO NA BARRA PRINCIPAL) */
+    .mute-groups-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 10px;
+      border-left: 1px solid #283042;
+    }
+
+    .mute-bar-title {
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1.1px;
+      color: #fca5a5;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .mute-bar-title::before {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 6px #ef4444;
+    }
+
+    .mute-buttons-group {
+      display: inline-flex;
+      align-items: center;
+      background: #0a0c10;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid #2a181c;
+      gap: 3px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .btn-mute-group {
+      position: relative;
+      background: linear-gradient(180deg, #252229 0%, #19171d 100%);
+      border: 1px solid #38303e;
+      border-radius: 5px;
+      color: #cbd5e1;
+      padding: 4px 10px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      min-width: 66px;
+      max-width: 96px;
+      transition: all 0.12s ease-in-out;
+      outline: none;
+      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-mute-group:hover {
+      background: linear-gradient(180deg, #322b37 0%, #231e28 100%);
+      color: #ffffff;
+      border-color: #5c4b66;
+      transform: translateY(-1px);
+    }
+
+    .btn-mute-group:active {
+      transform: translateY(1px);
+    }
+
+    .btn-mute-group.is-empty {
+      opacity: 0.65;
+    }
+
+    .btn-mute-group .mg-led {
+      width: 14px;
+      height: 4px;
+      border-radius: 2px;
+      background: #231d24;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+      transition: all 0.15s ease;
+    }
+
+    .btn-mute-group .mg-label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 82px;
+    }
+
+    .btn-mute-group .mg-count {
+      font-size: 8px;
+      font-weight: 700;
+      color: #64748b;
+      margin-top: -1px;
+    }
+
+    /* MUTE GROUP ATIVO (MUTADO - Vermelho Intenso Iluminado) */
+    .btn-mute-group.is-muted {
+      background: radial-gradient(circle at 50% 30%, #ef4444 0%, #b91c1c 70%, #450a0a 100%);
+      color: #ffffff;
+      border-color: #f87171;
+      box-shadow:
+        0 0 14px rgba(239, 68, 68, 0.75),
+        inset 0 1px 2px rgba(255, 255, 255, 0.45);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+      opacity: 1;
+    }
+
+    .btn-mute-group.is-muted .mg-led {
+      background: #fef08a;
+      box-shadow: 0 0 8px #fef08a, 0 0 14px #ef4444;
+    }
+
+    .btn-mute-group.is-muted .mg-count {
+      color: #fecaca;
+    }
+
+    .btn-mute-group-cfg {
+      background: #1b202c;
+      border: 1px solid #333d52;
+      color: #fbbf24;
+      border-radius: 5px;
+      width: 30px;
+      height: 36px;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      margin-left: 2px;
+    }
+
+    .btn-mute-group-cfg:hover {
+      background: #273042;
+      border-color: #fbbf24;
+      box-shadow: 0 0 8px rgba(251, 191, 36, 0.35);
+    }
+
+    /* Badges de Mute Group em cada Channel Strip */
+    .ch-mg-badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2px;
+      min-height: 13px;
+      margin-top: 2px;
+      width: 66px;
+    }
+
+    .ch-mg-pill {
+      font-size: 8px;
+      font-weight: 800;
+      padding: 0 4px;
+      line-height: 12px;
+      border-radius: 3px;
+      background: #1b1f2a;
+      color: #94a3b8;
+      border: 1px solid #2e3646;
+      letter-spacing: 0.3px;
+    }
+
+    .ch-mg-pill.is-muted {
+      background: #991b1b;
+      color: #ffffff;
+      border-color: #f87171;
+      box-shadow: 0 0 6px rgba(239, 68, 68, 0.7);
+    }
+
+    /* Modal de Configuração dos Mute Groups (Exclusivo Admin) */
+    .mg-modal-card {
+      background: #141822;
+      border: 1px solid #2e374d;
+      border-radius: 12px;
+      width: 680px;
+      max-width: 94vw;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
+      overflow: hidden;
+    }
+
+    .mg-tabs-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .btn-mg-tab {
+      background: #181c26;
+      border: 1px solid #2b3346;
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-mg-tab:hover {
+      background: #212736;
+      color: #f1f5f9;
+    }
+
+    .btn-mg-tab.active {
+      background: rgba(239, 68, 68, 0.16);
+      border-color: #ef4444;
+      color: #fca5a5;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
+    }
+
+    .btn-mg-tab .mg-tab-sub {
+      font-size: 10px;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .btn-mg-tab.active .mg-tab-sub {
+      color: #fecaca;
+    }
+
+    .mg-channels-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+      margin: 10px 0 14px 0;
+    }
+
+    .btn-mg-ch {
+      background: #161a24;
+      border: 1px solid #283044;
+      border-radius: 6px;
+      padding: 6px 4px;
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      transition: all 0.12s ease;
+    }
+
+    .btn-mg-ch:hover {
+      border-color: #475569;
+      color: #f1f5f9;
+    }
+
+    .btn-mg-ch.selected {
+      background: rgba(239, 68, 68, 0.22);
+      border-color: #ef4444;
+      color: #ffffff;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.35);
+    }
+
+    .btn-mg-ch .mg-ch-num {
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .btn-mg-ch .mg-ch-name {
+      font-size: 9px;
+      color: #64748b;
+      max-width: 68px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-mg-ch.selected .mg-ch-name {
+      color: #fecaca;
+    }
+
+    .btn-mg-ch .mg-ch-groups {
+      font-size: 8px;
+      font-weight: 800;
+      color: #fbbf24;
+      min-height: 10px;
+    }
+
     /* Lado Direito da Barra de Mix */
     .mix-bar-right {
       display: flex;
@@ -3109,6 +3400,36 @@
             <span class="mix-label">AUX 8</span>
           </button>
         </div>
+
+        <!-- 4 BOTÕES DE MUTE GROUPS DA APLICAÇÃO (CONFIGURÁVEIS DIRETO NA BARRA PRINCIPAL) -->
+        <div class="mute-groups-bar" id="muteGroupsBar">
+          <span class="mute-bar-title" title="Mute Groups gerenciados pela aplicação">MUTE:</span>
+          <div class="mute-buttons-group" id="muteButtonsGroup">
+            <button type="button" class="btn-mute-group is-empty" data-mg="1" id="btnMuteGroup_1" title="Mute Group 1 (Clique para ativar/desativar mute dos canais do grupo)">
+              <span class="mg-led"></span>
+              <span class="mg-label" id="mgLabel_1">MUTE 1</span>
+              <span class="mg-count" id="mgCount_1">0 ch</span>
+            </button>
+            <button type="button" class="btn-mute-group is-empty" data-mg="2" id="btnMuteGroup_2" title="Mute Group 2 (Clique para ativar/desativar mute dos canais do grupo)">
+              <span class="mg-led"></span>
+              <span class="mg-label" id="mgLabel_2">MUTE 2</span>
+              <span class="mg-count" id="mgCount_2">0 ch</span>
+            </button>
+            <button type="button" class="btn-mute-group is-empty" data-mg="3" id="btnMuteGroup_3" title="Mute Group 3 (Clique para ativar/desativar mute dos canais do grupo)">
+              <span class="mg-led"></span>
+              <span class="mg-label" id="mgLabel_3">MUTE 3</span>
+              <span class="mg-count" id="mgCount_3">0 ch</span>
+            </button>
+            <button type="button" class="btn-mute-group is-empty" data-mg="4" id="btnMuteGroup_4" title="Mute Group 4 (Clique para ativar/desativar mute dos canais do grupo)">
+              <span class="mg-led"></span>
+              <span class="mg-label" id="mgLabel_4">MUTE 4</span>
+              <span class="mg-count" id="mgCount_4">0 ch</span>
+            </button>
+            <button type="button" class="btn-mute-group-cfg" id="btnOpenMuteGroupConfig" title="Configurar Canais dos Mute Groups 1 a 4 (Exclusivo Admin)" style="display: none;">
+              ⚙️
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="mix-bar-right">
@@ -3521,6 +3842,73 @@
       <div class="modal-actions" style="display: flex; justify-content: flex-end; gap: 8px;">
         <button type="button" class="btn-scene-action" id="btnCancelRecall">Cancelar</button>
         <button type="button" class="btn-scene-action danger" id="btnConfirmRecall">Sim, Carregar na Mesa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIGURAÇÃO DE MUTE GROUPS (DIRETO DA BARRA PRINCIPAL — EXCLUSIVO ADMIN) -->
+  <div id="muteGroupConfigModalOverlay" class="modal-overlay">
+    <div class="mg-modal-card">
+      <div class="admin-modal-header">
+        <div class="admin-header-title">
+          <span class="admin-header-icon">🔇</span>
+          <div>
+            <h3>Configurar Mute Groups (1 a 4)</h3>
+            <p class="admin-header-sub">Um canal pode pertencer a vários grupos e só desmuta quando nenhum grupo ativo o contiver</p>
+          </div>
+        </div>
+        <button type="button" class="btn-admin-close" id="btnCloseMuteGroupConfig" title="Fechar (Esc)">✕</button>
+      </div>
+
+      <div class="admin-modal-body" style="padding: 16px;">
+        <!-- Seleção entre os 4 Mute Groups fixos -->
+        <div class="mg-tabs-row" id="mgConfigTabs">
+          <button type="button" class="btn-mg-tab active" data-mg="1" id="mgTab_1">
+            <span id="mgTabName_1">MUTE 1</span>
+            <span class="mg-tab-sub" id="mgTabCount_1">0 canais</span>
+          </button>
+          <button type="button" class="btn-mg-tab" data-mg="2" id="mgTab_2">
+            <span id="mgTabName_2">MUTE 2</span>
+            <span class="mg-tab-sub" id="mgTabCount_2">0 canais</span>
+          </button>
+          <button type="button" class="btn-mg-tab" data-mg="3" id="mgTab_3">
+            <span id="mgTabName_3">MUTE 3</span>
+            <span class="mg-tab-sub" id="mgTabCount_3">0 canais</span>
+          </button>
+          <button type="button" class="btn-mg-tab" data-mg="4" id="mgTab_4">
+            <span id="mgTabName_4">MUTE 4</span>
+            <span class="mg-tab-sub" id="mgTabCount_4">0 canais</span>
+          </button>
+        </div>
+
+        <!-- Nome e Ações Rápidas do Grupo Selecionado -->
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: #10131b; padding: 12px; border-radius: 8px; border: 1px solid #242c3d;">
+          <div style="flex: 1; min-width: 200px;">
+            <label for="mgConfigNameInput" style="display: block; font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 4px;">
+              Nome do Mute Group <span id="mgConfigActiveIdLabel">#1</span>:
+            </label>
+            <input type="text" id="mgConfigNameInput" maxlength="24" placeholder="Ex: MUTE 1, Banda, Vozes, Púlpito..." style="width: 100%; background: #0a0c10; border: 1px solid #333d52; color: #f8fafc; padding: 7px 10px; border-radius: 6px; font-size: 13px; font-weight: 700;">
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button type="button" class="btn-scene-action sm secondary" id="btnMgSelectAll">Marcar Todos</button>
+            <button type="button" class="btn-scene-action sm" id="btnMgClearAll">Limpar Grupo</button>
+          </div>
+        </div>
+
+        <!-- Grade de 32 Canais -->
+        <div style="margin-top: 10px; font-size: 11px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center;">
+          <span>Clique nos canais (1–32) para incluí-los ou removê-los deste Mute Group:</span>
+          <span id="mgConfigSelectedSummary" style="color: #fca5a5; font-weight: 700;">0 canais selecionados</span>
+        </div>
+
+        <div class="mg-channels-grid" id="mgConfigChannelsGrid">
+          <!-- 32 botões gerados via JS -->
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; padding-top: 10px; border-top: 1px solid #232a3b;">
+          <button type="button" class="btn-scene-action" id="btnCancelMuteGroupConfig">Fechar</button>
+          <button type="button" class="btn-scene-action primary" id="btnSaveMuteGroupConfig">💾 Salvar Mute Group</button>
+        </div>
       </div>
     </div>
   </div>
@@ -4173,6 +4561,10 @@
           if (btnSyncMixer) {
             btnSyncMixer.style.display = isAdmin ? 'inline-flex' : 'none';
           }
+          const btnOpenMgCfg = document.getElementById('btnOpenMuteGroupConfig');
+          if (btnOpenMgCfg) {
+            btnOpenMgCfg.style.display = isAdmin ? 'inline-flex' : 'none';
+          }
 
           if (currentUserRole === 'BASIC') {
             document.body.classList.add('role-basic');
@@ -4272,7 +4664,16 @@
         }
 
         if (data.type === 'init') {
+          if (Array.isArray(data.mute_groups) && typeof applyMuteGroupsFromServer === 'function') {
+            applyMuteGroupsFromServer(data.mute_groups);
+          }
           syncFullStateFromBackend();
+        }
+
+        if (data.type === 'mute_groups' && Array.isArray(data.mute_groups)) {
+          if (typeof applyMuteGroupsFromServer === 'function') {
+            applyMuteGroupsFromServer(data.mute_groups);
+          }
         }
 
         if (data.type === 'sync_status') {
@@ -4531,6 +4932,7 @@
           <span class="ch-badge" id="chBadge_${ch.index}" title="${ch.name}">${ch.name}</span>
           <div class="ch-mix-dest dest-master" id="chMixDest_${ch.index}">MASTER</div>
           <button type="button" class="btn-pre-post" id="btnPrePost_${ch.index}" data-ch="${ch.index}" title="Alternar Pré/Pós Fader (Post / Pre)">POST</button>
+          <div class="ch-mg-badges" id="chMgBadges_${ch.index}"></div>
         </div>
 
         <div class="ch-mute-wrap">
@@ -6822,6 +7224,10 @@
           updateOutputSelBadges();
         }
 
+        if (Array.isArray(json.mute_groups) && typeof applyMuteGroupsFromServer === 'function') {
+          applyMuteGroupsFromServer(json.mute_groups);
+        }
+
         saveMixDataDebounced();
       } catch (err) {
         console.error('Falha ao sincronizar estado com o servidor:', err);
@@ -7773,10 +8179,300 @@
       });
     }
 
+    // ==========================================
+    // MUTE GROUPS DA APLICAÇÃO (BARRA PRINCIPAL + CONFIGURAÇÃO ADMIN)
+    // ==========================================
+    let muteGroupsState = [
+      { id: 1, name: 'MUTE 1', channels: [], muted: false },
+      { id: 2, name: 'MUTE 2', channels: [], muted: false },
+      { id: 3, name: 'MUTE 3', channels: [], muted: false },
+      { id: 4, name: 'MUTE 4', channels: [], muted: false }
+    ];
+
+    const muteGroupConfigModalOverlay = document.getElementById('muteGroupConfigModalOverlay');
+    const btnOpenMuteGroupConfig = document.getElementById('btnOpenMuteGroupConfig');
+    const btnCloseMuteGroupConfig = document.getElementById('btnCloseMuteGroupConfig');
+    const btnCancelMuteGroupConfig = document.getElementById('btnCancelMuteGroupConfig');
+    const btnSaveMuteGroupConfig = document.getElementById('btnSaveMuteGroupConfig');
+    const mgConfigNameInput = document.getElementById('mgConfigNameInput');
+    const mgConfigActiveIdLabel = document.getElementById('mgConfigActiveIdLabel');
+    const mgConfigSelectedSummary = document.getElementById('mgConfigSelectedSummary');
+    const mgConfigChannelsGrid = document.getElementById('mgConfigChannelsGrid');
+    const btnMgSelectAll = document.getElementById('btnMgSelectAll');
+    const btnMgClearAll = document.getElementById('btnMgClearAll');
+
+    let mgEditingGroupId = 1;
+    let mgDraftName = 'MUTE 1';
+    let mgDraftChannelsSet = new Set();
+
+    function applyMuteGroupsFromServer(groups) {
+      if (!Array.isArray(groups)) return;
+      groups.forEach(g => {
+        if (g && g.id >= 1 && g.id <= 4) {
+          muteGroupsState[g.id - 1] = {
+            id: g.id,
+            name: g.name || `MUTE ${g.id}`,
+            channels: Array.isArray(g.channels) ? g.channels.slice() : [],
+            muted: Boolean(g.muted)
+          };
+        }
+      });
+      renderMuteGroupsBarUI();
+      renderChannelStripMuteGroupBadges();
+      if (muteGroupConfigModalOverlay && muteGroupConfigModalOverlay.classList.contains('open')) {
+        renderMgConfigTabsUI();
+      }
+    }
+
+    function renderMuteGroupsBarUI() {
+      for (let i = 0; i < 4; i++) {
+        const g = muteGroupsState[i];
+        const btn = document.getElementById(`btnMuteGroup_${g.id}`);
+        const lbl = document.getElementById(`mgLabel_${g.id}`);
+        const cnt = document.getElementById(`mgCount_${g.id}`);
+        if (!btn) continue;
+
+        const chCount = (g.channels || []).length;
+        if (lbl) lbl.textContent = g.name || `MUTE ${g.id}`;
+        if (cnt) {
+          cnt.textContent = `${chCount}`;
+        }
+        btn.classList.toggle('is-muted', Boolean(g.muted));
+        btn.classList.toggle('is-empty', chCount === 0 && !g.muted);
+
+        const chListText = chCount > 0
+          ? g.channels.map(c => `CH ${String(c).padStart(2, '0')}`).join(', ')
+          : 'Nenhum canal cadastrado';
+        btn.title = `${g.name} (${g.muted ? 'ATIVO / MUTADO' : 'Inativo'}) — Canais: ${chListText}`;
+      }
+    }
+
+    function renderChannelStripMuteGroupBadges() {
+      for (let chIdx = 0; chIdx < TOTAL_CHANNELS; chIdx++) {
+        const chNum = chIdx + 1;
+        const container = document.getElementById(`chMgBadges_${chIdx}`);
+        if (!container) continue;
+
+        const memberGroups = muteGroupsState.filter(g => Array.isArray(g.channels) && g.channels.includes(chNum));
+        if (memberGroups.length === 0) {
+          container.innerHTML = '';
+          continue;
+        }
+
+        container.innerHTML = memberGroups.map(g => `
+          <span class="ch-mg-pill ${g.muted ? 'is-muted' : ''}" title="${escapeHTML(g.name)} (${g.muted ? 'MUTADO' : 'Inativo'})">M${g.id}</span>
+        `).join('');
+      }
+    }
+
+    async function toggleMuteGroupAction(groupId) {
+      const g = muteGroupsState[groupId - 1];
+      if (!g) return;
+
+      if ((!g.channels || g.channels.length === 0) && !g.muted) {
+        if (currentUserRole === 'ADMIN') {
+          showToast(`${g.name} ainda não possui canais. Abrindo configuração... ⚙️`, '🔇');
+          openMuteGroupConfigModal(groupId);
+        } else {
+          showToast(`${g.name} não possui canais cadastrados pelo administrador.`, '🔇');
+        }
+        return;
+      }
+
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          action: 'toggle_mute_group',
+          mute_group_id: groupId
+        }));
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/mute-groups/${groupId}/toggle`, { method: 'POST' });
+        const data = await res.json();
+        if (res.ok && data.success && Array.isArray(data.groups)) {
+          applyMuteGroupsFromServer(data.groups);
+          syncFullStateFromBackend();
+        } else if (data.error) {
+          showToast(data.error, '⚠️');
+        }
+      } catch (err) {
+        console.error('Erro ao acionar Mute Group:', err);
+      }
+    }
+
+    for (let id = 1; id <= 4; id++) {
+      const btn = document.getElementById(`btnMuteGroup_${id}`);
+      if (btn) {
+        btn.addEventListener('click', () => {
+          toggleMuteGroupAction(id);
+        });
+        // Clique direito no botão abre a configuração daquele grupo se for ADMIN
+        btn.addEventListener('contextmenu', (e) => {
+          if (currentUserRole === 'ADMIN') {
+            e.preventDefault();
+            openMuteGroupConfigModal(id);
+          }
+        });
+      }
+    }
+
+    function renderMgConfigTabsUI() {
+      for (let id = 1; id <= 4; id++) {
+        const g = muteGroupsState[id - 1];
+        const tabBtn = document.getElementById(`mgTab_${id}`);
+        const tabName = document.getElementById(`mgTabName_${id}`);
+        const tabCount = document.getElementById(`mgTabCount_${id}`);
+        if (tabBtn) tabBtn.classList.toggle('active', id === mgEditingGroupId);
+        if (tabName && g) tabName.textContent = g.name || `MUTE ${id}`;
+        if (tabCount && g) tabCount.textContent = `${(g.channels || []).length} canais`;
+      }
+    }
+
+    function loadGroupIntoMgEditor(groupId) {
+      mgEditingGroupId = groupId;
+      const g = muteGroupsState[groupId - 1] || { id: groupId, name: `MUTE ${groupId}`, channels: [] };
+      mgDraftName = g.name || `MUTE ${groupId}`;
+      mgDraftChannelsSet = new Set(g.channels || []);
+
+      if (mgConfigNameInput) mgConfigNameInput.value = mgDraftName;
+      if (mgConfigActiveIdLabel) mgConfigActiveIdLabel.textContent = `#${groupId}`;
+      renderMgConfigTabsUI();
+      renderMgConfigChannelsGrid();
+    }
+
+    function renderMgConfigChannelsGrid() {
+      if (!mgConfigChannelsGrid) return;
+      mgConfigChannelsGrid.innerHTML = '';
+
+      for (let ch = 1; ch <= 32; ch++) {
+        const chIdx = ch - 1;
+        const isSelected = mgDraftChannelsSet.has(ch);
+        const chName = (channelsState[chIdx] && channelsState[chIdx].name)
+          ? channelsState[chIdx].name
+          : `CH ${String(ch).padStart(2, '0')}`;
+
+        // Lista outros grupos aos quais este canal também pertence
+        const otherGroups = [];
+        for (let gId = 1; gId <= 4; gId++) {
+          if (gId === mgEditingGroupId) {
+            if (isSelected) otherGroups.push(`M${gId}`);
+          } else {
+            const grp = muteGroupsState[gId - 1];
+            if (grp && Array.isArray(grp.channels) && grp.channels.includes(ch)) {
+              otherGroups.push(`M${gId}`);
+            }
+          }
+        }
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-mg-ch' + (isSelected ? ' selected' : '');
+        btn.innerHTML = `
+          <span class="mg-ch-num">CH ${String(ch).padStart(2, '0')}</span>
+          <span class="mg-ch-name" title="${escapeHTML(chName)}">${escapeHTML(chName)}</span>
+          <span class="mg-ch-groups">${otherGroups.join(' · ')}</span>
+        `;
+        btn.addEventListener('click', () => {
+          if (mgDraftChannelsSet.has(ch)) {
+            mgDraftChannelsSet.delete(ch);
+          } else {
+            mgDraftChannelsSet.add(ch);
+          }
+          renderMgConfigChannelsGrid();
+        });
+        mgConfigChannelsGrid.appendChild(btn);
+      }
+
+      if (mgConfigSelectedSummary) {
+        mgConfigSelectedSummary.textContent = `${mgDraftChannelsSet.size} canal(is) selecionado(s)`;
+      }
+    }
+
+    function openMuteGroupConfigModal(initialGroupId = 1) {
+      if (currentUserRole !== 'ADMIN' || !muteGroupConfigModalOverlay) return;
+      loadGroupIntoMgEditor(initialGroupId);
+      muteGroupConfigModalOverlay.classList.add('open');
+    }
+
+    function closeMuteGroupConfigModal() {
+      if (muteGroupConfigModalOverlay) {
+        muteGroupConfigModalOverlay.classList.remove('open');
+      }
+    }
+
+    if (btnOpenMuteGroupConfig) {
+      btnOpenMuteGroupConfig.addEventListener('click', () => openMuteGroupConfigModal(1));
+    }
+    if (btnCloseMuteGroupConfig) {
+      btnCloseMuteGroupConfig.addEventListener('click', closeMuteGroupConfigModal);
+    }
+    if (btnCancelMuteGroupConfig) {
+      btnCancelMuteGroupConfig.addEventListener('click', closeMuteGroupConfigModal);
+    }
+    if (muteGroupConfigModalOverlay) {
+      muteGroupConfigModalOverlay.addEventListener('click', (e) => {
+        if (e.target === muteGroupConfigModalOverlay) closeMuteGroupConfigModal();
+      });
+    }
+
+    for (let id = 1; id <= 4; id++) {
+      const tabBtn = document.getElementById(`mgTab_${id}`);
+      if (tabBtn) {
+        tabBtn.addEventListener('click', () => loadGroupIntoMgEditor(id));
+      }
+    }
+
+    if (btnMgSelectAll) {
+      btnMgSelectAll.addEventListener('click', () => {
+        for (let ch = 1; ch <= 32; ch++) mgDraftChannelsSet.add(ch);
+        renderMgConfigChannelsGrid();
+      });
+    }
+    if (btnMgClearAll) {
+      btnMgClearAll.addEventListener('click', () => {
+        mgDraftChannelsSet.clear();
+        renderMgConfigChannelsGrid();
+      });
+    }
+
+    if (btnSaveMuteGroupConfig) {
+      btnSaveMuteGroupConfig.addEventListener('click', async () => {
+        const name = (mgConfigNameInput ? mgConfigNameInput.value : '').trim() || `MUTE ${mgEditingGroupId}`;
+        const channels = Array.from(mgDraftChannelsSet).sort((a, b) => a - b);
+
+        btnSaveMuteGroupConfig.disabled = true;
+        btnSaveMuteGroupConfig.textContent = 'Salvando...';
+        try {
+          const res = await fetch(`/api/mute-groups/${mgEditingGroupId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, channels })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            if (Array.isArray(data.groups)) {
+              applyMuteGroupsFromServer(data.groups);
+            }
+            showToast(data.message || `Mute Group '${name}' salvo! 🔇`, '🔇');
+          } else {
+            alert(data.error || 'Erro ao salvar Mute Group.');
+          }
+        } catch (err) {
+          alert('Falha de comunicação ao salvar Mute Group.');
+        } finally {
+          btnSaveMuteGroupConfig.disabled = false;
+          btnSaveMuteGroupConfig.textContent = '💾 Salvar Mute Group';
+        }
+      });
+    }
+
     // Tecla ESC para fechar modais de administração e cenas
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        if (confirmRecallModal && confirmRecallModal.classList.contains('open')) {
+        if (muteGroupConfigModalOverlay && muteGroupConfigModalOverlay.classList.contains('open')) {
+          closeMuteGroupConfigModal();
+        } else if (confirmRecallModal && confirmRecallModal.classList.contains('open')) {
           closeConfirmRecallModal();
         } else if (adminModalOverlay && adminModalOverlay.classList.contains('open')) {
           closeAdminModal();

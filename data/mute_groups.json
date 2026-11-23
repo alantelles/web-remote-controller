@@ -1,0 +1,40 @@
+[
+  {
+    "id": 1,
+    "name": "Bateria",
+    "channels": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "muted": false,
+    "updated_at": "2026-11-23T14:35:14.03411217-03:00"
+  },
+  {
+    "id": 2,
+    "name": "Banda",
+    "channels": [
+      7,
+      9,
+      10
+    ],
+    "muted": false,
+    "updated_at": "2026-11-23T14:36:33.181055278-03:00"
+  },
+  {
+    "id": 3,
+    "name": "MUTE 3",
+    "channels": [],
+    "muted": false,
+    "updated_at": "2026-11-23T14:20:34.509902321-03:00"
+  },
+  {
+    "id": 4,
+    "name": "MUTE 4",
+    "channels": [],
+    "muted": false,
+    "updated_at": "2026-11-23T14:20:34.509902321-03:00"
+  }
+]

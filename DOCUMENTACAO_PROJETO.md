@@ -120,6 +120,19 @@ O **Web Remote Controller** é uma solução moderna e leve para controle remoto
   * Controle circular interativo em Canvas (`touch-action: none`) com 3 pólos defasados em $120^\circ$ (**EU**, **VOZES**, **OUTROS**).
   * **Cálculo Equal Power ($w_{\text{eu}}^2 + w_{\text{vozes}}^2 + w_{\text{outros}}^2 = 1$):** Atua como multiplicador relativo sobre os `BaseLevels` ajustados pelo Admin naquele Auxiliar, emitindo os novos níveis de envio (`0x23`) em tempo real via WebSocket e barramento MIDI com throttling de 20 ms.
 
+### Etapa 11: Mute Groups da Aplicação (Multi-Grupo com Proteção de Interseção)
+* **Gerenciamento Independente na Aplicação (`mute_groups.go` & `data/mute_groups.json`):**
+  * 4 Mute Groups fixos (`MUTE 1` a `MUTE 4`) definidos e persistidos pela própria aplicação, atuando diretamente sobre o parâmetro `ON/MUTE` (`0x1A`) dos canais de entrada (`1` a `32`) sem depender dos mute groups internos do hardware.
+* **Lógica de Interseção de Grupos (Multi-Grupo Seguro):**
+  * Um canal pode pertencer a múltiplos Mute Groups simultaneamente.
+  * **Ativar Mute Group:** Muta imediatamente (`On = 0`) todos os canais cadastrados no grupo.
+  * **Desativar Mute Group:** Só desmuta (`On = 1`) os canais do grupo que **não** pertençam a nenhum outro Mute Group que continue ativo (mutado).
+  * **Override Manual Permitido:** O operador pode desmutar individualmente um canal na faixa do console mesmo com o Mute Group ativo.
+* **Permissões (RBAC) e Interface (Desktop e Mobile):**
+  * **Acionamento (Mutar/Desmutar Grupo):** Disponível direto na barra principal do console (Desktop e Mobile) para `ADMIN`, `OPERATOR` e `BASIC`.
+  * **Configuração (Nome e Seleção de Canais 1–32):** Exclusiva para `ADMIN` através do botão `⚙️` ao lado dos Mute Groups na barra principal (ou clique direito no grupo no Desktop).
+  * **Badges nos Canais (`M1`..`M4`):** Cada faixa de canal exibe quais Mute Groups integra, acendendo em vermelho quando o respectivo grupo está mutado.
+
 ---
 
 ## 3. Em que Ponto Estamos Hoje (Status Atual)

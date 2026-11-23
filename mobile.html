@@ -291,6 +291,135 @@
       box-shadow: 0 0 8px rgba(2, 132, 199, 0.4);
     }
 
+    /* Linha de Mute Groups na Barra Principal Mobile (acima dos Auxiliares) */
+    .mobile-mg-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin: 2px 0;
+      padding: 6px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .mobile-mg-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mobile-mg-title {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #fca5a5;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .mobile-mg-title::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 5px #ef4444;
+    }
+
+    .btn-mobile-mg-cfg {
+      background: #1b202c;
+      border: 1px solid #333d52;
+      color: #fbbf24;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .mobile-mg-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .btn-mobile-mg {
+      height: 38px;
+      background: #1a171e;
+      border: 1px solid #33293a;
+      border-radius: 6px;
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      cursor: pointer;
+      padding: 2px 4px;
+      transition: all 0.12s ease;
+    }
+
+    .btn-mobile-mg.is-empty {
+      opacity: 0.65;
+    }
+
+    .btn-mobile-mg .mg-m-name {
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-mobile-mg .mg-m-sub {
+      font-size: 9px;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .btn-mobile-mg.is-muted {
+      background: linear-gradient(180deg, #dc2626 0%, #7f1d1d 100%);
+      border-color: #f87171;
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+      opacity: 1;
+    }
+
+    .btn-mobile-mg.is-muted .mg-m-sub {
+      color: #fecaca;
+    }
+
+    /* Badges de Mute Group nos cartões de canal Mobile */
+    .mobile-ch-mg-badges {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      margin-left: 2px;
+    }
+
+    .mobile-ch-mg-pill {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 4px;
+      border-radius: 4px;
+      background: #1b1f2a;
+      color: #94a3b8;
+      border: 1px solid #2e3646;
+    }
+
+    .mobile-ch-mg-pill.is-muted {
+      background: #991b1b;
+      color: #ffffff;
+      border-color: #f87171;
+      box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+    }
+
     /* ==========================================
        BLOCO: NAVEGAÇÃO E FILTROS DE CANAIS (COLAPSÁVEL)
        ========================================== */
@@ -2012,7 +2141,33 @@
       </button>
     </div>
 
-    <!-- Linha 2: Aux 1 a 4 -->
+    <!-- Linha 2: Mute Groups 1 a 4 (Acima dos Auxiliares) -->
+    <div class="mobile-mg-bar" id="mobileMuteGroupsBar">
+      <div class="mobile-mg-header">
+        <span class="mobile-mg-title">Mute Groups</span>
+        <button class="btn-mobile-mg-cfg" id="btnMobileOpenMgConfig" type="button">⚙️ Configurar</button>
+      </div>
+      <div class="mobile-mg-grid">
+        <button class="btn-mobile-mg is-empty" data-mg="1" id="mobileBtnMg_1" type="button">
+          <span class="mg-m-name" id="mobileMgName_1">MUTE 1</span>
+          <span class="mg-m-sub" id="mobileMgSub_1">0 ch</span>
+        </button>
+        <button class="btn-mobile-mg is-empty" data-mg="2" id="mobileBtnMg_2" type="button">
+          <span class="mg-m-name" id="mobileMgName_2">MUTE 2</span>
+          <span class="mg-m-sub" id="mobileMgSub_2">0 ch</span>
+        </button>
+        <button class="btn-mobile-mg is-empty" data-mg="3" id="mobileBtnMg_3" type="button">
+          <span class="mg-m-name" id="mobileMgName_3">MUTE 3</span>
+          <span class="mg-m-sub" id="mobileMgSub_3">0 ch</span>
+        </button>
+        <button class="btn-mobile-mg is-empty" data-mg="4" id="mobileBtnMg_4" type="button">
+          <span class="mg-m-name" id="mobileMgName_4">MUTE 4</span>
+          <span class="mg-m-sub" id="mobileMgSub_4">0 ch</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Linha 3: Aux 1 a 4 -->
     <div class="outputs-aux-grid">
       <button class="btn-out btn-out-aux" data-mix="AUX1" type="button">AUX 1</button>
       <button class="btn-out btn-out-aux" data-mix="AUX2" type="button">AUX 2</button>
@@ -2020,7 +2175,7 @@
       <button class="btn-out btn-out-aux" data-mix="AUX4" type="button">AUX 4</button>
     </div>
 
-    <!-- Linha 3: Aux 5 a 8 -->
+    <!-- Linha 4: Aux 5 a 8 -->
     <div class="outputs-aux-grid">
       <button class="btn-out btn-out-aux" data-mix="AUX5" type="button">AUX 5</button>
       <button class="btn-out btn-out-aux" data-mix="AUX6" type="button">AUX 6</button>
@@ -2028,6 +2183,46 @@
       <button class="btn-out btn-out-aux" data-mix="AUX8" type="button">AUX 8</button>
     </div>
   </section>
+
+  <!-- ==========================================
+       MODAL DE CONFIGURAÇÃO DE MUTE GROUPS (MOBILE — EXCLUSIVO ADMIN)
+       ========================================== -->
+  <div class="modal-backdrop" id="mobileMuteGroupsModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <span>🔇 Configurar Mute Groups (1 a 4)</span>
+        <button id="btnCloseMobileMgModal" type="button">✕</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="mobile-mg-grid" id="mobileMgModalTabs">
+          <button class="btn-nav active" data-mg-tab="1" id="mobileMgTab_1" type="button">MUTE 1</button>
+          <button class="btn-nav" data-mg-tab="2" id="mobileMgTab_2" type="button">MUTE 2</button>
+          <button class="btn-nav" data-mg-tab="3" id="mobileMgTab_3" type="button">MUTE 3</button>
+          <button class="btn-nav" data-mg-tab="4" id="mobileMgTab_4" type="button">MUTE 4</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <label for="mobileMgNameInput" style="font-size: 11px; color: var(--text-dim); font-weight: 700;">
+            Nome do Grupo <span id="mobileMgActiveIdBadge">#1</span>:
+          </label>
+          <input type="text" id="mobileMgNameInput" maxlength="24" placeholder="Ex: MUTE 1, Banda, Vozes..." style="background: #0e1118; border: 1px solid #334155; border-radius: 6px; padding: 8px 10px; color: #f8fafc; font-size: 13px; font-weight: 700;">
+        </div>
+        <div style="font-size: 11px; color: var(--text-dim); display: flex; justify-content: space-between;">
+          <span>Canais do grupo (um canal pode estar em vários):</span>
+          <span id="mobileMgSelectedCount" style="color: #fca5a5; font-weight: 700;">0 ch</span>
+        </div>
+        <div class="channels-checkbox-grid" id="mobileMgCheckboxGrid">
+          <!-- Gerado via JS (CH 1 a 32) -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-action" id="btnMobileMgAll" type="button">Marcar Todos</button>
+        <button class="btn-modal-action" id="btnMobileMgClear" type="button">Limpar Grupo</button>
+        <button class="btn-modal-action btn-modal-save modal-footer-save" id="btnMobileMgSave" type="button">
+          💾 Salvar Mute Group
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ==========================================
        MODAL DE SELEÇÃO DE CANAIS VISÍVEIS
@@ -3110,7 +3305,17 @@
             if (msg.simulation_running !== undefined) {
               updateSimButton(msg.simulation_running);
             }
+            if (Array.isArray(msg.mute_groups) && typeof applyMobileMuteGroups === 'function') {
+              applyMobileMuteGroups(msg.mute_groups);
+            }
             syncMobileStateFromBackend();
+            return;
+          }
+
+          if (msg.type === 'mute_groups' && Array.isArray(msg.mute_groups)) {
+            if (typeof applyMobileMuteGroups === 'function') {
+              applyMobileMuteGroups(msg.mute_groups);
+            }
             return;
           }
 
@@ -3283,6 +3488,10 @@
         }
         updateMasterFaderCard();
         updateMasterSelGlow();
+
+        if (Array.isArray(json.mute_groups) && typeof applyMobileMuteGroups === 'function') {
+          applyMobileMuteGroups(json.mute_groups);
+        }
 
         if (isEqModalOpen) {
           if (currentRackTab === 'eq') {
@@ -3552,7 +3761,8 @@
           <div class="card-row-top">
             <div class="channel-name-tag">
               <span class="channel-num-badge">CH ${chNumStr}</span>
-              <span>Canal ${ch + 1}</span>
+              <span class="channel-label">Canal ${ch + 1}</span>
+              <span class="mobile-ch-mg-badges" id="mobileChMgBadges_${ch}"></span>
             </div>
             <div class="card-top-buttons">
               <button class="btn-ch-pre-post" id="prePostBtn_${ch}" type="button">POST</button>
@@ -4253,6 +4463,10 @@
           const btnMobileSync = document.getElementById('btnMobileSyncMixer');
           if (btnMobileSync) {
             btnMobileSync.style.display = isAdmin ? 'inline-flex' : 'none';
+          }
+          const btnMobileOpenMgConfig = document.getElementById('btnMobileOpenMgConfig');
+          if (btnMobileOpenMgConfig) {
+            btnMobileOpenMgConfig.style.display = isAdmin ? 'inline-flex' : 'none';
           }
 
           if (currentMobileUserRole === 'BASIC') {
@@ -6353,6 +6567,230 @@
     }
 
     // ==========================================
+    // MUTE GROUPS DA APLICAÇÃO (MOBILE)
+    // ==========================================
+    let mobileMuteGroupsState = [
+      { id: 1, name: 'MUTE 1', channels: [], muted: false },
+      { id: 2, name: 'MUTE 2', channels: [], muted: false },
+      { id: 3, name: 'MUTE 3', channels: [], muted: false },
+      { id: 4, name: 'MUTE 4', channels: [], muted: false }
+    ];
+    let mobileMgEditingId = 1;
+    let mobileMgDraftChannels = new Set();
+
+    function applyMobileMuteGroups(groups) {
+      if (!Array.isArray(groups)) return;
+      groups.forEach(g => {
+        if (g && g.id >= 1 && g.id <= 4) {
+          mobileMuteGroupsState[g.id - 1] = {
+            id: g.id,
+            name: g.name || `MUTE ${g.id}`,
+            channels: Array.isArray(g.channels) ? g.channels.slice() : [],
+            muted: Boolean(g.muted)
+          };
+        }
+      });
+      renderMobileMuteGroupsBar();
+      renderMobileChannelCardMgBadges();
+    }
+
+    function renderMobileMuteGroupsBar() {
+      for (let id = 1; id <= 4; id++) {
+        const g = mobileMuteGroupsState[id - 1];
+        const btn = document.getElementById(`mobileBtnMg_${id}`);
+        const nameEl = document.getElementById(`mobileMgName_${id}`);
+        const subEl = document.getElementById(`mobileMgSub_${id}`);
+        if (!btn || !g) continue;
+
+        const chCount = (g.channels || []).length;
+        if (nameEl) nameEl.innerText = g.name || `MUTE ${id}`;
+        if (subEl) subEl.innerText = g.muted ? `MUTED (${chCount})` : `${chCount} ch`;
+        btn.classList.toggle('is-muted', Boolean(g.muted));
+        btn.classList.toggle('is-empty', chCount === 0 && !g.muted);
+      }
+    }
+
+    function renderMobileChannelCardMgBadges() {
+      for (let chIdx = 0; chIdx < TOTAL_CHANNELS; chIdx++) {
+        const chNum = chIdx + 1;
+        const container = document.getElementById(`mobileChMgBadges_${chIdx}`);
+        if (!container) continue;
+        const memberGroups = mobileMuteGroupsState.filter(g => Array.isArray(g.channels) && g.channels.includes(chNum));
+        if (memberGroups.length === 0) {
+          container.innerHTML = '';
+          continue;
+        }
+        container.innerHTML = memberGroups.map(g =>
+          `<span class="mobile-ch-mg-pill ${g.muted ? 'is-muted' : ''}">M${g.id}</span>`
+        ).join('');
+      }
+    }
+
+    async function toggleMobileMuteGroup(groupId) {
+      const g = mobileMuteGroupsState[groupId - 1];
+      if (!g) return;
+
+      if ((!g.channels || g.channels.length === 0) && !g.muted) {
+        if (currentMobileUserRole === 'ADMIN') {
+          showToast(`${g.name} sem canais. Abrindo configuração...`);
+          openMobileMgConfigModal(groupId);
+        } else {
+          showToast(`${g.name} não possui canais cadastrados.`);
+        }
+        return;
+      }
+
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          action: 'toggle_mute_group',
+          mute_group_id: groupId
+        }));
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/mute-groups/${groupId}/toggle`, { method: 'POST' });
+        const data = await res.json();
+        if (res.ok && data.success && Array.isArray(data.groups)) {
+          applyMobileMuteGroups(data.groups);
+          syncMobileStateFromBackend();
+        }
+      } catch (e) {
+        console.error('Erro ao alternar Mute Group no mobile:', e);
+      }
+    }
+
+    function loadMobileMgIntoEditor(groupId) {
+      mobileMgEditingId = groupId;
+      const g = mobileMuteGroupsState[groupId - 1] || { id: groupId, name: `MUTE ${groupId}`, channels: [] };
+      mobileMgDraftChannels = new Set(g.channels || []);
+
+      const nameInput = document.getElementById('mobileMgNameInput');
+      const idBadge = document.getElementById('mobileMgActiveIdBadge');
+      if (nameInput) nameInput.value = g.name || `MUTE ${groupId}`;
+      if (idBadge) idBadge.innerText = `#${groupId}`;
+
+      for (let id = 1; id <= 4; id++) {
+        const tabBtn = document.getElementById(`mobileMgTab_${id}`);
+        const grp = mobileMuteGroupsState[id - 1];
+        if (tabBtn) {
+          tabBtn.classList.toggle('active', id === groupId);
+          if (grp) tabBtn.innerText = grp.name || `MUTE ${id}`;
+        }
+      }
+
+      renderMobileMgCheckboxes();
+    }
+
+    function renderMobileMgCheckboxes() {
+      const grid = document.getElementById('mobileMgCheckboxGrid');
+      const countEl = document.getElementById('mobileMgSelectedCount');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      for (let ch = 1; ch <= 32; ch++) {
+        const checked = mobileMgDraftChannels.has(ch);
+        const chNumStr = String(ch).padStart(2, '0');
+        const item = document.createElement('label');
+        item.className = 'channel-chk-item';
+        if (checked) {
+          item.style.borderColor = '#ef4444';
+          item.style.background = 'rgba(239, 68, 68, 0.16)';
+        }
+        item.innerHTML = `
+          <input type="checkbox" ${checked ? 'checked' : ''}>
+          <span>CH ${chNumStr}</span>
+        `;
+        const input = item.querySelector('input');
+        input.addEventListener('change', () => {
+          if (input.checked) mobileMgDraftChannels.add(ch);
+          else mobileMgDraftChannels.delete(ch);
+          renderMobileMgCheckboxes();
+        });
+        grid.appendChild(item);
+      }
+
+      if (countEl) countEl.innerText = `${mobileMgDraftChannels.size} canal(is)`;
+    }
+
+    function openMobileMgConfigModal(groupId = 1) {
+      if (currentMobileUserRole !== 'ADMIN') return;
+      const modal = document.getElementById('mobileMuteGroupsModal');
+      if (!modal) return;
+      loadMobileMgIntoEditor(groupId);
+      modal.classList.add('open');
+    }
+
+    function initMobileMuteGroups() {
+      for (let id = 1; id <= 4; id++) {
+        const btn = document.getElementById(`mobileBtnMg_${id}`);
+        if (btn) {
+          btn.addEventListener('click', () => toggleMobileMuteGroup(id));
+        }
+        const tabBtn = document.getElementById(`mobileMgTab_${id}`);
+        if (tabBtn) {
+          tabBtn.addEventListener('click', () => loadMobileMgIntoEditor(id));
+        }
+      }
+
+      const modal = document.getElementById('mobileMuteGroupsModal');
+      const btnOpen = document.getElementById('btnMobileOpenMgConfig');
+      const btnClose = document.getElementById('btnCloseMobileMgModal');
+      const btnAll = document.getElementById('btnMobileMgAll');
+      const btnClear = document.getElementById('btnMobileMgClear');
+      const btnSave = document.getElementById('btnMobileMgSave');
+
+      if (btnOpen) btnOpen.addEventListener('click', () => openMobileMgConfigModal(1));
+      if (btnClose && modal) btnClose.addEventListener('click', () => modal.classList.remove('open'));
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) modal.classList.remove('open');
+        });
+      }
+      if (btnAll) {
+        btnAll.addEventListener('click', () => {
+          for (let ch = 1; ch <= 32; ch++) mobileMgDraftChannels.add(ch);
+          renderMobileMgCheckboxes();
+        });
+      }
+      if (btnClear) {
+        btnClear.addEventListener('click', () => {
+          mobileMgDraftChannels.clear();
+          renderMobileMgCheckboxes();
+        });
+      }
+      if (btnSave) {
+        btnSave.addEventListener('click', async () => {
+          const nameInput = document.getElementById('mobileMgNameInput');
+          const name = (nameInput ? nameInput.value : '').trim() || `MUTE ${mobileMgEditingId}`;
+          const channels = Array.from(mobileMgDraftChannels).sort((a, b) => a - b);
+
+          btnSave.disabled = true;
+          btnSave.innerText = 'Salvando...';
+          try {
+            const res = await fetch(`/api/mute-groups/${mobileMgEditingId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name, channels })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+              if (Array.isArray(data.groups)) applyMobileMuteGroups(data.groups);
+              showToast(`Mute Group '${name}' salvo! 🔇`);
+            } else {
+              showToast(data.error || 'Erro ao salvar Mute Group');
+            }
+          } catch (e) {
+            showToast('Erro de conexão ao salvar Mute Group');
+          } finally {
+            btnSave.disabled = false;
+            btnSave.innerText = '💾 Salvar Mute Group';
+          }
+        });
+      }
+    }
+
+    // ==========================================
     // INICIALIZAÇÃO GERAL
     // ==========================================
     document.addEventListener('DOMContentLoaded', () => {
@@ -6364,6 +6802,7 @@
       initGlobalActions();
       initUserMenu();
       initAdminModalMobile();
+      initMobileMuteGroups();
       initEqModal();
 
       // Botões de Saída (Bloco 2)

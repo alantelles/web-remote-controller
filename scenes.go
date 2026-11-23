@@ -455,6 +455,7 @@ func InitSceneManager(baseDir string) {
 	mixerStateLock.Unlock()
 
 	InitPersonalMixManager(dataDirRoot)
+	InitMuteGroupManager(dataDirRoot)
 
 	startAutoSaveLoop(5 * time.Second)
 }
@@ -1146,8 +1147,9 @@ func handleAPIGetCurrentState(w http.ResponseWriter, r *http.Request) {
 
 	state := GetCurrentMixerState()
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"state":   state,
+		"success":     true,
+		"state":       state,
+		"mute_groups": ListMuteGroups(),
 	})
 }
 

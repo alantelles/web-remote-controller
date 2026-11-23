@@ -29,21 +29,23 @@ import (
 )
 
 type WSMessage struct {
-	Type    string  `json:"type,omitempty"`    // "init", "param", "simulation_status"
-	Port    string  `json:"port,omitempty"`    // Nome da porta MIDI
-	Hex     string  `json:"hex,omitempty"`     // SysEx em hexadecimal
-	Element byte    `json:"element"`           // 0x1C (Fader), 0x1A (Mute/ON)
-	Param   byte    `json:"param"`             // 0x00
-	Channel byte    `json:"channel"`           // 0x00 a 0x1F (0 a 31)
-	Value   int     `json:"value"`             // 0 a 1023
-	Running *bool   `json:"running,omitempty"` // status da simulação
-	Action  string  `json:"action,omitempty"`  // "toggle_sim", "sync_main", "sync_aux", "sync_fx", "personal_mix_joystick"
-	Aux     int     `json:"aux,omitempty"`     // 1 a 8 para sync_aux
-	Target  string  `json:"target,omitempty"`  // Identificador do canal/saída para sync_fx
-	MixID   string  `json:"mix_id,omitempty"`  // ID da mix pessoal para personal_mix_joystick
-	JoyX    float64 `json:"x,omitempty"`       // Coordenada X (-1..1) do joystick 3 eixos
-	JoyY    float64 `json:"y,omitempty"`       // Coordenada Y (-1..1) do joystick 3 eixos
-	Persist bool    `json:"persist,omitempty"` // Salvar posição do joystick em disco (ex: ao soltar o toque)
+	Type        string       `json:"type,omitempty"`          // "init", "param", "simulation_status", "mute_groups"
+	Port        string       `json:"port,omitempty"`          // Nome da porta MIDI
+	Hex         string       `json:"hex,omitempty"`           // SysEx em hexadecimal
+	Element     byte         `json:"element"`                 // 0x1C (Fader), 0x1A (Mute/ON)
+	Param       byte         `json:"param"`                   // 0x00
+	Channel     byte         `json:"channel"`                 // 0x00 a 0x1F (0 a 31)
+	Value       int          `json:"value"`                   // 0 a 1023
+	Running     *bool        `json:"running,omitempty"`       // status da simulação
+	Action      string       `json:"action,omitempty"`        // "toggle_sim", "sync_main", "sync_aux", "sync_fx", "personal_mix_joystick", "toggle_mute_group", "set_mute_group"
+	Aux         int          `json:"aux,omitempty"`           // 1 a 8 para sync_aux
+	Target      string       `json:"target,omitempty"`        // Identificador do canal/saída para sync_fx
+	MixID       string       `json:"mix_id,omitempty"`        // ID da mix pessoal para personal_mix_joystick
+	JoyX        float64      `json:"x,omitempty"`             // Coordenada X (-1..1) do joystick 3 eixos
+	JoyY        float64      `json:"y,omitempty"`             // Coordenada Y (-1..1) do joystick 3 eixos
+	Persist     bool         `json:"persist,omitempty"`       // Salvar posição do joystick em disco (ex: ao soltar o toque)
+	MuteGroupID int          `json:"mute_group_id,omitempty"` // 1 a 4 para toggle_mute_group / set_mute_group
+	MuteGroups  []*MuteGroup `json:"mute_groups,omitempty"`   // Estado completo dos Mute Groups da aplicação
 }
 
 var (
@@ -1009,12 +1011,13 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 	runningCopy := simRunning
 	simLock.Unlock()
 
-	// Envia informação inicial (porta e status da simulação)
+	// Envia informação inicial (porta, status da simulação e mute groups)
 	conn.WriteJSON(WSMessage{
-		Type:    "init",
-		Port:    pName,
-		Running: &runningCopy,
-		Hex:     "Conectado ao console Yamaha 01V96V2",
+		Type:       "init",
+		Port:       pName,
+		Running:    &runningCopy,
+		Hex:        "Conectado ao console Yamaha 01V96V2",
+		MuteGroups: ListMuteGroups(),
 	})
 
 	for {
@@ -1051,6 +1054,20 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		// 1. Usuário PERFORMER não possui permissão para emitir comandos no console principal
 		if userRole == "PERFORMER" {
 			log.Printf("WebSocket: comando ignorado para usuário PERFORMER '%s'", sess.User.Username)
+			continue
+		}
+
+		// Acionamento de Mute Group da aplicação (liberado para ADMIN, OPERATOR e BASIC)
+		if msg.Action == "toggle_mute_group" {
+			if _, _, err := ToggleMuteGroup(msg.MuteGroupID); err != nil {
+				log.Printf("WebSocket: erro ao alternar Mute Group %d: %v", msg.MuteGroupID, err)
+			}
+			continue
+		}
+		if msg.Action == "set_mute_group" {
+			if _, _, err := SetMuteGroupState(msg.MuteGroupID, msg.Value != 0); err != nil {
+				log.Printf("WebSocket: erro ao definir Mute Group %d: %v", msg.MuteGroupID, err)
+			}
 			continue
 		}
 
@@ -1716,6 +1733,8 @@ func main() {
 	http.HandleFunc("/api/scenes/import", handleAPIImportScene)
 	http.HandleFunc("/api/personal-mixes", handleAPIPersonalMixes)
 	http.HandleFunc("/api/personal-mixes/", handleAPIPersonalMixDetail)
+	http.HandleFunc("/api/mute-groups", handleAPIMuteGroups)
+	http.HandleFunc("/api/mute-groups/", handleAPIMuteGroupDetail)
 	http.HandleFunc("/api/state/status", handleAPIStateStatus)
 	http.HandleFunc("/api/state/restore-last", handleAPIRestoreLastState)
 	http.HandleFunc("/api/state/sync-mixer", handleAPISyncMixer)
