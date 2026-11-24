@@ -1691,6 +1691,10 @@ func selectMIDIPorts(outs []drivers.Out, ins []drivers.In, flagPort string) (dri
 			}
 			log.Printf("Nenhuma porta encontrada contendo o termo '%s'.", trimmed)
 		}
+		// Se -port foi informado explicitamente e não é simulação, não silenciar nem cair em simulação sem TTY
+		if fi, err := os.Stdin.Stat(); err != nil || (fi.Mode()&os.ModeCharDevice) == 0 || len(outs) == 0 {
+			log.Fatalf("Erro: porta MIDI '%s' não encontrada ou indisponível. Encerrando serviço (use -port sim ou -sim apenas se desejar modo simulação).", trimmed)
+		}
 	}
 
 	// Caso não haja portas MIDI disponíveis no sistema

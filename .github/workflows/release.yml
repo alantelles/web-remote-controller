@@ -1,0 +1,61 @@
+name: Release Ubuntu 20.04 Package
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  test-and-build:
+    name: Test, Build (Ubuntu 20.04) & Semantic Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run unit tests
+        run: go test -v ./...
+
+      - name: Build native binary for Ubuntu 20.04 via Docker
+        run: |
+          chmod +x build-ubuntu2004.sh scripts/package-ubuntu2004.sh
+          ./build-ubuntu2004.sh
+
+      - name: Set up Node.js for semantic-release
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install semantic-release
+        run: npm install --no-save semantic-release @semantic-release/exec
+
+      - name: Run semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
+
+      - name: Upload release packages as workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 01v96-controller-ubuntu20.04
+          path: |
+            01v96-controller
+            dist/*.tar.gz
+            dist/*.deb
+          if-no-files-found: warn
