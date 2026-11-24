@@ -1963,11 +1963,6 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		if msg.Action != "" && msg.Element == 0 {
-			log.Printf("WebSocket: ação '%s' desconhecida/ignorada", msg.Action)
-			continue
-		}
-
 		// 2. Ações de simulação ou sincronização geral são exclusivas de administradores (ADMIN)
 		if msg.Action == "toggle_sim" || msg.Action == "sync_mixer" || msg.Action == "sync_main" {
 			if userRole != "ADMIN" {
@@ -2069,6 +2064,11 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 			go func(t string) {
 				_ = RequestChannelFXSync(t, 15*time.Millisecond)
 			}(target)
+			continue
+		}
+
+		if msg.Action != "" && msg.Element == 0 {
+			log.Printf("WebSocket: ação '%s' desconhecida/ignorada", msg.Action)
 			continue
 		}
 
