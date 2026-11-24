@@ -652,6 +652,11 @@ func generateChannelFXTargets(targetKey string) []paramTarget {
 		targets = append(targets, generateEQTargets(0x20, ch)...)
 		targets = append(targets, generateCompTargets(0x1F, ch)...)
 		targets = append(targets, generateGateTargets(0x21, ch)...)
+		// Envios Auxiliares 1 a 8 do canal (ON e Nível)
+		for auxIdx := 0; auxIdx < 8; auxIdx++ {
+			targets = append(targets, paramTarget{element: 0x23, param: byte(auxIdx * 3), channel: ch})     // Aux ON
+			targets = append(targets, paramTarget{element: 0x23, param: byte(auxIdx*3 + 2), channel: ch}) // Aux Level
+		}
 	}
 
 	return targets

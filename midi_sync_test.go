@@ -196,10 +196,10 @@ func TestOnDemandSyncTargets(t *testing.T) {
 		t.Errorf("Esperado 96 targets para envios do Aux 1, obtido: %d", len(auxTargets))
 	}
 
-	// 3. Rack de Efeitos Canal de Entrada (Att + EQ 15 + Comp 8 + Gate 6 = 30)
+	// 3. Rack de Efeitos Canal de Entrada (Att 1 + EQ 15 + Comp 8 + Gate 6 + Aux Sends 16 = 46)
 	chTargets := generateChannelFXTargets("CH01")
-	if len(chTargets) != 30 {
-		t.Errorf("Esperado 30 targets para rack de efeitos de canal, obtido: %d", len(chTargets))
+	if len(chTargets) != 46 {
+		t.Errorf("Esperado 46 targets para rack de efeitos de canal, obtido: %d", len(chTargets))
 	}
 
 	// 4. Rack de Efeitos Master Stereo (EQ 15 + Comp 8 = 23)

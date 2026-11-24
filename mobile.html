@@ -1223,10 +1223,9 @@
       color: #fff;
     }
 
-    /* Barra de Abas do Rack (EQ, COMP, GATE) */
+    /* Barra de Abas do Rack (EQ, COMP, GATE, AUX) */
     .fx-rack-tabs-bar {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      display: flex;
       gap: 4px;
       background: #0f1218;
       padding: 3px;
@@ -1235,19 +1234,110 @@
     }
 
     .btn-fx-tab {
+      flex: 1;
+      min-width: 0;
       height: 28px;
       background: transparent;
       border: none;
       border-radius: 5px;
       color: var(--text-dim);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
+      padding: 0 4px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 4px;
+      white-space: nowrap;
       transition: all 0.15s ease;
+    }
+
+    /* Aba Auxiliares no Mobile (Faders Horizontais) */
+    #pane_aux {
+      padding: 10px 12px 18px 12px;
+      box-sizing: border-box;
+    }
+
+    .mobile-aux-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .mobile-aux-card {
+      background: #141824;
+      border: 1px solid #242b3d;
+      border-radius: 8px;
+      padding: 6px 10px 4px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .mobile-aux-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .mobile-aux-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mobile-aux-right {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .mobile-aux-badge {
+      font-size: 11px;
+      font-weight: 800;
+      color: #60a5fa;
+      background: #0d121c;
+      border: 1px solid #1e3a5f;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.4px;
+    }
+
+    .mobile-aux-db {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 800;
+      color: #38bdf8;
+      background: #0c0f16;
+      border: 1px solid #1e2536;
+      padding: 2px 6px;
+      border-radius: 4px;
+      min-width: 64px;
+      text-align: center;
+    }
+
+    .mobile-aux-card .btn-quick-val {
+      padding: 3px 8px;
+      font-size: 11px;
+      min-width: 28px;
+      height: 26px;
+    }
+
+    .mobile-aux-card .btn-ch-mute {
+      height: 26px;
+      min-width: 52px;
+      font-size: 11px;
+      padding: 0 8px;
+    }
+
+    .mobile-aux-card .card-row-slider {
+      padding: 2px 0 0 0;
+    }
+
+    .mobile-aux-card .fader-horizontal {
+      height: 30px;
     }
 
     .btn-fx-tab:active {
@@ -2337,6 +2427,10 @@
             <span class="tab-status-dot" id="dot_tab_gate"></span>
             <span>GATE</span>
           </button>
+          <button class="btn-fx-tab" data-tab="aux" id="tabBtn_aux" type="button">
+            <span class="tab-status-dot" id="dot_tab_aux"></span>
+            <span>AUX</span>
+          </button>
         </div>
       </div>
 
@@ -2622,6 +2716,18 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- ABA 4: AUXILIARES (AUX 1 A 8) -->
+      <div class="fx-tab-pane" id="pane_aux">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px;">
+          <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">Envios Aux 1 a 8</span>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn-quick-val" id="btnMobileAuxAllOn" type="button" style="padding: 4px 8px; font-size: 10px;">Todos ON</button>
+            <button class="btn-quick-val" id="btnMobileAuxAllMute" type="button" style="padding: 4px 8px; font-size: 10px;">Todos MUTE</button>
+          </div>
+        </div>
+        <div class="mobile-aux-list" id="mobileAuxList"></div>
       </div>
     </div>
   </div>
@@ -3390,16 +3496,16 @@
           if (st.stereo_master.eq && mixEqState['MASTER']) {
             const meq = mixEqState['MASTER'];
             meq.on = st.stereo_master.eq.on;
-            meq.low.gain = st.stereo_master.eq.low.gain;
+            meq.low.gain = st.stereo_master.eq.low.gain + 180;
             meq.low.freq = st.stereo_master.eq.low.freq;
             meq.low.q = Math.max(0, Math.min(40, 40 - st.stereo_master.eq.low.q));
-            meq.lomid.gain = st.stereo_master.eq.low_mid.gain;
+            meq.lomid.gain = st.stereo_master.eq.low_mid.gain + 180;
             meq.lomid.freq = st.stereo_master.eq.low_mid.freq;
             meq.lomid.q = Math.max(0, Math.min(40, 40 - st.stereo_master.eq.low_mid.q));
-            meq.himid.gain = st.stereo_master.eq.hi_mid.gain;
+            meq.himid.gain = st.stereo_master.eq.hi_mid.gain + 180;
             meq.himid.freq = st.stereo_master.eq.hi_mid.freq;
             meq.himid.q = Math.max(0, Math.min(40, 40 - st.stereo_master.eq.hi_mid.q));
-            meq.high.gain = st.stereo_master.eq.high.gain;
+            meq.high.gain = st.stereo_master.eq.high.gain + 180;
             meq.high.freq = st.stereo_master.eq.high.freq;
             meq.high.q = Math.max(0, Math.min(40, 40 - st.stereo_master.eq.high.q));
             meq.hpf = st.stereo_master.eq.hpf_on;
@@ -3420,16 +3526,16 @@
             if (aux.eq && mixEqState[auxKey]) {
               const aeq = mixEqState[auxKey];
               aeq.on = aux.eq.on;
-              aeq.low.gain = aux.eq.low.gain;
+              aeq.low.gain = aux.eq.low.gain + 180;
               aeq.low.freq = aux.eq.low.freq;
               aeq.low.q = Math.max(0, Math.min(40, 40 - aux.eq.low.q));
-              aeq.lomid.gain = aux.eq.low_mid.gain;
+              aeq.lomid.gain = aux.eq.low_mid.gain + 180;
               aeq.lomid.freq = aux.eq.low_mid.freq;
               aeq.lomid.q = Math.max(0, Math.min(40, 40 - aux.eq.low_mid.q));
-              aeq.himid.gain = aux.eq.hi_mid.gain;
+              aeq.himid.gain = aux.eq.hi_mid.gain + 180;
               aeq.himid.freq = aux.eq.hi_mid.freq;
               aeq.himid.q = Math.max(0, Math.min(40, 40 - aux.eq.hi_mid.q));
-              aeq.high.gain = aux.eq.high.gain;
+              aeq.high.gain = aux.eq.high.gain + 180;
               aeq.high.freq = aux.eq.high.freq;
               aeq.high.q = Math.max(0, Math.min(40, 40 - aux.eq.high.q));
               aeq.hpf = aux.eq.hpf_on;
@@ -3454,16 +3560,16 @@
               if (inp.eq && eqState[i]) {
                 eqState[i].on = inp.eq.on;
                 eqState[i].attenuator = (inp.eq.attenuator !== undefined) ? inp.eq.attenuator : 0;
-                eqState[i].low.gain = inp.eq.low.gain;
+                eqState[i].low.gain = inp.eq.low.gain + 180;
                 eqState[i].low.freq = inp.eq.low.freq;
                 eqState[i].low.q = Math.max(0, Math.min(40, 40 - inp.eq.low.q));
-                eqState[i].lomid.gain = inp.eq.low_mid.gain;
+                eqState[i].lomid.gain = inp.eq.low_mid.gain + 180;
                 eqState[i].lomid.freq = inp.eq.low_mid.freq;
                 eqState[i].lomid.q = Math.max(0, Math.min(40, 40 - inp.eq.low_mid.q));
-                eqState[i].himid.gain = inp.eq.hi_mid.gain;
+                eqState[i].himid.gain = inp.eq.hi_mid.gain + 180;
                 eqState[i].himid.freq = inp.eq.hi_mid.freq;
                 eqState[i].himid.q = Math.max(0, Math.min(40, 40 - inp.eq.hi_mid.q));
-                eqState[i].high.gain = inp.eq.high.gain;
+                eqState[i].high.gain = inp.eq.high.gain + 180;
                 eqState[i].high.freq = inp.eq.high.freq;
                 eqState[i].high.q = Math.max(0, Math.min(40, 40 - inp.eq.high.q));
                 eqState[i].hpf = inp.eq.hpf_on;
@@ -3533,7 +3639,10 @@
           } else if (currentRackTab === 'gate') {
             syncGateModalUI();
             requestGateRedrawMobile();
+          } else if (currentRackTab === 'aux') {
+            syncAuxModalUI();
           }
+          updateMobileAuxStatusDot(currentEqTarget);
         }
       } catch (err) {
         console.warn('Falha ao sincronizar mobile:', err);
@@ -3604,6 +3713,10 @@
             // Send ON / MUTE
             state.mutes[auxKey][ch] = val;
             if (currentMix === auxKey) updateMuteButtonUI(ch, val);
+            if (isEqModalOpen && currentEqTarget === ch) {
+              updateMobileAuxMuteUI(auxIdx, val);
+              updateMobileAuxStatusDot(ch);
+            }
           } else if (subParam === 1) {
             // Send PRE / POST
             if (!state.pre[auxKey]) state.pre[auxKey] = new Array(TOTAL_CHANNELS).fill(0);
@@ -3617,6 +3730,9 @@
               const dbText = document.getElementById(`dbText_${ch}`);
               if (slider) slider.value = val;
               if (dbText) dbText.innerText = rawToDb(val);
+            }
+            if (isEqModalOpen && currentEqTarget === ch) {
+              updateMobileAuxFaderUI(auxIdx, val);
             }
           }
         }
@@ -5903,6 +6019,155 @@
       }
     }
 
+    // ==========================================
+    // ABA AUXILIARES NO MOBILE (FADERS HORIZONTAIS)
+    // ==========================================
+    function updateMobileAuxStatusDot(target) {
+      const dotAux = document.getElementById('dot_tab_aux');
+      if (!dotAux) return;
+      let anyOn = false;
+      if (typeof target === 'number') {
+        for (let a = 1; a <= 8; a++) {
+          const auxKey = `AUX${a}`;
+          if (state.mutes[auxKey] && state.mutes[auxKey][target] === 1) {
+            anyOn = true;
+            break;
+          }
+        }
+      }
+      dotAux.classList.toggle('on', anyOn);
+    }
+
+    function updateMobileAuxFaderUI(auxIdx, val) {
+      if (val === undefined || val === null || isNaN(val)) val = 0;
+      val = Math.max(0, Math.min(1023, Math.round(val)));
+      const slider = document.getElementById(`mobileAuxSlider_${auxIdx}`);
+      const dbEl = document.getElementById(`mobileAuxDb_${auxIdx}`);
+      if (slider) slider.value = val;
+      if (dbEl) dbEl.innerText = rawToDb(val);
+    }
+
+    function updateMobileAuxMuteUI(auxIdx, val) {
+      const btn = document.getElementById(`mobileAuxMute_${auxIdx}`);
+      if (!btn) return;
+      if (val === 1) {
+        btn.classList.add('is-on');
+        btn.innerText = 'ON';
+      } else {
+        btn.classList.remove('is-on');
+        btn.innerText = 'MUTE';
+      }
+    }
+
+    function setMobileAuxVolume(ch, auxIdx, val, throttle = true) {
+      if (typeof ch !== 'number') return;
+      val = Math.max(0, Math.min(1023, Math.round(val)));
+      const auxKey = `AUX${auxIdx + 1}`;
+      state.faders[auxKey][ch] = val;
+      updateMobileAuxFaderUI(auxIdx, val);
+      if (currentMix === auxKey) {
+        const slider = document.getElementById(`slider_${ch}`);
+        const dbText = document.getElementById(`dbText_${ch}`);
+        if (slider) slider.value = val;
+        if (dbText) dbText.innerText = rawToDb(val);
+      }
+      sendCommand(0x23, auxIdx * 3 + 2, ch, val, throttle);
+    }
+
+    function setMobileAuxMute(ch, auxIdx, val) {
+      if (typeof ch !== 'number') return;
+      const auxKey = `AUX${auxIdx + 1}`;
+      const nextVal = val ? 1 : 0;
+      state.mutes[auxKey][ch] = nextVal;
+      updateMobileAuxMuteUI(auxIdx, nextVal);
+      if (currentMix === auxKey) {
+        updateMuteButtonUI(ch, nextVal);
+      }
+      updateMobileAuxStatusDot(ch);
+      sendCommand(0x23, auxIdx * 3, ch, nextVal, false);
+    }
+
+    function syncAuxModalUI() {
+      if (typeof currentEqTarget !== 'number') return;
+      for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
+        const auxKey = `AUX${auxIdx + 1}`;
+        const vol = state.faders[auxKey] ? (state.faders[auxKey][currentEqTarget] || 0) : 0;
+        const onVal = state.mutes[auxKey] ? (state.mutes[auxKey][currentEqTarget] || 0) : 0;
+        updateMobileAuxFaderUI(auxIdx, vol);
+        updateMobileAuxMuteUI(auxIdx, onVal);
+      }
+      updateMobileAuxStatusDot(currentEqTarget);
+    }
+
+    (function initMobileAuxList() {
+      const listEl = document.getElementById('mobileAuxList');
+      if (!listEl) return;
+      for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
+        const card = document.createElement('div');
+        card.className = 'mobile-aux-card';
+        card.innerHTML = `
+          <div class="mobile-aux-card-top">
+            <div class="mobile-aux-left">
+              <span class="mobile-aux-badge">AUX ${auxIdx + 1}</span>
+              <span class="mobile-aux-db" id="mobileAuxDb_${auxIdx}">-∞ dB</span>
+            </div>
+            <div class="mobile-aux-right">
+              <button class="btn-quick-val" id="mobileAuxZero_${auxIdx}" type="button">0</button>
+              <button class="btn-quick-val" id="mobileAuxInf_${auxIdx}" type="button">-∞</button>
+              <button class="btn-ch-mute is-on" id="mobileAuxMute_${auxIdx}" type="button">ON</button>
+            </div>
+          </div>
+          <div class="card-row-slider">
+            <input type="range" class="fader-horizontal" id="mobileAuxSlider_${auxIdx}" min="0" max="1023" value="0">
+          </div>
+        `;
+        listEl.appendChild(card);
+
+        const slider = card.querySelector(`#mobileAuxSlider_${auxIdx}`);
+        const muteBtn = card.querySelector(`#mobileAuxMute_${auxIdx}`);
+        const btnZero = card.querySelector(`#mobileAuxZero_${auxIdx}`);
+        const btnInf = card.querySelector(`#mobileAuxInf_${auxIdx}`);
+
+        slider.addEventListener('input', (e) => {
+          setMobileAuxVolume(currentEqTarget, auxIdx, parseInt(e.target.value, 10), true);
+        });
+        slider.addEventListener('change', (e) => {
+          setMobileAuxVolume(currentEqTarget, auxIdx, parseInt(e.target.value, 10), false);
+        });
+        muteBtn.addEventListener('click', () => {
+          if (typeof currentEqTarget !== 'number') return;
+          const auxKey = `AUX${auxIdx + 1}`;
+          const cur = state.mutes[auxKey] ? state.mutes[auxKey][currentEqTarget] : 0;
+          setMobileAuxMute(currentEqTarget, auxIdx, cur !== 1);
+        });
+        btnZero.addEventListener('click', () => {
+          setMobileAuxVolume(currentEqTarget, auxIdx, NOMINAL_VALUE, false);
+        });
+        btnInf.addEventListener('click', () => {
+          setMobileAuxVolume(currentEqTarget, auxIdx, MIN_VALUE, false);
+        });
+      }
+
+      const btnAllOn = document.getElementById('btnMobileAuxAllOn');
+      const btnAllMute = document.getElementById('btnMobileAuxAllMute');
+      if (btnAllOn) {
+        btnAllOn.addEventListener('click', () => {
+          if (typeof currentEqTarget !== 'number') return;
+          for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
+            setMobileAuxMute(currentEqTarget, auxIdx, true);
+          }
+        });
+      }
+      if (btnAllMute) {
+        btnAllMute.addEventListener('click', () => {
+          if (typeof currentEqTarget !== 'number') return;
+          for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
+            setMobileAuxMute(currentEqTarget, auxIdx, false);
+          }
+        });
+      }
+    })();
+
     function switchRackTab(tabKey) {
       currentRackTab = tabKey;
       document.querySelectorAll('.btn-fx-tab').forEach(b => {
@@ -5927,6 +6192,8 @@
         resizeGateCanvas();
         syncGateModalUI();
         requestGateRedrawMobile();
+      } else if (tabKey === 'aux') {
+        syncAuxModalUI();
       }
       syncGRSubscriptionMobile();
     }
@@ -5980,10 +6247,12 @@
       }
       if (titleEl) titleEl.innerText = titleStr;
 
-      // Oculta aba GATE se for saída Master ou Aux (Gate só existe para inputs 1..32)
+      // Oculta abas GATE e AUX se for saída Master ou Aux (só existem para inputs 1..32)
       const gateTab = document.getElementById('tabBtn_gate');
       if (gateTab) gateTab.style.display = (typeof target === 'number') ? 'flex' : 'none';
-      if (currentRackTab === 'gate' && typeof target !== 'number') switchRackTab('eq');
+      const auxTab = document.getElementById('tabBtn_aux');
+      if (auxTab) auxTab.style.display = (typeof target === 'number') ? 'flex' : 'none';
+      if ((currentRackTab === 'gate' || currentRackTab === 'aux') && typeof target !== 'number') switchRackTab('eq');
 
       // Atualiza status dots das abas (verde se ativo)
       const eq = getEqData(target);
@@ -5997,6 +6266,11 @@
       const isGateOn = getGateOn(target) === 1;
       const dotGate = document.getElementById('dot_tab_gate');
       if (dotGate) dotGate.classList.toggle('on', isGateOn);
+
+      updateMobileAuxStatusDot(target);
+      if (typeof target === 'number') {
+        syncAuxModalUI();
+      }
 
       const btnCompToggle = document.getElementById('btnCompToggleOn');
       if (btnCompToggle) {

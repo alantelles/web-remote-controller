@@ -2461,6 +2461,85 @@
       display: block;
     }
 
+    /* ABA: ENVIOS AUXILIARES (AUX 1 A 8) NO MODAL SEL */
+    .fx-aux-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .fx-aux-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: #141824;
+      border: 1px solid #242b3d;
+      border-radius: 8px;
+      padding: 8px 12px;
+    }
+
+    .fx-aux-hint {
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    .fx-aux-global-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .fx-aux-grid {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(82px, 1fr));
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .fx-aux-strip {
+      background: linear-gradient(180deg, #1b202d 0%, #131722 100%);
+      border: 1px solid #2a3142;
+      border-radius: 8px;
+      padding: 8px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+
+    .fx-aux-strip-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      color: #60a5fa;
+      background: #0d121c;
+      border: 1px solid #1e3a5f;
+      border-radius: 4px;
+      padding: 3px 8px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .fx-aux-strip .btn-yamaha-on {
+      width: 100%;
+      height: 28px;
+      font-size: 10px;
+    }
+
+    .fx-aux-strip .fader-section {
+      min-height: 210px;
+      height: 220px;
+      padding: 20px 2px;
+    }
+
+    .fx-aux-strip .ch-footer {
+      width: 100%;
+    }
+
     /* Placeholder "Em Breve" para Comp e Gate */
     .fx-placeholder-box {
       display: flex;
@@ -4463,6 +4542,10 @@
           <div class="fx-tab-status-dot" id="dot_gate"></div>
           <span>GATE</span>
         </button>
+        <button type="button" class="fx-tab-btn" data-tab="aux" id="tabBtn_aux">
+          <div class="fx-tab-status-dot" id="dot_aux"></div>
+          <span>AUXILIARES</span>
+        </button>
       </div>
 
       <div class="fx-modal-body">
@@ -4885,6 +4968,20 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- ABA: AUXILIARES (AUX 1 A 8) -->
+        <div class="fx-tab-pane" id="fxTab_aux">
+          <div class="fx-aux-panel">
+            <div class="fx-aux-top-bar">
+              <span class="fx-aux-hint">Envios do canal selecionado para os 8 auxiliares (Nível e Mute)</span>
+              <div class="fx-aux-global-actions">
+                <button type="button" class="btn-eq-flat" id="btnFxAuxAllOn" title="Ativar envio em todos os 8 auxiliares">Todos ON</button>
+                <button type="button" class="btn-eq-flat" id="btnFxAuxAllMute" title="Mutar envio em todos os 8 auxiliares">Todos MUTE</button>
+              </div>
+            </div>
+            <div class="fx-aux-grid" id="fxAuxGrid"></div>
           </div>
         </div>
       </div>
@@ -5455,6 +5552,10 @@
                   if (currentMixTarget === targetKey) {
                     updateChannelOnUI(ch, data.value === 1);
                   }
+                  if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === ch && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
+                    if (typeof updateFxAuxOnUI === 'function') updateFxAuxOnUI(auxIdx, data.value === 1);
+                    if (typeof updateTabStatusDots === 'function') updateTabStatusDots(ch);
+                  }
                 } else if (subParam === 1) {
                   // Send PRE / POST
                   if (!mixData[targetKey].pre) mixData[targetKey].pre = new Array(TOTAL_CHANNELS).fill(0);
@@ -5468,6 +5569,9 @@
                   mixData[targetKey].volumes[ch] = val;
                   if (currentMixTarget === targetKey && activeDraggingChannel !== ch) {
                     updateFaderUI(ch, val);
+                  }
+                  if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === ch && fxModalOverlay && fxModalOverlay.classList.contains('open') && activeDraggingFxAux !== auxIdx) {
+                    if (typeof updateFxAuxFaderUI === 'function') updateFxAuxFaderUI(auxIdx, val);
                   }
                 }
               }
@@ -7107,6 +7211,8 @@
         requestCompRedraw();
       } else if (tabKey === 'gate') {
         if (typeof requestGateRedraw === 'function') requestGateRedraw();
+      } else if (tabKey === 'aux') {
+        if (typeof syncAuxModalFromState === 'function') syncAuxModalFromState(currentSelectedCh);
       }
       syncGRSubscription();
     }
@@ -7118,6 +7224,7 @@
       }
       currentSelectedCh = target;
       const tabGateBtn = document.querySelector('[data-tab="gate"]');
+      const tabAuxBtn = document.querySelector('[data-tab="aux"]');
 
       fxModalChBadge.className = 'fx-ch-badge';
       fxModalChBadge.style.color = '';
@@ -7130,19 +7237,22 @@
         fxModalChBadge.title = chName;
         fxModalChBadge.classList.add('type-ch');
         if (tabGateBtn) tabGateBtn.style.display = '';
+        if (tabAuxBtn) tabAuxBtn.style.display = '';
       } else if (target === 'MASTER') {
         fxModalChBadge.textContent = 'STEREO MASTER OUT';
         fxModalChBadge.title = 'Stereo Master Out';
         fxModalChBadge.classList.add('type-master');
         if (tabGateBtn) tabGateBtn.style.display = 'none';
-        if (currentFxTab === 'gate') switchFxTab('eq');
+        if (tabAuxBtn) tabAuxBtn.style.display = 'none';
+        if (currentFxTab === 'gate' || currentFxTab === 'aux') switchFxTab('eq');
       } else if (typeof target === 'string' && target.startsWith('AUX')) {
         const auxNum = target.replace('AUX', '');
         fxModalChBadge.textContent = `AUX ${auxNum} MASTER OUT`;
         fxModalChBadge.title = `Aux ${auxNum} Master Out`;
         fxModalChBadge.classList.add('type-aux');
         if (tabGateBtn) tabGateBtn.style.display = 'none';
-        if (currentFxTab === 'gate') switchFxTab('eq');
+        if (tabAuxBtn) tabAuxBtn.style.display = 'none';
+        if (currentFxTab === 'gate' || currentFxTab === 'aux') switchFxTab('eq');
       }
       
       // Atualiza botões SEL na interface dos canais
@@ -7153,10 +7263,11 @@
       });
       updateOutputSelBadges();
 
-      // Carrega estado do EQ, COMP e GATE do canal/saída
+      // Carrega estado do EQ, COMP, GATE e AUX do canal/saída
       syncEqModalFromState(target);
       syncCompModalFromState(target);
       if (typeof syncGateModalFromState === 'function') syncGateModalFromState(target);
+      if (typeof syncAuxModalFromState === 'function') syncAuxModalFromState(target);
       updateTabStatusDots(target);
       fxModalOverlay.classList.add('open');
       
@@ -7896,14 +8007,235 @@
       const dotEq = document.getElementById('dot_eq');
       const dotComp = document.getElementById('dot_comp');
       const dotGate = document.getElementById('dot_gate');
+      const dotAux = document.getElementById('dot_aux');
       if (dotEq) dotEq.classList.toggle('dot-on', eq && eq.on === 1);
       if (dotComp) dotComp.classList.toggle('dot-on', comp && comp.on === 1);
       if (dotGate) dotGate.classList.toggle('dot-on', gate && gate.on === 1);
+      if (dotAux) {
+        let anyAuxOn = false;
+        if (typeof target === 'number') {
+          for (let a = 1; a <= 8; a++) {
+            const auxMix = mixData['AUX' + a];
+            if (auxMix && auxMix.on[target] === 1) {
+              anyAuxOn = true;
+              break;
+            }
+          }
+        }
+        dotAux.classList.toggle('dot-on', anyAuxOn);
+      }
       if (typeof target === 'number') {
         updateChannelStripFxBadges(target);
       } else {
         updateOutputSelBadges();
       }
+    }
+
+    // ==========================================
+    // ABA AUXILIARES (AUX 1 A 8) NO MODAL SEL
+    // ==========================================
+    let activeDraggingFxAux = null;
+    const fxAuxGridEl = document.getElementById('fxAuxGrid');
+    const btnFxAuxAllOn = document.getElementById('btnFxAuxAllOn');
+    const btnFxAuxAllMute = document.getElementById('btnFxAuxAllMute');
+
+    function updateFxAuxFaderUI(auxIdx, value) {
+      if (value === undefined || value === null || isNaN(value)) value = 0;
+      value = Math.max(0, Math.min(MAX_VALUE, Math.round(value)));
+      const cap = document.getElementById(`fxAuxCap_${auxIdx}`);
+      const dbEl = document.getElementById(`fxAuxDb_${auxIdx}`);
+      if (cap) {
+        const topPct = (1 - (value / MAX_VALUE)) * 100;
+        cap.style.top = `${topPct.toFixed(2)}%`;
+      }
+      if (dbEl) dbEl.textContent = rawToDb(value);
+    }
+
+    function updateFxAuxOnUI(auxIdx, isOn) {
+      const btn = document.getElementById(`fxAuxBtnOn_${auxIdx}`);
+      if (!btn) return;
+      if (isOn) {
+        btn.className = 'btn-yamaha-on is-on';
+        btn.textContent = 'AUX ON';
+      } else {
+        btn.className = 'btn-yamaha-on is-muted';
+        btn.textContent = 'MUTE';
+      }
+    }
+
+    function setFxAuxVolume(chIndex, auxIdx, value, sendMidi = true) {
+      if (typeof chIndex !== 'number') return;
+      value = Math.max(0, Math.min(MAX_VALUE, Math.round(value)));
+      const auxKey = 'AUX' + (auxIdx + 1);
+      if (!mixData[auxKey]) return;
+      mixData[auxKey].volumes[chIndex] = value;
+      updateFxAuxFaderUI(auxIdx, value);
+      if (currentMixTarget === auxKey) {
+        updateFaderUI(chIndex, value);
+      }
+      saveMixDataDebounced();
+      if (sendMidi) {
+        sendCommand(0x23, auxIdx * 3 + 2, chIndex, value);
+      }
+    }
+
+    function setFxAuxOn(chIndex, auxIdx, isOn, sendMidi = true) {
+      if (typeof chIndex !== 'number') return;
+      const auxKey = 'AUX' + (auxIdx + 1);
+      if (!mixData[auxKey]) return;
+      const val = isOn ? 1 : 0;
+      mixData[auxKey].on[chIndex] = val;
+      updateFxAuxOnUI(auxIdx, isOn);
+      if (currentMixTarget === auxKey) {
+        updateChannelOnUI(chIndex, isOn);
+      }
+      saveMixDataDebounced();
+      updateTabStatusDots(chIndex);
+      if (sendMidi) {
+        sendCommand(0x23, auxIdx * 3, chIndex, val);
+      }
+    }
+
+    function syncAuxModalFromState(target) {
+      if (typeof target !== 'number') return;
+      for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
+        const auxKey = 'AUX' + (auxIdx + 1);
+        const auxMix = mixData[auxKey];
+        const vol = auxMix ? (auxMix.volumes[target] || 0) : 0;
+        const isOn = auxMix ? (auxMix.on[target] === 1) : false;
+        updateFxAuxFaderUI(auxIdx, vol);
+        updateFxAuxOnUI(auxIdx, isOn);
+      }
+    }
+
+    if (fxAuxGridEl) {
+      const auxTicksHtml = SCALE_MARKERS.map(m => `
+        <div class="scale-tick ${m.isZero ? 'tick-0db' : ''}" style="top: ${m.pct}%;">
+          <span>${m.db}</span>
+          <span>${m.db}</span>
+        </div>
+      `).join('');
+
+      for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
+        const strip = document.createElement('div');
+        strip.className = 'fx-aux-strip';
+        strip.innerHTML = `
+          <div class="fx-aux-strip-title">AUX ${auxIdx + 1}</div>
+          <button type="button" class="btn-yamaha-on is-on" id="fxAuxBtnOn_${auxIdx}" title="Alternar Envio AUX ${auxIdx + 1} ON / MUTE">AUX ON</button>
+          <div class="fader-section">
+            <div class="fader-track-container" id="fxAuxTrack_${auxIdx}">
+              <div class="scale-ticks">${auxTicksHtml}</div>
+              <div class="fader-slot"></div>
+              <div class="fader-cap cap-blue" id="fxAuxCap_${auxIdx}">
+                <div class="fader-cap-body">
+                  <div class="fader-center-line"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="ch-footer">
+            <div class="ch-db-readout" id="fxAuxDb_${auxIdx}">-∞ dB</div>
+            <div class="ch-quick-actions">
+              <button type="button" class="btn-ch-snap" id="fxAuxZero_${auxIdx}" title="Ajustar para 0.0 dB">0dB</button>
+              <button type="button" class="btn-ch-snap" id="fxAuxInf_${auxIdx}" title="Zerar em -∞ dB">-∞</button>
+            </div>
+          </div>
+        `;
+        fxAuxGridEl.appendChild(strip);
+
+        const btnOn = strip.querySelector(`#fxAuxBtnOn_${auxIdx}`);
+        const track = strip.querySelector(`#fxAuxTrack_${auxIdx}`);
+        const cap = strip.querySelector(`#fxAuxCap_${auxIdx}`);
+        const btnZero = strip.querySelector(`#fxAuxZero_${auxIdx}`);
+        const btnInf = strip.querySelector(`#fxAuxInf_${auxIdx}`);
+
+        btnOn.addEventListener('click', () => {
+          if (typeof currentSelectedCh !== 'number') return;
+          const auxKey = 'AUX' + (auxIdx + 1);
+          const cur = mixData[auxKey] ? mixData[auxKey].on[currentSelectedCh] : 0;
+          setFxAuxOn(currentSelectedCh, auxIdx, cur !== 1, true);
+        });
+
+        btnZero.addEventListener('click', () => {
+          if (typeof currentSelectedCh !== 'number') return;
+          setFxAuxVolume(currentSelectedCh, auxIdx, NOMINAL_VALUE, true);
+        });
+
+        btnInf.addEventListener('click', () => {
+          if (typeof currentSelectedCh !== 'number') return;
+          setFxAuxVolume(currentSelectedCh, auxIdx, 0, true);
+        });
+
+        cap.addEventListener('dblclick', (e) => {
+          e.stopPropagation();
+          if (typeof currentSelectedCh !== 'number') return;
+          setFxAuxVolume(currentSelectedCh, auxIdx, NOMINAL_VALUE, true);
+        });
+
+        track.addEventListener('dblclick', () => {
+          if (typeof currentSelectedCh !== 'number') return;
+          setFxAuxVolume(currentSelectedCh, auxIdx, NOMINAL_VALUE, true);
+        });
+
+        let isDraggingAux = false;
+        function calcAuxValFromPointer(clientY) {
+          const rect = track.getBoundingClientRect();
+          const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
+          return (1 - (y / rect.height)) * MAX_VALUE;
+        }
+
+        track.addEventListener('pointerdown', (e) => {
+          if (typeof currentSelectedCh !== 'number') return;
+          isDraggingAux = true;
+          activeDraggingFxAux = auxIdx;
+          cap.classList.add('is-dragging');
+          track.setPointerCapture(e.pointerId);
+          setFxAuxVolume(currentSelectedCh, auxIdx, calcAuxValFromPointer(e.clientY), true);
+        });
+
+        track.addEventListener('pointermove', (e) => {
+          if (!isDraggingAux || typeof currentSelectedCh !== 'number') return;
+          setFxAuxVolume(currentSelectedCh, auxIdx, calcAuxValFromPointer(e.clientY), true);
+        });
+
+        const endAuxDrag = (e) => {
+          if (!isDraggingAux) return;
+          isDraggingAux = false;
+          activeDraggingFxAux = null;
+          cap.classList.remove('is-dragging');
+          try { track.releasePointerCapture(e.pointerId); } catch (_) {}
+        };
+        track.addEventListener('pointerup', endAuxDrag);
+        track.addEventListener('pointercancel', endAuxDrag);
+
+        track.addEventListener('wheel', (e) => {
+          if (typeof currentSelectedCh !== 'number') return;
+          e.preventDefault();
+          const auxKey = 'AUX' + (auxIdx + 1);
+          const step = e.shiftKey ? 4 : 16;
+          const delta = e.deltaY < 0 ? step : -step;
+          const curVal = mixData[auxKey] ? (mixData[auxKey].volumes[currentSelectedCh] || 0) : 0;
+          setFxAuxVolume(currentSelectedCh, auxIdx, curVal + delta, true);
+        }, { passive: false });
+      }
+    }
+
+    if (btnFxAuxAllOn) {
+      btnFxAuxAllOn.addEventListener('click', () => {
+        if (typeof currentSelectedCh !== 'number') return;
+        for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
+          setFxAuxOn(currentSelectedCh, auxIdx, true, true);
+        }
+      });
+    }
+
+    if (btnFxAuxAllMute) {
+      btnFxAuxAllMute.addEventListener('click', () => {
+        if (typeof currentSelectedCh !== 'number') return;
+        for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
+          setFxAuxOn(currentSelectedCh, auxIdx, false, true);
+        }
+      });
     }
 
     function syncCompModalFromState(target) {
@@ -8791,6 +9123,11 @@
 
         if (Array.isArray(json.mute_groups) && typeof applyMuteGroupsFromServer === 'function') {
           applyMuteGroupsFromServer(json.mute_groups);
+        }
+
+        if (fxModalOverlay && fxModalOverlay.classList.contains('open') && typeof currentSelectedCh === 'number') {
+          if (typeof syncAuxModalFromState === 'function') syncAuxModalFromState(currentSelectedCh);
+          if (typeof updateTabStatusDots === 'function') updateTabStatusDots(currentSelectedCh);
         }
 
         saveMixDataDebounced();
