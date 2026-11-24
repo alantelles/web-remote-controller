@@ -21,7 +21,7 @@ echo "1. Construindo imagem de build..."
 docker build -f Dockerfile.ubuntu2004 -t "$IMAGE_TAG" .
 
 echo "2. Extraindo binário compilado '01v96-controller'..."
-CONTAINER_ID=$(docker create "$IMAGE_TAG")
+CONTAINER_ID=$(docker create "$IMAGE_TAG" /01v96-controller)
 docker cp "${CONTAINER_ID}:/01v96-controller" ./01v96-controller
 docker rm "$CONTAINER_ID" >/dev/null
 

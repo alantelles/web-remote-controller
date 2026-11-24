@@ -34,3 +34,4 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -tags netgo -ldflags="-s -w" 
 # Saída: imagem mínima para extração do binário
 FROM scratch
 COPY --from=builder /app/01v96-controller /01v96-controller
+CMD ["/01v96-controller"]
