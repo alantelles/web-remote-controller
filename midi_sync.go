@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"math"
@@ -10,7 +11,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"gitlab.com/gomidi/midi/v2"
 	"gitlab.com/gomidi/midi/v2/drivers"
 )
@@ -79,6 +79,32 @@ func Build01V96ParamRequest(element, param, channel byte) []byte {
 		element, param, channel,
 		0xF7,
 	}
+}
+
+// Parse01V96ChannelNameSysEx decodifica um caractere do nome de canal (curto: 0..3; longo: 0x08..0x17) da 01V96 / Studio Manager.
+// Formato: F0 43 1n 3E [0D|7F] 02 04 [param] [ch 0..31] 00 00 00 [ascii] F7
+func Parse01V96ChannelNameSysEx(data []byte) (channel byte, param byte, ascii byte, ok bool) {
+	if len(data) != 14 {
+		return 0, 0, 0, false
+	}
+	if data[0] != 0xF0 || data[1] != 0x43 || (data[2]&0xF0) != 0x10 || data[3] != 0x3E {
+		return 0, 0, 0, false
+	}
+	if data[4] != 0x0D && data[4] != 0x7F {
+		return 0, 0, 0, false
+	}
+	if data[5] != 0x02 || data[6] != 0x04 || data[13] != 0xF7 {
+		return 0, 0, 0, false
+	}
+	param = data[7]
+	channel = data[8]
+	isShort := param < 4
+	isLong := param >= 0x08 && param <= 0x17
+	if (!isShort && !isLong) || channel >= 32 {
+		return 0, 0, 0, false
+	}
+	ascii = data[12] & 0x7F
+	return channel, param, ascii, true
 }
 
 // Build01V96MeterRequest monta a mensagem SysEx de solicitação de Remote Meter (12 bytes).
@@ -454,9 +480,10 @@ func startMIDIInListener(in drivers.In) (stopFn func(), err error) {
 // ==========================================
 
 type paramTarget struct {
-	element byte
-	param   byte
-	channel byte
+	dataType byte // 0 ou 0x01 = Parameter Change; 0x02 = Channel Name
+	element  byte
+	param    byte
+	channel  byte
 }
 
 var (
@@ -774,7 +801,7 @@ func RequestMixerInitialState(paceDelay time.Duration) error {
 
 var (
 	grSubLock         sync.Mutex
-	grSubscribers     = make(map[*websocket.Conn]string)
+	grSubscribers     = make(map[*wsClient]string)
 	grPollRunning     bool
 	grPollStopChan    chan struct{}
 	grPollRefreshChan = make(chan struct{}, 1)
@@ -785,8 +812,8 @@ var (
 
 // setGRSubscription registra ou remove o interesse de uma tela WebSocket pelo Gain Reduction de um canal/saída.
 // O polling MIDI (ou telemetria simulada) só permanece ativo enquanto houver ao menos 1 tela com o compressor aberto.
-func setGRSubscription(conn *websocket.Conn, target string) {
-	if conn == nil {
+func setGRSubscription(client *wsClient, target string) {
+	if client == nil {
 		return
 	}
 
@@ -795,9 +822,9 @@ func setGRSubscription(conn *websocket.Conn, target string) {
 	defer grSubLock.Unlock()
 
 	if target == "" {
-		delete(grSubscribers, conn)
+		delete(grSubscribers, client)
 	} else {
-		grSubscribers[conn] = target
+		grSubscribers[client] = target
 	}
 
 	reconcileGRPollingLocked()
@@ -850,31 +877,30 @@ func getUniqueGRTargets() []string {
 // sendGRToSubscribers envia o valor de Gain Reduction apenas para as conexões que estão vendo aquele canal/saída.
 func sendGRToSubscribers(target string, grDb float64, raw int) {
 	grSubLock.Lock()
-	var conns []*websocket.Conn
+	var targets []*wsClient
 	for c, t := range grSubscribers {
 		if t == target {
-			conns = append(conns, c)
+			targets = append(targets, c)
 		}
 	}
 	grSubLock.Unlock()
 
-	if len(conns) == 0 {
+	if len(targets) == 0 {
 		return
 	}
 
-	msg := WSMessage{
+	b, err := json.Marshal(WSMessage{
 		Type:   "gr_meter",
 		Target: target,
 		GRDb:   math.Round(grDb*10) / 10,
 		Raw:    raw,
+	})
+	if err != nil {
+		return
 	}
 
-	clientsLock.Lock()
-	defer clientsLock.Unlock()
-	for _, c := range conns {
-		if err := c.WriteJSON(msg); err != nil {
-			log.Printf("Erro ao enviar gr_meter via WS: %v", err)
-		}
+	for _, c := range targets {
+		c.enqueueBytes(b)
 	}
 }
 

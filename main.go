@@ -31,9 +31,11 @@ import (
 )
 
 type WSMessage struct {
-	Type        string       `json:"type,omitempty"`          // "init", "param", "simulation_status", "mute_groups"
+	Type        string       `json:"type,omitempty"`          // "init", "param", "channel_name", "simulation_status", "mute_groups"
 	Port        string       `json:"port,omitempty"`          // Nome da porta MIDI
 	Hex         string       `json:"hex,omitempty"`           // SysEx em hexadecimal
+	Name        string       `json:"name,omitempty"`          // Nome curto do canal (0x02 0x04 param 0..3)
+	LongName    string       `json:"long_name,omitempty"`     // Nome longo do canal (0x02 0x04 param 0x08..0x17)
 	Element     byte         `json:"element"`                 // 0x1C (Fader), 0x1A (Mute/ON)
 	Param       byte         `json:"param"`                   // 0x00
 	Channel     byte         `json:"channel"`                 // 0x00 a 0x1F (0 a 31)
@@ -64,7 +66,7 @@ var (
 	}
 
 	// Gerenciamento de conexões WebSocket para Broadcast em tempo real
-	clients     = make(map[*websocket.Conn]bool)
+	clients     = make(map[*wsClient]bool)
 	clientsLock sync.Mutex
 
 	// Controle da simulação de faders
@@ -304,14 +306,90 @@ func (t *paramThrottler) allowOrSchedule(element, param, channel byte, value int
 	return
 }
 
+const (
+	wsWriteTimeout = 2 * time.Second
+	wsSendBuffer   = 256
+)
+
+type wsClient struct {
+	conn   *websocket.Conn
+	send   chan []byte
+	closed chan struct{}
+	once   sync.Once
+}
+
+func newWSClient(conn *websocket.Conn) *wsClient {
+	return &wsClient{
+		conn:   conn,
+		send:   make(chan []byte, wsSendBuffer),
+		closed: make(chan struct{}),
+	}
+}
+
+func (c *wsClient) close() {
+	c.once.Do(func() {
+		close(c.closed)
+		_ = c.conn.Close()
+	})
+}
+
+func (c *wsClient) enqueueBytes(b []byte) bool {
+	select {
+	case <-c.closed:
+		return false
+	default:
+	}
+
+	select {
+	case c.send <- b:
+		return true
+	case <-c.closed:
+		return false
+	default:
+		// Cliente lento: descarta a mensagem sem travar os demais clientes
+		return false
+	}
+}
+
+func (c *wsClient) enqueueJSON(msg WSMessage) bool {
+	b, err := json.Marshal(msg)
+	if err != nil {
+		return false
+	}
+	return c.enqueueBytes(b)
+}
+
+func (c *wsClient) writePump() {
+	for {
+		select {
+		case <-c.closed:
+			return
+		case msg := <-c.send:
+			_ = c.conn.SetWriteDeadline(time.Now().Add(wsWriteTimeout))
+			if err := c.conn.WriteMessage(websocket.TextMessage, msg); err != nil {
+				c.close()
+				return
+			}
+		}
+	}
+}
+
 func broadcastWS(msg WSMessage) {
+	b, err := json.Marshal(msg)
+	if err != nil {
+		return
+	}
+
 	clientsLock.Lock()
 	defer clientsLock.Unlock()
 
-	for conn := range clients {
-		if err := conn.WriteJSON(msg); err != nil {
-			conn.Close()
-			delete(clients, conn)
+	for client := range clients {
+		if !client.enqueueBytes(b) {
+			select {
+			case <-client.closed:
+				delete(clients, client)
+			default:
+			}
 		}
 	}
 }
@@ -1552,7 +1630,7 @@ func executeSystemShutdown() {
 
 	clientsLock.Lock()
 	for client := range clients {
-		client.Close()
+		client.close()
 		delete(clients, client)
 	}
 	clientsLock.Unlock()
@@ -1737,16 +1815,19 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Erro no upgrade WebSocket: %v", err)
 		return
 	}
+	client := newWSClient(conn)
+	go client.writePump()
+
 	defer func() {
-		setGRSubscription(conn, "")
+		setGRSubscription(client, "")
 		clientsLock.Lock()
-		delete(clients, conn)
+		delete(clients, client)
 		clientsLock.Unlock()
-		conn.Close()
+		client.close()
 	}()
 
 	clientsLock.Lock()
-	clients[conn] = true
+	clients[client] = true
 	clientsLock.Unlock()
 
 	log.Printf("Cliente WebSocket conectado: %s (Usuário: %s)", r.RemoteAddr, sess.User.Username)
@@ -1760,7 +1841,7 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 	simLock.Unlock()
 
 	// Envia informação inicial (porta, status da simulação e mute groups)
-	conn.WriteJSON(WSMessage{
+	client.enqueueJSON(WSMessage{
 		Type:       "init",
 		Port:       pName,
 		Running:    &runningCopy,
@@ -1843,12 +1924,28 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		// Assinatura sob demanda do medidor de Gain Reduction (apenas ADMIN/OPERATOR com tela do compressor aberta)
 		if msg.Action == "subscribe_gr" {
 			if userRole == "ADMIN" || userRole == "OPERATOR" {
-				setGRSubscription(conn, msg.Target)
+				setGRSubscription(client, msg.Target)
 			}
 			continue
 		}
 		if msg.Action == "unsubscribe_gr" {
-			setGRSubscription(conn, "")
+			setGRSubscription(client, "")
+			continue
+		}
+
+		if msg.Action == "set_channel_name" {
+			if userRole == "ADMIN" || userRole == "OPERATOR" {
+				if msg.Channel < 32 {
+					shortName, longName := SetChannelName(int(msg.Channel), msg.Name, msg.LongName)
+					go FlushStateToDiskIfDirty()
+					broadcastWS(WSMessage{
+						Type:     "channel_name",
+						Channel:  msg.Channel,
+						Name:     shortName,
+						LongName: longName,
+					})
+				}
+			}
 			continue
 		}
 
@@ -1991,7 +2088,6 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 			elemCopy, paramCopy, chCopy := msg.Element, msg.Param, msg.Channel
 			canMIDI, canWS = throttler.allowOrSchedule(elemCopy, paramCopy, chCopy, msg.Value, func(finalVal int) {
 				finalSysex := Build01V96SysEx(elemCopy, paramCopy, chCopy, finalVal)
-				finalHex := fmt.Sprintf("% X", finalSysex)
 
 				markSentEcho(elemCopy, paramCopy, chCopy, finalVal)
 
@@ -2007,7 +2103,6 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 					Param:   paramCopy,
 					Channel: chCopy,
 					Value:   finalVal,
-					Hex:     finalHex,
 				})
 			})
 		}
@@ -2031,7 +2126,6 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 				Param:   msg.Param,
 				Channel: msg.Channel,
 				Value:   msg.Value,
-				Hex:     hexStr,
 			})
 		}
 	}

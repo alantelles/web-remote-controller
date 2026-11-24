@@ -3931,17 +3931,38 @@
 
         // Eventos do Slider
         const slider = card.querySelector(`#slider_${ch}`);
+        const dbTextEl = card.querySelector(`#dbText_${ch}`);
+        let sliderPendingVal = null;
+        let sliderRafId = 0;
+
+        function flushMobileSliderSend() {
+          sliderRafId = 0;
+          if (sliderPendingVal === null) return;
+          const val = sliderPendingVal;
+          sliderPendingVal = null;
+          const target = MIX_TARGETS[currentMix];
+          sendCommand(target.faderElement, target.faderParam, ch, val, true);
+        }
+
         slider.addEventListener('input', (e) => {
           const val = parseInt(e.target.value, 10);
           state.faders[currentMix][ch] = val;
-          document.getElementById(`dbText_${ch}`).innerText = rawToDb(val);
-          const target = MIX_TARGETS[currentMix];
-          sendCommand(target.faderElement, target.faderParam, ch, val, true);
+          if (dbTextEl) dbTextEl.textContent = rawToDb(val);
+          sliderPendingVal = val;
+          if (!sliderRafId) {
+            sliderRafId = requestAnimationFrame(flushMobileSliderSend);
+          }
         });
 
         slider.addEventListener('change', (e) => {
+          if (sliderRafId) {
+            cancelAnimationFrame(sliderRafId);
+            sliderRafId = 0;
+          }
+          sliderPendingVal = null;
           const val = parseInt(e.target.value, 10);
           state.faders[currentMix][ch] = val;
+          if (dbTextEl) dbTextEl.textContent = rawToDb(val);
           const target = MIX_TARGETS[currentMix];
           sendCommand(target.faderElement, target.faderParam, ch, val, false);
         });

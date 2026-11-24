@@ -4520,8 +4520,14 @@
         <div class="fx-header-title-wrap">
           <div class="fx-ch-nav">
             <button type="button" class="btn-fx-nav" id="btnFxPrevCh" title="Canal Anterior (Alt + ←)">◀</button>
-            <span class="fx-ch-badge type-ch" id="fxModalChBadge">CH 01</span>
+            <span class="fx-ch-badge type-ch" id="fxModalChBadge" title="Duplo clique para editar o nome">CH 01</span>
             <button type="button" class="btn-fx-nav" id="btnFxNextCh" title="Próximo Canal (Alt + →)">▶</button>
+          </div>
+          <div id="fxChNameEditor" style="display: none; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <input type="text" id="fxChShortNameInput" maxlength="4" placeholder="Curto (4)" style="width: 72px; padding: 4px 6px; border-radius: 4px; border: 1px solid #475569; background: #0f172a; color: #f8fafc; font-size: 12px; font-weight: 600;" />
+            <input type="text" id="fxChLongNameInput" maxlength="16" placeholder="Nome longo (16)" style="width: 150px; padding: 4px 8px; border-radius: 4px; border: 1px solid #475569; background: #0f172a; color: #f8fafc; font-size: 12px;" />
+            <button type="button" id="btnFxSaveChName" class="btn-fx-nav" style="width: auto; padding: 4px 10px; background: #2563eb; color: #fff; border-color: #3b82f6; font-size: 11px; font-weight: 600;">Salvar</button>
+            <button type="button" id="btnFxCancelChName" class="btn-fx-nav" style="font-size: 11px;">✕</button>
           </div>
           <span class="fx-header-title">Processamento de Canal (Rack de Efeitos)</span>
         </div>
@@ -5516,6 +5522,24 @@
           showToast('Cena carregada e sincronizada! 🎬', '🎬');
         }
 
+        if (data.type === 'channel_name' && data.channel >= 0 && data.channel < TOTAL_CHANNELS) {
+          const ch = data.channel;
+          const shortName = data.name || `CH ${ch + 1}`;
+          const longName = data.long_name || '';
+          channelsState[ch].name = shortName;
+          channelsState[ch].longName = longName;
+          const badgeEl = document.getElementById(`chBadge_${ch}`);
+          if (badgeEl) {
+            badgeEl.textContent = shortName;
+            badgeEl.title = longName || shortName;
+          }
+          if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === ch && fxModalOverlay && fxModalOverlay.classList.contains('open') && fxModalChBadge) {
+            const modalName = longName || shortName;
+            fxModalChBadge.textContent = modalName;
+            fxModalChBadge.title = modalName;
+          }
+        }
+
         if (data.type === 'param') {
           // Element 0x1C = Input Fader (Master Stereo)
           if (data.element === 0x1C && data.param === 0x00) {
@@ -5524,7 +5548,7 @@
             if (ch !== undefined && ch >= 0 && ch < TOTAL_CHANNELS) {
               mixData.MASTER.volumes[ch] = val;
               if (currentMixTarget === 'MASTER' && activeDraggingChannel !== ch) {
-                updateFaderUI(ch, val);
+                scheduleFaderUI(ch, val);
               }
             }
           }
@@ -5568,10 +5592,10 @@
                   const val = (data.value !== undefined && data.value !== null && !isNaN(data.value)) ? data.value : 0;
                   mixData[targetKey].volumes[ch] = val;
                   if (currentMixTarget === targetKey && activeDraggingChannel !== ch) {
-                    updateFaderUI(ch, val);
+                    scheduleFaderUI(ch, val);
                   }
                   if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === ch && fxModalOverlay && fxModalOverlay.classList.contains('open') && activeDraggingFxAux !== auxIdx) {
-                    if (typeof updateFxAuxFaderUI === 'function') updateFxAuxFaderUI(auxIdx, val);
+                    if (typeof updateFxAuxFaderUI === 'function') scheduleFxAuxFaderUI(auxIdx, val);
                   }
                 }
               }
@@ -5718,7 +5742,7 @@
             const val = (data.value !== undefined && data.value !== null && !isNaN(data.value)) ? data.value : 0;
             mixData.MASTER.masterVolume = val;
             if (currentMixTarget === 'MASTER' && activeDraggingChannel !== 'masterOut') {
-              updateMasterOutputFaderUI(val);
+              scheduleMasterFaderUI(val);
             }
           }
           // Element 0x4D = Stereo Out ON / MUTE (Master)
@@ -5736,7 +5760,7 @@
             if (mixData[targetKey]) {
               mixData[targetKey].masterVolume = val;
               if (currentMixTarget === targetKey && activeDraggingChannel !== 'masterOut') {
-                updateMasterOutputFaderUI(val);
+                scheduleMasterFaderUI(val);
               }
             }
           }
@@ -5864,6 +5888,49 @@
     // INTERATIVIDADE DOS FADERS E ON/MUTE
     // ==========================================
     let activeDraggingChannel = null;
+
+    const pendingFaderUI = new Map();
+    let pendingMasterFaderUI = null;
+    const pendingFxAuxFaderUI = new Map();
+    let faderRafId = 0;
+
+    function flushFaderUI() {
+      faderRafId = 0;
+      if (pendingFaderUI.size > 0) {
+        pendingFaderUI.forEach((val, ch) => updateFaderUI(ch, val));
+        pendingFaderUI.clear();
+      }
+      if (pendingMasterFaderUI !== null) {
+        const val = pendingMasterFaderUI;
+        pendingMasterFaderUI = null;
+        updateMasterOutputFaderUI(val);
+      }
+      if (pendingFxAuxFaderUI.size > 0) {
+        pendingFxAuxFaderUI.forEach((val, auxIdx) => updateFxAuxFaderUI(auxIdx, val));
+        pendingFxAuxFaderUI.clear();
+      }
+    }
+
+    function ensureFaderRaf() {
+      if (!faderRafId) {
+        faderRafId = requestAnimationFrame(flushFaderUI);
+      }
+    }
+
+    function scheduleFaderUI(chIndex, value) {
+      pendingFaderUI.set(chIndex, value);
+      ensureFaderRaf();
+    }
+
+    function scheduleMasterFaderUI(value) {
+      pendingMasterFaderUI = value;
+      ensureFaderRaf();
+    }
+
+    function scheduleFxAuxFaderUI(auxIdx, value) {
+      pendingFxAuxFaderUI.set(auxIdx, value);
+      ensureFaderRaf();
+    }
 
     function updateFaderUI(chIndex, value) {
       if (value === undefined || value === null || isNaN(value)) {
@@ -6184,17 +6251,29 @@
         });
 
         let isMasterDragging = false;
+        let masterTrackRect = null;
+        let masterDragPendingVal = null;
+        let masterDragRafId = 0;
 
         function calcMasterValueFromPointer(clientY) {
-          const rect = trackContainer.getBoundingClientRect();
+          const rect = masterTrackRect || trackContainer.getBoundingClientRect();
           const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
           const fraction = 1 - (y / rect.height);
           return fraction * MAX_VALUE;
         }
 
+        function flushMasterDrag() {
+          masterDragRafId = 0;
+          if (masterDragPendingVal === null) return;
+          const val = masterDragPendingVal;
+          masterDragPendingVal = null;
+          setMasterOutputVolume(val, true);
+        }
+
         trackContainer.addEventListener('pointerdown', (e) => {
           isMasterDragging = true;
           activeDraggingChannel = 'masterOut';
+          masterTrackRect = trackContainer.getBoundingClientRect();
           cap.classList.add('is-dragging');
           trackContainer.setPointerCapture(e.pointerId);
           const val = calcMasterValueFromPointer(e.clientY);
@@ -6203,14 +6282,21 @@
 
         trackContainer.addEventListener('pointermove', (e) => {
           if (!isMasterDragging) return;
-          const val = calcMasterValueFromPointer(e.clientY);
-          setMasterOutputVolume(val, true);
+          masterDragPendingVal = calcMasterValueFromPointer(e.clientY);
+          if (!masterDragRafId) {
+            masterDragRafId = requestAnimationFrame(flushMasterDrag);
+          }
         });
 
         trackContainer.addEventListener('pointerup', (e) => {
           if (isMasterDragging) {
+            if (masterDragRafId) {
+              cancelAnimationFrame(masterDragRafId);
+              flushMasterDrag();
+            }
             isMasterDragging = false;
             activeDraggingChannel = null;
+            masterTrackRect = null;
             cap.classList.remove('is-dragging');
             try { trackContainer.releasePointerCapture(e.pointerId); } catch (_) {}
           }
@@ -6603,19 +6689,40 @@
         setChannelVolume(chIndex, NOMINAL_VALUE, true);
       });
 
+      const badgeEl = document.getElementById(`chBadge_${chIndex}`);
+      if (badgeEl) {
+        badgeEl.addEventListener('dblclick', (e) => {
+          e.stopPropagation();
+          if (currentUserRole !== 'ADMIN' && currentUserRole !== 'OPERATOR') return;
+          if (typeof openStripNamePopover === 'function') openStripNamePopover(chIndex, badgeEl);
+        });
+      }
+
       // Pointer Events para arrasto preciso e suave (Mouse / Touch)
       let isDragging = false;
+      let trackRect = null;
+      let dragPendingVal = null;
+      let dragRafId = 0;
 
       function calcValueFromPointer(clientY) {
-        const rect = trackContainer.getBoundingClientRect();
+        const rect = trackRect || trackContainer.getBoundingClientRect();
         const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
         const fraction = 1 - (y / rect.height);
         return fraction * MAX_VALUE;
       }
 
+      function flushChannelDrag() {
+        dragRafId = 0;
+        if (dragPendingVal === null) return;
+        const val = dragPendingVal;
+        dragPendingVal = null;
+        setChannelVolume(chIndex, val, true);
+      }
+
       trackContainer.addEventListener('pointerdown', (e) => {
         isDragging = true;
         activeDraggingChannel = chIndex;
+        trackRect = trackContainer.getBoundingClientRect();
         cap.classList.add('is-dragging');
         trackContainer.setPointerCapture(e.pointerId);
         const val = calcValueFromPointer(e.clientY);
@@ -6624,14 +6731,21 @@
 
       trackContainer.addEventListener('pointermove', (e) => {
         if (!isDragging) return;
-        const val = calcValueFromPointer(e.clientY);
-        setChannelVolume(chIndex, val, true);
+        dragPendingVal = calcValueFromPointer(e.clientY);
+        if (!dragRafId) {
+          dragRafId = requestAnimationFrame(flushChannelDrag);
+        }
       });
 
       trackContainer.addEventListener('pointerup', (e) => {
         if (isDragging) {
+          if (dragRafId) {
+            cancelAnimationFrame(dragRafId);
+            flushChannelDrag();
+          }
           isDragging = false;
           activeDraggingChannel = null;
+          trackRect = null;
           cap.classList.remove('is-dragging');
           try { trackContainer.releasePointerCapture(e.pointerId); } catch (_) {}
         }
@@ -7228,11 +7342,15 @@
 
       fxModalChBadge.className = 'fx-ch-badge';
       fxModalChBadge.style.color = '';
+      if (typeof hideFxChNameEditor === 'function') hideFxChNameEditor();
 
       if (typeof target === 'number') {
-        const chName = (channelsState[target] && channelsState[target].name) 
-          ? channelsState[target].name 
+        const chShort = (channelsState[target] && channelsState[target].name)
+          ? channelsState[target].name
           : `CH ${String(target + 1).padStart(2, '0')}`;
+        const chName = (channelsState[target] && channelsState[target].longName)
+          ? channelsState[target].longName
+          : chShort;
         fxModalChBadge.textContent = chName;
         fxModalChBadge.title = chName;
         fxModalChBadge.classList.add('type-ch');
@@ -7337,6 +7455,134 @@
     }
 
     btnFxClose.addEventListener('click', closeFxModal);
+
+    // Editor inline do nome do canal (curto 4 chars + longo 16 chars) salvo apenas no serviço
+    const fxChNameEditor = document.getElementById('fxChNameEditor');
+    const fxChShortNameInput = document.getElementById('fxChShortNameInput');
+    const fxChLongNameInput = document.getElementById('fxChLongNameInput');
+    const btnFxSaveChName = document.getElementById('btnFxSaveChName');
+    const btnFxCancelChName = document.getElementById('btnFxCancelChName');
+
+    function sendChannelNameUpdate(chIdx, shortVal, longVal) {
+      if (typeof chIdx !== 'number') return;
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          action: 'set_channel_name',
+          channel: chIdx,
+          name: (shortVal || '').trim().slice(0, 4),
+          long_name: (longVal || '').trim().slice(0, 16)
+        }));
+      }
+      showToast('Nome do canal salvo', '🏷️');
+    }
+
+    function hideFxChNameEditor() {
+      if (fxChNameEditor) fxChNameEditor.style.display = 'none';
+    }
+
+    function openFxChNameEditor() {
+      if (typeof currentSelectedCh !== 'number' || !fxChNameEditor) return;
+      if (currentUserRole !== 'ADMIN' && currentUserRole !== 'OPERATOR') return;
+      const ch = channelsState[currentSelectedCh] || {};
+      const defaultName = `CH ${currentSelectedCh + 1}`;
+      fxChShortNameInput.value = (ch.name && ch.name !== defaultName) ? ch.name : '';
+      fxChLongNameInput.value = ch.longName || '';
+      fxChNameEditor.style.display = 'flex';
+      fxChLongNameInput.focus();
+      fxChLongNameInput.select();
+    }
+
+    function submitFxChNameEditor() {
+      if (typeof currentSelectedCh !== 'number') return;
+      sendChannelNameUpdate(currentSelectedCh, fxChShortNameInput.value, fxChLongNameInput.value);
+      hideFxChNameEditor();
+    }
+
+    if (fxModalChBadge) {
+      fxModalChBadge.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        openFxChNameEditor();
+      });
+    }
+    if (btnFxCancelChName) btnFxCancelChName.addEventListener('click', hideFxChNameEditor);
+    if (btnFxSaveChName) btnFxSaveChName.addEventListener('click', submitFxChNameEditor);
+    [fxChShortNameInput, fxChLongNameInput].forEach(inp => {
+      if (!inp) return;
+      inp.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          submitFxChNameEditor();
+        } else if (e.key === 'Escape') {
+          e.stopPropagation();
+          hideFxChNameEditor();
+        }
+      });
+    });
+
+    // Popover inline para editar o nome direto no strip (duplo clique no nome do canal)
+    let stripNamePopover = null;
+    let stripNameEditingCh = null;
+
+    function closeStripNamePopover() {
+      if (stripNamePopover) stripNamePopover.style.display = 'none';
+      stripNameEditingCh = null;
+    }
+
+    function openStripNamePopover(chIdx, anchorEl) {
+      if (!stripNamePopover) {
+        stripNamePopover = document.createElement('div');
+        stripNamePopover.id = 'stripNamePopover';
+        stripNamePopover.style.cssText = 'position: fixed; z-index: 3000; background: #1e293b; border: 1px solid #475569; border-radius: 8px; padding: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); display: none; flex-direction: column; gap: 6px; width: 190px;';
+        stripNamePopover.innerHTML = `
+          <div style="font-size: 11px; color: #94a3b8; font-weight: 600;">Nome do Canal</div>
+          <input type="text" id="stripShortInput" maxlength="4" placeholder="Curto (4)" style="padding: 4px 6px; border-radius: 4px; border: 1px solid #475569; background: #0f172a; color: #f8fafc; font-size: 12px; font-weight: 600;" />
+          <input type="text" id="stripLongInput" maxlength="16" placeholder="Nome completo (16)" style="padding: 4px 6px; border-radius: 4px; border: 1px solid #475569; background: #0f172a; color: #f8fafc; font-size: 12px;" />
+          <div style="display: flex; gap: 6px; justify-content: flex-end;">
+            <button type="button" id="stripNameCancel" class="btn-fx-nav" style="font-size: 11px;">✕</button>
+            <button type="button" id="stripNameSave" class="btn-fx-nav" style="width: auto; padding: 4px 10px; background: #2563eb; color: #fff; border-color: #3b82f6; font-size: 11px; font-weight: 600;">Salvar</button>
+          </div>
+        `;
+        document.body.appendChild(stripNamePopover);
+
+        const shortInp = stripNamePopover.querySelector('#stripShortInput');
+        const longInp = stripNamePopover.querySelector('#stripLongInput');
+        const saveFn = () => {
+          if (typeof stripNameEditingCh !== 'number') return;
+          sendChannelNameUpdate(stripNameEditingCh, shortInp.value, longInp.value);
+          closeStripNamePopover();
+        };
+        stripNamePopover.querySelector('#stripNameSave').addEventListener('click', saveFn);
+        stripNamePopover.querySelector('#stripNameCancel').addEventListener('click', closeStripNamePopover);
+        [shortInp, longInp].forEach(inp => {
+          inp.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); saveFn(); }
+            else if (e.key === 'Escape') { e.stopPropagation(); closeStripNamePopover(); }
+          });
+        });
+        document.addEventListener('mousedown', (e) => {
+          if (stripNamePopover && stripNamePopover.style.display !== 'none' && !stripNamePopover.contains(e.target)) {
+            closeStripNamePopover();
+          }
+        });
+      }
+
+      stripNameEditingCh = chIdx;
+      const ch = channelsState[chIdx] || {};
+      const defaultName = `CH ${chIdx + 1}`;
+      const shortInp = stripNamePopover.querySelector('#stripShortInput');
+      const longInp = stripNamePopover.querySelector('#stripLongInput');
+      shortInp.value = (ch.name && ch.name !== defaultName) ? ch.name : '';
+      longInp.value = ch.longName || '';
+
+      const rect = anchorEl.getBoundingClientRect();
+      const left = Math.max(8, Math.min(window.innerWidth - 200, rect.left));
+      const top = Math.min(window.innerHeight - 135, rect.bottom + 4);
+      stripNamePopover.style.left = `${left}px`;
+      stripNamePopover.style.top = `${top}px`;
+      stripNamePopover.style.display = 'flex';
+      longInp.focus();
+      longInp.select();
+    }
 
     // Fecha o diálogo de efeitos ao clicar fora (no overlay de fundo)
     fxModalOverlay.addEventListener('mousedown', (e) => {
@@ -8178,16 +8424,29 @@
         });
 
         let isDraggingAux = false;
+        let auxTrackRect = null;
+        let auxDragPendingVal = null;
+        let auxDragRafId = 0;
+
         function calcAuxValFromPointer(clientY) {
-          const rect = track.getBoundingClientRect();
+          const rect = auxTrackRect || track.getBoundingClientRect();
           const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
           return (1 - (y / rect.height)) * MAX_VALUE;
+        }
+
+        function flushAuxDrag() {
+          auxDragRafId = 0;
+          if (auxDragPendingVal === null || typeof currentSelectedCh !== 'number') return;
+          const val = auxDragPendingVal;
+          auxDragPendingVal = null;
+          setFxAuxVolume(currentSelectedCh, auxIdx, val, true);
         }
 
         track.addEventListener('pointerdown', (e) => {
           if (typeof currentSelectedCh !== 'number') return;
           isDraggingAux = true;
           activeDraggingFxAux = auxIdx;
+          auxTrackRect = track.getBoundingClientRect();
           cap.classList.add('is-dragging');
           track.setPointerCapture(e.pointerId);
           setFxAuxVolume(currentSelectedCh, auxIdx, calcAuxValFromPointer(e.clientY), true);
@@ -8195,13 +8454,21 @@
 
         track.addEventListener('pointermove', (e) => {
           if (!isDraggingAux || typeof currentSelectedCh !== 'number') return;
-          setFxAuxVolume(currentSelectedCh, auxIdx, calcAuxValFromPointer(e.clientY), true);
+          auxDragPendingVal = calcAuxValFromPointer(e.clientY);
+          if (!auxDragRafId) {
+            auxDragRafId = requestAnimationFrame(flushAuxDrag);
+          }
         });
 
         const endAuxDrag = (e) => {
           if (!isDraggingAux) return;
+          if (auxDragRafId) {
+            cancelAnimationFrame(auxDragRafId);
+            flushAuxDrag();
+          }
           isDraggingAux = false;
           activeDraggingFxAux = null;
+          auxTrackRect = null;
           cap.classList.remove('is-dragging');
           try { track.releasePointerCapture(e.pointerId); } catch (_) {}
         };
@@ -9051,11 +9318,15 @@
         if (Array.isArray(st.inputs)) {
           st.inputs.forEach((inp, i) => {
             if (i < TOTAL_CHANNELS) {
-              // Rótulo do Canal
+              // Rótulo do Canal (curto no strip, longo na visão expandida)
               if (inp.name) {
                 channelsState[i].name = inp.name;
-                const nameEl = document.querySelector(`.ch-strip[data-ch="${i}"] .ch-name`);
-                if (nameEl) nameEl.textContent = inp.name;
+                channelsState[i].longName = inp.long_name || '';
+                const badgeEl = document.getElementById(`chBadge_${i}`);
+                if (badgeEl) {
+                  badgeEl.textContent = inp.name;
+                  badgeEl.title = inp.long_name || inp.name;
+                }
               }
 
               // Fader e ON no Stereo Master

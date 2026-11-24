@@ -214,3 +214,34 @@ func TestOnDemandSyncTargets(t *testing.T) {
 		t.Errorf("Esperado 15 targets para aux master out, obtido: %d", len(auxFxTargets))
 	}
 }
+
+func TestParse01V96ChannelNameSysEx(t *testing.T) {
+	// Mensagens reais capturadas do Studio Manager para o canal 1 ("TOBY")
+	packets := [][]byte{
+		{0xF0, 0x43, 0x10, 0x3E, 0x0D, 0x02, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x54, 0xF7}, // 'T'
+		{0xF0, 0x43, 0x10, 0x3E, 0x0D, 0x02, 0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x4F, 0xF7}, // 'O'
+		{0xF0, 0x43, 0x10, 0x3E, 0x0D, 0x02, 0x04, 0x02, 0x00, 0x00, 0x00, 0x00, 0x42, 0xF7}, // 'B'
+		{0xF0, 0x43, 0x10, 0x3E, 0x0D, 0x02, 0x04, 0x03, 0x00, 0x00, 0x00, 0x00, 0x59, 0xF7}, // 'Y'
+	}
+
+	var decodedShort []byte
+	for i, pkt := range packets {
+		ch, charIdx, ascii, ok := Parse01V96ChannelNameSysEx(pkt)
+		if !ok {
+			t.Fatalf("Parse01V96ChannelNameSysEx falhou no pacote %d: % X", i, pkt)
+		}
+		if ch != 0 || int(charIdx) != i {
+			t.Fatalf("esperado ch=0 charIdx=%d, obtido ch=%d charIdx=%d", i, ch, charIdx)
+		}
+		decodedShort = append(decodedShort, ascii)
+	}
+	if string(decodedShort) != "TOBY" {
+		t.Errorf("esperado 'TOBY', obtido %q", string(decodedShort))
+	}
+
+	// Testa gravação de nomes curto e longo via SetChannelName (armazenados no serviço)
+	shortOut, longOut := SetChannelName(0, "TOBY", "Thom Yorkez")
+	if shortOut != "TOBY" || longOut != "Thom Yorkez" {
+		t.Fatalf("SetChannelName inesperado: curto=%q longo=%q", shortOut, longOut)
+	}
+}

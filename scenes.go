@@ -60,9 +60,10 @@ type AuxSend struct {
 
 // InputChannel representa o estado completo de um canal de entrada (1 a 32)
 type InputChannel struct {
-	Channel  int        `json:"channel"`   // 1 a 32
-	Name     string     `json:"name"`      // Rótulo amigável ("Vocal 1", "Bumbo")
-	Fader    int        `json:"fader"`     // 0 a 1023 (823 = 0.0 dB)
+	Channel  int        `json:"channel"`             // 1 a 32
+	Name     string     `json:"name"`                // Rótulo curto do console (4 chars, ex: "TOBY")
+	LongName string     `json:"long_name,omitempty"` // Rótulo longo expandido (16 chars, ex: "BRIAN")
+	Fader    int        `json:"fader"`               // 0 a 1023 (823 = 0.0 dB)
 	On       int        `json:"on"`        // 1 = ON, 0 = MUTE
 	Pan      int        `json:"pan"`       // -63 a +63 (0 = Center)
 	AuxSends [8]AuxSend `json:"aux_sends"` // Envios para Aux 1 a 8
@@ -210,6 +211,43 @@ func NewDefaultMixerState() MixerState {
 	}
 
 	return state
+}
+
+func sanitizeASCIIName(s string, maxLen int) string {
+	var b strings.Builder
+	for i := 0; i < len(s) && b.Len() < maxLen; i++ {
+		c := s[i]
+		if c >= 0x20 && c <= 0x7E {
+			b.WriteByte(c)
+		}
+	}
+	return strings.TrimSpace(b.String())
+}
+
+// SetChannelName atualiza o nome curto (4 chars) e o nome longo (16 chars) de um canal (0..31)
+// no estado em memória e retorna os valores normalizados.
+func SetChannelName(chIdx int, shortName, longName string) (string, string) {
+	if chIdx < 0 || chIdx >= 32 {
+		return "", ""
+	}
+
+	shortClean := sanitizeASCIIName(shortName, 4)
+	longClean := sanitizeASCIIName(longName, 16)
+
+	if shortClean == "" && longClean != "" {
+		shortClean = sanitizeASCIIName(longClean, 4)
+	}
+	if shortClean == "" {
+		shortClean = fmt.Sprintf("CH %d", chIdx+1)
+	}
+
+	mixerStateLock.Lock()
+	currentMixer.Inputs[chIdx].Name = shortClean
+	currentMixer.Inputs[chIdx].LongName = longClean
+	stateDirty = true
+	mixerStateLock.Unlock()
+
+	return shortClean, longClean
 }
 
 // ApplyParamToState atualiza o espelho de memória com base nos bytes de parâmetros da 01V96
