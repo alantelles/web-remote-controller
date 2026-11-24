@@ -343,13 +343,23 @@ var (
 )
 
 type User struct {
-	Name            string `json:"name"`
-	Username        string `json:"username"`
-	Password        string `json:"-"`
-	Role            string `json:"role"`
-	MixID           string `json:"mix_id,omitempty"`
-	AllowedChannels string `json:"allowed_channels,omitempty"` // Lista/Faixa (ex: "1-8,12" ou "" para todos)
-	AllowedOutputs  string `json:"allowed_outputs,omitempty"`  // Lista (ex: "MASTER,AUX1,AUX2" ou "" para todos)
+	Name               string `json:"name"`
+	Username           string `json:"username"`
+	Password           string `json:"-"`
+	Role               string `json:"role"`
+	MixID              string `json:"mix_id,omitempty"`
+	AllowedChannels    string `json:"allowed_channels,omitempty"` // Lista/Faixa (ex: "1-8,12" ou "" para todos)
+	AllowedOutputs     string `json:"allowed_outputs,omitempty"`  // Lista (ex: "MASTER,AUX1,AUX2" ou "" para todos)
+	MustChangePassword bool   `json:"must_change_password,omitempty"`
+}
+
+func parseBoolFlag(raw string) bool {
+	switch strings.ToLower(strings.TrimSpace(raw)) {
+	case "true", "1", "sim", "yes", "s", "y":
+		return true
+	default:
+		return false
+	}
 }
 
 var allStandardOutputs = []string{"MASTER", "AUX1", "AUX2", "AUX3", "AUX4", "AUX5", "AUX6", "AUX7", "AUX8"}
@@ -629,7 +639,7 @@ func getUsersCSVFile() string {
 func ensureUsersCSV() {
 	filePath := getUsersCSVFile()
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		defaultContent := "nome,usuario,senha,papel,mix,canais,saidas\nAdministrador,admin,admin,ADMIN,,,\n"
+		defaultContent := "nome,usuario,senha,papel,mix,canais,saidas,trocar_senha\nAdministrador,admin,admin,ADMIN,,,,false\n"
 		if err := os.WriteFile(filePath, []byte(defaultContent), 0644); err != nil {
 			log.Printf("Aviso: Falha ao inicializar %s: %v", filePath, err)
 		} else {
@@ -646,7 +656,7 @@ func saveUsers(users []User) error {
 
 	var buf bytes.Buffer
 	writer := csv.NewWriter(&buf)
-	if err := writer.Write([]string{"nome", "usuario", "senha", "papel", "mix", "canais", "saidas"}); err != nil {
+	if err := writer.Write([]string{"nome", "usuario", "senha", "papel", "mix", "canais", "saidas", "trocar_senha"}); err != nil {
 		return err
 	}
 
@@ -659,6 +669,7 @@ func saveUsers(users []User) error {
 			u.MixID,
 			u.AllowedChannels,
 			u.AllowedOutputs,
+			strconv.FormatBool(u.MustChangePassword),
 		}
 		if err := writer.Write(record); err != nil {
 			return err
@@ -687,6 +698,7 @@ func saveUsers(users []User) error {
 				s.User.MixID = u.MixID
 				s.User.AllowedChannels = u.AllowedChannels
 				s.User.AllowedOutputs = u.AllowedOutputs
+				s.User.MustChangePassword = u.MustChangePassword
 				break
 			}
 		}
@@ -735,12 +747,21 @@ func loadUsers() ([]User, error) {
 			allowedChannels = strings.TrimSpace(record[5])
 		}
 		allowedOutputs := ""
+		mustChangePassword := false
 		if len(record) == 7 {
 			allowedOutputs = strings.TrimSpace(record[6])
-		} else if len(record) > 7 {
-			// Auto-cura: se o CSV contiver vírgulas sem aspas na coluna de saídas (ex: ...,1-8,MASTER,AUX1,AUX2)
+		} else if len(record) == 8 {
+			allowedOutputs = strings.TrimSpace(record[6])
+			mustChangePassword = parseBoolFlag(record[7])
+		} else if len(record) > 8 {
+			lastCol := strings.ToLower(strings.TrimSpace(record[len(record)-1]))
+			endIdx := len(record)
+			if lastCol == "true" || lastCol == "false" || lastCol == "1" || lastCol == "0" || lastCol == "sim" || lastCol == "nao" || lastCol == "não" {
+				mustChangePassword = parseBoolFlag(lastCol)
+				endIdx = len(record) - 1
+			}
 			var outParts []string
-			for _, p := range record[6:] {
+			for _, p := range record[6:endIdx] {
 				if trimmed := strings.TrimSpace(p); trimmed != "" {
 					outParts = append(outParts, trimmed)
 				}
@@ -775,13 +796,14 @@ func loadUsers() ([]User, error) {
 		}
 
 		users = append(users, User{
-			Name:            name,
-			Username:        username,
-			Password:        password,
-			Role:            role,
-			MixID:           mixID,
-			AllowedChannels: allowedChannels,
-			AllowedOutputs:  allowedOutputs,
+			Name:               name,
+			Username:           username,
+			Password:           password,
+			Role:               role,
+			MixID:              mixID,
+			AllowedChannels:    allowedChannels,
+			AllowedOutputs:     allowedOutputs,
+			MustChangePassword: mustChangePassword,
 		})
 	}
 
@@ -891,22 +913,27 @@ func isMobileUserAgent(r *http.Request) bool {
 	return false
 }
 
-func handleLogin(w http.ResponseWriter, r *http.Request) {
-	target := "/"
-	if isMobileUserAgent(r) {
-		target = "/m"
+func getPostLoginRedirectTarget(r *http.Request, user User) string {
+	if user.MustChangePassword {
+		return "/change-password"
 	}
+	if strings.EqualFold(user.Role, "PERFORMER") {
+		mixID := user.MixID
+		if mixID == "" {
+			mixID = "1"
+		}
+		return "/mix?id=" + mixID
+	}
+	if isMobileUserAgent(r) {
+		return "/m"
+	}
+	return "/"
+}
 
+func handleLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		if sess := getSessionFromRequest(r); sess != nil {
-			if strings.EqualFold(sess.User.Role, "PERFORMER") {
-				mixID := sess.User.MixID
-				if mixID == "" {
-					mixID = "1"
-				}
-				target = "/mix?id=" + mixID
-			}
-			http.Redirect(w, r, target, http.StatusSeeOther)
+			http.Redirect(w, r, getPostLoginRedirectTarget(r, sess.User), http.StatusSeeOther)
 			return
 		}
 		http.ServeFile(w, r, "login.html")
@@ -966,26 +993,22 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 			MaxAge:   int(sessionDuration.Seconds()),
 		})
 
-		log.Printf("Usuário autenticado com sucesso: %s (%s, Papel: %s)", user.Name, user.Username, user.Role)
+		log.Printf("Usuário autenticado com sucesso: %s (%s, Papel: %s, TrocaSenha: %v)", user.Name, user.Username, user.Role, user.MustChangePassword)
 
-		if strings.EqualFold(user.Role, "PERFORMER") {
-			mixID := user.MixID
-			if mixID == "" {
-				mixID = "1"
-			}
-			target = "/mix?id=" + mixID
-		}
+		target := getPostLoginRedirectTarget(r, *user)
 
 		if isJSON {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success":  true,
-				"redirect": target,
-				"user": map[string]string{
-					"name":     user.Name,
-					"username": user.Username,
-					"role":     user.Role,
-					"mix_id":   user.MixID,
+				"success":              true,
+				"redirect":             target,
+				"must_change_password": user.MustChangePassword,
+				"user": map[string]interface{}{
+					"name":                 user.Name,
+					"username":             user.Username,
+					"role":                 user.Role,
+					"mix_id":               user.MixID,
+					"must_change_password": user.MustChangePassword,
 				},
 			})
 			return
@@ -1028,13 +1051,119 @@ func handleMe(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"authenticated":    true,
-		"name":             sess.User.Name,
-		"username":         sess.User.Username,
-		"role":             strings.ToUpper(sess.User.Role),
-		"mix_id":           sess.User.MixID,
-		"allowed_channels": sess.User.GetAllowedChannelsList(),
-		"allowed_outputs":  sess.User.GetAllowedOutputsList(),
+		"authenticated":        true,
+		"name":                 sess.User.Name,
+		"username":             sess.User.Username,
+		"role":                 strings.ToUpper(sess.User.Role),
+		"mix_id":               sess.User.MixID,
+		"allowed_channels":     sess.User.GetAllowedChannelsList(),
+		"allowed_outputs":      sess.User.GetAllowedOutputsList(),
+		"must_change_password": sess.User.MustChangePassword,
+	})
+}
+
+func handleChangePasswordPage(w http.ResponseWriter, r *http.Request) {
+	sess := getSessionFromRequest(r)
+	if sess == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	http.ServeFile(w, r, "change-password.html")
+}
+
+func handleAPIChangePassword(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Método não permitido"})
+		return
+	}
+
+	sess := getSessionFromRequest(r)
+	if sess == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Não autenticado"})
+		return
+	}
+
+	var req struct {
+		CurrentPassword string `json:"current_password"`
+		NewPassword     string `json:"new_password"`
+		ConfirmPassword string `json:"confirm_password"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Requisição JSON inválida"})
+		return
+	}
+
+	if req.CurrentPassword == "" || req.NewPassword == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Informe a senha atual e a nova senha."})
+		return
+	}
+
+	if len(req.NewPassword) < 4 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "A nova senha deve ter pelo menos 4 caracteres."})
+		return
+	}
+
+	if req.ConfirmPassword != "" && req.NewPassword != req.ConfirmPassword {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "A confirmação da nova senha não confere."})
+		return
+	}
+
+	users, err := loadUsers()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+		return
+	}
+
+	idx := -1
+	for i := range users {
+		if strings.EqualFold(users[i].Username, sess.User.Username) {
+			idx = i
+			break
+		}
+	}
+	if idx == -1 {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Usuário não encontrado."})
+		return
+	}
+
+	if users[idx].Password != req.CurrentPassword {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Senha atual incorreta."})
+		return
+	}
+
+	if users[idx].MustChangePassword && req.NewPassword == req.CurrentPassword {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "No primeiro login, a nova senha deve ser diferente da senha inicial."})
+		return
+	}
+
+	users[idx].Password = req.NewPassword
+	users[idx].MustChangePassword = false
+
+	if err := saveUsers(users); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+		return
+	}
+
+	updatedUser := users[idx]
+	target := getPostLoginRedirectTarget(r, updatedUser)
+	log.Printf("[AUTH] Usuário '%s' alterou sua própria senha com sucesso.", updatedUser.Username)
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success":  true,
+		"message":  "Senha alterada com sucesso!",
+		"redirect": target,
 	})
 }
 
@@ -1055,26 +1184,28 @@ func handleAPIUsers(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		type SafeUserResp struct {
-			Name            string   `json:"name"`
-			Username        string   `json:"username"`
-			Role            string   `json:"role"`
-			MixID           string   `json:"mix_id,omitempty"`
-			AllowedChannels string   `json:"allowed_channels,omitempty"`
-			AllowedOutputs  string   `json:"allowed_outputs,omitempty"`
-			ChannelsList    []int    `json:"channels_list"`
-			OutputsList     []string `json:"outputs_list"`
+			Name               string   `json:"name"`
+			Username           string   `json:"username"`
+			Role               string   `json:"role"`
+			MixID              string   `json:"mix_id,omitempty"`
+			AllowedChannels    string   `json:"allowed_channels,omitempty"`
+			AllowedOutputs     string   `json:"allowed_outputs,omitempty"`
+			ChannelsList       []int    `json:"channels_list"`
+			OutputsList        []string `json:"outputs_list"`
+			MustChangePassword bool     `json:"must_change_password"`
 		}
 		var list []SafeUserResp
 		for _, u := range users {
 			list = append(list, SafeUserResp{
-				Name:            u.Name,
-				Username:        u.Username,
-				Role:            u.Role,
-				MixID:           u.MixID,
-				AllowedChannels: u.AllowedChannels,
-				AllowedOutputs:  u.AllowedOutputs,
-				ChannelsList:    u.GetAllowedChannelsList(),
-				OutputsList:     u.GetAllowedOutputsList(),
+				Name:               u.Name,
+				Username:           u.Username,
+				Role:               u.Role,
+				MixID:              u.MixID,
+				AllowedChannels:    u.AllowedChannels,
+				AllowedOutputs:     u.AllowedOutputs,
+				ChannelsList:       u.GetAllowedChannelsList(),
+				OutputsList:        u.GetAllowedOutputsList(),
+				MustChangePassword: u.MustChangePassword,
 			})
 		}
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -1131,6 +1262,245 @@ func handleAPIUsers(w http.ResponseWriter, r *http.Request) {
 			"message": fmt.Sprintf("Limites do usuário '%s' salvos com sucesso!", req.Username),
 		})
 
+	case http.MethodPut:
+		var req struct {
+			Name               string `json:"name"`
+			Username           string `json:"username"`
+			Password           string `json:"password"`
+			Role               string `json:"role"`
+			MixID              string `json:"mix_id"`
+			MustChangePassword *bool  `json:"must_change_password"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Requisição JSON inválida"})
+			return
+		}
+
+		name := strings.TrimSpace(req.Name)
+		username := strings.TrimSpace(req.Username)
+		password := req.Password
+		role := strings.ToUpper(strings.TrimSpace(req.Role))
+		mixID := strings.TrimSpace(req.MixID)
+
+		if name == "" || username == "" || password == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Nome, usuário e senha são obrigatórios."})
+			return
+		}
+		if strings.ContainsAny(username, " \t\r\n,;") {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "O login do usuário não pode conter espaços, vírgulas ou ponto-e-vírgula."})
+			return
+		}
+		if len(password) < 4 {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "A senha deve ter pelo menos 4 caracteres."})
+			return
+		}
+		if role != "ADMIN" && role != "OPERATOR" && role != "BASIC" && role != "PERFORMER" {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Papel inválido. Use ADMIN, OPERATOR, BASIC ou PERFORMER."})
+			return
+		}
+		if role == "PERFORMER" && mixID == "" {
+			mixID = "1"
+		}
+
+		users, err := loadUsers()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+			return
+		}
+
+		for _, u := range users {
+			if strings.EqualFold(u.Username, username) {
+				w.WriteHeader(http.StatusConflict)
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": fmt.Sprintf("O usuário '%s' já existe.", username)})
+				return
+			}
+		}
+
+		mustChange := true
+		if req.MustChangePassword != nil {
+			mustChange = *req.MustChangePassword
+		}
+
+		newUser := User{
+			Name:               name,
+			Username:           username,
+			Password:           password,
+			Role:               role,
+			MixID:              mixID,
+			MustChangePassword: mustChange,
+		}
+		users = append(users, newUser)
+
+		if err := saveUsers(users); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+			return
+		}
+
+		log.Printf("[ADMIN] Novo usuário '%s' (Papel: %s, TrocaSenha: %v) cadastrado por '%s'", newUser.Username, newUser.Role, newUser.MustChangePassword, sess.User.Username)
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": true,
+			"message": fmt.Sprintf("Usuário '%s' cadastrado com sucesso!", newUser.Username),
+			"user": map[string]interface{}{
+				"name":                 newUser.Name,
+				"username":             newUser.Username,
+				"role":                 newUser.Role,
+				"mix_id":               newUser.MixID,
+				"must_change_password": newUser.MustChangePassword,
+			},
+		})
+
+	case http.MethodPatch:
+		var req struct {
+			Username           string `json:"username"`
+			Name               string `json:"name"`
+			Password           string `json:"password"`
+			Role               string `json:"role"`
+			MixID              string `json:"mix_id"`
+			MustChangePassword *bool  `json:"must_change_password"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Requisição JSON inválida"})
+			return
+		}
+
+		username := strings.TrimSpace(req.Username)
+		if username == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Informe o usuário a atualizar."})
+			return
+		}
+
+		users, err := loadUsers()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+			return
+		}
+
+		idx := -1
+		for i := range users {
+			if strings.EqualFold(users[i].Username, username) {
+				idx = i
+				break
+			}
+		}
+		if idx == -1 {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Usuário não encontrado."})
+			return
+		}
+
+		if name := strings.TrimSpace(req.Name); name != "" {
+			users[idx].Name = name
+		}
+		if role := strings.ToUpper(strings.TrimSpace(req.Role)); role != "" {
+			if role != "ADMIN" && role != "OPERATOR" && role != "BASIC" && role != "PERFORMER" {
+				w.WriteHeader(http.StatusBadRequest)
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Papel inválido. Use ADMIN, OPERATOR, BASIC ou PERFORMER."})
+				return
+			}
+			users[idx].Role = role
+		}
+		if users[idx].Role == "PERFORMER" {
+			if mixID := strings.TrimSpace(req.MixID); mixID != "" {
+				users[idx].MixID = mixID
+			} else if users[idx].MixID == "" {
+				users[idx].MixID = "1"
+			}
+		} else if req.MixID != "" {
+			users[idx].MixID = strings.TrimSpace(req.MixID)
+		}
+		if req.Password != "" {
+			if len(req.Password) < 4 {
+				w.WriteHeader(http.StatusBadRequest)
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "A senha deve ter pelo menos 4 caracteres."})
+				return
+			}
+			users[idx].Password = req.Password
+			if req.MustChangePassword == nil {
+				users[idx].MustChangePassword = true
+			}
+		}
+		if req.MustChangePassword != nil {
+			users[idx].MustChangePassword = *req.MustChangePassword
+		}
+
+		if err := saveUsers(users); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+			return
+		}
+
+		log.Printf("[ADMIN] Usuário '%s' atualizado por '%s'", users[idx].Username, sess.User.Username)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": true,
+			"message": fmt.Sprintf("Usuário '%s' atualizado com sucesso!", users[idx].Username),
+		})
+
+	case http.MethodDelete:
+		username := strings.TrimSpace(r.URL.Query().Get("username"))
+		if username == "" {
+			var req struct {
+				Username string `json:"username"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&req); err == nil {
+				username = strings.TrimSpace(req.Username)
+			}
+		}
+		if username == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Informe o usuário a excluir."})
+			return
+		}
+		if strings.EqualFold(username, sess.User.Username) {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Você não pode excluir seu próprio usuário."})
+			return
+		}
+
+		users, err := loadUsers()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+			return
+		}
+
+		var filtered []User
+		found := false
+		for _, u := range users {
+			if strings.EqualFold(u.Username, username) {
+				found = true
+				continue
+			}
+			filtered = append(filtered, u)
+		}
+		if !found {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Usuário não encontrado."})
+			return
+		}
+
+		if err := saveUsers(filtered); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+			return
+		}
+
+		log.Printf("[ADMIN] Usuário '%s' excluído por '%s'", username, sess.User.Username)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": true,
+			"message": fmt.Sprintf("Usuário '%s' excluído com sucesso!", username),
+		})
+
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Método não permitido"})
@@ -1141,6 +1511,10 @@ func handleMobile(w http.ResponseWriter, r *http.Request) {
 	sess := getSessionFromRequest(r)
 	if sess == nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	if sess.User.MustChangePassword {
+		http.Redirect(w, r, "/change-password", http.StatusSeeOther)
 		return
 	}
 	if strings.EqualFold(sess.User.Role, "PERFORMER") {
@@ -1158,6 +1532,10 @@ func handleMix(w http.ResponseWriter, r *http.Request) {
 	sess := getSessionFromRequest(r)
 	if sess == nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	if sess.User.MustChangePassword {
+		http.Redirect(w, r, "/change-password", http.StatusSeeOther)
 		return
 	}
 	http.ServeFile(w, r, "mix.html")
@@ -1343,6 +1721,11 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 	if sess == nil {
 		log.Printf("Tentativa de conexão WebSocket não autorizada de %s rejeitada", r.RemoteAddr)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if sess.User.MustChangePassword {
+		log.Printf("Tentativa de conexão WebSocket bloqueada para '%s': troca de senha obrigatória pendente", sess.User.Username)
+		http.Error(w, "Password change required", http.StatusForbidden)
 		return
 	}
 
@@ -2136,6 +2519,8 @@ func main() {
 
 	http.HandleFunc("/login", handleLogin)
 	http.HandleFunc("/logout", handleLogout)
+	http.HandleFunc("/change-password", handleChangePasswordPage)
+	http.HandleFunc("/api/change-password", handleAPIChangePassword)
 	http.HandleFunc("/api/me", handleMe)
 	http.HandleFunc("/api/users", handleAPIUsers)
 	http.HandleFunc("/api/scenes", handleAPIScenes)
@@ -2162,6 +2547,10 @@ func main() {
 		sess := getSessionFromRequest(r)
 		if sess == nil {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		if sess.User.MustChangePassword {
+			http.Redirect(w, r, "/change-password", http.StatusSeeOther)
 			return
 		}
 		if strings.EqualFold(sess.User.Role, "PERFORMER") {

@@ -842,3 +842,150 @@ Basico,basico,basico123,BASIC,,1-8,MASTER
 		t.Errorf("Canal 16 deveria ser permitido e 17 bloqueado")
 	}
 }
+
+func TestUserRegistrationAndFirstLoginPasswordChange(t *testing.T) {
+	testFile := "test_user_reg_usuarios.csv"
+	testSess := "test_user_reg_sessions.json"
+	defer os.Remove(testFile)
+	defer os.Remove(testSess)
+
+	origCSV := getUsersCSVFile()
+	origSess := getSessionsFile()
+	setUsersCSVFile(testFile)
+	setSessionsFile(testSess)
+	defer func() {
+		setUsersCSVFile(origCSV)
+		setSessionsFile(origSess)
+	}()
+	ensureUsersCSV()
+
+	adminToken := createSession(User{Username: "admin", Name: "Administrador", Role: "ADMIN"})
+	opToken := createSession(User{Username: "op", Name: "Operador", Role: "OPERATOR"})
+
+	// 1. Não-admin tentando cadastrar usuário -> 403 Forbidden
+	reqNonAdmin := httptest.NewRequest(http.MethodPut, "/api/users", bytes.NewBufferString(`{"name":"Joao","username":"joao","password":"1234","role":"OPERATOR"}`))
+	reqNonAdmin.AddCookie(&http.Cookie{Name: sessionCookieName, Value: opToken})
+	rrNonAdmin := httptest.NewRecorder()
+	handleAPIUsers(rrNonAdmin, reqNonAdmin)
+	if rrNonAdmin.Code != http.StatusForbidden {
+		t.Fatalf("Esperava 403 para não-admin no cadastro, obteve %d", rrNonAdmin.Code)
+	}
+
+	// 2. Admin cadastra novo usuário -> 201 Created com must_change_password=true por padrão
+	reqCreate := httptest.NewRequest(http.MethodPut, "/api/users", bytes.NewBufferString(`{"name":"João Silva","username":"joao","password":"init123","role":"OPERATOR"}`))
+	reqCreate.AddCookie(&http.Cookie{Name: sessionCookieName, Value: adminToken})
+	rrCreate := httptest.NewRecorder()
+	handleAPIUsers(rrCreate, reqCreate)
+	if rrCreate.Code != http.StatusCreated {
+		t.Fatalf("Esperava 201 Created ao cadastrar usuário, obteve %d (body: %s)", rrCreate.Code, rrCreate.Body.String())
+	}
+
+	// 3. Cadastro duplicado -> 409 Conflict
+	reqDup := httptest.NewRequest(http.MethodPut, "/api/users", bytes.NewBufferString(`{"name":"Outro João","username":"JOAO","password":"abc123","role":"BASIC"}`))
+	reqDup.AddCookie(&http.Cookie{Name: sessionCookieName, Value: adminToken})
+	rrDup := httptest.NewRecorder()
+	handleAPIUsers(rrDup, reqDup)
+	if rrDup.Code != http.StatusConflict {
+		t.Errorf("Esperava 409 Conflict para usuário duplicado, obteve %d", rrDup.Code)
+	}
+
+	// 4. Primeiro login do usuário 'joao' -> deve redirecionar para /change-password
+	loginBody, _ := json.Marshal(map[string]string{"username": "joao", "password": "init123"})
+	reqLogin := httptest.NewRequest(http.MethodPost, "/login", bytes.NewReader(loginBody))
+	reqLogin.Header.Set("Content-Type", "application/json")
+	rrLogin := httptest.NewRecorder()
+	handleLogin(rrLogin, reqLogin)
+	if rrLogin.Code != http.StatusOK {
+		t.Fatalf("Esperava 200 OK no primeiro login, obteve %d", rrLogin.Code)
+	}
+	var loginResp map[string]interface{}
+	if err := json.Unmarshal(rrLogin.Body.Bytes(), &loginResp); err != nil {
+		t.Fatalf("Erro ao decodificar loginResp: %v", err)
+	}
+	if loginResp["redirect"] != "/change-password" || loginResp["must_change_password"] != true {
+		t.Fatalf("Esperava redirect='/change-password' e must_change_password=true, obteve: %v", loginResp)
+	}
+
+	var joaoCookie *http.Cookie
+	for _, c := range rrLogin.Result().Cookies() {
+		if c.Name == sessionCookieName {
+			joaoCookie = c
+			break
+		}
+	}
+	if joaoCookie == nil {
+		t.Fatalf("Cookie de sessão não retornado para joao")
+	}
+
+	// 5. Enquanto must_change_password=true, /m redireciona para /change-password e /ws retorna 403
+	reqMobile := httptest.NewRequest(http.MethodGet, "/m", nil)
+	reqMobile.AddCookie(joaoCookie)
+	rrMobile := httptest.NewRecorder()
+	handleMobile(rrMobile, reqMobile)
+	if rrMobile.Code != http.StatusSeeOther || rrMobile.Header().Get("Location") != "/change-password" {
+		t.Errorf("Esperava 303 -> /change-password em /m antes da troca, obteve %d -> %s", rrMobile.Code, rrMobile.Header().Get("Location"))
+	}
+
+	reqWS := httptest.NewRequest(http.MethodGet, "/ws", nil)
+	reqWS.AddCookie(joaoCookie)
+	rrWS := httptest.NewRecorder()
+	handleWS(rrWS, reqWS)
+	if rrWS.Code != http.StatusForbidden {
+		t.Errorf("Esperava 403 em /ws antes da troca de senha, obteve %d", rrWS.Code)
+	}
+
+	// 6. Tentativa de manter a mesma senha no primeiro login -> 400 Bad Request
+	reqSamePwd := httptest.NewRequest(http.MethodPost, "/api/change-password", bytes.NewBufferString(`{"current_password":"init123","new_password":"init123","confirm_password":"init123"}`))
+	reqSamePwd.AddCookie(joaoCookie)
+	rrSamePwd := httptest.NewRecorder()
+	handleAPIChangePassword(rrSamePwd, reqSamePwd)
+	if rrSamePwd.Code != http.StatusBadRequest {
+		t.Errorf("Esperava 400 ao manter a mesma senha no primeiro login, obteve %d", rrSamePwd.Code)
+	}
+
+	// 7. Troca de senha válida -> 200 OK e redirect para "/"
+	reqChange := httptest.NewRequest(http.MethodPost, "/api/change-password", bytes.NewBufferString(`{"current_password":"init123","new_password":"novaSenha99","confirm_password":"novaSenha99"}`))
+	reqChange.AddCookie(joaoCookie)
+	rrChange := httptest.NewRecorder()
+	handleAPIChangePassword(rrChange, reqChange)
+	if rrChange.Code != http.StatusOK {
+		t.Fatalf("Esperava 200 OK na troca de senha, obteve %d (body: %s)", rrChange.Code, rrChange.Body.String())
+	}
+	var changeResp map[string]interface{}
+	_ = json.Unmarshal(rrChange.Body.Bytes(), &changeResp)
+	if changeResp["redirect"] != "/" {
+		t.Errorf("Esperava redirect '/' após troca de senha, obteve %v", changeResp["redirect"])
+	}
+
+	// 8. Novo login com a senha alterada -> redirect "/" e must_change_password=false
+	loginBody2, _ := json.Marshal(map[string]string{"username": "joao", "password": "novaSenha99"})
+	reqLogin2 := httptest.NewRequest(http.MethodPost, "/login", bytes.NewReader(loginBody2))
+	reqLogin2.Header.Set("Content-Type", "application/json")
+	rrLogin2 := httptest.NewRecorder()
+	handleLogin(rrLogin2, reqLogin2)
+	if rrLogin2.Code != http.StatusOK {
+		t.Fatalf("Esperava 200 OK no segundo login, obteve %d", rrLogin2.Code)
+	}
+	var loginResp2 map[string]interface{}
+	_ = json.Unmarshal(rrLogin2.Body.Bytes(), &loginResp2)
+	if loginResp2["redirect"] != "/" || loginResp2["must_change_password"] != false {
+		t.Errorf("Esperava redirect='/' e must_change_password=false no segundo login, obteve %v", loginResp2)
+	}
+
+	// 9. Admin não pode excluir a si mesmo -> 400, mas pode excluir 'joao' -> 200
+	reqDelSelf := httptest.NewRequest(http.MethodDelete, "/api/users?username=admin", nil)
+	reqDelSelf.AddCookie(&http.Cookie{Name: sessionCookieName, Value: adminToken})
+	rrDelSelf := httptest.NewRecorder()
+	handleAPIUsers(rrDelSelf, reqDelSelf)
+	if rrDelSelf.Code != http.StatusBadRequest {
+		t.Errorf("Esperava 400 ao tentar excluir o próprio usuário, obteve %d", rrDelSelf.Code)
+	}
+
+	reqDelJoao := httptest.NewRequest(http.MethodDelete, "/api/users?username=joao", nil)
+	reqDelJoao.AddCookie(&http.Cookie{Name: sessionCookieName, Value: adminToken})
+	rrDelJoao := httptest.NewRecorder()
+	handleAPIUsers(rrDelJoao, reqDelJoao)
+	if rrDelJoao.Code != http.StatusOK {
+		t.Errorf("Esperava 200 ao excluir 'joao', obteve %d", rrDelJoao.Code)
+	}
+}

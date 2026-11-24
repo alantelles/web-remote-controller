@@ -3581,6 +3581,7 @@
           <span>👤</span>
           <span class="user-name" id="userDisplayName">Carregando...</span>
           <span class="user-role-badge" id="userRoleBadge">ADMIN</span>
+          <button type="button" id="btnOpenChangePwdModal" class="btn-logout" style="color: #fbbf24; border-color: rgba(251, 191, 36, 0.4); background: transparent; cursor: pointer;" title="Alterar sua senha de acesso">🔑 Senha</button>
           <a href="/m" class="btn-logout" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); text-decoration: none;" title="Abrir versão para celular">📱 Mobile</a>
           <a href="/logout" class="btn-logout" title="Sair da aplicação">Sair ↪</a>
         </div>
@@ -4167,9 +4168,76 @@
         <div class="admin-tab-pane" id="adminPane_users">
           <div class="admin-section-banner">
             <div class="admin-section-banner-info">
-              <h4>👥 Limites de Uso de Canais &amp; Saídas (Perfil BASIC)</h4>
-              <p>Configure quais entradas (Canais 1–32) e saídas (Master e Aux 1–8) cada operador Básico pode acessar no console.</p>
+              <h4>👥 Usuários, Papéis &amp; Limites de Acesso</h4>
+              <p>Cadastre novos usuários, gerencie papéis e configure quais entradas (Canais 1–32) e saídas (Master e Aux 1–8) cada operador Básico pode acessar.</p>
             </div>
+            <div class="scenes-actions-bar">
+              <button type="button" class="btn-scene-action primary" id="btnOpenNewUserForm">
+                <span>➕</span>
+                <span>Novo Usuário</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Formulário de Cadastro / Edição de Usuário -->
+          <div class="user-limits-editor-card" id="userFormCard" style="display: none; margin-top: 0; margin-bottom: 16px;">
+            <div class="pm-editor-header" style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h4 style="color: #38bdf8; font-size: 15px;" id="userFormTitle">➕ Cadastrar Novo Usuário</h4>
+                <p style="color: #94a3b8; font-size: 12px;" id="userFormSubtitle">Preencha os dados de acesso do usuário.</p>
+              </div>
+              <button type="button" class="btn-admin-close" id="btnCloseUserForm" style="font-size: 14px;">✕</button>
+            </div>
+
+            <div id="userFormError" style="display: none; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; padding: 8px 12px; border-radius: 6px; font-size: 12px;"></div>
+
+            <form id="adminUserForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+              <div>
+                <label for="userFormName" style="display: block; font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase;">Nome</label>
+                <input type="text" id="userFormName" required placeholder="Ex: João da Silva" style="width: 100%; box-sizing: border-box; background: #0f1218; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 8px 10px; color: #f1f5f9; font-size: 13px;">
+              </div>
+
+              <div>
+                <label for="userFormUsername" style="display: block; font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase;">Usuário (Login)</label>
+                <input type="text" id="userFormUsername" required placeholder="Ex: joao" style="width: 100%; box-sizing: border-box; background: #0f1218; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 8px 10px; color: #f1f5f9; font-size: 13px;">
+              </div>
+
+              <div>
+                <label for="userFormPassword" id="userFormPasswordLabel" style="display: block; font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase;">Senha</label>
+                <div style="position: relative; display: flex; align-items: center;">
+                  <input type="password" id="userFormPassword" placeholder="Mínimo 4 caracteres" style="width: 100%; box-sizing: border-box; background: #0f1218; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 8px 34px 8px 10px; color: #f1f5f9; font-size: 13px;">
+                  <button type="button" id="btnToggleUserFormPwd" style="position: absolute; right: 8px; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 13px;" title="Mostrar/ocultar senha">👁️</button>
+                </div>
+              </div>
+
+              <div>
+                <label for="userFormRole" style="display: block; font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase;">Papel</label>
+                <select id="userFormRole" style="width: 100%; box-sizing: border-box; background: #0f1218; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 8px 10px; color: #f1f5f9; font-size: 13px;">
+                  <option value="ADMIN">ADMIN (Acesso total)</option>
+                  <option value="OPERATOR">OPERATOR (Operação completa)</option>
+                  <option value="BASIC" selected>BASIC (Volumes e Mutes delimitados)</option>
+                  <option value="PERFORMER">PERFORMER (Mix pessoal de músico)</option>
+                </select>
+              </div>
+
+              <div id="userFormMixWrap" style="display: none;">
+                <label for="userFormMixId" style="display: block; font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase;">Mix Pessoal (Performer)</label>
+                <select id="userFormMixId" style="width: 100%; box-sizing: border-box; background: #0f1218; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 8px 10px; color: #f1f5f9; font-size: 13px;">
+                  <option value="">Carregando mixes...</option>
+                </select>
+              </div>
+
+              <div style="grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding-top: 4px;">
+                <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: #cbd5e1; cursor: pointer;">
+                  <input type="checkbox" id="userFormMustChangePwd" checked>
+                  <span>Exigir troca de senha no próximo login</span>
+                </label>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn-scene-action secondary" id="btnCancelUserForm">Cancelar</button>
+                  <button type="submit" class="btn-scene-action primary" id="btnSaveUserForm">💾 Salvar Usuário</button>
+                </div>
+              </div>
+            </form>
           </div>
 
           <!-- Tabela de Usuários -->
@@ -4961,6 +5029,8 @@
     // ==========================================
     // USUÁRIO E SESSÃO
     // ==========================================
+    let currentUser = null;
+
     async function loadCurrentUser() {
       try {
         const res = await fetch('/api/me');
@@ -4970,6 +5040,11 @@
         }
         if (res.ok) {
           const user = await res.json();
+          if (user.must_change_password) {
+            window.location.href = `${BASE_PATH}/change-password`;
+            return;
+          }
+          currentUser = user;
           currentUserRole = (user.role || '').toUpperCase();
 
           // Se for PERFORMER, redireciona para a mix cadastrada
@@ -9324,6 +9399,7 @@
         row.innerHTML = `
           <div class="scene-info-wrap">
             <span class="scene-item-name" style="font-size:13px;">${escapeHTML(u.name || u.username)}</span>
+            ${u.must_change_password ? '<span style="font-size:10px; color:#fbbf24; background:rgba(251,191,36,0.12); border:1px solid rgba(251,191,36,0.3); padding:1px 6px; border-radius:4px; margin-left:6px;" title="Troca de senha obrigatória no próximo login">🔑 Troca pendente</span>' : ''}
           </div>
           <div>
             <code style="font-size:12px; color:#94a3b8; background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px;">${escapeHTML(u.username)}</code>
@@ -9337,10 +9413,15 @@
           <div>
             ${outDisplay}
           </div>
-          <div class="scene-item-actions">
+          <div class="scene-item-actions" style="display:flex; gap:6px; justify-content:flex-end;">
             ${isBasic
               ? `<button type="button" class="btn-scene-action secondary sm btn-edit-user-limits" data-username="${escapeHTML(u.username)}" title="Definir canais e saídas permitidos">⚙️ Delimitar</button>`
               : `<button type="button" class="btn-scene-action secondary sm" disabled style="opacity:0.35; cursor:not-allowed;" title="Limites aplicam-se apenas a operadores BASIC">⚙️ Delimitar</button>`
+            }
+            <button type="button" class="btn-scene-action secondary sm btn-edit-user" data-username="${escapeHTML(u.username)}" title="Editar dados ou redefinir senha">✏️</button>
+            ${(currentUser && currentUser.username && currentUser.username.toLowerCase() === (u.username || '').toLowerCase())
+              ? `<button type="button" class="btn-scene-action secondary sm" disabled style="opacity:0.35; cursor:not-allowed;" title="Você não pode excluir seu próprio usuário">🗑️</button>`
+              : `<button type="button" class="btn-scene-action danger sm btn-delete-user" data-username="${escapeHTML(u.username)}" title="Excluir usuário">🗑️</button>`
             }
           </div>
         `;
@@ -9352,6 +9433,19 @@
         btn.addEventListener('click', () => {
           const user = adminCachedUsers.find(x => x.username === btn.dataset.username);
           if (user) openUserLimitsEditor(user);
+        });
+      });
+
+      adminUsersListItems.querySelectorAll('.btn-edit-user').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const user = adminCachedUsers.find(x => x.username === btn.dataset.username);
+          if (user) openUserFormForEdit(user);
+        });
+      });
+
+      adminUsersListItems.querySelectorAll('.btn-delete-user').forEach(btn => {
+        btn.addEventListener('click', () => {
+          deleteAdminUser(btn.dataset.username);
         });
       });
     }
@@ -9898,10 +9992,352 @@
       });
     }
 
+    // ==========================================
+    // CADASTRO, EDIÇÃO E EXCLUSÃO DE USUÁRIOS (ADMIN)
+    // ==========================================
+    const userFormCard = document.getElementById('userFormCard');
+    const adminUserForm = document.getElementById('adminUserForm');
+    const userFormTitle = document.getElementById('userFormTitle');
+    const userFormSubtitle = document.getElementById('userFormSubtitle');
+    const userFormError = document.getElementById('userFormError');
+    const userFormName = document.getElementById('userFormName');
+    const userFormUsername = document.getElementById('userFormUsername');
+    const userFormPassword = document.getElementById('userFormPassword');
+    const userFormPasswordLabel = document.getElementById('userFormPasswordLabel');
+    const userFormRole = document.getElementById('userFormRole');
+    const userFormMixWrap = document.getElementById('userFormMixWrap');
+    const userFormMixId = document.getElementById('userFormMixId');
+    const userFormMustChangePwd = document.getElementById('userFormMustChangePwd');
+    const btnOpenNewUserForm = document.getElementById('btnOpenNewUserForm');
+    const btnCloseUserForm = document.getElementById('btnCloseUserForm');
+    const btnCancelUserForm = document.getElementById('btnCancelUserForm');
+    const btnSaveUserForm = document.getElementById('btnSaveUserForm');
+    const btnToggleUserFormPwd = document.getElementById('btnToggleUserFormPwd');
+
+    let userFormMode = 'create'; // 'create' | 'edit'
+
+    async function loadMixOptionsForUserForm(selectedMixId) {
+      if (!userFormMixId) return;
+      userFormMixId.innerHTML = '<option value="">Carregando mixes...</option>';
+      try {
+        const res = await fetch('/api/personal-mixes');
+        const data = res.ok ? await res.json() : { mixes: [] };
+        const mixes = data.mixes || [];
+        pmCachedMixes = mixes;
+
+        userFormMixId.innerHTML = '';
+        if (mixes.length === 0) {
+          const opt = document.createElement('option');
+          opt.value = selectedMixId || '1';
+          opt.textContent = selectedMixId
+            ? `${selectedMixId} (nenhuma mix cadastrada)`
+            : 'Nenhuma mix cadastrada (padrão: 1)';
+          userFormMixId.appendChild(opt);
+          return;
+        }
+
+        let foundSelected = false;
+        mixes.forEach(mix => {
+          const opt = document.createElement('option');
+          opt.value = mix.id;
+          const auxLabel = mix.output_aux ? `AUX ${mix.output_aux}` : 'AUX';
+          const statusLabel = mix.enabled ? '' : ' [Inativa]';
+          opt.textContent = `${mix.name} (${mix.id} · ${auxLabel})${statusLabel}`;
+          if (selectedMixId && mix.id === selectedMixId) {
+            opt.selected = true;
+            foundSelected = true;
+          }
+          userFormMixId.appendChild(opt);
+        });
+
+        if (selectedMixId && !foundSelected) {
+          const customOpt = document.createElement('option');
+          customOpt.value = selectedMixId;
+          customOpt.textContent = `${selectedMixId} (atual - não encontrada)`;
+          customOpt.selected = true;
+          userFormMixId.appendChild(customOpt);
+        }
+      } catch (err) {
+        userFormMixId.innerHTML = '';
+        const opt = document.createElement('option');
+        opt.value = selectedMixId || '1';
+        opt.textContent = selectedMixId || '1 (erro ao carregar mixes)';
+        userFormMixId.appendChild(opt);
+      }
+    }
+
+    function updateUserFormMixVisibility() {
+      if (!userFormMixWrap || !userFormRole) return;
+      userFormMixWrap.style.display = userFormRole.value === 'PERFORMER' ? 'block' : 'none';
+    }
+
+    if (userFormRole) {
+      userFormRole.addEventListener('change', () => {
+        updateUserFormMixVisibility();
+        if (userFormRole.value === 'PERFORMER') {
+          loadMixOptionsForUserForm(userFormMixId ? userFormMixId.value : '');
+        }
+      });
+    }
+
+    if (btnToggleUserFormPwd && userFormPassword) {
+      btnToggleUserFormPwd.addEventListener('click', () => {
+        const nextType = userFormPassword.type === 'password' ? 'text' : 'password';
+        userFormPassword.type = nextType;
+        btnToggleUserFormPwd.textContent = nextType === 'password' ? '👁️' : '🙈';
+      });
+    }
+
+    function openUserFormForCreate() {
+      userFormMode = 'create';
+      if (userFormError) userFormError.style.display = 'none';
+      if (userFormTitle) userFormTitle.textContent = '➕ Cadastrar Novo Usuário';
+      if (userFormSubtitle) userFormSubtitle.textContent = 'Informe nome, login, senha inicial e papel de acesso.';
+      if (userFormName) userFormName.value = '';
+      if (userFormUsername) {
+        userFormUsername.value = '';
+        userFormUsername.disabled = false;
+      }
+      if (userFormPassword) {
+        userFormPassword.value = '';
+        userFormPassword.required = true;
+        userFormPassword.placeholder = 'Mínimo 4 caracteres';
+        userFormPassword.type = 'password';
+      }
+      if (btnToggleUserFormPwd) btnToggleUserFormPwd.textContent = '👁️';
+      if (userFormPasswordLabel) userFormPasswordLabel.textContent = 'Senha Inicial';
+      if (userFormRole) userFormRole.value = 'BASIC';
+      if (userFormMixId) userFormMixId.value = '';
+      if (userFormMustChangePwd) userFormMustChangePwd.checked = true;
+      updateUserFormMixVisibility();
+      loadMixOptionsForUserForm('');
+      if (userFormCard) {
+        userFormCard.style.display = 'flex';
+        if (userFormName) userFormName.focus();
+      }
+    }
+
+    function openUserFormForEdit(user) {
+      userFormMode = 'edit';
+      if (userFormError) userFormError.style.display = 'none';
+      if (userFormTitle) userFormTitle.textContent = `✏️ Editar Usuário: ${user.name || user.username}`;
+      if (userFormSubtitle) userFormSubtitle.textContent = `Login: @${user.username} — deixe a senha em branco para mantê-la.`;
+      if (userFormName) userFormName.value = user.name || '';
+      if (userFormUsername) {
+        userFormUsername.value = user.username || '';
+        userFormUsername.disabled = true;
+      }
+      if (userFormPassword) {
+        userFormPassword.value = '';
+        userFormPassword.required = false;
+        userFormPassword.placeholder = 'Deixe em branco para manter';
+        userFormPassword.type = 'password';
+      }
+      if (btnToggleUserFormPwd) btnToggleUserFormPwd.textContent = '👁️';
+      if (userFormPasswordLabel) userFormPasswordLabel.textContent = 'Nova Senha (Opcional)';
+      if (userFormRole) userFormRole.value = (user.role || 'BASIC').toUpperCase();
+      if (userFormMustChangePwd) userFormMustChangePwd.checked = Boolean(user.must_change_password);
+      updateUserFormMixVisibility();
+      loadMixOptionsForUserForm(user.mix_id || '');
+      if (userFormCard) {
+        userFormCard.style.display = 'flex';
+        if (userFormName) userFormName.focus();
+      }
+    }
+
+    function closeUserForm() {
+      if (userFormCard) userFormCard.style.display = 'none';
+    }
+
+    if (btnOpenNewUserForm) btnOpenNewUserForm.addEventListener('click', openUserFormForCreate);
+    if (btnCloseUserForm) btnCloseUserForm.addEventListener('click', closeUserForm);
+    if (btnCancelUserForm) btnCancelUserForm.addEventListener('click', closeUserForm);
+
+    if (adminUserForm) {
+      adminUserForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (userFormError) userFormError.style.display = 'none';
+
+        const payload = {
+          name: userFormName.value.trim(),
+          username: userFormUsername.value.trim(),
+          role: userFormRole.value,
+          mix_id: userFormRole.value === 'PERFORMER' ? userFormMixId.value.trim() : '',
+          must_change_password: userFormMustChangePwd.checked
+        };
+        if (userFormPassword.value) {
+          payload.password = userFormPassword.value;
+        }
+
+        if (btnSaveUserForm) {
+          btnSaveUserForm.disabled = true;
+          btnSaveUserForm.textContent = '💾 Salvando...';
+        }
+
+        try {
+          const res = await fetch('/api/users', {
+            method: userFormMode === 'create' ? 'PUT' : 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            showToast(data.message || 'Usuário salvo com sucesso!', '👤');
+            closeUserForm();
+            await loadAdminUsers();
+          } else if (userFormError) {
+            userFormError.textContent = data.error || 'Erro ao salvar usuário.';
+            userFormError.style.display = 'block';
+          }
+        } catch (err) {
+          if (userFormError) {
+            userFormError.textContent = 'Erro de comunicação com o servidor.';
+            userFormError.style.display = 'block';
+          }
+        } finally {
+          if (btnSaveUserForm) {
+            btnSaveUserForm.disabled = false;
+            btnSaveUserForm.textContent = '💾 Salvar Usuário';
+          }
+        }
+      });
+    }
+
+    async function deleteAdminUser(username) {
+      if (!username) return;
+      if (!confirm(`Tem certeza que deseja excluir o usuário "@${username}"?`)) return;
+
+      try {
+        const res = await fetch(`/api/users?username=${encodeURIComponent(username)}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast(data.message || `Usuário @${username} excluído.`, '🗑️');
+          await loadAdminUsers();
+        } else {
+          alert(data.error || 'Erro ao excluir usuário.');
+        }
+      } catch (err) {
+        alert('Erro de comunicação ao excluir usuário.');
+      }
+    }
+
+    // ==========================================
+    // MODAL: ALTERAR MINHA SENHA (USUÁRIO LOGADO)
+    // ==========================================
+    const changePwdModalOverlay = document.createElement('div');
+    changePwdModalOverlay.className = 'admin-modal-overlay';
+    changePwdModalOverlay.id = 'changePwdModalOverlay';
+    changePwdModalOverlay.innerHTML = `
+      <div class="admin-modal" style="max-width: 420px;">
+        <div class="admin-modal-header">
+          <div class="admin-modal-title">
+            <span>🔑</span>
+            <div>
+              <h3>Alterar Minha Senha</h3>
+              <p>Atualize sua senha de acesso ao console</p>
+            </div>
+          </div>
+          <button type="button" class="btn-admin-close" id="btnCloseChangePwdModal" title="Fechar">✕</button>
+        </div>
+        <div class="admin-modal-body" style="padding: 18px 22px;">
+          <div id="modalChangePwdError" style="display: none; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 12px;"></div>
+          <form id="modalChangePwdForm" style="display: flex; flex-direction: column; gap: 12px;">
+            <div>
+              <label for="modalCurrentPwd" style="display: block; font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase;">Senha Atual</label>
+              <input type="password" id="modalCurrentPwd" required autocomplete="current-password" placeholder="Digite sua senha atual" style="width: 100%; box-sizing: border-box; background: #0f1218; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 9px 12px; color: #f1f5f9; font-size: 13px;">
+            </div>
+            <div>
+              <label for="modalNewPwd" style="display: block; font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase;">Nova Senha</label>
+              <input type="password" id="modalNewPwd" required minlength="4" autocomplete="new-password" placeholder="Mínimo 4 caracteres" style="width: 100%; box-sizing: border-box; background: #0f1218; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 9px 12px; color: #f1f5f9; font-size: 13px;">
+            </div>
+            <div>
+              <label for="modalConfirmPwd" style="display: block; font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase;">Confirmar Nova Senha</label>
+              <input type="password" id="modalConfirmPwd" required minlength="4" autocomplete="new-password" placeholder="Repita a nova senha" style="width: 100%; box-sizing: border-box; background: #0f1218; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 9px 12px; color: #f1f5f9; font-size: 13px;">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
+              <button type="button" class="btn-scene-action secondary" id="btnCancelChangePwdModal">Cancelar</button>
+              <button type="submit" class="btn-scene-action primary" id="btnSubmitChangePwdModal">💾 Salvar Nova Senha</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(changePwdModalOverlay);
+
+    const btnOpenChangePwdModal = document.getElementById('btnOpenChangePwdModal');
+    const btnCloseChangePwdModal = document.getElementById('btnCloseChangePwdModal');
+    const btnCancelChangePwdModal = document.getElementById('btnCancelChangePwdModal');
+    const modalChangePwdForm = document.getElementById('modalChangePwdForm');
+    const modalChangePwdError = document.getElementById('modalChangePwdError');
+    const btnSubmitChangePwdModal = document.getElementById('btnSubmitChangePwdModal');
+
+    function openChangePwdModal() {
+      if (modalChangePwdError) modalChangePwdError.style.display = 'none';
+      if (modalChangePwdForm) modalChangePwdForm.reset();
+      changePwdModalOverlay.classList.add('open');
+      const cur = document.getElementById('modalCurrentPwd');
+      if (cur) cur.focus();
+    }
+
+    function closeChangePwdModal() {
+      changePwdModalOverlay.classList.remove('open');
+    }
+
+    if (btnOpenChangePwdModal) btnOpenChangePwdModal.addEventListener('click', openChangePwdModal);
+    if (btnCloseChangePwdModal) btnCloseChangePwdModal.addEventListener('click', closeChangePwdModal);
+    if (btnCancelChangePwdModal) btnCancelChangePwdModal.addEventListener('click', closeChangePwdModal);
+    changePwdModalOverlay.addEventListener('click', (e) => {
+      if (e.target === changePwdModalOverlay) closeChangePwdModal();
+    });
+
+    if (modalChangePwdForm) {
+      modalChangePwdForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        modalChangePwdError.style.display = 'none';
+        const current_password = document.getElementById('modalCurrentPwd').value;
+        const new_password = document.getElementById('modalNewPwd').value;
+        const confirm_password = document.getElementById('modalConfirmPwd').value;
+
+        if (new_password !== confirm_password) {
+          modalChangePwdError.textContent = 'A confirmação da nova senha não confere.';
+          modalChangePwdError.style.display = 'block';
+          return;
+        }
+
+        btnSubmitChangePwdModal.disabled = true;
+        btnSubmitChangePwdModal.textContent = '💾 Salvando...';
+        try {
+          const res = await fetch('/api/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ current_password, new_password, confirm_password })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            closeChangePwdModal();
+            showToast('Senha alterada com sucesso!', '🔑');
+          } else {
+            modalChangePwdError.textContent = data.error || 'Erro ao alterar senha.';
+            modalChangePwdError.style.display = 'block';
+          }
+        } catch (err) {
+          modalChangePwdError.textContent = 'Erro de comunicação com o servidor.';
+          modalChangePwdError.style.display = 'block';
+        } finally {
+          btnSubmitChangePwdModal.disabled = false;
+          btnSubmitChangePwdModal.textContent = '💾 Salvar Nova Senha';
+        }
+      });
+    }
+
     // Tecla ESC para fechar modais de administração e cenas
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        if (muteGroupConfigModalOverlay && muteGroupConfigModalOverlay.classList.contains('open')) {
+        if (changePwdModalOverlay && changePwdModalOverlay.classList.contains('open')) {
+          closeChangePwdModal();
+        } else if (muteGroupConfigModalOverlay && muteGroupConfigModalOverlay.classList.contains('open')) {
           closeMuteGroupConfigModal();
         } else if (confirmRecallModal && confirmRecallModal.classList.contains('open')) {
           closeConfirmRecallModal();
