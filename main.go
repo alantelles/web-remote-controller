@@ -42,10 +42,11 @@ type WSMessage struct {
 	Action      string       `json:"action,omitempty"`        // "toggle_sim", "sync_main", "sync_aux", "sync_fx", "personal_mix_joystick", "toggle_mute_group", "set_mute_group"
 	Aux         int          `json:"aux,omitempty"`           // 1 a 8 para sync_aux
 	Target      string       `json:"target,omitempty"`        // Identificador do canal/saída para sync_fx
-	MixID       string       `json:"mix_id,omitempty"`        // ID da mix pessoal para personal_mix_joystick
+	MixID       string       `json:"mix_id,omitempty"`        // ID da mix pessoal para personal_mix_joystick / personal_mix_master
 	JoyX        float64      `json:"x,omitempty"`             // Coordenada X (-1..1) do joystick 3 eixos
 	JoyY        float64      `json:"y,omitempty"`             // Coordenada Y (-1..1) do joystick 3 eixos
-	Persist     bool         `json:"persist,omitempty"`       // Salvar posição do joystick em disco (ex: ao soltar o toque)
+	MasterLevel float64      `json:"level,omitempty"`         // Nível relativo (0.0..1.0) do Master da mix pessoal
+	Persist     bool         `json:"persist,omitempty"`       // Salvar posição do joystick/master em disco
 	MuteGroupID int          `json:"mute_group_id,omitempty"` // 1 a 4 para toggle_mute_group / set_mute_group
 	MuteGroups  []*MuteGroup `json:"mute_groups,omitempty"`   // Estado completo dos Mute Groups da aplicação
 }
@@ -1795,6 +1796,27 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		if msg.Action == "personal_mix_master" {
+			targetMixID := sanitizeSlug(msg.MixID)
+			if userRole == "PERFORMER" {
+				myMix := GetPersonalMixForPerformer(sess.User.Username)
+				if myMix == nil && sess.User.MixID != "" {
+					myMix, _ = GetPersonalMix(sess.User.MixID)
+				}
+				if myMix == nil || (targetMixID != "" && myMix.ID != targetMixID) {
+					log.Printf("WebSocket: acesso negado ao master da mix '%s' para PERFORMER '%s'", targetMixID, sess.User.Username)
+					continue
+				}
+				targetMixID = myMix.ID
+			}
+			if targetMixID != "" {
+				if _, _, err := ApplyPersonalMixMaster(targetMixID, msg.MasterLevel, msg.Persist); err != nil {
+					log.Printf("WebSocket: erro ao aplicar master na mix '%s': %v", targetMixID, err)
+				}
+			}
+			continue
+		}
+
 		// 1. Usuário PERFORMER não possui permissão para emitir comandos no console principal
 		if userRole == "PERFORMER" {
 			log.Printf("WebSocket: comando ignorado para usuário PERFORMER '%s'", sess.User.Username)
@@ -1812,6 +1834,11 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 			if _, _, err := SetMuteGroupState(msg.MuteGroupID, msg.Value != 0); err != nil {
 				log.Printf("WebSocket: erro ao definir Mute Group %d: %v", msg.MuteGroupID, err)
 			}
+			continue
+		}
+
+		if msg.Action != "" && msg.Element == 0 {
+			log.Printf("WebSocket: ação '%s' desconhecida/ignorada", msg.Action)
 			continue
 		}
 

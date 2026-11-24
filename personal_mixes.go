@@ -39,6 +39,9 @@ type PersonalMix struct {
 	BaseLevels        [32]int           `json:"base_levels"`        // Volumes base de referência (0..1023) configurados pelo Admin no Aux
 	JoystickX         float64           `json:"joystick_x"`         // Última posição X do joystick (-1.0 a 1.0)
 	JoystickY         float64           `json:"joystick_y"`         // Última posição Y do joystick (-1.0 a 1.0)
+	MasterMax         int               `json:"master_max"`         // Teto máximo do Master definido pelo Admin (0..1023 -> -inf a 0 dB)
+	MasterLevel       float64           `json:"master_level"`       // Posição relativa do Master do Performer (0.0 a 1.0)
+	HasMasterConfig   bool              `json:"has_master_config,omitempty"`
 	CreatedAt         time.Time         `json:"created_at"`
 	UpdatedAt         time.Time         `json:"updated_at"`
 }
@@ -108,6 +111,11 @@ func loadPersonalMixesFromDisk() error {
 		}
 		if m.Groups.Others == nil {
 			m.Groups.Others = []int{}
+		}
+		if !m.HasMasterConfig && m.MasterMax == 0 {
+			m.MasterMax = 1023
+			m.MasterLevel = 1.0
+			m.HasMasterConfig = true
 		}
 		personalMixes[m.ID] = m
 	}
@@ -414,6 +422,8 @@ func SavePersonalMix(existingID string, input PersonalMix) (*PersonalMix, error)
 	createdAt := now
 	var baseLevels [32]int
 	var joyX, joyY float64
+	masterMax := 1023
+	masterLevel := 1.0
 	var previousPerformer string
 
 	if existing, exists := personalMixes[targetID]; exists && existing != nil {
@@ -421,6 +431,10 @@ func SavePersonalMix(existingID string, input PersonalMix) (*PersonalMix, error)
 		baseLevels = existing.BaseLevels
 		joyX = existing.JoystickX
 		joyY = existing.JoystickY
+		if existing.HasMasterConfig || existing.MasterMax > 0 {
+			masterMax = existing.MasterMax
+			masterLevel = existing.MasterLevel
+		}
 		previousPerformer = existing.PerformerUsername
 		// Se trocou de canal Auxiliar de saída, captura os níveis base do novo Auxiliar
 		if existing.OutputAux != input.OutputAux {
@@ -428,6 +442,15 @@ func SavePersonalMix(existingID string, input PersonalMix) (*PersonalMix, error)
 		}
 	} else {
 		baseLevels = captureBaseLevelsFromCurrentAux(input.OutputAux)
+	}
+
+	if input.HasMasterConfig || input.MasterMax > 0 {
+		masterMax = input.MasterMax
+		if masterMax < 0 {
+			masterMax = 0
+		} else if masterMax > 1023 {
+			masterMax = 1023
+		}
 	}
 
 	// Regra: um PERFORMER pode ter apenas UMA mix disponível.
@@ -452,6 +475,9 @@ func SavePersonalMix(existingID string, input PersonalMix) (*PersonalMix, error)
 		BaseLevels:        baseLevels,
 		JoystickX:         joyX,
 		JoystickY:         joyY,
+		MasterMax:         masterMax,
+		MasterLevel:       masterLevel,
+		HasMasterConfig:   true,
 		CreatedAt:         createdAt,
 		UpdatedAt:         now,
 	}
@@ -716,6 +742,136 @@ func ApplyPersonalMixJoystick(mixID string, x, y float64, persistDisk bool) (*Pe
 	return &copyMix, emittedVolumes, weights, nil
 }
 
+// emitPerformerAuxMaster aplica o nível calculado ao Aux Master Fader (0x39, param 0x00, ch auxIdx)
+// na memória da mesa e envia via throttler para MIDI + WebSocket.
+func emitPerformerAuxMaster(auxIdx int, value int) {
+	if auxIdx < 0 || auxIdx >= 8 {
+		return
+	}
+	if value < 0 {
+		value = 0
+	} else if value > 1023 {
+		value = 1023
+	}
+
+	mixerStateLock.Lock()
+	currentMixer.AuxMasters[auxIdx].Fader = value
+	stateDirty = true
+	mixerStateLock.Unlock()
+
+	elem := byte(0x39)
+	param := byte(0x00)
+	ch := byte(auxIdx)
+
+	sysex := Build01V96SysEx(elem, param, ch, value)
+	hexStr := fmt.Sprintf("% X", sysex)
+
+	canMIDI, canWS := throttler.allowOrSchedule(elem, param, ch, value, func(finalVal int) {
+		finalSysex := Build01V96SysEx(elem, param, ch, finalVal)
+		finalHex := fmt.Sprintf("% X", finalSysex)
+
+		markSentEcho(elem, param, ch, finalVal)
+
+		midiLock.Lock()
+		if err := sendMIDISysExLocked(finalSysex); err != nil {
+			log.Printf("Erro ao enviar MIDI (flush performer master): %v", err)
+		}
+		midiLock.Unlock()
+
+		broadcastWS(WSMessage{
+			Type:    "param",
+			Element: elem,
+			Param:   param,
+			Channel: ch,
+			Value:   finalVal,
+			Hex:     finalHex,
+		})
+	})
+
+	if canMIDI {
+		markSentEcho(elem, param, ch, value)
+		midiLock.Lock()
+		if err := sendMIDISysExLocked(sysex); err != nil {
+			log.Printf("Erro ao enviar MIDI (performer master): %v", err)
+		}
+		midiLock.Unlock()
+	}
+
+	if canWS {
+		broadcastWS(WSMessage{
+			Type:    "param",
+			Element: elem,
+			Param:   param,
+			Channel: ch,
+			Value:   value,
+			Hex:     hexStr,
+		})
+	}
+}
+
+// ApplyPersonalMixMaster aplica o controle Master relativo (0.0 a 1.0) entre -inf (0) e o teto MasterMax
+// definido pelo Admin para a mix pessoal, emitindo o valor resultante para o Aux Master correspondente.
+func ApplyPersonalMixMaster(mixID string, level float64, persistDisk bool) (*PersonalMix, int, error) {
+	cleanID := sanitizeSlug(mixID)
+	if level < 0.0 {
+		level = 0.0
+	} else if level > 1.0 {
+		level = 1.0
+	}
+
+	personalMixesLock.Lock()
+	mix, exists := personalMixes[cleanID]
+	if !exists || mix == nil {
+		personalMixesLock.Unlock()
+		return nil, 0, fmt.Errorf("mix pessoal '%s' não encontrada", mixID)
+	}
+	if !mix.Enabled {
+		personalMixesLock.Unlock()
+		return nil, 0, fmt.Errorf("esta mix pessoal está desabilitada pelo administrador")
+	}
+
+	auxIdx := mix.OutputAux - 1
+	if auxIdx < 0 || auxIdx >= 8 {
+		personalMixesLock.Unlock()
+		return nil, 0, fmt.Errorf("auxiliar de saída inválido na mix")
+	}
+
+	if !mix.HasMasterConfig && mix.MasterMax == 0 {
+		mix.MasterMax = 1023
+		mix.HasMasterConfig = true
+	}
+
+	mix.MasterLevel = level
+	mix.UpdatedAt = time.Now()
+
+	if persistDisk {
+		_ = savePersonalMixesLocked()
+	}
+
+	maxVal := mix.MasterMax
+	if maxVal < 0 {
+		maxVal = 0
+	} else if maxVal > 1023 {
+		maxVal = 1023
+	}
+
+	copyMix := *mix
+	copyMix.Groups.Me = append([]int{}, mix.Groups.Me...)
+	copyMix.Groups.Voices = append([]int{}, mix.Groups.Voices...)
+	copyMix.Groups.Others = append([]int{}, mix.Groups.Others...)
+	personalMixesLock.Unlock()
+
+	rawVal := int(math.Round(float64(maxVal) * level))
+	if rawVal < 0 {
+		rawVal = 0
+	} else if rawVal > maxVal {
+		rawVal = maxVal
+	}
+
+	emitPerformerAuxMaster(auxIdx, rawVal)
+	return &copyMix, rawVal, nil
+}
+
 // listPerformerUsers retorna todos os usuários com papel PERFORMER e qual mix está atribuída a cada um.
 func listPerformerUsers() []PerformerUserInfo {
 	users, err := loadUsers()
@@ -922,6 +1078,52 @@ func handleAPIPersonalMixDetail(w http.ResponseWriter, r *http.Request) {
 				"voices": weights[1],
 				"others": weights[2],
 			},
+		})
+		return
+	}
+
+	// Sub-rota: POST /api/personal-mixes/{id}/master
+	if len(parts) >= 4 && parts[3] == "master" {
+		if r.Method != http.MethodPost {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Use POST"})
+			return
+		}
+
+		targetMixID := sanitizeSlug(mixID)
+		if strings.EqualFold(sess.User.Role, "PERFORMER") {
+			myMix := GetPersonalMixForPerformer(sess.User.Username)
+			if myMix == nil && sess.User.MixID != "" {
+				myMix, _ = GetPersonalMix(sess.User.MixID)
+			}
+			if myMix == nil || myMix.ID != targetMixID {
+				w.WriteHeader(http.StatusForbidden)
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Você não tem permissão para controlar esta mix pessoal"})
+				return
+			}
+		}
+
+		var req struct {
+			Level   float64 `json:"level"`
+			Persist bool    `json:"persist"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "JSON inválido"})
+			return
+		}
+
+		updatedMix, rawVal, err := ApplyPersonalMixMaster(targetMixID, req.Level, req.Persist)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+			return
+		}
+
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success":   true,
+			"mix":       updatedMix,
+			"raw_value": rawVal,
 		})
 		return
 	}

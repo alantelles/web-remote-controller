@@ -483,6 +483,15 @@
             </div>
           </div>
 
+          <!-- Controle Master Relativo da Mix -->
+          <div class="group-meter-card" style="border-color: rgba(248, 113, 113, 0.35);">
+            <div class="group-meter-top">
+              <span class="group-meter-label" style="color: #f87171;">🔊 MASTER</span>
+              <span class="group-meter-pct" id="masterPctReadout" style="color: #f87171;">100%</span>
+            </div>
+            <input type="range" id="mixMasterSlider" min="0" max="1000" value="1000" style="width: 100%; accent-color: #ef4444; cursor: pointer; margin-top: 2px;">
+          </div>
+
           <!-- Medidores de Peso Equal Power dos 3 Grupos -->
           <div class="groups-meters-grid">
             <div class="group-meter-card card-me">
@@ -810,6 +819,54 @@
       updateGroupMetersUI(weights);
     }
 
+    const mixMasterSlider = document.getElementById('mixMasterSlider');
+    const masterPctReadout = document.getElementById('masterPctReadout');
+
+    let currentMasterMax = 1023;
+    let currentMasterLevel = 1.0;
+    let lastMasterRestTime = 0;
+
+    function updateMasterUI() {
+      const pct = Math.round(currentMasterLevel * 100);
+      if (mixMasterSlider) mixMasterSlider.value = String(Math.round(currentMasterLevel * 1000));
+      if (masterPctReadout) masterPctReadout.textContent = `${pct}%`;
+    }
+
+    function transmitMasterLevel(persistToDisk) {
+      if (!activeMix || !activeMix.enabled) return;
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          action: 'personal_mix_master',
+          mix_id: activeMix.id,
+          level: currentMasterLevel,
+          persist: Boolean(persistToDisk)
+        }));
+        return;
+      }
+      const now = performance.now();
+      if (persistToDisk || now - lastMasterRestTime >= 40) {
+        lastMasterRestTime = now;
+        fetch(`${BASE_PATH}/api/personal-mixes/${encodeURIComponent(activeMix.id)}/master`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ level: currentMasterLevel, persist: Boolean(persistToDisk) })
+        }).catch(() => {});
+      }
+    }
+
+    if (mixMasterSlider) {
+      mixMasterSlider.addEventListener('input', () => {
+        currentMasterLevel = Math.max(0, Math.min(1, Number(mixMasterSlider.value) / 1000));
+        updateMasterUI();
+        transmitMasterLevel(false);
+      });
+      mixMasterSlider.addEventListener('change', () => {
+        currentMasterLevel = Math.max(0, Math.min(1, Number(mixMasterSlider.value) / 1000));
+        updateMasterUI();
+        transmitMasterLevel(true);
+      });
+    }
+
     // Emite a nova posição do joystick para o backend calcular via Equal Power e enviar os SysEx
     function transmitJoystickPosition(persistToDisk) {
       if (!activeMix || !activeMix.enabled) return;
@@ -977,6 +1034,9 @@
 
       joyX = typeof mix.joystick_x === 'number' ? mix.joystick_x : 0;
       joyY = typeof mix.joystick_y === 'number' ? mix.joystick_y : 0;
+      currentMasterMax = (mix.has_master_config || mix.master_max > 0) ? mix.master_max : 1023;
+      currentMasterLevel = typeof mix.master_level === 'number' ? mix.master_level : 1.0;
+      updateMasterUI();
       drawJoystickDisc();
     }
 

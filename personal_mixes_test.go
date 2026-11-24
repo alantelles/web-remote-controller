@@ -305,3 +305,63 @@ Cantor,cantor1,senha1,PERFORMER,
 	}
 }
 
+func TestPersonalMixRelativeMaster(t *testing.T) {
+	tmpDir := t.TempDir()
+	InitSceneManager(tmpDir)
+	InitPersonalMixManager(tmpDir)
+
+	// Cria uma mix no AUX 2 com teto MasterMax = 760 (-10 dB)
+	mix, err := SavePersonalMix("", PersonalMix{
+		Name:            "Mix Master Limitado",
+		OutputAux:       2,
+		Enabled:         true,
+		MasterMax:       760,
+		HasMasterConfig: true,
+		Groups: PersonalMixGroups{
+			Me: []int{1},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Erro ao salvar mix: %v", err)
+	}
+
+	// 1. Master em 100% (1.0) -> deve enviar exatamente 760 (teto do Admin) para o Aux 2 Master
+	updated, raw100, err := ApplyPersonalMixMaster(mix.ID, 1.0, true)
+	if err != nil {
+		t.Fatalf("Erro ao aplicar master 100%%: %v", err)
+	}
+	if raw100 != 760 || updated.MasterLevel != 1.0 {
+		t.Errorf("Esperava raw=760 e master_level=1.0, obteve raw=%d level=%v", raw100, updated.MasterLevel)
+	}
+	if got := GetCurrentMixerState().AuxMasters[1].Fader; got != 760 {
+		t.Errorf("Esperava AuxMasters[1].Fader = 760, obteve %d", got)
+	}
+
+	// 2. Master em 50% (0.5) -> deve enviar 380 (metade do teto 760)
+	_, raw50, err := ApplyPersonalMixMaster(mix.ID, 0.5, false)
+	if err != nil {
+		t.Fatalf("Erro ao aplicar master 50%%: %v", err)
+	}
+	if raw50 != 380 {
+		t.Errorf("Esperava raw=380 em 50%% de 760, obteve %d", raw50)
+	}
+
+	// 3. Master em 0% (0.0) -> deve enviar 0 (-inf)
+	_, raw0, err := ApplyPersonalMixMaster(mix.ID, 0.0, true)
+	if err != nil {
+		t.Fatalf("Erro ao aplicar master 0%%: %v", err)
+	}
+	if raw0 != 0 {
+		t.Errorf("Esperava raw=0 em 0%%, obteve %d", raw0)
+	}
+
+	// 4. Clamping acima de 1.0 -> não pode ultrapassar MasterMax (760)
+	_, rawOver, err := ApplyPersonalMixMaster(mix.ID, 1.5, false)
+	if err != nil {
+		t.Fatalf("Erro ao aplicar master > 1.0: %v", err)
+	}
+	if rawOver != 760 {
+		t.Errorf("Esperava clamping em MasterMax=760, obteve %d", rawOver)
+	}
+}
+

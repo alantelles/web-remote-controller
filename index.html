@@ -4083,6 +4083,22 @@
               <input type="text" id="pmMixDesc" placeholder="Ex: Monitor In-Ear do vocalista principal (multiplicador relativo ao Aux)" maxlength="120" autocomplete="off">
             </div>
 
+            <div class="pm-field" style="background: rgba(15, 18, 24, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px; flex-wrap: wrap;">
+                <label for="pmMasterMaxRange" style="margin: 0;">🔊 Limite Máximo do Master (Performer):</label>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span id="pmMasterMaxDbBadge" style="font-family: monospace; font-size: 12px; font-weight: 800; color: #38bdf8; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); padding: 2px 8px; border-radius: 4px;">0.0 dB</span>
+                  <button type="button" class="btn-scene-action sm secondary pm-master-preset" data-val="1023">0 dB</button>
+                  <button type="button" class="btn-scene-action sm secondary pm-master-preset" data-val="890">-5 dB</button>
+                  <button type="button" class="btn-scene-action sm secondary pm-master-preset" data-val="760">-10 dB</button>
+                  <button type="button" class="btn-scene-action sm secondary pm-master-preset" data-val="480">-20 dB</button>
+                  <button type="button" class="btn-scene-action sm secondary pm-master-preset" data-val="0">-∞</button>
+                </div>
+              </div>
+              <input type="range" id="pmMasterMaxRange" min="0" max="1023" value="1023" style="width: 100%; accent-color: #38bdf8; cursor: pointer;">
+              <span style="font-size: 10px; color: #64748b;">Define o teto máximo (entre -∞ e 0.0 dB) que o músico poderá atingir no Master relativo da sua mix.</span>
+            </div>
+
             <!-- Configuração dos 3 Grupos que formam a Mix (Eu, Vozes, Outros) -->
             <div class="pm-groups-box">
               <div class="pm-groups-toolbar">
@@ -8835,6 +8851,8 @@
     const pmOutputAuxSelect = document.getElementById('pmOutputAux');
     const pmPerformerUserSelect = document.getElementById('pmPerformerUser');
     const pmEnabledCheckbox = document.getElementById('pmEnabled');
+    const pmMasterMaxRange = document.getElementById('pmMasterMaxRange');
+    const pmMasterMaxDbBadge = document.getElementById('pmMasterMaxDbBadge');
     const pmGroupTabs = document.getElementById('pmGroupTabs');
     const pmChannelsGrid = document.getElementById('pmChannelsGrid');
     const pmCountMe = document.getElementById('pmCountMe');
@@ -8984,6 +9002,28 @@
       });
     }
 
+    function updatePmMasterMaxBadge(val) {
+      if (!pmMasterMaxDbBadge) return;
+      const num = Math.max(0, Math.min(1023, parseInt(val, 10) || 0));
+      pmMasterMaxDbBadge.textContent = rawToDbOutput(num);
+    }
+
+    if (pmMasterMaxRange) {
+      pmMasterMaxRange.addEventListener('input', () => {
+        updatePmMasterMaxBadge(pmMasterMaxRange.value);
+      });
+    }
+
+    document.querySelectorAll('.pm-master-preset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = parseInt(btn.dataset.val, 10);
+        if (pmMasterMaxRange && !isNaN(val)) {
+          pmMasterMaxRange.value = String(val);
+          updatePmMasterMaxBadge(val);
+        }
+      });
+    });
+
     function openPmEditor(mixToEdit) {
       if (!pmEditorCard) return;
       pmChannelGroupMap = {};
@@ -8997,6 +9037,9 @@
         if (pmMixDescInput) pmMixDescInput.value = mixToEdit.description || '';
         if (pmOutputAuxSelect) pmOutputAuxSelect.value = String(mixToEdit.output_aux || 1);
         if (pmEnabledCheckbox) pmEnabledCheckbox.checked = Boolean(mixToEdit.enabled);
+        const maxVal = (mixToEdit.has_master_config || mixToEdit.master_max > 0) ? mixToEdit.master_max : 1023;
+        if (pmMasterMaxRange) pmMasterMaxRange.value = String(maxVal);
+        updatePmMasterMaxBadge(maxVal);
         populatePmPerformersDropdown(mixToEdit.performer_username || '', mixToEdit.id);
 
         const groups = mixToEdit.groups || {};
@@ -9011,6 +9054,8 @@
         if (pmMixDescInput) pmMixDescInput.value = '';
         if (pmOutputAuxSelect) pmOutputAuxSelect.value = '1';
         if (pmEnabledCheckbox) pmEnabledCheckbox.checked = true;
+        if (pmMasterMaxRange) pmMasterMaxRange.value = '1023';
+        updatePmMasterMaxBadge(1023);
         populatePmPerformersDropdown('', '');
       }
 
@@ -9063,6 +9108,8 @@
           output_aux: outputAux,
           performer_username: performerUsername,
           enabled,
+          master_max: pmMasterMaxRange ? (parseInt(pmMasterMaxRange.value, 10) || 0) : 1023,
+          has_master_config: true,
           groups: { me, voices, others }
         };
 
