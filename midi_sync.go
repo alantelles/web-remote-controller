@@ -3,12 +3,14 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/gorilla/websocket"
 	"gitlab.com/gomidi/midi/v2"
 	"gitlab.com/gomidi/midi/v2/drivers"
 )
@@ -77,6 +79,51 @@ func Build01V96ParamRequest(element, param, channel byte) []byte {
 		element, param, channel,
 		0xF7,
 	}
+}
+
+// Build01V96MeterRequest monta a mensagem SysEx de solicitação de Remote Meter (12 bytes).
+// Formato Yamaha 01V96: F0 43 30 3E 0D 21 [UL] [LU] [LL] [CountH] [CountL] F7
+func Build01V96MeterRequest(ul, lu, ll byte, count uint16) []byte {
+	return []byte{
+		0xF0, 0x43, 0x30, 0x3E, 0x0D, 0x21,
+		ul & 0x7F, lu & 0x7F, ll & 0x7F,
+		byte((count >> 7) & 0x7F), byte(count & 0x7F),
+		0xF7,
+	}
+}
+
+// Build01V96MeterStop monta a mensagem SysEx para interromper o stream de Remote Meter (UL = 0x7F).
+func Build01V96MeterStop() []byte {
+	return []byte{0xF0, 0x43, 0x30, 0x3E, 0x0D, 0x21, 0x7F, 0x00, 0x00, 0x00, 0x00, 0xF7}
+}
+
+// Parse01V96MeterSysEx decodifica pacotes de resposta Remote Meter (0x21) da Yamaha 01V96.
+// Formato esperado: F0 43 1n 3E [0D|7F] 21 [UL] [LU] [LL] [H1 L1] [H2 L2] ... F7
+func Parse01V96MeterSysEx(data []byte) (ul, lu, ll byte, values []int, ok bool) {
+	if len(data) < 12 || (len(data)-10)%2 != 0 {
+		return 0, 0, 0, nil, false
+	}
+	if data[0] != 0xF0 || data[1] != 0x43 || (data[2]&0xF0) != 0x10 || data[3] != 0x3E {
+		return 0, 0, 0, nil, false
+	}
+	if data[4] != 0x0D && data[4] != 0x7F {
+		return 0, 0, 0, nil, false
+	}
+	if data[5] != 0x21 || data[len(data)-1] != 0xF7 {
+		return 0, 0, 0, nil, false
+	}
+
+	ul = data[6]
+	lu = data[7]
+	ll = data[8]
+	payload := data[9 : len(data)-1]
+	values = make([]int, len(payload)/2)
+	for i := 0; i < len(values); i++ {
+		h := int(payload[i*2] & 0x7F)
+		l := int(payload[i*2+1] & 0x7F)
+		values[i] = (h << 7) | l
+	}
+	return ul, lu, ll, values, true
 }
 
 // ==========================================
@@ -368,7 +415,13 @@ func handleIncomingMIDIMessage(msg midi.Message, timestampms int32) {
 		return
 	}
 
-	// 2. Program Change recebido da mesa (indica recall físico de cena na 01V96)
+	// 2. Mensagem SysEx de Remote Meter (0x21 - Level / Gain Reduction)
+	if ul, lu, ll, values, ok := Parse01V96MeterSysEx(data); ok {
+		handleIncomingMeterData(ul, lu, ll, values, data)
+		return
+	}
+
+	// 3. Program Change recebido da mesa (indica recall físico de cena na 01V96)
 	var ch, prog uint8
 	if msg.GetProgramChange(&ch, &prog) {
 		log.Printf("MIDI IN -> Program Change recebido (Ch: %d, Prog: %d). Cena alterada na mesa física. Disparando sincronização...", ch, prog)
@@ -708,4 +761,255 @@ func RequestChannelFXSync(targetKey string, paceDelay time.Duration) error {
 // RequestMixerInitialState consulta os parâmetros da mixagem principal de forma rápida e segura
 func RequestMixerInitialState(paceDelay time.Duration) error {
 	return RequestMainViewSync(paceDelay)
+}
+
+// ==========================================
+// TELEMETRIA SOB DEMANDA: GAIN REDUCTION (0x21)
+// ==========================================
+
+var (
+	grSubLock         sync.Mutex
+	grSubscribers     = make(map[*websocket.Conn]string)
+	grPollRunning     bool
+	grPollStopChan    chan struct{}
+	grPollRefreshChan = make(chan struct{}, 1)
+
+	meterDiagLock sync.Mutex
+	meterDiagLast = make(map[uint32]time.Time)
+)
+
+// setGRSubscription registra ou remove o interesse de uma tela WebSocket pelo Gain Reduction de um canal/saída.
+// O polling MIDI (ou telemetria simulada) só permanece ativo enquanto houver ao menos 1 tela com o compressor aberto.
+func setGRSubscription(conn *websocket.Conn, target string) {
+	if conn == nil {
+		return
+	}
+
+	target = strings.TrimSpace(target)
+	grSubLock.Lock()
+	defer grSubLock.Unlock()
+
+	if target == "" {
+		delete(grSubscribers, conn)
+	} else {
+		grSubscribers[conn] = target
+	}
+
+	reconcileGRPollingLocked()
+	if target != "" {
+		select {
+		case grPollRefreshChan <- struct{}{}:
+		default:
+		}
+	}
+}
+
+func reconcileGRPollingLocked() {
+	if len(grSubscribers) > 0 && !grPollRunning {
+		grPollRunning = true
+		grPollStopChan = make(chan struct{})
+		go runGRPoller(grPollStopChan)
+		return
+	}
+
+	if len(grSubscribers) == 0 && grPollRunning {
+		close(grPollStopChan)
+		grPollStopChan = nil
+		grPollRunning = false
+
+		// Solicita à mesa física a parada imediata do stream Remote Meter (UL = 0x7F)
+		midiLock.Lock()
+		hasOut := midiOut != nil
+		midiLock.Unlock()
+		if hasOut {
+			_ = sendMIDISysExLocked(Build01V96MeterStop())
+		}
+	}
+}
+
+func getUniqueGRTargets() []string {
+	grSubLock.Lock()
+	defer grSubLock.Unlock()
+
+	seen := make(map[string]bool, len(grSubscribers))
+	targets := make([]string, 0, len(grSubscribers))
+	for _, t := range grSubscribers {
+		if t != "" && !seen[t] {
+			seen[t] = true
+			targets = append(targets, t)
+		}
+	}
+	return targets
+}
+
+// sendGRToSubscribers envia o valor de Gain Reduction apenas para as conexões que estão vendo aquele canal/saída.
+func sendGRToSubscribers(target string, grDb float64, raw int) {
+	grSubLock.Lock()
+	var conns []*websocket.Conn
+	for c, t := range grSubscribers {
+		if t == target {
+			conns = append(conns, c)
+		}
+	}
+	grSubLock.Unlock()
+
+	if len(conns) == 0 {
+		return
+	}
+
+	msg := WSMessage{
+		Type:   "gr_meter",
+		Target: target,
+		GRDb:   math.Round(grDb*10) / 10,
+		Raw:    raw,
+	}
+
+	clientsLock.Lock()
+	defer clientsLock.Unlock()
+	for _, c := range conns {
+		if err := c.WriteJSON(msg); err != nil {
+			log.Printf("Erro ao enviar gr_meter via WS: %v", err)
+		}
+	}
+}
+
+// sendGRMeterRequestsForTargets envia pedidos SysEx 0x21 apenas para os canais atualmente abertos em tela.
+func sendGRMeterRequestsForTargets(targets []string) {
+	midiLock.Lock()
+	hasOut := midiOut != nil
+	midiLock.Unlock()
+	if !hasOut {
+		return
+	}
+
+	for _, t := range targets {
+		if chNum, err := strconv.Atoi(t); err == nil && chNum >= 0 && chNum < 32 {
+			// Bloco 00 05 [ch] count=1 (canais de entrada 1..32, dinâmica/GR)
+			req := Build01V96MeterRequest(0x00, 0x05, byte(chNum), 1)
+			_ = sendMIDISysExLocked(req)
+		} else if t == "MASTER" {
+			req := Build01V96MeterRequest(0x04, 0x00, 0x00, 2)
+			_ = sendMIDISysExLocked(req)
+		}
+	}
+}
+
+func runGRPoller(stopChan chan struct{}) {
+	midiLock.Lock()
+	hasMIDI := midiOut != nil
+	midiLock.Unlock()
+
+	if hasMIDI {
+		// Na 01V96 cada Meter Request mantém o stream por ~10s; renovamos a cada 8s enquanto houver tela aberta.
+		sendGRMeterRequestsForTargets(getUniqueGRTargets())
+		ticker := time.NewTicker(8 * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-stopChan:
+				return
+			case <-grPollRefreshChan:
+				sendGRMeterRequestsForTargets(getUniqueGRTargets())
+			case <-ticker.C:
+				targets := getUniqueGRTargets()
+				if len(targets) > 0 {
+					sendGRMeterRequestsForTargets(targets)
+				}
+			}
+		}
+	}
+
+	// Modo simulação (-sim / sem porta física): gera telemetria sintética apenas para canais com tela aberta
+	ticker := time.NewTicker(90 * time.Millisecond)
+	defer ticker.Stop()
+
+	phase := 0.0
+	for {
+		select {
+		case <-stopChan:
+			return
+		case <-grPollRefreshChan:
+			// Atualiza no próximo tick
+		case <-ticker.C:
+			phase += 0.25
+			targets := getUniqueGRTargets()
+			if len(targets) == 0 {
+				continue
+			}
+
+			state := GetCurrentMixerState()
+			for _, t := range targets {
+				var compOn int
+				var threshold, ratio int
+
+				if chNum, err := strconv.Atoi(t); err == nil && chNum >= 0 && chNum < 32 {
+					c := state.Inputs[chNum].Comp
+					compOn, threshold, ratio = c.On, c.Threshold, c.Ratio
+				} else if t == "MASTER" {
+					c := state.StereoMaster.Comp
+					compOn, threshold, ratio = c.On, c.Threshold, c.Ratio
+				} else if strings.HasPrefix(t, "AUX") {
+					if auxNum, err := strconv.Atoi(strings.TrimPrefix(t, "AUX")); err == nil && auxNum >= 1 && auxNum <= 8 {
+						c := state.AuxMasters[auxNum-1].Comp
+						compOn, threshold, ratio = c.On, c.Threshold, c.Ratio
+					}
+				}
+
+				if compOn == 0 || ratio == 0 {
+					sendGRToSubscribers(t, 0, 0)
+					continue
+				}
+
+				// Simula redução de ganho proporcional ao threshold/ratio apenas quando o compressor está ativo
+				depth := math.Max(0.5, float64(-threshold)/80.0) * (float64(ratio) / 10.0)
+				wave := 0.5 + 0.5*math.Sin(phase)*math.Cos(phase*0.37)
+				grDb := math.Min(24.0, depth*wave*2.2)
+				sendGRToSubscribers(t, grDb, 0)
+			}
+		}
+	}
+}
+
+// raw01V96MeterToGRDb converte valor bruto de 14 bits de meter (0x21) em dB de Gain Reduction.
+// Nota: escala preliminar (0..32 -> 0..24 dB) sujeita à calibração final na 01V96 física.
+func raw01V96MeterToGRDb(raw int) float64 {
+	if raw <= 0 {
+		return 0
+	}
+	if raw <= 32 {
+		return (float64(raw) / 32.0) * 24.0
+	}
+	if raw <= 240 {
+		return float64(raw) / 10.0
+	}
+	return math.Min(24.0, (float64(raw)/1023.0)*24.0)
+}
+
+func handleIncomingMeterData(ul, lu, ll byte, values []int, rawBytes []byte) {
+	// Log de diagnóstico limitado a 1x a cada 500ms por endereço para facilitar calibração na mesa física
+	addrKey := (uint32(ul) << 16) | (uint32(lu) << 8) | uint32(ll)
+	now := time.Now()
+	meterDiagLock.Lock()
+	lastLog, seen := meterDiagLast[addrKey]
+	shouldLog := !seen || now.Sub(lastLog) >= 500*time.Millisecond
+	if shouldLog {
+		meterDiagLast[addrKey] = now
+	}
+	meterDiagLock.Unlock()
+
+	if shouldLog {
+		log.Printf("MIDI IN -> Remote Meter 0x21 [UL=0x%02X LU=0x%02X LL=0x%02X] values=%v (raw=% X)", ul, lu, ll, values, rawBytes)
+	}
+
+	// Mapeia bloco de canais (UL=0x00, LU=0x05) apenas para quem está com a tela daquele canal aberta
+	if ul == 0x00 && lu == 0x05 {
+		for i, raw := range values {
+			ch := int(ll) + i
+			if ch >= 0 && ch < 32 {
+				target := strconv.Itoa(ch)
+				sendGRToSubscribers(target, raw01V96MeterToGRDb(raw), raw)
+			}
+		}
+	}
 }

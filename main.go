@@ -49,6 +49,8 @@ type WSMessage struct {
 	Persist     bool         `json:"persist,omitempty"`       // Salvar posição do joystick/master em disco
 	MuteGroupID int          `json:"mute_group_id,omitempty"` // 1 a 4 para toggle_mute_group / set_mute_group
 	MuteGroups  []*MuteGroup `json:"mute_groups,omitempty"`   // Estado completo dos Mute Groups da aplicação
+	GRDb        float64      `json:"gr_db,omitempty"`         // Gain Reduction em dB (0.0 .. 24.0)
+	Raw         int          `json:"raw,omitempty"`           // Valor bruto 14-bit para diagnóstico/calibração
 }
 
 var (
@@ -1736,6 +1738,7 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer func() {
+		setGRSubscription(conn, "")
 		clientsLock.Lock()
 		delete(clients, conn)
 		clientsLock.Unlock()
@@ -1834,6 +1837,18 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 			if _, _, err := SetMuteGroupState(msg.MuteGroupID, msg.Value != 0); err != nil {
 				log.Printf("WebSocket: erro ao definir Mute Group %d: %v", msg.MuteGroupID, err)
 			}
+			continue
+		}
+
+		// Assinatura sob demanda do medidor de Gain Reduction (apenas ADMIN/OPERATOR com tela do compressor aberta)
+		if msg.Action == "subscribe_gr" {
+			if userRole == "ADMIN" || userRole == "OPERATOR" {
+				setGRSubscription(conn, msg.Target)
+			}
+			continue
+		}
+		if msg.Action == "unsubscribe_gr" {
+			setGRSubscription(conn, "")
 			continue
 		}
 

@@ -4771,13 +4771,119 @@
           </div>
         </div>
 
-        <!-- ABA: GATE (Placeholder) -->
+        <!-- ABA: GATE / EXPANDER -->
         <div class="fx-tab-pane" id="fxTab_gate">
-          <div class="fx-placeholder-box">
-            <div class="fx-placeholder-icon">🚪</div>
-            <div class="fx-placeholder-title">GATE / EXPANDER</div>
-            <div class="fx-placeholder-desc">
-              Em Breve. Threshold, Range, Attack, Hold e Decay para controle de ruído de fundo deste canal.
+          <div class="comp-panel">
+            <!-- Barra de ações do Gate (Bypass, Presets, Reset) -->
+            <div class="comp-top-bar">
+              <div class="comp-switch-group">
+                <button type="button" class="btn-comp-bypass" id="btnGateBypass">GATE: BYPASS (OFF)</button>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="font-size: 11px; font-weight: 700; color: #94a3b8;">Preset:</span>
+                  <select class="comp-preset-select" id="gatePresetSelect">
+                    <option value="default" selected>Padrão (Geral)</option>
+                    <option value="kick">Bumbo / Kick</option>
+                    <option value="snare">Caixa / Snare</option>
+                    <option value="tom">Tons / Toms</option>
+                    <option value="vocal">Vocal / Voz</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" class="btn-comp-reset" id="btnGateReset" title="Restaurar valores padrão do Noise Gate">Reset Padrão</button>
+              </div>
+            </div>
+
+            <!-- Gráfico Visual da Curva de Transferência do Gate -->
+            <div class="comp-display-card">
+              <canvas id="gateCanvas" class="comp-curve-canvas" width="700" height="170"></canvas>
+            </div>
+
+            <!-- Grade de Parâmetros do Noise Gate (Threshold, Range, Attack, Hold, Decay) -->
+            <div class="comp-controls-grid">
+              <!-- THRESHOLD -->
+              <div class="comp-param-card">
+                <div class="comp-param-header">
+                  <span class="comp-param-title">THRESHOLD (LIMIAR)</span>
+                  <span class="comp-param-val" id="lbl_gateThreshold">-20.0 dB</span>
+                </div>
+                <div class="eq-ctrl-row">
+                  <input type="range" class="comp-range-input" id="rng_gateThreshold" min="0" max="540" value="340">
+                  <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-top: 2px;">
+                    <span>-54.0 dB</span>
+                    <span>-20.0 dB</span>
+                    <span>0.0 dB</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- RANGE -->
+              <div class="comp-param-card">
+                <div class="comp-param-header">
+                  <span class="comp-param-title">RANGE (ATENUAÇÃO)</span>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="comp-param-val" id="lbl_gateRange">-∞ dB</span>
+                    <button type="button" id="btnMinGateRange" style="font-size: 9px; padding: 1px 6px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: #cbd5e1; cursor: pointer;">-∞</button>
+                    <button type="button" id="btnZeroGateRange" style="font-size: 9px; padding: 1px 6px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: #cbd5e1; cursor: pointer;">0 dB</button>
+                  </div>
+                </div>
+                <div class="eq-ctrl-row">
+                  <input type="range" class="comp-range-input" id="rng_gateRange" min="0" max="70" value="0">
+                  <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-top: 2px;">
+                    <span>-∞ dB</span>
+                    <span>-35 dB</span>
+                    <span>0 dB</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ATTACK -->
+              <div class="comp-param-card">
+                <div class="comp-param-header">
+                  <span class="comp-param-title">ATTACK (ATAQUE)</span>
+                  <span class="comp-param-val" id="lbl_gateAttack">1 ms</span>
+                </div>
+                <div class="eq-ctrl-row">
+                  <input type="range" class="comp-range-input" id="rng_gateAttack" min="0" max="120" value="1">
+                  <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-top: 2px;">
+                    <span>0 ms</span>
+                    <span>60 ms</span>
+                    <span>120 ms</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- HOLD -->
+              <div class="comp-param-card">
+                <div class="comp-param-header">
+                  <span class="comp-param-title">HOLD (SUSTENTAÇÃO)</span>
+                  <span class="comp-param-val" id="lbl_gateHold">20 ms</span>
+                </div>
+                <div class="eq-ctrl-row">
+                  <input type="range" class="comp-range-input" id="rng_gateHold" min="0" max="120" value="20">
+                  <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-top: 2px;">
+                    <span>0 ms</span>
+                    <span>60 ms</span>
+                    <span>120 ms</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- DECAY -->
+              <div class="comp-param-card">
+                <div class="comp-param-header">
+                  <span class="comp-param-title">DECAY (DECAIMENTO)</span>
+                  <span class="comp-param-val" id="lbl_gateDecay">250 ms</span>
+                </div>
+                <div class="eq-ctrl-row">
+                  <input type="range" class="comp-range-input" id="rng_gateDecay" min="0" max="43" value="18">
+                  <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-top: 2px;">
+                    <span>5 ms</span>
+                    <span>250 ms</span>
+                    <span>42.3 s</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -5400,13 +5506,15 @@
                     if (data.value === 1) eq.low.type = 'hpf';
                     break;
                   case 0x02: eq.low.freq = data.value; break;
-                  case 0x03: eq.low.gain = data.value; break;
+                  case 0x03:
+                    if (eq.low.type !== 'hpf' && eq.hpf !== 1) eq.low.gain = data.value + 180;
+                    break;
                   case 0x05: eq.lomid.q = Math.max(0, Math.min(40, 40 - data.value)); break;
                   case 0x06: eq.lomid.freq = data.value; break;
-                  case 0x07: eq.lomid.gain = data.value; break;
+                  case 0x07: eq.lomid.gain = data.value + 180; break;
                   case 0x08: eq.himid.q = Math.max(0, Math.min(40, 40 - data.value)); break;
                   case 0x09: eq.himid.freq = data.value; break;
-                  case 0x0A: eq.himid.gain = data.value; break;
+                  case 0x0A: eq.himid.gain = data.value + 180; break;
                   case 0x0B:
                     if (data.value === 43 || data.value === 0x2B) {
                       eq.high.type = 'lpf';
@@ -5425,7 +5533,9 @@
                     if (data.value === 1) eq.high.type = 'lpf';
                     break;
                   case 0x0C: eq.high.freq = data.value; break;
-                  case 0x0D: eq.high.gain = data.value; break;
+                  case 0x0D:
+                    if (eq.high.type !== 'lpf' && eq.lpf !== 1) eq.high.gain = data.value + 180;
+                    break;
                 }
                 if (typeof updateTabStatusDots === 'function') updateTabStatusDots(targetKey);
                 if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === targetKey && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
@@ -5449,7 +5559,7 @@
                 switch (data.param) {
                   case 0x00: comp.position = data.value; break;
                   case 0x01: comp.on = data.value; break;
-                  case 0x09: comp.threshold = data.value; break;
+                  case 0x09: comp.threshold = data.value + 540; break;
                   case 0x06: comp.ratio = data.value; break;
                   case 0x04: comp.attack = data.value; break;
                   case 0x05: comp.release = data.value; break;
@@ -5460,6 +5570,28 @@
                 if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === targetKey && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
                   syncCompModalFromState(targetKey);
                   requestCompRedraw();
+                }
+              }
+            }
+          }
+          // Element 0x21 (Input Noise Gate - Canais 1 a 32)
+          else if (data.element === 0x21 && data.channel >= 0 && data.channel < TOTAL_CHANNELS) {
+            const ch = data.channel;
+            if (typeof getChannelGate === 'function') {
+              const gate = getChannelGate(ch);
+              if (gate) {
+                switch (data.param) {
+                  case 0x00: gate.on = data.value; break;
+                  case 0x01: gate.threshold = data.value; break;
+                  case 0x02: gate.range = data.value; break;
+                  case 0x03: gate.attack = data.value; break;
+                  case 0x04: gate.hold = data.value; break;
+                  case 0x05: gate.decay = data.value; break;
+                }
+                if (typeof updateTabStatusDots === 'function') updateTabStatusDots(ch);
+                if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === ch && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
+                  syncGateModalFromState(ch);
+                  requestGateRedraw();
                 }
               }
             }
@@ -6973,7 +7105,10 @@
         requestEqRedraw();
       } else if (tabKey === 'comp') {
         requestCompRedraw();
+      } else if (tabKey === 'gate') {
+        if (typeof requestGateRedraw === 'function') requestGateRedraw();
       }
+      syncGRSubscription();
     }
 
     function openFxModal(target) {
@@ -7018,9 +7153,10 @@
       });
       updateOutputSelBadges();
 
-      // Carrega estado do EQ e COMP do canal/saída
+      // Carrega estado do EQ, COMP e GATE do canal/saída
       syncEqModalFromState(target);
       syncCompModalFromState(target);
+      if (typeof syncGateModalFromState === 'function') syncGateModalFromState(target);
       updateTabStatusDots(target);
       fxModalOverlay.classList.add('open');
       
@@ -7028,6 +7164,8 @@
         requestEqRedraw();
       } else if (currentFxTab === 'comp') {
         requestCompRedraw();
+      } else if (currentFxTab === 'gate') {
+        if (typeof requestGateRedraw === 'function') requestGateRedraw();
       }
 
       // Sincronização sob demanda: solicita parâmetros de EQ, Compressor e Gate da mesa física para este canal/saída
@@ -7754,10 +7892,13 @@
     function updateTabStatusDots(target) {
       const eq = getChannelEq(target);
       const comp = getChannelComp(target);
+      const gate = typeof getChannelGate === 'function' ? getChannelGate(target) : null;
       const dotEq = document.getElementById('dot_eq');
       const dotComp = document.getElementById('dot_comp');
+      const dotGate = document.getElementById('dot_gate');
       if (dotEq) dotEq.classList.toggle('dot-on', eq && eq.on === 1);
       if (dotComp) dotComp.classList.toggle('dot-on', comp && comp.on === 1);
+      if (dotGate) dotGate.classList.toggle('dot-on', gate && gate.on === 1);
       if (typeof target === 'number') {
         updateChannelStripFxBadges(target);
       } else {
@@ -8125,6 +8266,349 @@
       sendCompParam(0x07, val);
     });
 
+    // ==========================================
+    // MÓDULO NOISE GATE / EXPANDER (VISÃO PC)
+    // ==========================================
+    const GATE_PRESETS = {
+      default: { threshold: 340, range: 0, attack: 1, hold: 20, decay: 18 },
+      kick:    { threshold: 380, range: 0, attack: 1, hold: 10, decay: 12 },
+      snare:   { threshold: 360, range: 10, attack: 1, hold: 15, decay: 14 },
+      tom:     { threshold: 340, range: 0, attack: 2, hold: 25, decay: 17 },
+      vocal:   { threshold: 260, range: 25, attack: 5, hold: 30, decay: 20 }
+    };
+
+    const gateState = Array.from({ length: TOTAL_CHANNELS }, () => ({
+      on: 0,
+      threshold: 340,
+      range: 0,
+      attack: 1,
+      hold: 20,
+      decay: 18
+    }));
+
+    function getChannelGate(target) {
+      if (typeof target === 'number') {
+        return gateState[target] || gateState[0];
+      }
+      return null;
+    }
+
+    function rawGateRangeToDb(val) {
+      if (val <= 0) return '-∞ dB';
+      const db = val - 70;
+      if (db === 0) return '0 dB';
+      return `${db} dB`;
+    }
+
+    const gateCanvas = document.getElementById('gateCanvas');
+    const gateCtx = gateCanvas ? gateCanvas.getContext('2d') : null;
+    const btnGateBypass = document.getElementById('btnGateBypass');
+    const btnGateReset = document.getElementById('btnGateReset');
+    const gatePresetSelect = document.getElementById('gatePresetSelect');
+
+    const gateControls = {
+      threshold: { rng: document.getElementById('rng_gateThreshold'), lbl: document.getElementById('lbl_gateThreshold') },
+      range:     { rng: document.getElementById('rng_gateRange'),     lbl: document.getElementById('lbl_gateRange') },
+      attack:    { rng: document.getElementById('rng_gateAttack'),    lbl: document.getElementById('lbl_gateAttack') },
+      hold:      { rng: document.getElementById('rng_gateHold'),      lbl: document.getElementById('lbl_gateHold') },
+      decay:     { rng: document.getElementById('rng_gateDecay'),     lbl: document.getElementById('lbl_gateDecay') }
+    };
+
+    function syncGateModalFromState(target) {
+      const gate = getChannelGate(target);
+      if (!gate) return;
+
+      if (btnGateBypass) {
+        btnGateBypass.classList.toggle('on', gate.on === 1);
+        btnGateBypass.textContent = gate.on === 1 ? 'GATE: ATIVO (ON)' : 'GATE: BYPASS (OFF)';
+      }
+
+      if (gateControls.threshold.rng) gateControls.threshold.rng.value = gate.threshold;
+      if (gateControls.threshold.lbl) gateControls.threshold.lbl.textContent = rawThresholdToDb(gate.threshold);
+
+      if (gateControls.range.rng) gateControls.range.rng.value = gate.range;
+      if (gateControls.range.lbl) gateControls.range.lbl.textContent = rawGateRangeToDb(gate.range);
+
+      if (gateControls.attack.rng) gateControls.attack.rng.value = gate.attack;
+      if (gateControls.attack.lbl) gateControls.attack.lbl.textContent = `${gate.attack} ms`;
+
+      if (gateControls.hold.rng) gateControls.hold.rng.value = gate.hold;
+      if (gateControls.hold.lbl) gateControls.hold.lbl.textContent = `${gate.hold} ms`;
+
+      if (gateControls.decay.rng) gateControls.decay.rng.value = gate.decay;
+      if (gateControls.decay.lbl) gateControls.decay.lbl.textContent = COMP_RELEASE_VALUES[gate.decay] || `${gate.decay} ms`;
+    }
+
+    function sendGateParam(param, value) {
+      if (typeof currentSelectedCh === 'number') {
+        sendCommand(0x21, param, currentSelectedCh, value);
+      }
+      requestGateRedraw();
+    }
+
+    let gateRedrawQueued = false;
+    function requestGateRedraw() {
+      if (currentFxTab !== 'gate' || !fxModalOverlay.classList.contains('open')) return;
+      if (gateRedrawQueued) return;
+      gateRedrawQueued = true;
+      requestAnimationFrame(() => {
+        gateRedrawQueued = false;
+        drawGateCurve();
+      });
+    }
+
+    function drawGateCurve() {
+      if (!gateCtx || !gateCanvas) return;
+      const w = gateCanvas.width;
+      const h = gateCanvas.height;
+      const ctx = gateCtx;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const padL = 42;
+      const padR = 20;
+      const padT = 16;
+      const padB = 26;
+      const pw = w - padL - padR;
+      const ph = h - padT - padB;
+
+      function inDbToX(db) { return padL + ((db - (-60)) / 60) * pw; }
+      function outDbToY(db) { return padT + ph - ((db - (-60)) / 60) * ph; }
+
+      const dBs = [-60, -50, -40, -30, -20, -10, 0];
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      ctx.fillStyle = '#64748b';
+      ctx.font = '9px monospace';
+
+      dBs.forEach(db => {
+        const x = inDbToX(db);
+        const y = outDbToY(db);
+
+        ctx.beginPath();
+        ctx.moveTo(x, padT);
+        ctx.lineTo(x, padT + ph);
+        ctx.stroke();
+
+        ctx.textAlign = 'center';
+        ctx.fillText(db === 0 ? '0' : `${db}`, x, h - 8);
+
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(padL + pw, y);
+        ctx.stroke();
+
+        ctx.textAlign = 'right';
+        ctx.fillText(db === 0 ? '0' : `${db}`, padL - 6, y + 3);
+      });
+
+      ctx.fillStyle = '#475569';
+      ctx.font = '9px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('INPUT (dB)', padL + pw, h - 8);
+      ctx.textAlign = 'left';
+      ctx.fillText('OUT', 4, padT + 8);
+
+      // Linha 1:1
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(inDbToX(-60), outDbToY(-60));
+      ctx.lineTo(inDbToX(0), outDbToY(0));
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const gate = getChannelGate(currentSelectedCh);
+      if (!gate || gate.on === 0 || typeof currentSelectedCh !== 'number') {
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('GATE BYPASS (DESATIVADO)', padL + pw / 2, padT + ph / 2);
+        return;
+      }
+
+      const thDb = (gate.threshold - 540) / 10;
+      const rangeAtten = gate.range === 0 ? 999 : (70 - gate.range);
+
+      function gateTransfer(inDb) {
+        if (inDb >= thDb) return inDb;
+        return Math.max(-60, inDb - rangeAtten);
+      }
+
+      const curvePoints = [];
+      for (let db = -60; db <= 0.001; db += 0.5) {
+        curvePoints.push({ x: inDbToX(db), y: outDbToY(gateTransfer(db)) });
+      }
+
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.1)';
+      ctx.beginPath();
+      ctx.moveTo(inDbToX(-60), outDbToY(-60));
+      curvePoints.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.lineTo(inDbToX(0), outDbToY(0));
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      curvePoints.forEach((p, idx) => {
+        if (idx === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+
+      const thX = inDbToX(thDb);
+      const thY = outDbToY(gateTransfer(thDb));
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(thX, Math.max(padT, Math.min(padT + ph, thY)), 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.fillStyle = '#bae6fd';
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'center';
+      const labelY = thY > padT + 22 ? thY - 9 : thY + 16;
+      ctx.fillText(`${thDb.toFixed(1)}dB`, thX, labelY);
+    }
+
+    if (btnGateBypass) {
+      btnGateBypass.addEventListener('click', () => {
+        const gate = getChannelGate(currentSelectedCh);
+        if (!gate) return;
+        gate.on = gate.on === 1 ? 0 : 1;
+        btnGateBypass.classList.toggle('on', gate.on === 1);
+        btnGateBypass.textContent = gate.on === 1 ? 'GATE: ATIVO (ON)' : 'GATE: BYPASS (OFF)';
+        updateTabStatusDots(currentSelectedCh);
+        sendGateParam(0x00, gate.on);
+      });
+    }
+
+    if (btnGateReset) {
+      btnGateReset.addEventListener('click', () => {
+        const def = GATE_PRESETS.default;
+        const gate = getChannelGate(currentSelectedCh);
+        if (!gate) return;
+        gate.threshold = def.threshold;
+        gate.range = def.range;
+        gate.attack = def.attack;
+        gate.hold = def.hold;
+        gate.decay = def.decay;
+
+        syncGateModalFromState(currentSelectedCh);
+        sendGateParam(0x01, def.threshold);
+        sendGateParam(0x02, def.range);
+        sendGateParam(0x03, def.attack);
+        sendGateParam(0x04, def.hold);
+        sendGateParam(0x05, def.decay);
+        if (gatePresetSelect) gatePresetSelect.value = 'default';
+        showToast(`Noise Gate de CH ${currentSelectedCh + 1} restaurado para o padrão ⚡`, '⚡');
+      });
+    }
+
+    if (gatePresetSelect) {
+      gatePresetSelect.addEventListener('change', (e) => {
+        const p = GATE_PRESETS[e.target.value];
+        const gate = getChannelGate(currentSelectedCh);
+        if (!p || !gate) return;
+        gate.threshold = p.threshold;
+        gate.range = p.range;
+        gate.attack = p.attack;
+        gate.hold = p.hold;
+        gate.decay = p.decay;
+
+        syncGateModalFromState(currentSelectedCh);
+        sendGateParam(0x01, p.threshold);
+        sendGateParam(0x02, p.range);
+        sendGateParam(0x03, p.attack);
+        sendGateParam(0x04, p.hold);
+        sendGateParam(0x05, p.decay);
+        showToast(`Preset Gate "${e.target.options[e.target.selectedIndex].text}" aplicado! 🚪`, '🚪');
+      });
+    }
+
+    if (gateControls.threshold.rng) {
+      gateControls.threshold.rng.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        const gate = getChannelGate(currentSelectedCh);
+        if (!gate) return;
+        gate.threshold = val;
+        gateControls.threshold.lbl.textContent = rawThresholdToDb(val);
+        sendGateParam(0x01, val);
+      });
+    }
+
+    if (gateControls.range.rng) {
+      gateControls.range.rng.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        const gate = getChannelGate(currentSelectedCh);
+        if (!gate) return;
+        gate.range = val;
+        gateControls.range.lbl.textContent = rawGateRangeToDb(val);
+        sendGateParam(0x02, val);
+      });
+    }
+
+    const btnMinGateRange = document.getElementById('btnMinGateRange');
+    if (btnMinGateRange) {
+      btnMinGateRange.addEventListener('click', () => {
+        const gate = getChannelGate(currentSelectedCh);
+        if (!gate) return;
+        gate.range = 0;
+        if (gateControls.range.rng) gateControls.range.rng.value = 0;
+        if (gateControls.range.lbl) gateControls.range.lbl.textContent = '-∞ dB';
+        sendGateParam(0x02, 0);
+      });
+    }
+
+    const btnZeroGateRange = document.getElementById('btnZeroGateRange');
+    if (btnZeroGateRange) {
+      btnZeroGateRange.addEventListener('click', () => {
+        const gate = getChannelGate(currentSelectedCh);
+        if (!gate) return;
+        gate.range = 70;
+        if (gateControls.range.rng) gateControls.range.rng.value = 70;
+        if (gateControls.range.lbl) gateControls.range.lbl.textContent = '0 dB';
+        sendGateParam(0x02, 70);
+      });
+    }
+
+    if (gateControls.attack.rng) {
+      gateControls.attack.rng.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        const gate = getChannelGate(currentSelectedCh);
+        if (!gate) return;
+        gate.attack = val;
+        gateControls.attack.lbl.textContent = `${val} ms`;
+        sendGateParam(0x03, val);
+      });
+    }
+
+    if (gateControls.hold.rng) {
+      gateControls.hold.rng.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        const gate = getChannelGate(currentSelectedCh);
+        if (!gate) return;
+        gate.hold = val;
+        gateControls.hold.lbl.textContent = `${val} ms`;
+        sendGateParam(0x04, val);
+      });
+    }
+
+    if (gateControls.decay.rng) {
+      gateControls.decay.rng.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        const gate = getChannelGate(currentSelectedCh);
+        if (!gate) return;
+        gate.decay = val;
+        gateControls.decay.lbl.textContent = COMP_RELEASE_VALUES[val] || `${val} ms`;
+        sendGateParam(0x05, val);
+      });
+    }
+
     // Evento de clique no botão SEL dos canais e foco por clique no modo teclado
     mixerRack.addEventListener('click', (e) => {
       if (isChannelKeyboardNavActive) {
@@ -8260,16 +8744,16 @@
               // Equalizador de Canal
               if (typeof eqState !== 'undefined' && eqState[i] && inp.eq) {
                 eqState[i].on = inp.eq.on;
-                eqState[i].low.gain = inp.eq.low.gain;
+                eqState[i].low.gain = inp.eq.low.gain + 180;
                 eqState[i].low.freq = inp.eq.low.freq;
                 eqState[i].low.q = Math.max(0, Math.min(40, 40 - inp.eq.low.q));
-                eqState[i].lomid.gain = inp.eq.low_mid.gain;
+                eqState[i].lomid.gain = inp.eq.low_mid.gain + 180;
                 eqState[i].lomid.freq = inp.eq.low_mid.freq;
                 eqState[i].lomid.q = Math.max(0, Math.min(40, 40 - inp.eq.low_mid.q));
-                eqState[i].himid.gain = inp.eq.hi_mid.gain;
+                eqState[i].himid.gain = inp.eq.hi_mid.gain + 180;
                 eqState[i].himid.freq = inp.eq.hi_mid.freq;
                 eqState[i].himid.q = Math.max(0, Math.min(40, 40 - inp.eq.hi_mid.q));
-                eqState[i].high.gain = inp.eq.high.gain;
+                eqState[i].high.gain = inp.eq.high.gain + 180;
                 eqState[i].high.freq = inp.eq.high.freq;
                 eqState[i].high.q = Math.max(0, Math.min(40, 40 - inp.eq.high.q));
                 eqState[i].hpf = inp.eq.hpf_on;
@@ -8279,7 +8763,8 @@
               // Compressor de Canal
               if (typeof compState !== 'undefined' && compState[i] && inp.comp) {
                 compState[i].on = inp.comp.on;
-                compState[i].threshold = inp.comp.threshold;
+                compState[i].position = inp.comp.position !== undefined ? inp.comp.position : 1;
+                compState[i].threshold = inp.comp.threshold + 540;
                 compState[i].ratio = inp.comp.ratio;
                 compState[i].attack = inp.comp.attack;
                 compState[i].release = inp.comp.release;

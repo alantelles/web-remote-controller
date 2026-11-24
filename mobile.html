@@ -2457,6 +2457,15 @@
           <canvas id="compCanvasMobile" width="600" height="170"></canvas>
         </div>
 
+        <!-- Medidor de Gain Reduction (sob demanda) -->
+        <div style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #0f172a; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; margin-bottom: 8px;">
+          <span style="font-size: 10px; font-weight: 800; color: #94a3b8; letter-spacing: 0.4px; white-space: nowrap;">GR</span>
+          <div style="flex: 1; height: 8px; background: #020617; border-radius: 999px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06);">
+            <div id="compGrFillMobile" style="width: 0%; height: 100%; background: linear-gradient(90deg, #f59e0b, #ef4444); transition: width 70ms linear;"></div>
+          </div>
+          <span id="lblCompGrValMobile" style="font-size: 11px; font-weight: 800; color: #fca5a5; min-width: 52px; text-align: right; font-variant-numeric: tabular-nums;">0.0 dB</span>
+        </div>
+
         <!-- Controles do Compressor -->
         <div class="eq-band-controls-card">
           <!-- THRESHOLD -->
@@ -3284,6 +3293,7 @@
         const dot = document.getElementById('headerStatusDot');
         dot.classList.add('connected');
         dot.title = 'Conectado à 01V96';
+        if (typeof syncGRSubscriptionMobile === 'function') syncGRSubscriptionMobile();
       };
 
       ws.onclose = () => {
@@ -3334,6 +3344,13 @@
           if (msg.type === 'state_sync') {
             syncMobileStateFromBackend();
             showToast('Cena sincronizada! 🎬');
+            return;
+          }
+
+          if (msg.type === 'gr_meter') {
+            if (isEqModalOpen && currentRackTab === 'comp' && String(currentEqTarget) === String(msg.target)) {
+              updateCompGainReductionMobile(msg.gr_db || 0);
+            }
             return;
           }
 
@@ -5857,6 +5874,35 @@
 
     let currentRackTab = 'eq';
 
+    function updateCompGainReductionMobile(grDb) {
+      const fill = document.getElementById('compGrFillMobile');
+      const lbl = document.getElementById('lblCompGrValMobile');
+      if (!fill || !lbl) return;
+      const comp = getChannelComp(currentEqTarget);
+      if (grDb <= 0 || (comp && comp.on === 0)) {
+        fill.style.width = '0%';
+        lbl.textContent = '0.0 dB';
+      } else {
+        const pct = Math.min(100, (grDb / 24) * 100);
+        fill.style.width = `${pct}%`;
+        lbl.textContent = `-${grDb.toFixed(1)} dB`;
+      }
+    }
+
+    function syncGRSubscriptionMobile() {
+      const isCompOpen = isEqModalOpen && currentRackTab === 'comp';
+      if (typeof ws !== 'undefined' && ws && ws.readyState === WebSocket.OPEN) {
+        if (isCompOpen && currentEqTarget !== null && currentEqTarget !== undefined) {
+          ws.send(JSON.stringify({ action: 'subscribe_gr', target: String(currentEqTarget) }));
+        } else {
+          ws.send(JSON.stringify({ action: 'unsubscribe_gr' }));
+        }
+      }
+      if (!isCompOpen) {
+        updateCompGainReductionMobile(0);
+      }
+    }
+
     function switchRackTab(tabKey) {
       currentRackTab = tabKey;
       document.querySelectorAll('.btn-fx-tab').forEach(b => {
@@ -5882,6 +5928,7 @@
         syncGateModalUI();
         requestGateRedrawMobile();
       }
+      syncGRSubscriptionMobile();
     }
 
     function updateDesktopFxLinks() {
@@ -5999,6 +6046,7 @@
           target: String(target)
         }));
       }
+      syncGRSubscriptionMobile();
     }
 
     function scrollCardIntoView(card) {
@@ -6014,6 +6062,7 @@
       isEqModalOpen = false;
       const backdrop = document.getElementById('eqModalBackdrop');
       if (backdrop) backdrop.classList.remove('open');
+      syncGRSubscriptionMobile();
 
       // Ao fechar o modal, sincroniza o fader selecionado no mixer e posiciona suavemente
       if (typeof currentEqTarget === 'number') {
