@@ -744,6 +744,8 @@
       gap: 8px;
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
       touch-action: pan-y;
+      scroll-margin-top: 64px;
+      scroll-margin-bottom: 16px;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
@@ -5998,6 +6000,15 @@
       }
     }
 
+    function scrollCardIntoView(card) {
+      if (!card || card.style.display === 'none') return;
+      const header = document.querySelector('.mobile-header');
+      const headerHeight = header ? header.getBoundingClientRect().height : 0;
+      card.style.scrollMarginTop = `${Math.ceil(headerHeight) + 10}px`;
+      card.style.scrollMarginBottom = '16px';
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
     function closeEqModal() {
       isEqModalOpen = false;
       const backdrop = document.getElementById('eqModalBackdrop');
@@ -6006,19 +6017,13 @@
       // Ao fechar o modal, sincroniza o fader selecionado no mixer e posiciona suavemente
       if (typeof currentEqTarget === 'number') {
         setSelectedChannel(currentEqTarget);
-        const card = document.getElementById(`channelCard_${currentEqTarget}`);
-        if (card && card.style.display !== 'none') {
-          card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
+        scrollCardIntoView(document.getElementById(`channelCard_${currentEqTarget}`));
       } else {
         setSelectedMaster();
         if (currentEqTarget !== currentMix) {
           setMixTarget(currentEqTarget);
         }
-        const masterCard = document.getElementById('masterFaderCard');
-        if (masterCard && masterCard.style.display !== 'none') {
-          masterCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
+        scrollCardIntoView(document.getElementById('masterFaderCard'));
       }
     }
 
@@ -7137,9 +7142,7 @@
           }
 
           const card = document.getElementById(`channelCard_${nextCh}`);
-          if (card) {
-            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }
+          scrollCardIntoView(card);
         }
         // Setas Esquerda / Direita: ajusta o volume horizontalmente (de todos os canais selecionados)
         else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
