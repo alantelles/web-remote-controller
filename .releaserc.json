@@ -1,0 +1,28 @@
+{
+  "branches": ["master", "main"],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "./scripts/package-ubuntu2004.sh ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "path": "dist/*.tar.gz",
+            "label": "01v96-controller Ubuntu 20.04 (tar.gz)"
+          },
+          {
+            "path": "dist/*.deb",
+            "label": "01v96-controller Ubuntu 20.04 (.deb)"
+          }
+        ]
+      }
+    ]
+  ]
+}

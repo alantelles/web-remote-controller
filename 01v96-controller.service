@@ -10,7 +10,7 @@ Group=audio
 
 # Diretório onde o binário e arquivos (index.html, usuarios.csv, data) residem
 WorkingDirectory=/home/alantelles/development/midi-test-go
-ExecStart=/home/alantelles/development/midi-test-go/01v96-controller -addr :8080
+ExecStart=/home/alantelles/development/midi-test-go/01v96-controller -addr :9553 -port "Midi Through"
 
 # Reinicialização automática em caso de falha
 Restart=always
