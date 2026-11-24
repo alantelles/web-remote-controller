@@ -28,6 +28,9 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Install ALSA dev headers for CGO tests
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libasound2-dev
+
       - name: Run unit tests
         run: go test -v ./...
 
