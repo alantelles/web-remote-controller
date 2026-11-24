@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -83,10 +84,11 @@ type AuxMasterState struct {
 
 // StereoMasterState representa a saída master Stereo principal
 type StereoMasterState struct {
-	Fader int       `json:"fader"` // 0 a 1023 (823 = 0.0 dB)
-	On    int       `json:"on"`    // 1 = ON, 0 = MUTE
-	EQ    EQState   `json:"eq"`    // Equalizador 4 bandas
-	Comp  CompState `json:"comp"`  // Compressor
+	Name  string    `json:"name,omitempty"` // Nome amigável da saída Master ("PA", "Stereo Master")
+	Fader int       `json:"fader"`          // 0 a 1023 (823 = 0.0 dB)
+	On    int       `json:"on"`             // 1 = ON, 0 = MUTE
+	EQ    EQState   `json:"eq"`             // Equalizador 4 bandas
+	Comp  CompState `json:"comp"`           // Compressor
 }
 
 // MixerState é o snapshot completo de todos os parâmetros gerenciados da 01V96
@@ -248,6 +250,38 @@ func SetChannelName(chIdx int, shortName, longName string) (string, string) {
 	mixerStateLock.Unlock()
 
 	return shortClean, longClean
+}
+
+// SetOutputName atualiza o nome amigável de uma saída (MASTER ou AUX1..AUX8) no estado em memória.
+func SetOutputName(targetKey, name string) (string, bool) {
+	key := strings.ToUpper(strings.TrimSpace(targetKey))
+	clean := sanitizeASCIIName(name, 16)
+
+	mixerStateLock.Lock()
+	defer mixerStateLock.Unlock()
+
+	if key == "MASTER" {
+		if clean == "" {
+			clean = "STEREO MASTER"
+		}
+		currentMixer.StereoMaster.Name = clean
+		stateDirty = true
+		return clean, true
+	}
+
+	if strings.HasPrefix(key, "AUX") {
+		numStr := strings.TrimPrefix(key, "AUX")
+		if n, err := strconv.Atoi(numStr); err == nil && n >= 1 && n <= 8 {
+			if clean == "" {
+				clean = fmt.Sprintf("Aux %d", n)
+			}
+			currentMixer.AuxMasters[n-1].Name = clean
+			stateDirty = true
+			return clean, true
+		}
+	}
+
+	return "", false
 }
 
 // ApplyParamToState atualiza o espelho de memória com base nos bytes de parâmetros da 01V96

@@ -1949,6 +1949,20 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		if msg.Action == "set_output_name" {
+			if userRole == "ADMIN" || userRole == "OPERATOR" {
+				if cleanName, ok := SetOutputName(msg.Target, msg.Name); ok {
+					go FlushStateToDiskIfDirty()
+					broadcastWS(WSMessage{
+						Type:   "output_name",
+						Target: strings.ToUpper(strings.TrimSpace(msg.Target)),
+						Name:   cleanName,
+					})
+				}
+			}
+			continue
+		}
+
 		if msg.Action != "" && msg.Element == 0 {
 			log.Printf("WebSocket: ação '%s' desconhecida/ignorada", msg.Action)
 			continue

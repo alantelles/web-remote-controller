@@ -1,0 +1,3369 @@
+{
+  "version": 1,
+  "id": "teste",
+  "name": "teste",
+  "description": "",
+  "created_at": "2026-11-24T20:25:22.104723755-03:00",
+  "updated_at": "2026-11-24T20:25:22.104723755-03:00",
+  "author": "Alan",
+  "state": {
+    "stereo_master": {
+      "fader": 676,
+      "on": 1,
+      "eq": {
+        "on": 1,
+        "low": {
+          "q": 23,
+          "freq": 27,
+          "gain": 180
+        },
+        "low_mid": {
+          "q": 20,
+          "freq": 51,
+          "gain": 180
+        },
+        "hi_mid": {
+          "q": 20,
+          "freq": 79,
+          "gain": 180
+        },
+        "high": {
+          "q": 23,
+          "freq": 107,
+          "gain": 180
+        },
+        "hpf_on": 0,
+        "lpf_on": 0,
+        "attenuator": 0
+      },
+      "comp": {
+        "on": 1,
+        "position": 0,
+        "threshold": 340,
+        "ratio": 7,
+        "attack": 20,
+        "release": 18,
+        "knee": 0,
+        "gain": 0
+      }
+    },
+    "aux_masters": [
+      {
+        "aux": 1,
+        "name": "AUX 1",
+        "fader": 612,
+        "on": 1,
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 55,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "aux": 2,
+        "name": "AUX 2",
+        "fader": 618,
+        "on": 1,
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "aux": 3,
+        "name": "AUX 3",
+        "fader": 683,
+        "on": 1,
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "aux": 4,
+        "name": "AUX 4",
+        "fader": 234,
+        "on": 1,
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "aux": 5,
+        "name": "AUX 5",
+        "fader": 1023,
+        "on": 1,
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "aux": 6,
+        "name": "AUX 6",
+        "fader": 585,
+        "on": 1,
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "aux": 7,
+        "name": "AUX 7",
+        "fader": 642,
+        "on": 1,
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "aux": 8,
+        "name": "AUX 8",
+        "fader": 309,
+        "on": 1,
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      }
+    ],
+    "inputs": [
+      {
+        "channel": 1,
+        "name": "Alan",
+        "long_name": "Alan Telles",
+        "fader": 771,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 567,
+            "on": 1,
+            "pre": 1
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 280,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 736,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 141,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 340,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 484,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 87,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 20,
+            "freq": 21,
+            "gain": 0
+          },
+          "low_mid": {
+            "q": 16,
+            "freq": 49,
+            "gain": 0
+          },
+          "hi_mid": {
+            "q": 24,
+            "freq": 81,
+            "gain": 0
+          },
+          "high": {
+            "q": 42,
+            "freq": 97,
+            "gain": 0
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 1,
+          "threshold": -200,
+          "ratio": 7,
+          "attack": 20,
+          "release": 41,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 2,
+        "name": "OUTR",
+        "long_name": "Outro",
+        "fader": 807,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 453,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 188,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 695,
+            "on": 0,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 491,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 613,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 21,
+            "freq": 22,
+            "gain": 0
+          },
+          "low_mid": {
+            "q": 13,
+            "freq": 47,
+            "gain": 0
+          },
+          "hi_mid": {
+            "q": 16,
+            "freq": 80,
+            "gain": 0
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 0
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": -198,
+          "ratio": 3,
+          "attack": 1,
+          "release": 0,
+          "knee": 5,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 3,
+        "name": "CH 03",
+        "fader": 548,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 444,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 695,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 777,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 0
+          },
+          "low_mid": {
+            "q": 28,
+            "freq": 49,
+            "gain": 0
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 0
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 0
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 1,
+          "threshold": -127,
+          "ratio": 8,
+          "attack": 48,
+          "release": 67,
+          "knee": 0,
+          "gain": 78
+        }
+      },
+      {
+        "channel": 4,
+        "name": "CH 04",
+        "fader": 665,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 467,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 0
+          },
+          "low_mid": {
+            "q": 15,
+            "freq": 42,
+            "gain": 68
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 0
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 0
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": -210
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 5,
+        "name": "CH 05",
+        "fader": 446,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 341,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 695,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 0
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 0
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 0
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 0
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 6,
+        "name": "CH 06",
+        "fader": 823,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 305,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 613,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 0
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 0
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 0
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 0
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 7,
+        "name": "CH 07",
+        "fader": 823,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 0
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 0
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 0
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 0
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 8,
+        "name": "CH 08",
+        "fader": 823,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 0
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 0
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 0
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 0
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 9,
+        "name": "CH 09",
+        "fader": 823,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 0
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 0
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 0
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 0
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 1,
+          "threshold": -200,
+          "ratio": 7,
+          "attack": 20,
+          "release": 41,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 10,
+        "name": "CH 10",
+        "fader": 465,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 11,
+        "name": "CH 11",
+        "fader": 481,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 12,
+        "name": "CH 12",
+        "fader": 420,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 13,
+        "name": "CH 13",
+        "fader": 465,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 14,
+        "name": "CH 14",
+        "fader": 395,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 15,
+        "name": "CH 15",
+        "fader": 458,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 16,
+        "name": "CH 16",
+        "fader": 431,
+        "on": 1,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 17,
+        "name": "CH 17",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 18,
+        "name": "CH 18",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 19,
+        "name": "CH 19",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 20,
+        "name": "CH 20",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 29,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 21,
+        "name": "CH 21",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 22,
+        "name": "CH 22",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 23,
+        "name": "CH 23",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 24,
+        "name": "CH 24",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 25,
+        "name": "CH 25",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 26,
+        "name": "CH 26",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 27,
+        "name": "CH 27",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 28,
+        "name": "CH 28",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 29,
+        "name": "CH 29",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 30,
+        "name": "CH 30",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 31,
+        "name": "CH 31",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      },
+      {
+        "channel": 32,
+        "name": "CH 32",
+        "fader": 823,
+        "on": 0,
+        "pan": 63,
+        "aux_sends": [
+          {
+            "aux": 1,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 2,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 3,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 4,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 5,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 6,
+            "level": 823,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 7,
+            "level": 7,
+            "on": 1,
+            "pre": 0
+          },
+          {
+            "aux": 8,
+            "level": 0,
+            "on": 1,
+            "pre": 0
+          }
+        ],
+        "eq": {
+          "on": 1,
+          "low": {
+            "q": 23,
+            "freq": 27,
+            "gain": 180
+          },
+          "low_mid": {
+            "q": 20,
+            "freq": 51,
+            "gain": 180
+          },
+          "hi_mid": {
+            "q": 20,
+            "freq": 79,
+            "gain": 180
+          },
+          "high": {
+            "q": 23,
+            "freq": 107,
+            "gain": 180
+          },
+          "hpf_on": 0,
+          "lpf_on": 0,
+          "attenuator": 0
+        },
+        "comp": {
+          "on": 1,
+          "position": 0,
+          "threshold": 340,
+          "ratio": 7,
+          "attack": 20,
+          "release": 18,
+          "knee": 0,
+          "gain": 0
+        }
+      }
+    ]
+  }
+}

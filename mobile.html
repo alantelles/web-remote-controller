@@ -2401,7 +2401,7 @@
         <div class="eq-header-ch-row">
           <div class="eq-ch-nav">
             <button class="btn-fx-step" id="btnFxPrevCh" type="button" title="Canal Anterior (Alt + ←)">◀</button>
-            <div class="eq-ch-tag">
+            <div class="eq-ch-tag" id="eqChTag" title="Duplo clique/toque para editar o nome">
               <span>🎛️</span>
               <span id="eqModalChannelName">CH 01</span>
             </div>
@@ -3453,6 +3453,28 @@
             return;
           }
 
+          if (msg.type === 'channel_name' && msg.channel >= 0 && msg.channel < TOTAL_CHANNELS) {
+            const ch = msg.channel;
+            const shortName = msg.name || `CH ${ch + 1}`;
+            const longName = msg.long_name || '';
+            channelNamesState[ch] = { short: shortName, long: longName };
+            const labelEl = document.getElementById(`channelLabel_${ch}`);
+            if (labelEl) {
+              labelEl.textContent = shortName;
+              labelEl.title = longName || shortName;
+            }
+            if (isEqModalOpen && currentEqTarget === ch) {
+              const titleEl = document.getElementById('eqModalChannelName');
+              if (titleEl) titleEl.textContent = `CH ${String(ch + 1).padStart(2, '0')} - ${longName || shortName}`;
+            }
+            return;
+          }
+
+          if (msg.type === 'output_name' && msg.target) {
+            applyMobileOutputNameUI(msg.target, msg.name || '');
+            return;
+          }
+
           if (msg.type === 'gr_meter') {
             if (isEqModalOpen && currentRackTab === 'comp' && String(currentEqTarget) === String(msg.target)) {
               updateCompGainReductionMobile(msg.gr_db || 0);
@@ -3493,6 +3515,7 @@
         if (st.stereo_master) {
           state.masterFaders['MASTER'] = st.stereo_master.fader;
           state.masterMutes['MASTER'] = st.stereo_master.on;
+          applyMobileOutputNameUI('MASTER', st.stereo_master.name || 'STEREO MASTER');
           if (st.stereo_master.eq && mixEqState['MASTER']) {
             const meq = mixEqState['MASTER'];
             meq.on = st.stereo_master.eq.on;
@@ -3523,6 +3546,7 @@
               state.masterFaders[auxKey] = aux.fader;
               state.masterMutes[auxKey] = aux.on;
             }
+            applyMobileOutputNameUI(auxKey, aux.name || `AUX ${i + 1}`);
             if (aux.eq && mixEqState[auxKey]) {
               const aeq = mixEqState[auxKey];
               aeq.on = aux.eq.on;
@@ -3550,9 +3574,13 @@
         if (Array.isArray(st.inputs)) {
           st.inputs.forEach((inp, i) => {
             if (i < TOTAL_CHANNELS) {
-              if (inp.name) {
-                const labelEl = document.querySelector(`#channelCard_${i} .channel-label`);
-                if (labelEl) labelEl.innerText = inp.name;
+              const shortName = inp.name || `CH ${i + 1}`;
+              const longName = inp.long_name || '';
+              channelNamesState[i] = { short: shortName, long: longName };
+              const labelEl = document.getElementById(`channelLabel_${i}`);
+              if (labelEl) {
+                labelEl.textContent = shortName;
+                labelEl.title = longName || shortName;
               }
               state.faders.MASTER[i] = inp.fader;
               state.mutes.MASTER[i] = inp.on;
@@ -3892,6 +3920,168 @@
     // ==========================================
     // RENDERIZAÇÃO E ATUALIZAÇÃO DA INTERFACE
     // ==========================================
+    const outputNamesState = {
+      MASTER: 'STEREO MASTER',
+      AUX1: 'AUX 1', AUX2: 'AUX 2', AUX3: 'AUX 3', AUX4: 'AUX 4',
+      AUX5: 'AUX 5', AUX6: 'AUX 6', AUX7: 'AUX 7', AUX8: 'AUX 8'
+    };
+
+    function getMobileDefaultOutputName(targetKey) {
+      if (targetKey === 'MASTER') return 'STEREO MASTER';
+      if (typeof targetKey === 'string' && targetKey.startsWith('AUX')) {
+        return `AUX ${targetKey.replace('AUX', '')}`;
+      }
+      return String(targetKey || '');
+    }
+
+    function getMobileOutputDisplayName(targetKey) {
+      return outputNamesState[targetKey] || getMobileDefaultOutputName(targetKey);
+    }
+
+    function applyMobileOutputNameUI(targetKey, name) {
+      const clean = (name || '').trim() || getMobileDefaultOutputName(targetKey);
+      outputNamesState[targetKey] = clean;
+
+      const mixBtn = document.querySelector(`.mix-btn[data-mix="${targetKey}"]`);
+      if (mixBtn) {
+        mixBtn.textContent = clean;
+        mixBtn.title = clean;
+      }
+
+      if (currentMix === targetKey) {
+        const title = document.getElementById('masterOutputTitle');
+        if (title) title.textContent = clean;
+        if (typeof updateCompactBadge === 'function') updateCompactBadge();
+      }
+
+      if (isEqModalOpen && typeof currentEqTarget === 'string' && currentEqTarget === targetKey) {
+        const titleEl = document.getElementById('eqModalChannelName');
+        if (titleEl) titleEl.textContent = clean;
+      }
+    }
+
+    const channelNamesState = Array.from({ length: TOTAL_CHANNELS }, (_, i) => ({
+      short: `CH ${i + 1}`,
+      long: ''
+    }));
+
+    function bindMobileDoubleTap(el, handler) {
+      if (!el) return;
+      let lastTap = 0;
+      el.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        handler(e);
+      });
+      el.addEventListener('touchend', (e) => {
+        const now = Date.now();
+        if (now - lastTap > 0 && now - lastTap < 350) {
+          e.preventDefault();
+          e.stopPropagation();
+          lastTap = 0;
+          handler(e);
+        } else {
+          lastTap = now;
+        }
+      }, { passive: false });
+    }
+
+    let mobileNameEditorOverlay = null;
+    let mobileNameEditingCh = null;
+
+    function closeMobileChannelNameEditor() {
+      if (mobileNameEditorOverlay) mobileNameEditorOverlay.style.display = 'none';
+      mobileNameEditingCh = null;
+    }
+
+    function openMobileChannelNameEditor(chIdx) {
+      if (typeof chIdx !== 'number' && typeof chIdx !== 'string') return;
+      if (currentMobileUserRole !== 'ADMIN' && currentMobileUserRole !== 'OPERATOR') return;
+
+      if (!mobileNameEditorOverlay) {
+        mobileNameEditorOverlay = document.createElement('div');
+        mobileNameEditorOverlay.id = 'mobileNameEditorOverlay';
+        mobileNameEditorOverlay.style.cssText = 'position: fixed; inset: 0; z-index: 4000; background: rgba(2,6,23,0.75); display: none; align-items: center; justify-content: center; padding: 16px;';
+        mobileNameEditorOverlay.innerHTML = `
+          <div style="width: 100%; max-width: 320px; background: #1e293b; border: 1px solid #475569; border-radius: 12px; padding: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 10px;">
+            <div id="mobileNameEditorTitle" style="font-size: 14px; font-weight: 700; color: #f8fafc;">Editar Nome do Canal</div>
+            <label id="mobileShortNameLabel" style="font-size: 11px; color: #94a3b8; display: flex; flex-direction: column; gap: 4px;">
+              Nome curto (até 4 caracteres — exibido no card)
+              <input type="text" id="mobileShortNameInput" maxlength="4" placeholder="Ex: VOZ1" style="padding: 8px 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #f8fafc; font-size: 14px; font-weight: 600;" />
+            </label>
+            <label id="mobileLongNameLabel" style="font-size: 11px; color: #94a3b8; display: flex; flex-direction: column; gap: 4px;">
+              Nome completo (até 16 caracteres — visão expandida)
+              <input type="text" id="mobileLongNameInput" maxlength="16" placeholder="Ex: Thom Yorkez" style="padding: 8px 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #f8fafc; font-size: 14px;" />
+            </label>
+            <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px;">
+              <button type="button" id="mobileNameCancelBtn" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #475569; background: #334155; color: #e2e8f0; font-size: 13px; font-weight: 600;">Cancelar</button>
+              <button type="button" id="mobileNameSaveBtn" style="padding: 8px 14px; border-radius: 6px; border: 1px solid #3b82f6; background: #2563eb; color: #fff; font-size: 13px; font-weight: 600;">Salvar</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(mobileNameEditorOverlay);
+
+        const shortInp = mobileNameEditorOverlay.querySelector('#mobileShortNameInput');
+        const longInp = mobileNameEditorOverlay.querySelector('#mobileLongNameInput');
+        const saveFn = () => {
+          if (typeof mobileNameEditingCh === 'number') {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({
+                action: 'set_channel_name',
+                channel: mobileNameEditingCh,
+                name: (shortInp.value || '').trim().slice(0, 4),
+                long_name: (longInp.value || '').trim().slice(0, 16)
+              }));
+            }
+            showToast('Nome do canal salvo');
+          } else if (typeof mobileNameEditingCh === 'string') {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({
+                action: 'set_output_name',
+                target: mobileNameEditingCh,
+                name: (longInp.value || '').trim().slice(0, 16)
+              }));
+            }
+            showToast('Nome da saída salvo');
+          }
+          closeMobileChannelNameEditor();
+        };
+        mobileNameEditorOverlay.querySelector('#mobileNameSaveBtn').addEventListener('click', saveFn);
+        mobileNameEditorOverlay.querySelector('#mobileNameCancelBtn').addEventListener('click', closeMobileChannelNameEditor);
+        mobileNameEditorOverlay.addEventListener('click', (e) => {
+          if (e.target === mobileNameEditorOverlay) closeMobileChannelNameEditor();
+        });
+        [shortInp, longInp].forEach(inp => {
+          inp.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); saveFn(); }
+            else if (e.key === 'Escape') { e.stopPropagation(); closeMobileChannelNameEditor(); }
+          });
+        });
+      }
+
+      mobileNameEditingCh = chIdx;
+      const shortLabel = mobileNameEditorOverlay.querySelector('#mobileShortNameLabel');
+      const shortInp = mobileNameEditorOverlay.querySelector('#mobileShortNameInput');
+      const longInp = mobileNameEditorOverlay.querySelector('#mobileLongNameInput');
+      if (typeof chIdx === 'number') {
+        const info = channelNamesState[chIdx] || { short: `CH ${chIdx + 1}`, long: '' };
+        const defaultName = `CH ${chIdx + 1}`;
+        mobileNameEditorOverlay.querySelector('#mobileNameEditorTitle').textContent = `Nome do Canal CH ${String(chIdx + 1).padStart(2, '0')}`;
+        if (shortLabel) shortLabel.style.display = 'flex';
+        shortInp.value = (info.short && info.short !== defaultName) ? info.short : '';
+        longInp.placeholder = 'Ex: Thom Yorkez';
+        longInp.value = info.long || '';
+      } else {
+        mobileNameEditorOverlay.querySelector('#mobileNameEditorTitle').textContent = `Nome da Saída (${chIdx})`;
+        if (shortLabel) shortLabel.style.display = 'none';
+        shortInp.value = '';
+        longInp.placeholder = 'Ex: PA Igreja / Vozes';
+        longInp.value = getMobileOutputDisplayName(chIdx);
+      }
+      mobileNameEditorOverlay.style.display = 'flex';
+      longInp.focus();
+      longInp.select();
+    }
+
     function initChannelCards() {
       const container = document.getElementById('fadersList');
 
@@ -3904,9 +4094,9 @@
 
         card.innerHTML = `
           <div class="card-row-top">
-            <div class="channel-name-tag">
+            <div class="channel-name-tag" id="channelNameTag_${ch}" style="touch-action: manipulation;">
               <span class="channel-num-badge">CH ${chNumStr}</span>
-              <span class="channel-label">Canal ${ch + 1}</span>
+              <span class="channel-label" id="channelLabel_${ch}">Canal ${ch + 1}</span>
               <span class="mobile-ch-mg-badges" id="mobileChMgBadges_${ch}"></span>
             </div>
             <div class="card-top-buttons">
@@ -3928,6 +4118,12 @@
         `;
 
         container.appendChild(card);
+
+        // Duplo clique / toque duplo no nome do canal para editar (curto + longo)
+        const nameTagEl = card.querySelector(`#channelNameTag_${ch}`);
+        if (nameTagEl) {
+          bindMobileDoubleTap(nameTagEl, () => openMobileChannelNameEditor(ch));
+        }
 
         // Eventos do Slider
         const slider = card.querySelector(`#slider_${ch}`);
@@ -4136,12 +4332,13 @@
       const badge = document.getElementById('compactOutputBadge');
       if (!badge) return;
       const target = MIX_TARGETS[currentMix];
+      const outName = getMobileOutputDisplayName(currentMix);
       if (target.isMaster) {
         badge.className = 'output-dest-badge dest-master';
-        badge.innerHTML = '★ SAÍDA: STEREO MASTER';
+        badge.textContent = `★ SAÍDA: ${outName}`;
       } else {
         badge.className = 'output-dest-badge dest-aux';
-        badge.innerHTML = `↗ SAÍDA: ${target.title}`;
+        badge.textContent = `↗ SAÍDA: ${outName}`;
       }
     }
 
@@ -4260,7 +4457,7 @@
       const dbText = document.getElementById('masterDbText');
       const target = MIX_TARGETS[currentMix];
 
-      title.innerText = target.title;
+      title.textContent = getMobileOutputDisplayName(currentMix);
       const val = state.masterFaders[currentMix];
       slider.value = val;
       dbText.innerText = rawToDbOutput(val);
@@ -6256,15 +6453,13 @@
 
       let titleStr = '';
       if (typeof target === 'number') {
-        const card = document.getElementById(`channelCard_${target}`);
-        const nameSpan = card ? card.querySelector('.channel-name-tag span:last-child') : null;
-        const name = nameSpan ? nameSpan.innerText : `Canal ${target + 1}`;
+        const info = channelNamesState[target] || { short: `CH ${target + 1}`, long: '' };
+        const name = info.long || info.short || `Canal ${target + 1}`;
         titleStr = `CH ${String(target + 1).padStart(2, '0')} - ${name}`;
       } else if (target === 'MASTER') {
-        titleStr = 'STEREO MASTER OUT';
+        titleStr = getMobileOutputDisplayName('MASTER');
       } else if (typeof target === 'string' && target.startsWith('AUX')) {
-        const num = target.replace('AUX', '');
-        titleStr = `AUX ${num} MASTER OUT`;
+        titleStr = getMobileOutputDisplayName(target);
       }
       if (titleEl) titleEl.innerText = titleStr;
 
@@ -6521,6 +6716,22 @@
       document.getElementById('eqModalBackdrop').addEventListener('click', (e) => {
         if (e.target.id === 'eqModalBackdrop') closeEqModal();
       });
+
+      const masterNameTag = document.querySelector('#masterFaderCard .channel-name-tag');
+      if (masterNameTag) {
+        masterNameTag.style.touchAction = 'manipulation';
+        bindMobileDoubleTap(masterNameTag, () => openMobileChannelNameEditor(currentMix));
+      }
+
+      const eqChTagEl = document.getElementById('eqChTag');
+      if (eqChTagEl) {
+        eqChTagEl.style.touchAction = 'manipulation';
+        bindMobileDoubleTap(eqChTagEl, () => {
+          if (typeof currentEqTarget === 'number' || typeof currentEqTarget === 'string') {
+            openMobileChannelNameEditor(currentEqTarget);
+          }
+        });
+      }
 
       // Toggle EQ ON / Bypass
       document.getElementById('btnEqToggleOn').addEventListener('click', () => {

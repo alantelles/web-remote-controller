@@ -5540,6 +5540,10 @@
           }
         }
 
+        if (data.type === 'output_name' && data.target) {
+          applyOutputNameUI(data.target, data.name || '');
+        }
+
         if (data.type === 'param') {
           // Element 0x1C = Input Fader (Master Stereo)
           if (data.element === 0x1C && data.param === 0x00) {
@@ -6043,7 +6047,7 @@
       const mixSysexInfo = document.getElementById('mixSysexInfo');
       const mixActiveDot = document.getElementById('mixActiveDot');
 
-      if (mixActiveName) mixActiveName.textContent = target.displayName;
+      if (mixActiveName) mixActiveName.textContent = getOutputDisplayName(targetId);
       if (mixActiveRoute) mixActiveRoute.textContent = target.route;
       if (mixSysexInfo) mixSysexInfo.textContent = target.sysexInfo;
       if (mixActiveDot) {
@@ -6141,14 +6145,17 @@
       if (!masterBadge || !faderCap || !dbReadout) return;
 
       if (target.isMaster) {
-        masterBadge.textContent = 'STEREO MASTER';
+        masterBadge.textContent = getOutputDisplayName('MASTER');
+        masterBadge.title = getOutputDisplayName('MASTER');
         masterBadge.className = 'master-badge badge-master';
         faderCap.classList.add('cap-red');
         faderCap.classList.remove('cap-blue');
         dbReadout.classList.add('db-master-red');
         dbReadout.classList.remove('db-aux-blue');
       } else {
-        masterBadge.textContent = `${target.name} MASTER`;
+        const outName = getOutputDisplayName(target.id);
+        masterBadge.textContent = outName;
+        masterBadge.title = outName;
         masterBadge.className = 'master-badge badge-aux';
         faderCap.classList.add('cap-blue');
         faderCap.classList.remove('cap-red');
@@ -7357,16 +7364,17 @@
         if (tabGateBtn) tabGateBtn.style.display = '';
         if (tabAuxBtn) tabAuxBtn.style.display = '';
       } else if (target === 'MASTER') {
-        fxModalChBadge.textContent = 'STEREO MASTER OUT';
-        fxModalChBadge.title = 'Stereo Master Out';
+        const mName = getOutputDisplayName('MASTER');
+        fxModalChBadge.textContent = mName;
+        fxModalChBadge.title = mName;
         fxModalChBadge.classList.add('type-master');
         if (tabGateBtn) tabGateBtn.style.display = 'none';
         if (tabAuxBtn) tabAuxBtn.style.display = 'none';
         if (currentFxTab === 'gate' || currentFxTab === 'aux') switchFxTab('eq');
       } else if (typeof target === 'string' && target.startsWith('AUX')) {
-        const auxNum = target.replace('AUX', '');
-        fxModalChBadge.textContent = `AUX ${auxNum} MASTER OUT`;
-        fxModalChBadge.title = `Aux ${auxNum} Master Out`;
+        const aName = getOutputDisplayName(target);
+        fxModalChBadge.textContent = aName;
+        fxModalChBadge.title = aName;
         fxModalChBadge.classList.add('type-aux');
         if (tabGateBtn) tabGateBtn.style.display = 'none';
         if (tabAuxBtn) tabAuxBtn.style.display = 'none';
@@ -7456,24 +7464,79 @@
 
     btnFxClose.addEventListener('click', closeFxModal);
 
-    // Editor inline do nome do canal (curto 4 chars + longo 16 chars) salvo apenas no serviço
+    // Editor inline do nome do canal/saída salvo apenas no serviço
+    const outputNamesState = {
+      MASTER: 'STEREO MASTER',
+      AUX1: 'AUX 1', AUX2: 'AUX 2', AUX3: 'AUX 3', AUX4: 'AUX 4',
+      AUX5: 'AUX 5', AUX6: 'AUX 6', AUX7: 'AUX 7', AUX8: 'AUX 8'
+    };
+
+    function getDefaultOutputName(targetKey) {
+      if (targetKey === 'MASTER') return 'STEREO MASTER';
+      if (typeof targetKey === 'string' && targetKey.startsWith('AUX')) {
+        return `AUX ${targetKey.replace('AUX', '')}`;
+      }
+      return String(targetKey || '');
+    }
+
+    function getOutputDisplayName(targetKey) {
+      return outputNamesState[targetKey] || getDefaultOutputName(targetKey);
+    }
+
+    function applyOutputNameUI(targetKey, name) {
+      const clean = (name || '').trim() || getDefaultOutputName(targetKey);
+      outputNamesState[targetKey] = clean;
+
+      const mixBtn = document.querySelector(`.btn-mix[data-mix="${targetKey}"]`);
+      if (mixBtn) {
+        const label = mixBtn.querySelector('.mix-label');
+        if (label) label.textContent = clean;
+        mixBtn.title = clean;
+      }
+
+      if (currentMixTarget === targetKey) {
+        const masterBadge = document.getElementById('masterBadge');
+        if (masterBadge) {
+          masterBadge.textContent = clean;
+          masterBadge.title = clean;
+        }
+        const mixActiveName = document.getElementById('mixActiveName');
+        if (mixActiveName) mixActiveName.textContent = clean;
+      }
+
+      if (typeof currentSelectedCh === 'string' && currentSelectedCh === targetKey && fxModalOverlay && fxModalOverlay.classList.contains('open') && fxModalChBadge) {
+        fxModalChBadge.textContent = clean;
+        fxModalChBadge.title = clean;
+      }
+    }
+
     const fxChNameEditor = document.getElementById('fxChNameEditor');
     const fxChShortNameInput = document.getElementById('fxChShortNameInput');
     const fxChLongNameInput = document.getElementById('fxChLongNameInput');
     const btnFxSaveChName = document.getElementById('btnFxSaveChName');
     const btnFxCancelChName = document.getElementById('btnFxCancelChName');
 
-    function sendChannelNameUpdate(chIdx, shortVal, longVal) {
-      if (typeof chIdx !== 'number') return;
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({
-          action: 'set_channel_name',
-          channel: chIdx,
-          name: (shortVal || '').trim().slice(0, 4),
-          long_name: (longVal || '').trim().slice(0, 16)
-        }));
+    function sendChannelNameUpdate(target, shortVal, longVal) {
+      if (typeof target === 'number') {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
+            action: 'set_channel_name',
+            channel: target,
+            name: (shortVal || '').trim().slice(0, 4),
+            long_name: (longVal || '').trim().slice(0, 16)
+          }));
+        }
+        showToast('Nome do canal salvo', '🏷️');
+      } else if (typeof target === 'string') {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
+            action: 'set_output_name',
+            target: target,
+            name: (longVal || '').trim().slice(0, 16)
+          }));
+        }
+        showToast('Nome da saída salvo', '🏷️');
       }
-      showToast('Nome do canal salvo', '🏷️');
     }
 
     function hideFxChNameEditor() {
@@ -7481,21 +7544,42 @@
     }
 
     function openFxChNameEditor() {
-      if (typeof currentSelectedCh !== 'number' || !fxChNameEditor) return;
+      if (!fxChNameEditor) return;
       if (currentUserRole !== 'ADMIN' && currentUserRole !== 'OPERATOR') return;
-      const ch = channelsState[currentSelectedCh] || {};
-      const defaultName = `CH ${currentSelectedCh + 1}`;
-      fxChShortNameInput.value = (ch.name && ch.name !== defaultName) ? ch.name : '';
-      fxChLongNameInput.value = ch.longName || '';
+      if (typeof currentSelectedCh === 'number') {
+        const ch = channelsState[currentSelectedCh] || {};
+        const defaultName = `CH ${currentSelectedCh + 1}`;
+        fxChShortNameInput.style.display = '';
+        fxChShortNameInput.value = (ch.name && ch.name !== defaultName) ? ch.name : '';
+        fxChLongNameInput.placeholder = 'Nome longo (16)';
+        fxChLongNameInput.value = ch.longName || '';
+      } else if (typeof currentSelectedCh === 'string') {
+        fxChShortNameInput.style.display = 'none';
+        fxChShortNameInput.value = '';
+        fxChLongNameInput.placeholder = 'Nome da saída (16)';
+        fxChLongNameInput.value = getOutputDisplayName(currentSelectedCh);
+      } else {
+        return;
+      }
       fxChNameEditor.style.display = 'flex';
       fxChLongNameInput.focus();
       fxChLongNameInput.select();
     }
 
     function submitFxChNameEditor() {
-      if (typeof currentSelectedCh !== 'number') return;
+      if (typeof currentSelectedCh !== 'number' && typeof currentSelectedCh !== 'string') return;
       sendChannelNameUpdate(currentSelectedCh, fxChShortNameInput.value, fxChLongNameInput.value);
       hideFxChNameEditor();
+    }
+
+    const masterBadgeEl = document.getElementById('masterBadge');
+    if (masterBadgeEl) {
+      masterBadgeEl.style.cursor = 'pointer';
+      masterBadgeEl.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        if (currentUserRole !== 'ADMIN' && currentUserRole !== 'OPERATOR') return;
+        openStripNamePopover(currentMixTarget, masterBadgeEl);
+      });
     }
 
     if (fxModalChBadge) {
@@ -7547,7 +7631,7 @@
         const shortInp = stripNamePopover.querySelector('#stripShortInput');
         const longInp = stripNamePopover.querySelector('#stripLongInput');
         const saveFn = () => {
-          if (typeof stripNameEditingCh !== 'number') return;
+          if (typeof stripNameEditingCh !== 'number' && typeof stripNameEditingCh !== 'string') return;
           sendChannelNameUpdate(stripNameEditingCh, shortInp.value, longInp.value);
           closeStripNamePopover();
         };
@@ -7567,12 +7651,24 @@
       }
 
       stripNameEditingCh = chIdx;
-      const ch = channelsState[chIdx] || {};
-      const defaultName = `CH ${chIdx + 1}`;
+      const titleDiv = stripNamePopover.firstElementChild;
       const shortInp = stripNamePopover.querySelector('#stripShortInput');
       const longInp = stripNamePopover.querySelector('#stripLongInput');
-      shortInp.value = (ch.name && ch.name !== defaultName) ? ch.name : '';
-      longInp.value = ch.longName || '';
+      if (typeof chIdx === 'number') {
+        if (titleDiv) titleDiv.textContent = `Nome do Canal CH ${chIdx + 1}`;
+        const ch = channelsState[chIdx] || {};
+        const defaultName = `CH ${chIdx + 1}`;
+        shortInp.style.display = '';
+        shortInp.value = (ch.name && ch.name !== defaultName) ? ch.name : '';
+        longInp.placeholder = 'Nome completo (16)';
+        longInp.value = ch.longName || '';
+      } else {
+        if (titleDiv) titleDiv.textContent = `Nome da Saída (${chIdx})`;
+        shortInp.style.display = 'none';
+        shortInp.value = '';
+        longInp.placeholder = 'Nome da saída (16)';
+        longInp.value = getOutputDisplayName(chIdx);
+      }
 
       const rect = anchorEl.getBoundingClientRect();
       const left = Math.max(8, Math.min(window.innerWidth - 200, rect.left));
@@ -9295,6 +9391,7 @@
         if (st.stereo_master) {
           mixData.MASTER.masterVolume = st.stereo_master.fader;
           mixData.MASTER.masterOn = st.stereo_master.on;
+          applyOutputNameUI('MASTER', st.stereo_master.name || 'STEREO MASTER');
           if (mixData.MASTER.eq && st.stereo_master.eq) {
             mixData.MASTER.eq.on = st.stereo_master.eq.on;
           }
@@ -9311,6 +9408,7 @@
               mixData[auxKey].masterVolume = aux.fader;
               mixData[auxKey].masterOn = aux.on;
             }
+            applyOutputNameUI(auxKey, aux.name || `AUX ${i + 1}`);
           });
         }
 
