@@ -2584,7 +2584,7 @@ func runFaderLoop(out drivers.Out, stopChan chan struct{}) {
 
 func main() {
 	flagPort := flag.String("port", "", "Porta MIDI de saída por índice ou nome (ex: -port 1 ou -port Delta). Deixe vazio para escolher interativamente.")
-	flagAddr := flag.String("addr", ":8080", "Endereço HTTP do servidor")
+	flagAddr := flag.String("addr", ":9553", "Endereço HTTP do servidor")
 	flagSimulate := flag.Bool("simulate", false, "Inicia o simulador de operação da Yamaha 01V96 emitindo faders nos canais 1 a 8")
 	flag.BoolVar(flagSimulate, "sim", false, "Atalho para -simulate")
 	flagUsers := flag.String("users", "usuarios.csv", "Caminho do arquivo CSV de credenciais de usuários (padrão: usuarios.csv)")

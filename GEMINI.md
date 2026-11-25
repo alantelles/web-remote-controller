@@ -43,7 +43,7 @@ go run . -port "Fast Track"
 
 # Execução em Modo de Simulação (sem porta física, ideal para testar telas sem a mesa)
 go run . -sim
-go run . -port sim -addr :8080
+go run . -port sim -addr :9553
 
 # Usando arquivo alternativo de usuários
 go run . -users /caminho/para/usuarios.csv
