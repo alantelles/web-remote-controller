@@ -51,6 +51,16 @@ type CompState struct {
 	Gain      int `json:"gain"`      // 0 a 180 (0dB a +18dB) (0x07)
 }
 
+// GateState representa o noise gate de canal de entrada (0x21)
+type GateState struct {
+	On        int `json:"on"`        // 0 = Bypass, 1 = On (0x00)
+	Threshold int `json:"threshold"` // 0 a 540 (0x01)
+	Range     int `json:"range"`     // 0 a 70 (0x02)
+	Attack    int `json:"attack"`    // 0 a 120 ms (0x03)
+	Hold      int `json:"hold"`      // 0 a 120 ms (0x04)
+	Decay     int `json:"decay"`     // 0 a 43 passos (0x05)
+}
+
 // AuxSend representa o envio de um canal para um auxiliar
 type AuxSend struct {
 	Aux   int `json:"aux"`   // 1 a 8
@@ -65,11 +75,12 @@ type InputChannel struct {
 	Name     string     `json:"name"`                // Rótulo curto do console (4 chars, ex: "TOBY")
 	LongName string     `json:"long_name,omitempty"` // Rótulo longo expandido (16 chars, ex: "BRIAN")
 	Fader    int        `json:"fader"`               // 0 a 1023 (823 = 0.0 dB)
-	On       int        `json:"on"`        // 1 = ON, 0 = MUTE
-	Pan      int        `json:"pan"`       // -63 a +63 (0 = Center)
-	AuxSends [8]AuxSend `json:"aux_sends"` // Envios para Aux 1 a 8
-	EQ       EQState    `json:"eq"`        // Equalizador 4 bandas
-	Comp     CompState  `json:"comp"`      // Compressor
+	On       int        `json:"on"`                  // 1 = ON, 0 = MUTE
+	Pan      int        `json:"pan"`                 // -63 a +63 (0 = Center)
+	AuxSends [8]AuxSend `json:"aux_sends"`           // Envios para Aux 1 a 8
+	EQ       EQState    `json:"eq"`                  // Equalizador 4 bandas
+	Comp     CompState  `json:"comp"`                // Compressor
+	Gate     GateState  `json:"gate"`                // Noise Gate
 }
 
 // AuxMasterState representa o estado de uma saída master auxiliar (1 a 8)
@@ -166,6 +177,18 @@ func newDefaultCompState() CompState {
 	}
 }
 
+// newDefaultGateState cria um estado neutro e seguro de Noise Gate (Bypass)
+func newDefaultGateState() GateState {
+	return GateState{
+		On:        0,
+		Threshold: 340,
+		Range:     0,
+		Attack:    1,
+		Hold:      20,
+		Decay:     18,
+	}
+}
+
 // NewDefaultMixerState inicializa uma estrutura completa com valores padrão seguros
 func NewDefaultMixerState() MixerState {
 	var state MixerState
@@ -200,6 +223,7 @@ func NewDefaultMixerState() MixerState {
 			Pan:     0, // Centro (-63 a +63)
 			EQ:      newDefaultEQState(),
 			Comp:    newDefaultCompState(),
+			Gate:    newDefaultGateState(),
 		}
 		for a := 0; a < 8; a++ {
 			ch.AuxSends[a] = AuxSend{
@@ -348,6 +372,12 @@ func ApplyParamToState(element, param, channel byte, value int) {
 			applyCompParam(&currentMixer.Inputs[chIdx].Comp, param, value)
 		}
 
+	// Input Noise Gate (0x21)
+	case 0x21:
+		if chIdx >= 0 && chIdx < 32 {
+			applyGateParam(&currentMixer.Inputs[chIdx].Gate, param, value)
+		}
+
 	// Stereo Master Fader (0x4F)
 	case 0x4F:
 		currentMixer.StereoMaster.Fader = value
@@ -450,6 +480,23 @@ func applyCompParam(comp *CompState, param byte, value int) {
 	}
 }
 
+func applyGateParam(gate *GateState, param byte, value int) {
+	switch param {
+	case 0x00:
+		gate.On = value
+	case 0x01:
+		gate.Threshold = value
+	case 0x02:
+		gate.Range = value
+	case 0x03:
+		gate.Attack = value
+	case 0x04:
+		gate.Hold = value
+	case 0x05:
+		gate.Decay = value
+	}
+}
+
 // GetCurrentMixerState retorna uma cópia thread-safe do estado atual
 func GetCurrentMixerState() MixerState {
 	mixerStateLock.RLock()
@@ -528,6 +575,7 @@ func InitSceneManager(baseDir string) {
 
 	InitPersonalMixManager(dataDirRoot)
 	InitMuteGroupManager(dataDirRoot)
+	InitChannelPresetManager(dataDirRoot)
 
 	startAutoSaveLoop(5 * time.Second)
 }
@@ -840,6 +888,17 @@ func generateCompSysEx(element, channel byte, comp *CompState) []sysexMessage {
 		{element: element, param: 0x05, channel: channel, value: comp.Release},
 		{element: element, param: 0x08, channel: channel, value: comp.Knee},
 		{element: element, param: 0x07, channel: channel, value: comp.Gain},
+	}
+}
+
+func generateGateSysEx(element, channel byte, gate *GateState) []sysexMessage {
+	return []sysexMessage{
+		{element: element, param: 0x00, channel: channel, value: gate.On},
+		{element: element, param: 0x01, channel: channel, value: gate.Threshold},
+		{element: element, param: 0x02, channel: channel, value: gate.Range},
+		{element: element, param: 0x03, channel: channel, value: gate.Attack},
+		{element: element, param: 0x04, channel: channel, value: gate.Hold},
+		{element: element, param: 0x05, channel: channel, value: gate.Decay},
 	}
 }
 

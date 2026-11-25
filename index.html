@@ -2445,6 +2445,90 @@
       box-shadow: 0 0 6px #38bdf8;
     }
 
+    /* Barra de Presets de Canal no Rack FX */
+    .fx-channel-presets-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 18px;
+      background: #090b10;
+      border-bottom: 1px solid #1e2433;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .preset-bar-left, .preset-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .preset-bar-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #38bdf8;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .preset-bar-select {
+      background: #141824;
+      border: 1px solid #334155;
+      color: #f1f5f9;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      outline: none;
+      max-width: 220px;
+      cursor: pointer;
+    }
+    .preset-bar-select:focus {
+      border-color: #38bdf8;
+    }
+    .btn-preset-action {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-preset-apply {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+    }
+    .btn-preset-apply:hover {
+      background: #0369a1;
+    }
+    .btn-preset-save {
+      background: #1e293b;
+      color: #38bdf8;
+      border-color: #334155;
+    }
+    .btn-preset-save:hover {
+      background: #283548;
+      border-color: #38bdf8;
+    }
+    .btn-preset-delete {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.4);
+      padding: 4px 8px;
+    }
+    .btn-preset-delete:hover {
+      background: #dc2626;
+      color: #fff;
+    }
+    .preset-bar-desc {
+      font-size: 11px;
+      color: #94a3b8;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     /* Conteúdo das Abas */
     .fx-modal-body {
       padding: 18px;
@@ -4532,6 +4616,48 @@
     </div>
   </div>
 
+  <!-- MODAL CUSTOMIZADO NÃO-BLOQUEANTE (SUBSTITUI alert/confirm NATIVOS) -->
+  <div id="appDialogModalOverlay" class="modal-overlay" style="z-index: 9999;">
+    <div class="modal-card" style="max-width: 400px;">
+      <div class="modal-header">
+        <span class="modal-icon" id="appDialogIcon">ℹ️</span>
+        <h3 class="modal-title" id="appDialogTitle">Aviso</h3>
+      </div>
+      <div class="modal-body" style="color: #cbd5e1; font-size: 13px; line-height: 1.5; margin: 12px 0; white-space: pre-line;" id="appDialogMessage"></div>
+      <div class="modal-actions" style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button type="button" class="btn-scene-action" id="btnAppDialogCancel" style="display: none;">Cancelar</button>
+        <button type="button" class="btn-scene-action" id="btnAppDialogOk" style="background: #2563eb; color: #fff; border-color: #3b82f6;">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PARA SALVAR PRESET DE CANAL -->
+  <div id="savePresetModalOverlay" class="modal-overlay" style="z-index: 250;">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <span class="modal-icon">💾</span>
+        <h3 class="modal-title">Salvar Preset de Canal</h3>
+      </div>
+      <div class="modal-body" style="color: #cbd5e1; font-size: 13px; line-height: 1.5; margin: 12px 0; display: flex; flex-direction: column; gap: 12px;">
+        <p style="color: #94a3b8; font-size: 12px; margin: 0;">
+          O preset salvará as configurações de rack (Equalizador 4 bandas, Atenuador, Compressor e Noise Gate) do canal selecionado em arquivo no serviço. Volumes, mutes, grupos e envios auxiliares não são afetados.
+        </p>
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 4px;">NOME DO PRESET *</label>
+          <input type="text" id="inputSavePresetName" placeholder="Ex: Voz Lead SM58" maxlength="50" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 8px 10px; color: #f8fafc; font-size: 13px;" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 4px;">DESCRIÇÃO / OBSERVAÇÕES (OPCIONAL)</label>
+          <input type="text" id="inputSavePresetDesc" placeholder="Ex: Microfone dinâmico com HPF e corte em 300Hz" maxlength="120" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 8px 10px; color: #f8fafc; font-size: 13px;" />
+        </div>
+      </div>
+      <div class="modal-actions" style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button type="button" class="btn-scene-action" id="btnCancelSavePreset">Cancelar</button>
+        <button type="button" class="btn-scene-action" id="btnConfirmSavePreset" style="background: #2563eb; color: #fff; border-color: #3b82f6;">Salvar Preset</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL RACK DE EFEITOS (EQ, COMP, GATE) -->
   <div id="fxModalOverlay" class="modal-overlay">
     <div class="fx-modal-card">
@@ -4577,6 +4703,22 @@
           <div class="fx-tab-status-dot" id="dot_aux"></div>
           <span>AUXILIARES</span>
         </button>
+      </div>
+
+      <!-- BARRA DE PRESETS DE CANAL (Apenas Canais de Entrada 1..32) -->
+      <div id="fxChannelPresetsBar" class="fx-channel-presets-bar" style="display: none;">
+        <div class="preset-bar-left">
+          <span class="preset-bar-label">PRESET:</span>
+          <select id="selChannelPreset" class="preset-bar-select">
+            <option value="">-- Carregando presets... --</option>
+          </select>
+          <button type="button" id="btnApplyChannelPreset" class="btn-preset-action btn-preset-apply" title="Carregar Rack (EQ, Comp, Gate) no canal ativo">Carregar</button>
+          <button type="button" id="btnDeleteChannelPreset" class="btn-preset-action btn-preset-delete" title="Excluir preset selecionado" style="display:none;">✕</button>
+        </div>
+        <div class="preset-bar-right">
+          <span id="lblChannelPresetDesc" class="preset-bar-desc"></span>
+          <button type="button" id="btnSaveChannelPreset" class="btn-preset-action btn-preset-save" title="Salvar rack atual como novo preset">Salvar Novo...</button>
+        </div>
       </div>
 
       <div class="fx-modal-body">
@@ -5346,6 +5488,12 @@
           } else {
             document.body.classList.remove('role-basic');
           }
+
+          if (currentUserRole === 'ADMIN' || currentUserRole === 'OPERATOR') {
+            if (typeof loadChannelPresetsList === 'function') {
+              loadChannelPresetsList();
+            }
+          }
         }
       } catch (err) {
         console.warn('Erro ao carregar dados do usuário:', err);
@@ -5547,6 +5695,24 @@
         if (data.type === 'state_sync') {
           syncFullStateFromBackend();
           showToast('Cena carregada e sincronizada! 🎬', '🎬');
+        }
+
+        if (data.type === 'channel_preset_applied') {
+          if (data.hex) {
+            showToast(data.hex, '🎛️');
+          }
+          if (typeof data.channel === 'number') {
+            updateChannelStripFxBadges(data.channel);
+            if (typeof currentSelectedCh === 'number' && currentSelectedCh === data.channel) {
+              syncEqModalFromState(data.channel);
+              syncCompModalFromState(data.channel);
+              if (typeof syncGateModalFromState === 'function') syncGateModalFromState(data.channel);
+              updateTabStatusDots(data.channel);
+              if (currentFxTab === 'eq') requestEqRedraw();
+              else if (currentFxTab === 'comp') requestCompRedraw();
+              else if (currentFxTab === 'gate') requestGateRedraw();
+            }
+          }
         }
 
         if (data.type === 'channel_name' && data.channel >= 0 && data.channel < TOTAL_CHANNELS) {
@@ -7459,6 +7625,7 @@
 
       // Carrega estado do EQ, COMP, GATE, AUX e PAN do canal/saída
       if (typeof syncFxPanUI === 'function') syncFxPanUI(target);
+      if (typeof updateChannelPresetsBarUI === 'function') updateChannelPresetsBarUI(target);
       syncEqModalFromState(target);
       syncCompModalFromState(target);
       if (typeof syncGateModalFromState === 'function') syncGateModalFromState(target);
@@ -7760,6 +7927,13 @@
       fxModalOverlay._mouseDownOnBackdrop = false;
     });
     document.addEventListener('keydown', (e) => {
+      if (appDialogOverlay && appDialogOverlay.classList.contains('open')) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeAppDialog(false);
+        }
+        return;
+      }
       if (fxModalOverlay.classList.contains('open')) {
         if (e.key === 'Escape') {
           closeFxModal();
@@ -7776,6 +7950,290 @@
         switchFxTab(btn.dataset.tab);
       });
     });
+
+    // ==========================================
+    // DIÁLOGOS CUSTOMIZADOS NÃO-BLOQUEANTES
+    // ==========================================
+    const appDialogOverlay = document.getElementById('appDialogModalOverlay');
+    const appDialogIcon = document.getElementById('appDialogIcon');
+    const appDialogTitle = document.getElementById('appDialogTitle');
+    const appDialogMessage = document.getElementById('appDialogMessage');
+    const btnAppDialogCancel = document.getElementById('btnAppDialogCancel');
+    const btnAppDialogOk = document.getElementById('btnAppDialogOk');
+    let _appDialogResolve = null;
+
+    function closeAppDialog(result) {
+      if (appDialogOverlay) appDialogOverlay.classList.remove('open');
+      if (_appDialogResolve) {
+        const res = _appDialogResolve;
+        _appDialogResolve = null;
+        res(result);
+      }
+    }
+
+    if (btnAppDialogOk) btnAppDialogOk.addEventListener('click', () => closeAppDialog(true));
+    if (btnAppDialogCancel) btnAppDialogCancel.addEventListener('click', () => closeAppDialog(false));
+    if (appDialogOverlay) {
+      appDialogOverlay.addEventListener('click', (e) => {
+        if (e.target === appDialogOverlay) {
+          closeAppDialog(false);
+        }
+      });
+    }
+
+    function showAppAlert(message, title = 'Aviso', icon = 'ℹ️') {
+      if (!appDialogOverlay) return Promise.resolve();
+      if (_appDialogResolve) closeAppDialog(false);
+      if (appDialogIcon) appDialogIcon.textContent = icon;
+      if (appDialogTitle) appDialogTitle.textContent = title;
+      if (appDialogMessage) appDialogMessage.textContent = String(message || '');
+      if (btnAppDialogCancel) btnAppDialogCancel.style.display = 'none';
+      if (btnAppDialogOk) btnAppDialogOk.textContent = 'OK';
+      appDialogOverlay.classList.add('open');
+      if (btnAppDialogOk) setTimeout(() => btnAppDialogOk.focus(), 50);
+      return new Promise(resolve => { _appDialogResolve = resolve; });
+    }
+
+    function showAppConfirm(message, title = 'Confirmação', icon = '⚠️') {
+      if (!appDialogOverlay) return Promise.resolve(false);
+      if (_appDialogResolve) closeAppDialog(false);
+      if (appDialogIcon) appDialogIcon.textContent = icon;
+      if (appDialogTitle) appDialogTitle.textContent = title;
+      if (appDialogMessage) appDialogMessage.textContent = String(message || '');
+      if (btnAppDialogCancel) btnAppDialogCancel.style.display = 'inline-block';
+      if (btnAppDialogOk) btnAppDialogOk.textContent = 'Confirmar';
+      appDialogOverlay.classList.add('open');
+      if (btnAppDialogOk) setTimeout(() => btnAppDialogOk.focus(), 50);
+      return new Promise(resolve => { _appDialogResolve = resolve; });
+    }
+
+    // ==========================================
+    // PRESETS DE CANAL (RACK: EQ, COMP, GATE)
+    // ==========================================
+    let channelPresetsList = [];
+    const fxChannelPresetsBar = document.getElementById('fxChannelPresetsBar');
+    const selChannelPreset = document.getElementById('selChannelPreset');
+    const btnApplyChannelPreset = document.getElementById('btnApplyChannelPreset');
+    const btnDeleteChannelPreset = document.getElementById('btnDeleteChannelPreset');
+    const btnSaveChannelPreset = document.getElementById('btnSaveChannelPreset');
+    const lblChannelPresetDesc = document.getElementById('lblChannelPresetDesc');
+    const savePresetModalOverlay = document.getElementById('savePresetModalOverlay');
+    const inputSavePresetName = document.getElementById('inputSavePresetName');
+    const inputSavePresetDesc = document.getElementById('inputSavePresetDesc');
+    const btnCancelSavePreset = document.getElementById('btnCancelSavePreset');
+    const btnConfirmSavePreset = document.getElementById('btnConfirmSavePreset');
+
+    async function loadChannelPresetsList() {
+      try {
+        const res = await fetch('/api/channel-presets');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && Array.isArray(data.presets)) {
+          channelPresetsList = data.presets;
+          renderChannelPresetsDropdown();
+        }
+      } catch (err) {
+        console.warn('Erro ao carregar lista de presets de canal:', err);
+      }
+    }
+
+    function isFactoryPreset(p) {
+      return Boolean(p && (p.factory || (p.author && p.author.includes('Factory'))));
+    }
+
+    function renderChannelPresetsDropdown(selectedId) {
+      if (!selChannelPreset) return;
+      const curVal = selectedId || selChannelPreset.value;
+      selChannelPreset.innerHTML = '<option value="">-- Selecione um preset --</option>';
+
+      const userPresets = channelPresetsList.filter(p => !isFactoryPreset(p));
+      const factoryPresets = channelPresetsList.filter(p => isFactoryPreset(p));
+
+      if (userPresets.length > 0) {
+        const grp = document.createElement('optgroup');
+        grp.label = 'Meus Presets';
+        userPresets.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = p.name;
+          grp.appendChild(opt);
+        });
+        selChannelPreset.appendChild(grp);
+      }
+
+      if (factoryPresets.length > 0) {
+        const grp = document.createElement('optgroup');
+        grp.label = 'Padrão';
+        factoryPresets.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = p.name;
+          grp.appendChild(opt);
+        });
+        selChannelPreset.appendChild(grp);
+      }
+
+      if (curVal) {
+        selChannelPreset.value = curVal;
+      }
+      onChannelPresetSelectionChange();
+    }
+
+    function onChannelPresetSelectionChange() {
+      const pid = selChannelPreset ? selChannelPreset.value : '';
+      const preset = channelPresetsList.find(p => p.id === pid);
+      if (lblChannelPresetDesc) {
+        lblChannelPresetDesc.textContent = preset ? (preset.description || '') : '';
+        lblChannelPresetDesc.title = preset ? (preset.description || '') : '';
+      }
+      if (btnDeleteChannelPreset) {
+        btnDeleteChannelPreset.style.display = (preset && !isFactoryPreset(preset)) ? 'inline-block' : 'none';
+      }
+    }
+
+    function updateChannelPresetsBarUI(target) {
+      if (!fxChannelPresetsBar) return;
+      const isOperatorOrAdmin = currentUserRole === 'ADMIN' || currentUserRole === 'OPERATOR';
+      const isInput = typeof target === 'number' && target >= 0 && target < TOTAL_CHANNELS;
+      if (isOperatorOrAdmin && isInput) {
+        fxChannelPresetsBar.style.display = 'flex';
+        onChannelPresetSelectionChange();
+      } else {
+        fxChannelPresetsBar.style.display = 'none';
+      }
+    }
+
+    if (selChannelPreset) {
+      selChannelPreset.addEventListener('change', onChannelPresetSelectionChange);
+    }
+
+    if (btnApplyChannelPreset) {
+      btnApplyChannelPreset.addEventListener('click', async () => {
+        if (currentUserRole !== 'ADMIN' && currentUserRole !== 'OPERATOR') {
+          showToast('Apenas operadores e administradores podem carregar presets.', '⚠️');
+          return;
+        }
+        if (typeof currentSelectedCh !== 'number' || currentSelectedCh < 0 || currentSelectedCh >= TOTAL_CHANNELS) {
+          showToast('Selecione um canal de entrada válido para aplicar o preset.', '⚠️');
+          return;
+        }
+        const pid = selChannelPreset ? selChannelPreset.value : '';
+        if (!pid) {
+          showToast('Selecione um preset na lista antes de carregar.', '⚠️');
+          return;
+        }
+        const chNum = currentSelectedCh + 1;
+        try {
+          const res = await fetch(`/api/channel-presets/${encodeURIComponent(pid)}/apply`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ channel: chNum })
+          });
+          const result = await res.json();
+          if (res.ok && result.success) {
+            showToast(`Preset aplicado ao CH ${String(chNum).padStart(2, '0')}! 🎛️`, '🎛️');
+            await syncFullStateFromBackend();
+            syncEqModalFromState(currentSelectedCh);
+            syncCompModalFromState(currentSelectedCh);
+            if (typeof syncGateModalFromState === 'function') syncGateModalFromState(currentSelectedCh);
+            updateTabStatusDots(currentSelectedCh);
+            if (currentFxTab === 'eq') requestEqRedraw();
+            else if (currentFxTab === 'comp') requestCompRedraw();
+            else if (currentFxTab === 'gate') requestGateRedraw();
+          } else {
+            await showAppAlert(`Falha ao aplicar preset: ${result.error || 'Erro desconhecido'}`, 'Erro', '⚠️');
+          }
+        } catch (err) {
+          await showAppAlert('Erro na comunicação com o servidor ao aplicar preset.', 'Erro de Conexão', '⚠️');
+        }
+      });
+    }
+
+    if (btnDeleteChannelPreset) {
+      btnDeleteChannelPreset.addEventListener('click', async () => {
+        if (currentUserRole !== 'ADMIN' && currentUserRole !== 'OPERATOR') return;
+        const pid = selChannelPreset ? selChannelPreset.value : '';
+        const preset = channelPresetsList.find(p => p.id === pid);
+        if (!preset || isFactoryPreset(preset)) return;
+        const confirmed = await showAppConfirm(`Deseja realmente excluir o preset '${preset.name}'?`, 'Excluir Preset', '🗑');
+        if (!confirmed) return;
+        try {
+          const res = await fetch(`/api/channel-presets/${encodeURIComponent(pid)}`, {
+            method: 'DELETE'
+          });
+          const result = await res.json();
+          if (res.ok && result.success) {
+            showToast(`Preset '${preset.name}' excluído.`, '🗑');
+            await loadChannelPresetsList();
+          } else {
+            await showAppAlert(`Erro ao excluir preset: ${result.error || 'Erro desconhecido'}`, 'Erro', '⚠️');
+          }
+        } catch (err) {
+          await showAppAlert('Erro ao excluir preset.', 'Erro de Conexão', '⚠️');
+        }
+      });
+    }
+
+    if (btnSaveChannelPreset) {
+      btnSaveChannelPreset.addEventListener('click', () => {
+        if (currentUserRole !== 'ADMIN' && currentUserRole !== 'OPERATOR') {
+          showToast('Apenas operadores e administradores podem salvar presets.', '⚠️');
+          return;
+        }
+        if (typeof currentSelectedCh !== 'number') {
+          showToast('Abra um canal de entrada para salvar seu rack.', '⚠️');
+          return;
+        }
+        if (inputSavePresetName) inputSavePresetName.value = '';
+        if (inputSavePresetDesc) inputSavePresetDesc.value = '';
+        if (savePresetModalOverlay) {
+          savePresetModalOverlay.classList.add('open');
+          setTimeout(() => { if (inputSavePresetName) inputSavePresetName.focus(); }, 100);
+        }
+      });
+    }
+
+    if (btnCancelSavePreset && savePresetModalOverlay) {
+      btnCancelSavePreset.addEventListener('click', () => {
+        savePresetModalOverlay.classList.remove('open');
+      });
+    }
+
+    if (btnConfirmSavePreset) {
+      btnConfirmSavePreset.addEventListener('click', async () => {
+        if (currentUserRole !== 'ADMIN' && currentUserRole !== 'OPERATOR') return;
+        const name = (inputSavePresetName ? inputSavePresetName.value : '').trim();
+        const desc = (inputSavePresetDesc ? inputSavePresetDesc.value : '').trim();
+        if (!name) {
+          await showAppAlert('Por favor informe um nome para o preset.', 'Campo Obrigatório', '⚠️');
+          if (inputSavePresetName) inputSavePresetName.focus();
+          return;
+        }
+        if (typeof currentSelectedCh !== 'number') return;
+        const chNum = currentSelectedCh + 1;
+        try {
+          const res = await fetch('/api/channel-presets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name, description: desc, channel: chNum })
+          });
+          const result = await res.json();
+          if (res.ok && result.success) {
+            showToast(`Preset '${name}' salvo com sucesso! 💾`, '💾');
+            if (savePresetModalOverlay) savePresetModalOverlay.classList.remove('open');
+            await loadChannelPresetsList();
+            if (result.preset && result.preset.id && selChannelPreset) {
+              selChannelPreset.value = result.preset.id;
+              onChannelPresetSelectionChange();
+            }
+          } else {
+            await showAppAlert(`Falha ao salvar preset: ${result.error || 'Erro desconhecido'}`, 'Erro', '⚠️');
+          }
+        } catch (err) {
+          await showAppAlert('Erro de conexão ao salvar preset.', 'Erro de Conexão', '⚠️');
+        }
+      });
+    }
 
     // Sincroniza controles do modal com o estado do canal ou saída
     function syncEqModalFromState(target) {
@@ -9677,6 +10135,16 @@
                 compState[i].release = inp.comp.release;
                 compState[i].knee = inp.comp.knee;
                 compState[i].gain = inp.comp.gain;
+              }
+
+              // Noise Gate de Canal
+              if (typeof gateState !== 'undefined' && gateState[i] && inp.gate) {
+                gateState[i].on = inp.gate.on;
+                gateState[i].threshold = inp.gate.threshold;
+                gateState[i].range = inp.gate.range;
+                gateState[i].attack = inp.gate.attack;
+                gateState[i].hold = inp.gate.hold;
+                gateState[i].decay = inp.gate.decay;
               }
             }
           });

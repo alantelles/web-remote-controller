@@ -208,6 +208,12 @@ O **Web Remote Controller** é uma solução moderna e leve para controle remoto
     * `Ctrl+↓`: no Desktop, ajusta instantaneamente o canal focado (ou bloco) para `-∞ dB` (0 / mute de fader).
     * No Mobile (`/m`), como os faders são horizontais, os atalhos seguem o eixo do slider: `Ctrl+→` ajusta para `0.0 dB` e `Ctrl+←` para `-∞ dB`.
     * Teclas `0` e `1` a `8` continuam funcionais para comutação rápida de saída, e pressionar `Shift 2x` novamente (ou `Escape`) encerra o modo.
+15. **Biblioteca de Presets de Canais (Channel Presets - Rack Completo):**
+    * **Persistência em Software:** Presets são salvos exclusivamente como arquivos JSON no serviço (`data/channel_presets/<id>.json`), sem gravar ou ocupar memórias internas na mesa física.
+    * **Processamento de Rack Completo:** Salva e carrega todas as informações do rack de canal (Equalizador 4 bandas, Atenuador digital, Compressor e Noise Gate).
+    * **Isolamento da Mixagem:** Não guarda volumes (faders), estados de mute, pan, configurações de grupos nem envios auxiliares (nível, mute, pre/post), preservando intacta a mixagem de FOH e palco ao carregar um preset.
+    * **Controle de Acesso RBAC (Operator+):** Apenas operadores e administradores (`OPERATOR` e `ADMIN`) podem salvar, carregar ou excluir presets. Usuários `BASIC` e `PERFORMER` possuem permissão restrita (403 Forbidden).
+    * **Transmissão Cadenciada:** Ao carregar um preset, o serviço atualiza o Edit Buffer da mesa física transmitindo os comandos SysEx de forma cadenciada (~6ms) e sincroniza instantaneamente todas as interfaces Desktop e Mobile via WebSocket.
 
 ---
 
@@ -221,6 +227,7 @@ O **Web Remote Controller** é uma solução moderna e leve para controle remoto
 | **WebSocket para Transporte** | Web MIDI API do navegador | A Web MIDI API no navegador exige contexto HTTPS obrigatório, drivers locais no cliente e é bloqueada na maioria dos navegadores mobile (ex: Safari iOS). WebSocket delega o acesso físico exclusivamente ao servidor Linux. |
 | **Throttling Paramétrico Seletivo** | Throttling global linear | Limitar globalmente causava atrasos em botões de MUTE quando um fader estava se movendo. O rastreamento por tupla `(Element, Param, Channel)` permite que botões discretos passem imediatamente e apenas o fader ativo sofra descarte de quadros repetidos. |
 | **Autenticação em CSV com Leitura Dinâmica** | SQLite / Banco de Dados SQL | Um arquivo CSV simples permite fácil edição direta no terminal (`nano usuarios.csv`) sem necessidade de instalar dependências de banco de dados no sistema operacional embarcado. |
+| **Persistência em Software vs. Edit Buffer da Mesa** | Gravar cenas/presets em User Libraries internas da mesa via SysEx Bulk Dump | Todos os controles que não necessitem de manipular o Edit Buffer são implementados em nível de software no próprio serviço (JSON em disco). A mesa física recebe apenas os parâmetros ativos no Edit Buffer (`0x01`) ao carregar/aplicar, evitando desgaste de memória flash, saturação de barramento e limitações de slots internos do console. |
 
 ---
 

@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "super-volume",
+  "name": "Super volume",
+  "description": "",
+  "author": "Alan Telles",
+  "created_at": "2026-11-25T20:10:18.127257405Z",
+  "updated_at": "2026-11-25T20:10:18.127257405Z",
+  "rack": {
+    "eq": {
+      "on": 1,
+      "low": {
+        "q": 44,
+        "freq": 16,
+        "gain": 0
+      },
+      "low_mid": {
+        "q": 20,
+        "freq": 38,
+        "gain": -25
+      },
+      "hi_mid": {
+        "q": 20,
+        "freq": 82,
+        "gain": 20
+      },
+      "high": {
+        "q": 23,
+        "freq": 104,
+        "gain": 15
+      },
+      "hpf_on": 1,
+      "lpf_on": 0,
+      "attenuator": 0
+    },
+    "comp": {
+      "on": 1,
+      "position": 1,
+      "threshold": -327,
+      "ratio": 9,
+      "attack": 1,
+      "release": 9,
+      "knee": 0,
+      "gain": 49
+    },
+    "gate": {
+      "on": 0,
+      "threshold": 340,
+      "range": 40,
+      "attack": 1,
+      "hold": 20,
+      "decay": 18
+    }
+  }
+}

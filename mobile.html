@@ -2451,6 +2451,16 @@
           <button type="button" id="btnPanCenterMobile" style="background: #1e293b; border: 1px solid #475569; color: #e2e8f0; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 5px; cursor: pointer;" title="Centralizar Pan (C)">C</button>
         </div>
 
+        <!-- Barra de Presets de Canal (Apenas Inputs 1..32) -->
+        <div id="mobilePresetControlWrap" style="display: none; align-items: center; gap: 6px; padding: 5px 8px; background: rgba(15,23,42,0.85); border: 1px solid #334155; border-radius: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+          <span style="font-size: 10px; font-weight: 800; color: #38bdf8; letter-spacing: 0.5px; white-space: nowrap;">PRESET:</span>
+          <select id="selMobileChannelPreset" style="flex: 1; min-width: 120px; font-size: 11px; background: #0f172a; color: #f8fafc; border: 1px solid #475569; border-radius: 5px; padding: 4px 6px;">
+            <option value="">-- Carregando presets... --</option>
+          </select>
+          <button type="button" id="btnApplyMobilePreset" style="background: #0284c7; border: 1px solid #38bdf8; color: #fff; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 5px; cursor: pointer;">Carregar</button>
+          <button type="button" id="btnSaveMobilePreset" style="background: #1e293b; border: 1px solid #334155; color: #38bdf8; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 5px; cursor: pointer;">Salvar</button>
+        </div>
+
         <!-- Barra de Abas dos Módulos (EQ, COMP, GATE) -->
         <div class="fx-rack-tabs-bar">
           <button class="btn-fx-tab active" data-tab="eq" id="tabBtn_eq" type="button">
@@ -2920,6 +2930,48 @@
       <div class="modal-footer">
         <button class="btn-modal-action" id="btnMobileCancelRecall" type="button">Cancelar</button>
         <button class="btn-modal-action" id="btnMobileConfirmRecall" type="button" style="background: #dc2626; border-color: #f87171; color: #fff;">Sim, Carregar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PARA SALVAR PRESET DE CANAL (MOBILE) -->
+  <div class="modal-backdrop" id="mobileSavePresetModal" style="z-index: 250;">
+    <div class="modal-container" style="max-width: 340px;">
+      <div class="modal-header">
+        <span>💾 Salvar Preset de Canal</span>
+        <button id="btnMobileCloseSavePreset" type="button">✕</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 10px; font-size: 13px; line-height: 1.45;">
+        <p style="color: var(--text-muted); font-size: 11px; margin: 0;">
+          Salva as configurações de rack (EQ 4 bandas, Atenuador, Comp e Gate) do canal selecionado em arquivo no serviço.
+        </p>
+        <div>
+          <label style="display: block; font-size: 10px; font-weight: 700; color: #94a3b8; margin-bottom: 3px;">NOME DO PRESET *</label>
+          <input type="text" id="inputMobilePresetName" placeholder="Ex: Voz Lead SM58" maxlength="50" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 7px 9px; color: #f8fafc; font-size: 13px;" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 10px; font-weight: 700; color: #94a3b8; margin-bottom: 3px;">DESCRIÇÃO (OPCIONAL)</label>
+          <input type="text" id="inputMobilePresetDesc" placeholder="Ex: Microfone dinâmico com HPF" maxlength="120" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 7px 9px; color: #f8fafc; font-size: 13px;" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-action" id="btnCancelMobileSavePreset" type="button">Cancelar</button>
+        <button class="btn-modal-action btn-modal-save" id="btnConfirmMobileSavePreset" type="button" style="background: #2563eb; border-color: #3b82f6; color: #fff;">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CUSTOMIZADO NÃO-BLOQUEANTE (SUBSTITUI alert/confirm NATIVOS) -->
+  <div class="modal-backdrop" id="mobileAppDialogModal" style="z-index: 9999;">
+    <div class="modal-container" style="max-width: 340px;">
+      <div class="modal-header">
+        <span id="mobileAppDialogTitle">ℹ️ Aviso</span>
+        <button id="btnMobileAppDialogClose" type="button">✕</button>
+      </div>
+      <div class="modal-body" style="font-size: 13px; line-height: 1.45; color: var(--text-main); white-space: pre-line;" id="mobileAppDialogMessage"></div>
+      <div class="modal-footer">
+        <button class="btn-modal-action" id="btnMobileAppDialogCancel" type="button" style="display: none;">Cancelar</button>
+        <button class="btn-modal-action btn-modal-save" id="btnMobileAppDialogOk" type="button" style="background: #2563eb; border-color: #3b82f6; color: #fff;">OK</button>
       </div>
     </div>
   </div>
@@ -3515,6 +3567,17 @@
             return;
           }
 
+          if (msg.type === 'channel_preset_applied') {
+            if (msg.hex) showToast(msg.hex);
+            if (typeof msg.channel === 'number') {
+              updateChannelFxBadges(msg.channel);
+              if (isEqModalOpen && currentEqTarget === msg.channel && typeof refreshOpenRackModalUI === 'function') {
+                refreshOpenRackModalUI();
+              }
+            }
+            return;
+          }
+
           if (msg.type === 'channel_name' && msg.channel >= 0 && msg.channel < TOTAL_CHANNELS) {
             const ch = msg.channel;
             const shortName = msg.name || `CH ${ch + 1}`;
@@ -3672,7 +3735,8 @@
 
               if (inp.comp && compState[i]) {
                 compState[i].on = inp.comp.on;
-                if (inp.comp.threshold !== undefined) compState[i].threshold = inp.comp.threshold;
+                if (inp.comp.position !== undefined) compState[i].position = inp.comp.position;
+                if (inp.comp.threshold !== undefined) compState[i].threshold = inp.comp.threshold + 540;
                 if (inp.comp.ratio !== undefined) compState[i].ratio = inp.comp.ratio;
                 if (inp.comp.attack !== undefined) compState[i].attack = inp.comp.attack;
                 if (inp.comp.release !== undefined) compState[i].release = inp.comp.release;
@@ -5096,6 +5160,12 @@
             document.body.classList.remove('role-basic');
             currentMobileAllowedChannels = null;
             currentMobileAllowedOutputs = null;
+          }
+
+          if (currentMobileUserRole === 'ADMIN' || currentMobileUserRole === 'OPERATOR') {
+            if (typeof loadMobileChannelPresetsList === 'function') {
+              loadMobileChannelPresetsList();
+            }
           }
         }
       } catch (e) {
@@ -6657,6 +6727,16 @@
 
       updateDesktopFxLinks();
 
+      // Presets de canal (apenas para canais 1..32 e papéis OPERATOR / ADMIN)
+      const presetWrap = document.getElementById('mobilePresetControlWrap');
+      if (presetWrap) {
+        const canUsePresets = (typeof target === 'number') && (currentMobileUserRole === 'ADMIN' || currentMobileUserRole === 'OPERATOR');
+        presetWrap.style.display = canUsePresets ? 'flex' : 'none';
+        if (canUsePresets && typeof onMobileChannelPresetSelectionChange === 'function') {
+          onMobileChannelPresetSelectionChange();
+        }
+      }
+
       backdrop.classList.add('open');
 
       if (currentRackTab === 'eq') {
@@ -7282,6 +7362,197 @@
           const lbl = document.getElementById('lblPanMobile');
           if (lbl) lbl.textContent = 'C';
           sendCommand(0x1B, 0x00, currentEqTarget, 0, false);
+        });
+      }
+
+      // Presets de Canal (Mobile)
+      let mobileChannelPresetsList = [];
+      const selMobilePreset = document.getElementById('selMobileChannelPreset');
+      const btnApplyMobPreset = document.getElementById('btnApplyMobilePreset');
+      const btnSaveMobPreset = document.getElementById('btnSaveMobilePreset');
+      const mobileSaveModal = document.getElementById('mobileSavePresetModal');
+      const inputMobPresetName = document.getElementById('inputMobilePresetName');
+      const inputMobPresetDesc = document.getElementById('inputMobilePresetDesc');
+      const btnConfirmMobSave = document.getElementById('btnConfirmMobileSavePreset');
+      const btnCancelMobSave = document.getElementById('btnCancelMobileSavePreset');
+      const btnCloseMobSave = document.getElementById('btnMobileCloseSavePreset');
+
+      window.loadMobileChannelPresetsList = async function() {
+        try {
+          const res = await fetch('/api/channel-presets');
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data && Array.isArray(data.presets)) {
+            mobileChannelPresetsList = data.presets;
+            renderMobileChannelPresetsDropdown();
+          }
+        } catch (err) {
+          console.warn('Erro ao carregar presets no mobile:', err);
+        }
+      };
+
+      function isFactoryPreset(p) {
+        return Boolean(p && (p.factory || (p.author && p.author.includes('Factory'))));
+      }
+
+      function renderMobileChannelPresetsDropdown(selectedId) {
+        if (!selMobilePreset) return;
+        const curVal = selectedId || selMobilePreset.value;
+        selMobilePreset.innerHTML = '<option value="">-- Selecionar Preset --</option>';
+
+        const userPresets = mobileChannelPresetsList.filter(p => !isFactoryPreset(p));
+        const factoryPresets = mobileChannelPresetsList.filter(p => isFactoryPreset(p));
+
+        if (userPresets.length > 0) {
+          const grp = document.createElement('optgroup');
+          grp.label = 'Meus Presets';
+          userPresets.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = p.name;
+            grp.appendChild(opt);
+          });
+          selMobilePreset.appendChild(grp);
+        }
+
+        if (factoryPresets.length > 0) {
+          const grp = document.createElement('optgroup');
+          grp.label = 'Padrão';
+          factoryPresets.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = p.name;
+            grp.appendChild(opt);
+          });
+          selMobilePreset.appendChild(grp);
+        }
+
+        if (curVal) {
+          selMobilePreset.value = curVal;
+        }
+      }
+
+      window.onMobileChannelPresetSelectionChange = function() {
+        // Eventual atualização contextual
+      };
+
+      window.refreshOpenRackModalUI = function() {
+        if (!isEqModalOpen || typeof currentEqTarget !== 'number') return;
+        const eq = getEqData(currentEqTarget);
+        const dotEq = document.getElementById('dot_tab_eq');
+        if (dotEq) dotEq.classList.toggle('on', eq && eq.on === 1);
+
+        const isCompOn = getCompOn(currentEqTarget) === 1;
+        const dotComp = document.getElementById('dot_tab_comp');
+        if (dotComp) dotComp.classList.toggle('on', isCompOn);
+
+        const isGateOn = getGateOn(currentEqTarget) === 1;
+        const dotGate = document.getElementById('dot_tab_gate');
+        if (dotGate) dotGate.classList.toggle('on', isGateOn);
+
+        if (currentRackTab === 'eq') {
+          syncEqModalUI();
+          requestEqRedrawMobile();
+        } else if (currentRackTab === 'comp') {
+          syncCompModalUI();
+          requestCompRedrawMobile();
+        } else if (currentRackTab === 'gate') {
+          syncGateModalUI();
+          requestGateRedrawMobile();
+        }
+      };
+
+      if (btnApplyMobPreset) {
+        btnApplyMobPreset.addEventListener('click', async () => {
+          if (currentMobileUserRole !== 'ADMIN' && currentMobileUserRole !== 'OPERATOR') {
+            showToast('Apenas operadores e administradores podem carregar presets.');
+            return;
+          }
+          if (typeof currentEqTarget !== 'number' || currentEqTarget < 0 || currentEqTarget >= TOTAL_CHANNELS) {
+            showToast('Selecione um canal válido para aplicar o preset.');
+            return;
+          }
+          const pid = selMobilePreset ? selMobilePreset.value : '';
+          if (!pid) {
+            showToast('Selecione um preset na lista.');
+            return;
+          }
+          const chNum = currentEqTarget + 1;
+          try {
+            const res = await fetch(`/api/channel-presets/${encodeURIComponent(pid)}/apply`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ channel: chNum })
+            });
+            const result = await res.json();
+            if (res.ok && result.success) {
+              showToast(`Preset aplicado ao CH ${String(chNum).padStart(2, '0')}!`);
+              await syncMobileStateFromBackend();
+              refreshOpenRackModalUI();
+            } else {
+              alert(`Falha ao aplicar preset: ${result.error || 'Erro desconhecido'}`);
+            }
+          } catch (err) {
+            alert('Erro de conexão ao aplicar preset.');
+          }
+        });
+      }
+
+      if (btnSaveMobPreset) {
+        btnSaveMobPreset.addEventListener('click', () => {
+          if (currentMobileUserRole !== 'ADMIN' && currentMobileUserRole !== 'OPERATOR') {
+            showToast('Apenas operadores e administradores podem salvar presets.');
+            return;
+          }
+          if (typeof currentEqTarget !== 'number') {
+            showToast('Abra um canal de entrada para salvar o preset.');
+            return;
+          }
+          if (inputMobPresetName) inputMobPresetName.value = '';
+          if (inputMobPresetDesc) inputMobPresetDesc.value = '';
+          if (mobileSaveModal) mobileSaveModal.classList.add('open');
+        });
+      }
+
+      function closeMobileSavePresetModal() {
+        if (mobileSaveModal) mobileSaveModal.classList.remove('open');
+      }
+
+      if (btnCancelMobSave) btnCancelMobSave.addEventListener('click', closeMobileSavePresetModal);
+      if (btnCloseMobSave) btnCloseMobSave.addEventListener('click', closeMobileSavePresetModal);
+
+      if (btnConfirmMobSave) {
+        btnConfirmMobSave.addEventListener('click', async () => {
+          if (currentMobileUserRole !== 'ADMIN' && currentMobileUserRole !== 'OPERATOR') return;
+          const name = (inputMobPresetName ? inputMobPresetName.value : '').trim();
+          const desc = (inputMobPresetDesc ? inputMobPresetDesc.value : '').trim();
+          if (!name) {
+            alert('Por favor informe o nome do preset.');
+            if (inputMobPresetName) inputMobPresetName.focus();
+            return;
+          }
+          if (typeof currentEqTarget !== 'number') return;
+          const chNum = currentEqTarget + 1;
+          try {
+            const res = await fetch('/api/channel-presets', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: name, description: desc, channel: chNum })
+            });
+            const result = await res.json();
+            if (res.ok && result.success) {
+              showToast(`Preset '${name}' salvo!`);
+              closeMobileSavePresetModal();
+              await loadMobileChannelPresetsList();
+              if (result.preset && result.preset.id && selMobilePreset) {
+                selMobilePreset.value = result.preset.id;
+              }
+            } else {
+              alert(`Falha ao salvar preset: ${result.error || 'Erro desconhecido'}`);
+            }
+          } catch (err) {
+            alert('Erro ao salvar preset.');
+          }
         });
       }
 

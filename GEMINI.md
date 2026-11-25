@@ -85,6 +85,10 @@ sudo modprobe snd-virmidi
 4. **Segurança de Sessão:**
    * Senhas nunca devem ser trafegadas nos endpoints de consulta (ex: campo `Password` marcado com `json:"-"` na struct `User`).
    * A checagem de autenticação no WebSocket deve ser feita antes do upgrade da conexão HTTP.
+5. **Persistência em Nível de Software vs. Edit Buffer da Mesa (Diretriz Arquitetural Fundamental):**
+   * **Todos os controles e recursos que não necessitem de manipular o Edit Buffer serão implementados em nível de software no próprio serviço, exceto onde aplicável.**
+   * **Presets (Cenas Gerais, Presets de Canais, Mute Groups, Personal Mixes):** São salvos e gerenciados exclusivamente em arquivos no próprio serviço/servidor (disco local em formato JSON), e **nunca** gravados diretamente nas memórias internas ou bibliotecas de usuário da mesa física (User Libraries via Bulk Dump).
+   * **Comunicação com a Mesa Física:** Destinada estritamente ao *Edit Buffer* (área ativa de processamento em tempo real via *Parameter Change* `0x01`), transmitindo os parâmetros de canal/áudio (EQ, Comp, Gate, faders) apenas no momento do recall/aplicação, sem depender nem alterar a memória interna de bibliotecas do hardware.
 
 ---
 

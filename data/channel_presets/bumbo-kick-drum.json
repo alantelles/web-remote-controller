@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "bumbo-kick-drum",
+  "name": "Bumbo (Kick Drum)",
+  "description": "Punch em 60Hz, corte em 350Hz para limpar embolado, estalo em 3.5kHz. Comp 4:1 com ataque lento e gate rápido.",
+  "author": "Sistema (01V96 Factory)",
+  "created_at": "2026-11-25T19:35:17.626746493Z",
+  "updated_at": "2026-11-25T19:35:17.626746618Z",
+  "rack": {
+    "eq": {
+      "on": 1,
+      "low": {
+        "q": 20,
+        "freq": 12,
+        "gain": 40
+      },
+      "low_mid": {
+        "q": 18,
+        "freq": 42,
+        "gain": -60
+      },
+      "hi_mid": {
+        "q": 22,
+        "freq": 82,
+        "gain": 30
+      },
+      "high": {
+        "q": 23,
+        "freq": 100,
+        "gain": 0
+      },
+      "hpf_on": 0,
+      "lpf_on": 0,
+      "attenuator": 0
+    },
+    "comp": {
+      "on": 1,
+      "position": 1,
+      "threshold": -180,
+      "ratio": 6,
+      "attack": 30,
+      "release": 35,
+      "knee": 1,
+      "gain": 30
+    },
+    "gate": {
+      "on": 1,
+      "threshold": 380,
+      "range": 55,
+      "attack": 0,
+      "hold": 15,
+      "decay": 10
+    }
+  }
+}

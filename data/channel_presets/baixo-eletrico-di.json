@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "baixo-eletrico-di",
+  "name": "Baixo Elétrico (Direct Box)",
+  "description": "Definição de graves em 80Hz, corte em 400Hz para abrir espaço para bumbo e teclados. Compressão controlada 4:1.",
+  "author": "Sistema (01V96 Factory)",
+  "created_at": "2026-11-25T19:35:17.626746792Z",
+  "updated_at": "2026-11-25T19:35:17.62674685Z",
+  "rack": {
+    "eq": {
+      "on": 1,
+      "low": {
+        "q": 20,
+        "freq": 16,
+        "gain": 25
+      },
+      "low_mid": {
+        "q": 20,
+        "freq": 45,
+        "gain": -35
+      },
+      "hi_mid": {
+        "q": 20,
+        "freq": 72,
+        "gain": 10
+      },
+      "high": {
+        "q": 23,
+        "freq": 95,
+        "gain": -10
+      },
+      "hpf_on": 0,
+      "lpf_on": 0,
+      "attenuator": 0
+    },
+    "comp": {
+      "on": 1,
+      "position": 1,
+      "threshold": -220,
+      "ratio": 6,
+      "attack": 20,
+      "release": 60,
+      "knee": 3,
+      "gain": 35
+    },
+    "gate": {
+      "on": 0,
+      "threshold": 340,
+      "range": 0,
+      "attack": 1,
+      "hold": 20,
+      "decay": 18
+    }
+  }
+}

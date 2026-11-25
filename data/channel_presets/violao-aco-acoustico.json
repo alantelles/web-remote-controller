@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "violao-aco-acoustico",
+  "name": "Violão Aço (Acoustic Guitar)",
+  "description": "HPF 90Hz, corte cirúrgico em 250Hz para remover ressonância de caixa, brilho em 8kHz. Compressão 2.5:1 natural.",
+  "author": "Sistema (01V96 Factory)",
+  "created_at": "2026-11-25T19:35:17.626746921Z",
+  "updated_at": "2026-11-25T19:35:17.626746992Z",
+  "rack": {
+    "eq": {
+      "on": 1,
+      "low": {
+        "q": 44,
+        "freq": 19,
+        "gain": 0
+      },
+      "low_mid": {
+        "q": 24,
+        "freq": 35,
+        "gain": -40
+      },
+      "hi_mid": {
+        "q": 20,
+        "freq": 78,
+        "gain": 10
+      },
+      "high": {
+        "q": 23,
+        "freq": 98,
+        "gain": 25
+      },
+      "hpf_on": 1,
+      "lpf_on": 0,
+      "attenuator": 0
+    },
+    "comp": {
+      "on": 1,
+      "position": 1,
+      "threshold": -220,
+      "ratio": 3,
+      "attack": 25,
+      "release": 50,
+      "knee": 3,
+      "gain": 20
+    },
+    "gate": {
+      "on": 0,
+      "threshold": 340,
+      "range": 0,
+      "attack": 1,
+      "hold": 20,
+      "decay": 18
+    }
+  }
+}
