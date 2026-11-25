@@ -422,6 +422,8 @@ func handleIncomingMIDIMessage(msg midi.Message, timestampms int32) {
 			return
 		}
 
+		syncReplyCounter.Add(1)
+
 		// Atualiza o espelho de estado em memória (scenes/MixerState)
 		ApplyParamToState(element, param, channel, value)
 
@@ -447,7 +449,13 @@ func handleIncomingMIDIMessage(msg midi.Message, timestampms int32) {
 		return
 	}
 
-	// 3. Program Change recebido da mesa (indica recall físico de cena na 01V96)
+	// 3. Log de diagnóstico para outros pacotes SysEx recebidos da mesa
+	if len(data) > 0 && data[0] == 0xF0 {
+		log.Printf("MIDI IN -> SysEx não mapeado (%d bytes): % X", len(data), data)
+		return
+	}
+
+	// 4. Program Change recebido da mesa (indica recall físico de cena na 01V96)
 	var ch, prog uint8
 	if msg.GetProgramChange(&ch, &prog) {
 		log.Printf("MIDI IN -> Program Change recebido (Ch: %d, Prog: %d). Cena alterada na mesa física. Disparando sincronização...", ch, prog)
@@ -491,6 +499,7 @@ var (
 	mixerSyncActive    atomic.Bool
 	mixerSyncProgress  atomic.Int32
 	mixerSyncTotalReqs atomic.Int32
+	syncReplyCounter   atomic.Int32
 )
 
 // IsMixerSyncing retorna se uma sincronização com a mesa física está em andamento
@@ -690,19 +699,21 @@ func generateChannelFXTargets(targetKey string) []paramTarget {
 }
 
 // executeSyncQueue executa uma sequência de consultas com pacing e drain window
-func executeSyncQueue(targets []paramTarget, taskName string, paceDelay time.Duration, drainWindow time.Duration) error {
+func executeSyncQueue(targets []paramTarget, taskName string, paceDelay time.Duration, drainWindow time.Duration) (int32, error) {
 	midiLock.Lock()
 	out := midiOut
 	midiLock.Unlock()
 
 	if out == nil {
 		log.Printf("[SYNC] Modo simulação: '%s' já sincronizado em memória.", taskName)
-		return nil
+		return 0, nil
 	}
 
 	if paceDelay < 15*time.Millisecond {
 		paceDelay = 15 * time.Millisecond
 	}
+
+	startReplies := syncReplyCounter.Load()
 
 	for _, t := range targets {
 		reqBytes := Build01V96ParamRequest(t.element, t.param, t.channel)
@@ -717,8 +728,13 @@ func executeSyncQueue(targets []paramTarget, taskName string, paceDelay time.Dur
 	if drainWindow > 0 {
 		time.Sleep(drainWindow)
 	}
-	log.Printf("[SYNC] '%s' finalizado com sucesso (%d itens solicitados).", taskName, len(targets))
-	return nil
+
+	received := syncReplyCounter.Load() - startReplies
+	log.Printf("[SYNC] '%s' finalizado (%d solicitados, %d respostas recebidas da mesa).", taskName, len(targets), received)
+	if received == 0 {
+		log.Printf("[SYNC] AVISO: Nenhuma resposta SysEx recebida da mesa para '%s'. Verifique MIDI IN, canal MIDI (Rx/Tx = 1) e Parameter Change na 01V96.", taskName)
+	}
+	return received, nil
 }
 
 // RequestMainViewSync sincroniza apenas a tela principal (114 itens: canais 1..32 e saídas)
@@ -746,15 +762,23 @@ func RequestMainViewSync(paceDelay time.Duration) error {
 		Hex:     "Sincronizando faders e mutes principais...",
 	})
 
-	_ = executeSyncQueue(targets, "Controles Principais", paceDelay, 350*time.Millisecond)
+	midiLock.Lock()
+	hasOut := midiOut != nil
+	midiLock.Unlock()
+
+	received, _ := executeSyncQueue(targets, "Controles Principais", paceDelay, 350*time.Millisecond)
 
 	FlushStateToDiskIfDirty()
 
 	stopped := false
+	statusMsg := "Mixagem principal sincronizada!"
+	if hasOut && received == 0 {
+		statusMsg = "Sem resposta da mesa física (verifique MIDI IN / Rx-Tx Ch 1)"
+	}
 	broadcastWS(WSMessage{
 		Type:    "sync_status",
 		Running: &stopped,
-		Hex:     "Mixagem principal sincronizada!",
+		Hex:     statusMsg,
 	})
 
 	broadcastWS(WSMessage{
@@ -772,7 +796,7 @@ func RequestAuxSendsSync(auxIdx int, paceDelay time.Duration) error {
 	}
 
 	log.Printf("[SYNC-AUX] Sincronizando envios de canais para AUX %d (%d itens)...", auxIdx+1, len(targets))
-	err := executeSyncQueue(targets, fmt.Sprintf("Sends AUX %d", auxIdx+1), paceDelay, 250*time.Millisecond)
+	_, err := executeSyncQueue(targets, fmt.Sprintf("Sends AUX %d", auxIdx+1), paceDelay, 250*time.Millisecond)
 	FlushStateToDiskIfDirty()
 	return err
 }
@@ -785,7 +809,7 @@ func RequestChannelFXSync(targetKey string, paceDelay time.Duration) error {
 	}
 
 	log.Printf("[SYNC-FX] Sincronizando Rack de Efeitos para '%s' (%d itens)...", targetKey, len(targets))
-	err := executeSyncQueue(targets, fmt.Sprintf("Rack Efeitos %s", targetKey), paceDelay, 150*time.Millisecond)
+	_, err := executeSyncQueue(targets, fmt.Sprintf("Rack Efeitos %s", targetKey), paceDelay, 150*time.Millisecond)
 	FlushStateToDiskIfDirty()
 	return err
 }
@@ -819,15 +843,22 @@ func setGRSubscription(client *wsClient, target string) {
 
 	target = strings.TrimSpace(target)
 	grSubLock.Lock()
-	defer grSubLock.Unlock()
-
 	if target == "" {
 		delete(grSubscribers, client)
 	} else {
 		grSubscribers[client] = target
 	}
+	shouldSendStop := reconcileGRPollingLocked()
+	grSubLock.Unlock()
 
-	reconcileGRPollingLocked()
+	if shouldSendStop {
+		midiLock.Lock()
+		if midiOut != nil {
+			_ = sendMIDISysExLocked(Build01V96MeterStop())
+		}
+		midiLock.Unlock()
+	}
+
 	if target != "" {
 		select {
 		case grPollRefreshChan <- struct{}{}:
@@ -836,27 +867,21 @@ func setGRSubscription(client *wsClient, target string) {
 	}
 }
 
-func reconcileGRPollingLocked() {
+func reconcileGRPollingLocked() (shouldSendStop bool) {
 	if len(grSubscribers) > 0 && !grPollRunning {
 		grPollRunning = true
 		grPollStopChan = make(chan struct{})
 		go runGRPoller(grPollStopChan)
-		return
+		return false
 	}
 
 	if len(grSubscribers) == 0 && grPollRunning {
 		close(grPollStopChan)
 		grPollStopChan = nil
 		grPollRunning = false
-
-		// Solicita à mesa física a parada imediata do stream Remote Meter (UL = 0x7F)
-		midiLock.Lock()
-		hasOut := midiOut != nil
-		midiLock.Unlock()
-		if hasOut {
-			_ = sendMIDISysExLocked(Build01V96MeterStop())
-		}
+		return true
 	}
+	return false
 }
 
 func getUniqueGRTargets() []string {
@@ -907,9 +932,9 @@ func sendGRToSubscribers(target string, grDb float64, raw int) {
 // sendGRMeterRequestsForTargets envia pedidos SysEx 0x21 apenas para os canais atualmente abertos em tela.
 func sendGRMeterRequestsForTargets(targets []string) {
 	midiLock.Lock()
-	hasOut := midiOut != nil
-	midiLock.Unlock()
-	if !hasOut {
+	defer midiLock.Unlock()
+
+	if midiOut == nil {
 		return
 	}
 

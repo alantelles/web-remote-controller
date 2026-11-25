@@ -1,13 +1,14 @@
 {
   "version": 1,
-  "id": "teste",
-  "name": "teste",
+  "id": "corrigida",
+  "name": "corrigida",
   "description": "",
-  "created_at": "2026-11-24T20:25:22.104723755-03:00",
-  "updated_at": "2026-11-24T20:25:22.104723755-03:00",
+  "created_at": "2026-11-25T10:44:58.756729969-03:00",
+  "updated_at": "2026-11-25T10:53:03.07883382-03:00",
   "author": "Alan",
   "state": {
     "stereo_master": {
+      "name": "MASTER",
       "fader": 676,
       "on": 1,
       "eq": {
@@ -50,7 +51,7 @@
     "aux_masters": [
       {
         "aux": 1,
-        "name": "AUX 1",
+        "name": "Bateria",
         "fader": 612,
         "on": 1,
         "eq": {
@@ -92,7 +93,7 @@
       },
       {
         "aux": 2,
-        "name": "AUX 2",
+        "name": "BANDA",
         "fader": 618,
         "on": 1,
         "eq": {
@@ -134,7 +135,7 @@
       },
       {
         "aux": 3,
-        "name": "AUX 3",
+        "name": "PULPITO",
         "fader": 683,
         "on": 1,
         "eq": {
@@ -390,9 +391,9 @@
         "channel": 1,
         "name": "Alan",
         "long_name": "Alan Telles",
-        "fader": 771,
+        "fader": 420,
         "on": 1,
-        "pan": 63,
+        "pan": 17,
         "aux_sends": [
           {
             "aux": 1,
@@ -472,7 +473,7 @@
         "comp": {
           "on": 1,
           "position": 1,
-          "threshold": -200,
+          "threshold": -167,
           "ratio": 7,
           "attack": 20,
           "release": 41,
@@ -484,9 +485,9 @@
         "channel": 2,
         "name": "OUTR",
         "long_name": "Outro",
-        "fader": 807,
+        "fader": 260,
         "on": 1,
-        "pan": 63,
+        "pan": 1,
         "aux_sends": [
           {
             "aux": 1,
@@ -566,20 +567,20 @@
         "comp": {
           "on": 1,
           "position": 0,
-          "threshold": -198,
-          "ratio": 3,
+          "threshold": -177,
+          "ratio": 7,
           "attack": 1,
           "release": 0,
-          "knee": 5,
+          "knee": 3,
           "gain": 0
         }
       },
       {
         "channel": 3,
         "name": "CH 03",
-        "fader": 548,
+        "fader": 308,
         "on": 1,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -670,9 +671,9 @@
       {
         "channel": 4,
         "name": "CH 04",
-        "fader": 665,
+        "fader": 767,
         "on": 1,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -733,7 +734,7 @@
           "low_mid": {
             "q": 15,
             "freq": 42,
-            "gain": 68
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
@@ -763,9 +764,9 @@
       {
         "channel": 5,
         "name": "CH 05",
-        "fader": 446,
+        "fader": 323,
         "on": 1,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -856,9 +857,9 @@
       {
         "channel": 6,
         "name": "CH 06",
-        "fader": 823,
+        "fader": 607,
         "on": 1,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -951,7 +952,7 @@
         "name": "CH 07",
         "fader": 823,
         "on": 1,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -1044,7 +1045,7 @@
         "name": "CH 08",
         "fader": 823,
         "on": 1,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -1137,7 +1138,7 @@
         "name": "CH 09",
         "fader": 823,
         "on": 1,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -1230,7 +1231,7 @@
         "name": "CH 10",
         "fader": 465,
         "on": 1,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -1286,22 +1287,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -1323,7 +1324,7 @@
         "name": "CH 11",
         "fader": 481,
         "on": 1,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -1379,22 +1380,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -1416,7 +1417,7 @@
         "name": "CH 12",
         "fader": 420,
         "on": 1,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -1472,22 +1473,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -1509,7 +1510,7 @@
         "name": "CH 13",
         "fader": 465,
         "on": 1,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -1565,22 +1566,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -1602,7 +1603,7 @@
         "name": "CH 14",
         "fader": 395,
         "on": 1,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -1658,22 +1659,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -1695,7 +1696,7 @@
         "name": "CH 15",
         "fader": 458,
         "on": 1,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -1751,22 +1752,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -1788,7 +1789,7 @@
         "name": "CH 16",
         "fader": 431,
         "on": 1,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -1844,22 +1845,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -1881,7 +1882,7 @@
         "name": "CH 17",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -1937,22 +1938,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -1974,7 +1975,7 @@
         "name": "CH 18",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -2030,22 +2031,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -2067,7 +2068,7 @@
         "name": "CH 19",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -2123,22 +2124,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -2160,7 +2161,7 @@
         "name": "CH 20",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -2216,22 +2217,22 @@
           "low": {
             "q": 23,
             "freq": 29,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -2253,7 +2254,7 @@
         "name": "CH 21",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -2309,22 +2310,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -2346,7 +2347,7 @@
         "name": "CH 22",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -2402,22 +2403,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -2439,7 +2440,7 @@
         "name": "CH 23",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -2495,22 +2496,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -2532,7 +2533,7 @@
         "name": "CH 24",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -2588,22 +2589,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -2625,7 +2626,7 @@
         "name": "CH 25",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -2681,22 +2682,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -2718,7 +2719,7 @@
         "name": "CH 26",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -2774,22 +2775,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -2811,7 +2812,7 @@
         "name": "CH 27",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -2867,22 +2868,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -2904,7 +2905,7 @@
         "name": "CH 28",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -2960,22 +2961,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -2997,7 +2998,7 @@
         "name": "CH 29",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -3053,22 +3054,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -3090,7 +3091,7 @@
         "name": "CH 30",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -3146,22 +3147,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -3183,7 +3184,7 @@
         "name": "CH 31",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -3239,22 +3240,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,
@@ -3276,7 +3277,7 @@
         "name": "CH 32",
         "fader": 823,
         "on": 0,
-        "pan": 63,
+        "pan": 0,
         "aux_sends": [
           {
             "aux": 1,
@@ -3332,22 +3333,22 @@
           "low": {
             "q": 23,
             "freq": 27,
-            "gain": 180
+            "gain": 0
           },
           "low_mid": {
             "q": 20,
             "freq": 51,
-            "gain": 180
+            "gain": 0
           },
           "hi_mid": {
             "q": 20,
             "freq": 79,
-            "gain": 180
+            "gain": 0
           },
           "high": {
             "q": 23,
             "freq": 107,
-            "gain": 180
+            "gain": 0
           },
           "hpf_on": 0,
           "lpf_on": 0,

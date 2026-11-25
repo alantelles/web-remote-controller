@@ -4531,6 +4531,12 @@
           </div>
           <span class="fx-header-title">Processamento de Canal (Rack de Efeitos)</span>
         </div>
+        <div id="fxPanControlWrap" style="display: flex; align-items: center; gap: 8px; background: rgba(15,23,42,0.75); padding: 4px 10px; border-radius: 6px; border: 1px solid #334155; margin-left: auto; margin-right: 12px;">
+          <span style="font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 0.5px;">PAN:</span>
+          <input type="range" class="eq-range-input" id="rng_fxPan" min="-63" max="63" value="0" step="1" style="width: 110px; height: 5px;">
+          <span class="eq-ctrl-val" id="lbl_fxPan" style="font-size: 11px; min-width: 34px; text-align: center; color: #38bdf8; font-weight: 800;">C</span>
+          <button type="button" id="btnFxPanCenter" style="background: transparent; border: 1px solid #475569; color: #94a3b8; font-size: 10px; padding: 2px 6px; border-radius: 4px; cursor: pointer;" title="Centralizar Pan (C)">C</button>
+        </div>
         <button type="button" class="btn-fx-close" id="btnFxClose" title="Fechar (Esc)">&times;</button>
       </div>
 
@@ -5563,6 +5569,16 @@
               mixData.MASTER.on[ch] = data.value;
               if (currentMixTarget === 'MASTER') {
                 updateChannelOnUI(ch, data.value === 1);
+              }
+            }
+          }
+          // Element 0x1B = Input Pan (-63 a +63)
+          else if (data.element === 0x1B && data.param === 0x00) {
+            const ch = data.channel;
+            if (ch !== undefined && ch >= 0 && ch < TOTAL_CHANNELS && typeof panState !== 'undefined') {
+              panState[ch] = data.value;
+              if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === ch && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
+                syncFxPanUI(ch);
               }
             }
           }
@@ -7389,7 +7405,8 @@
       });
       updateOutputSelBadges();
 
-      // Carrega estado do EQ, COMP, GATE e AUX do canal/saída
+      // Carrega estado do EQ, COMP, GATE, AUX e PAN do canal/saída
+      if (typeof syncFxPanUI === 'function') syncFxPanUI(target);
       syncEqModalFromState(target);
       syncCompModalFromState(target);
       if (typeof syncGateModalFromState === 'function') syncGateModalFromState(target);
@@ -9304,6 +9321,52 @@
       });
     }
 
+    // ==========================================
+    // CONTROLE DE PANORÂMICA (PAN 0x1B: -63..+63)
+    // ==========================================
+    const panState = new Array(TOTAL_CHANNELS).fill(0);
+    const fxPanControlWrap = document.getElementById('fxPanControlWrap');
+    const rngFxPan = document.getElementById('rng_fxPan');
+    const lblFxPan = document.getElementById('lbl_fxPan');
+    const btnFxPanCenter = document.getElementById('btnFxPanCenter');
+
+    function formatPanDisplay(val) {
+      if (val === 0) return 'C';
+      return val < 0 ? `L${Math.abs(val)}` : `R${val}`;
+    }
+
+    function syncFxPanUI(target) {
+      if (!fxPanControlWrap) return;
+      if (typeof target !== 'number') {
+        fxPanControlWrap.style.display = 'none';
+        return;
+      }
+      fxPanControlWrap.style.display = 'flex';
+      const val = panState[target] !== undefined ? panState[target] : 0;
+      if (rngFxPan) rngFxPan.value = val;
+      if (lblFxPan) lblFxPan.textContent = formatPanDisplay(val);
+    }
+
+    if (rngFxPan) {
+      rngFxPan.addEventListener('input', (e) => {
+        if (typeof currentSelectedCh !== 'number') return;
+        const val = parseInt(e.target.value, 10);
+        panState[currentSelectedCh] = val;
+        if (lblFxPan) lblFxPan.textContent = formatPanDisplay(val);
+        sendCommand(0x1B, 0x00, currentSelectedCh, val);
+      });
+    }
+
+    if (btnFxPanCenter) {
+      btnFxPanCenter.addEventListener('click', () => {
+        if (typeof currentSelectedCh !== 'number') return;
+        panState[currentSelectedCh] = 0;
+        if (rngFxPan) rngFxPan.value = 0;
+        if (lblFxPan) lblFxPan.textContent = 'C';
+        sendCommand(0x1B, 0x00, currentSelectedCh, 0);
+      });
+    }
+
     // Evento de clique no botão SEL dos canais e foco por clique no modo teclado
     mixerRack.addEventListener('click', (e) => {
       if (isChannelKeyboardNavActive) {
@@ -9393,10 +9456,28 @@
           mixData.MASTER.masterOn = st.stereo_master.on;
           applyOutputNameUI('MASTER', st.stereo_master.name || 'STEREO MASTER');
           if (mixData.MASTER.eq && st.stereo_master.eq) {
-            mixData.MASTER.eq.on = st.stereo_master.eq.on;
+            const meq = mixData.MASTER.eq;
+            const seq = st.stereo_master.eq;
+            meq.on = seq.on;
+            meq.attenuator = seq.attenuator !== undefined ? seq.attenuator : 0;
+            if (seq.low) { meq.low.gain = seq.low.gain + 180; meq.low.freq = seq.low.freq; meq.low.q = Math.max(0, Math.min(40, 40 - seq.low.q)); }
+            if (seq.low_mid) { meq.lomid.gain = seq.low_mid.gain + 180; meq.lomid.freq = seq.low_mid.freq; meq.lomid.q = Math.max(0, Math.min(40, 40 - seq.low_mid.q)); }
+            if (seq.hi_mid) { meq.himid.gain = seq.hi_mid.gain + 180; meq.himid.freq = seq.hi_mid.freq; meq.himid.q = Math.max(0, Math.min(40, 40 - seq.hi_mid.q)); }
+            if (seq.high) { meq.high.gain = seq.high.gain + 180; meq.high.freq = seq.high.freq; meq.high.q = Math.max(0, Math.min(40, 40 - seq.high.q)); }
+            meq.hpf = seq.hpf_on;
+            meq.lpf = seq.lpf_on;
           }
           if (mixData.MASTER.comp && st.stereo_master.comp) {
-            mixData.MASTER.comp.on = st.stereo_master.comp.on;
+            const mcomp = mixData.MASTER.comp;
+            const scomp = st.stereo_master.comp;
+            mcomp.on = scomp.on;
+            mcomp.position = scomp.position !== undefined ? scomp.position : 1;
+            mcomp.threshold = scomp.threshold + 540;
+            mcomp.ratio = scomp.ratio;
+            mcomp.attack = scomp.attack;
+            mcomp.release = scomp.release;
+            mcomp.knee = scomp.knee;
+            mcomp.gain = scomp.gain;
           }
         }
 
@@ -9407,6 +9488,17 @@
             if (mixData[auxKey]) {
               mixData[auxKey].masterVolume = aux.fader;
               mixData[auxKey].masterOn = aux.on;
+              if (mixData[auxKey].eq && aux.eq) {
+                const aeq = mixData[auxKey].eq;
+                aeq.on = aux.eq.on;
+                aeq.attenuator = aux.eq.attenuator !== undefined ? aux.eq.attenuator : 0;
+                if (aux.eq.low) { aeq.low.gain = aux.eq.low.gain + 180; aeq.low.freq = aux.eq.low.freq; aeq.low.q = Math.max(0, Math.min(40, 40 - aux.eq.low.q)); }
+                if (aux.eq.low_mid) { aeq.lomid.gain = aux.eq.low_mid.gain + 180; aeq.lomid.freq = aux.eq.low_mid.freq; aeq.lomid.q = Math.max(0, Math.min(40, 40 - aux.eq.low_mid.q)); }
+                if (aux.eq.hi_mid) { aeq.himid.gain = aux.eq.hi_mid.gain + 180; aeq.himid.freq = aux.eq.hi_mid.freq; aeq.himid.q = Math.max(0, Math.min(40, 40 - aux.eq.hi_mid.q)); }
+                if (aux.eq.high) { aeq.high.gain = aux.eq.high.gain + 180; aeq.high.freq = aux.eq.high.freq; aeq.high.q = Math.max(0, Math.min(40, 40 - aux.eq.high.q)); }
+                aeq.hpf = aux.eq.hpf_on;
+                aeq.lpf = aux.eq.lpf_on;
+              }
             }
             applyOutputNameUI(auxKey, aux.name || `AUX ${i + 1}`);
           });
@@ -9427,9 +9519,12 @@
                 }
               }
 
-              // Fader e ON no Stereo Master
+              // Fader, Pan e ON no Stereo Master
               mixData.MASTER.volumes[i] = inp.fader;
               mixData.MASTER.on[i] = inp.on;
+              if (typeof panState !== 'undefined') {
+                panState[i] = (inp.pan !== undefined) ? inp.pan : 0;
+              }
 
               // Envios Auxiliares (Sends on Fader)
               if (Array.isArray(inp.aux_sends)) {
