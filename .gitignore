@@ -41,6 +41,10 @@ sessions.json*
 data/last_state.json*
 data/mute_groups.json
 data/personal_mixes.json
+data/channel_presets/*
+!data/channel_presets/.gitkeep
+data/scenes/*
+!data/scenes/.gitkeep
 
 # Arquivos gerados por sistemas operacionais
 .DS_Store
