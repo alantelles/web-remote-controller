@@ -291,10 +291,24 @@ Cantor,cantor1,senha1,PERFORMER,
 		t.Errorf("No pólo EU esperava volumes [CH1=800, CH2=0, CH3=0], obteve %v", volsMe)
 	}
 
-	// Verifica que os BaseLevels configurados pelo Admin NÃO foram destruídos pelo movimento do joystick
+	// Simula eco MIDI IN retornando valor 0 para CH 2 e CH 3 após o movimento do joystick:
+	// NÃO deve sobrescrever BaseLevels[1] e BaseLevels[2] para 0!
+	ApplyParamToState(0x23, 2, 1, 0)
+	ApplyParamToState(0x23, 2, 2, 0)
+
+	// Verifica que os BaseLevels configurados pelo Admin NÃO foram destruídos pelo movimento do joystick nem pelo eco
 	reloaded, _ := GetPersonalMix(mix.ID)
 	if reloaded.BaseLevels[0] != 800 || reloaded.BaseLevels[1] != 600 || reloaded.BaseLevels[2] != 400 {
-		t.Errorf("BaseLevels não deveriam ser sobrescritos pelo performer! Obteve: %v", reloaded.BaseLevels[:3])
+		t.Errorf("BaseLevels não deveriam ser sobrescritos pelo performer ou eco! Obteve: %v", reloaded.BaseLevels[:3])
+	}
+
+	// Ao voltar o joystick para o centro, CH 2 e CH 3 devem sair do 0 normalmente
+	_, volsBack, _, err := ApplyPersonalMixJoystick(mix.ID, 0, 0, true)
+	if err != nil {
+		t.Fatalf("Erro ao voltar joystick para o centro: %v", err)
+	}
+	if volsBack[2] == 0 || volsBack[3] == 0 {
+		t.Errorf("Esperava CH 2 e CH 3 saindo de 0 ao voltar ao centro, obteve %v", volsBack)
 	}
 
 	// 5. Se o Admin alterar o fader de envio do CH 1 no AUX 1 para 900 no console principal, o BaseLevel atualiza automaticamente

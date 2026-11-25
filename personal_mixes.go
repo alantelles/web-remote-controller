@@ -218,10 +218,49 @@ func captureBaseLevelsFromCurrentAux(outputAux int) [32]int {
 	return base
 }
 
+type performerEmitKey struct {
+	auxIdx int
+	chIdx  int
+}
+
+type performerEmitEntry struct {
+	value int
+	at    time.Time
+}
+
+var (
+	performerEmitMu      sync.Mutex
+	performerEmitHistory = make(map[performerEmitKey]performerEmitEntry)
+)
+
+func recordPerformerEmit(auxIdx, chIdx, value int) {
+	performerEmitMu.Lock()
+	performerEmitHistory[performerEmitKey{auxIdx: auxIdx, chIdx: chIdx}] = performerEmitEntry{
+		value: value,
+		at:    time.Now(),
+	}
+	performerEmitMu.Unlock()
+}
+
+func isRecentPerformerEmit(auxIdx, chIdx, value int) bool {
+	performerEmitMu.Lock()
+	entry, ok := performerEmitHistory[performerEmitKey{auxIdx: auxIdx, chIdx: chIdx}]
+	performerEmitMu.Unlock()
+	if !ok {
+		return false
+	}
+	return entry.value == value && time.Since(entry.at) < 2500*time.Millisecond
+}
+
 // UpdateBaseLevelFromConsole atualiza o volume base de referência quando o Admin/Operador
 // move diretamente um fader de envio auxiliar na superfície principal do console.
 func UpdateBaseLevelFromConsole(auxIdx int, chIdx int, level int) {
 	if auxIdx < 0 || auxIdx >= 8 || chIdx < 0 || chIdx >= 32 {
+		return
+	}
+	// Não sobrescreve a referência base durante sincronizações MIDI (Puxar da Mesa / sync_aux)
+	// nem quando o evento é um eco/retorno do próprio joystick da mix pessoal.
+	if IsMixerSyncing() || isRecentPerformerEmit(auxIdx, chIdx, level) {
 		return
 	}
 	targetAux := auxIdx + 1
@@ -610,6 +649,8 @@ func emitPerformerAuxSend(auxIdx int, chIdx int, value int) {
 	stateDirty = true
 	mixerStateLock.Unlock()
 
+	recordPerformerEmit(auxIdx, chIdx, value)
+
 	elem := byte(0x23)
 	param := byte(auxIdx*3 + 2)
 	ch := byte(chIdx)
@@ -618,6 +659,7 @@ func emitPerformerAuxSend(auxIdx int, chIdx int, value int) {
 	hexStr := fmt.Sprintf("% X", sysex)
 
 	canMIDI, canWS := throttler.allowOrSchedule(elem, param, ch, value, func(finalVal int) {
+		recordPerformerEmit(auxIdx, chIdx, finalVal)
 		finalSysex := Build01V96SysEx(elem, param, ch, finalVal)
 		finalHex := fmt.Sprintf("% X", finalSysex)
 
