@@ -2530,6 +2530,16 @@
       font-size: 10px;
     }
 
+    .fx-aux-strip .btn-pre-post {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 22px;
+      margin-top: 0;
+      font-size: 10px;
+    }
+
     .fx-aux-strip .fader-section {
       min-height: 210px;
       height: 220px;
@@ -3767,6 +3777,15 @@
               <span>🔇</span>
               <span>Mutar Todos</span>
             </button>
+            <div class="action-menu-divider" id="auxPrePostDivider" style="display: none;"></div>
+            <button class="action-menu-item" id="btnAllPre" type="button" style="display: none;" title="Definir todos os 32 canais como PRE-Fader neste auxiliar">
+              <span>🔶</span>
+              <span>Todos PRE</span>
+            </button>
+            <button class="action-menu-item" id="btnAllPost" type="button" style="display: none;" title="Definir todos os 32 canais como POST-Fader neste auxiliar">
+              <span>🔷</span>
+              <span>Todos POST</span>
+            </button>
           </div>
         </div>
       </div>
@@ -4987,10 +5006,12 @@
         <div class="fx-tab-pane" id="fxTab_aux">
           <div class="fx-aux-panel">
             <div class="fx-aux-top-bar">
-              <span class="fx-aux-hint">Envios do canal selecionado para os 8 auxiliares (Nível e Mute)</span>
+              <span class="fx-aux-hint">Envios do canal selecionado para os 8 auxiliares (Nível, Pré/Pós Fader e Mute)</span>
               <div class="fx-aux-global-actions">
                 <button type="button" class="btn-eq-flat" id="btnFxAuxAllOn" title="Ativar envio em todos os 8 auxiliares">Todos ON</button>
                 <button type="button" class="btn-eq-flat" id="btnFxAuxAllMute" title="Mutar envio em todos os 8 auxiliares">Todos MUTE</button>
+                <button type="button" class="btn-eq-flat" id="btnFxAuxAllPre" title="Definir todos os 8 auxiliares como PRE-Fader">Todos PRE</button>
+                <button type="button" class="btn-eq-flat" id="btnFxAuxAllPost" title="Definir todos os 8 auxiliares como POST-Fader">Todos POST</button>
               </div>
             </div>
             <div class="fx-aux-grid" id="fxAuxGrid"></div>
@@ -5607,6 +5628,9 @@
                   if (currentMixTarget === targetKey) {
                     updatePrePostUI(ch, data.value === 1);
                   }
+                  if (typeof currentSelectedCh !== 'undefined' && currentSelectedCh === ch && fxModalOverlay && fxModalOverlay.classList.contains('open')) {
+                    if (typeof updateFxAuxPrePostUI === 'function') updateFxAuxPrePostUI(auxIdx, data.value === 1);
+                  }
                 } else if (subParam === 2) {
                   // Send Level (Fader)
                   const val = (data.value !== undefined && data.value !== null && !isNaN(data.value)) ? data.value : 0;
@@ -6069,6 +6093,14 @@
       if (mixActiveDot) {
         mixActiveDot.classList.toggle('is-aux', !target.isMaster);
       }
+
+      const auxPrePostDivider = document.getElementById('auxPrePostDivider');
+      const btnAllPre = document.getElementById('btnAllPre');
+      const btnAllPost = document.getElementById('btnAllPost');
+      const showAuxPrePost = !target.isMaster;
+      if (auxPrePostDivider) auxPrePostDivider.style.display = showAuxPrePost ? '' : 'none';
+      if (btnAllPre) btnAllPre.style.display = showAuxPrePost ? '' : 'none';
+      if (btnAllPost) btnAllPost.style.display = showAuxPrePost ? '' : 'none';
 
       // 3. Atualiza todos os faders, botões ON e etiquetas dos strips
       for (let i = 0; i < TOTAL_CHANNELS; i++) {
@@ -7176,6 +7208,26 @@
         setChannelOn(i, 0, true);
       }
     });
+
+    function setAllChannelsPrePost(isPre) {
+      if (currentMixTarget === 'MASTER') return;
+      const target = MIX_TARGETS[currentMixTarget];
+      if (!target || target.preParam === undefined) return;
+      if (!mixData[currentMixTarget].pre) {
+        mixData[currentMixTarget].pre = new Array(TOTAL_CHANNELS).fill(0);
+      }
+      const val = isPre ? 1 : 0;
+      for (let i = 0; i < TOTAL_CHANNELS; i++) {
+        mixData[currentMixTarget].pre[i] = val;
+        updatePrePostUI(i, isPre);
+        sendCommand(0x23, target.preParam, i, val);
+      }
+      saveMixDataDebounced();
+      showToast(`${target.name}: todos os canais em ${isPre ? 'PRE-Fader' : 'POST-Fader'}`);
+    }
+
+    document.getElementById('btnAllPre').addEventListener('click', () => setAllChannelsPrePost(true));
+    document.getElementById('btnAllPost').addEventListener('click', () => setAllChannelsPrePost(false));
 
     // ==========================================
     // RACK DE EFEITOS & EQUALIZADOR PARAMÉTRICO
@@ -8422,6 +8474,18 @@
       }
     }
 
+    function updateFxAuxPrePostUI(auxIdx, isPre) {
+      const btn = document.getElementById(`fxAuxPrePost_${auxIdx}`);
+      if (!btn) return;
+      if (isPre) {
+        btn.className = 'btn-pre-post is-pre';
+        btn.textContent = 'PRE';
+      } else {
+        btn.className = 'btn-pre-post';
+        btn.textContent = 'POST';
+      }
+    }
+
     function setFxAuxVolume(chIndex, auxIdx, value, sendMidi = true) {
       if (typeof chIndex !== 'number') return;
       value = Math.max(0, Math.min(MAX_VALUE, Math.round(value)));
@@ -8455,6 +8519,23 @@
       }
     }
 
+    function setFxAuxPrePost(chIndex, auxIdx, isPre, sendMidi = true) {
+      if (typeof chIndex !== 'number') return;
+      const auxKey = 'AUX' + (auxIdx + 1);
+      if (!mixData[auxKey]) return;
+      if (!mixData[auxKey].pre) mixData[auxKey].pre = new Array(TOTAL_CHANNELS).fill(0);
+      const val = isPre ? 1 : 0;
+      mixData[auxKey].pre[chIndex] = val;
+      updateFxAuxPrePostUI(auxIdx, isPre);
+      if (currentMixTarget === auxKey) {
+        updatePrePostUI(chIndex, isPre);
+      }
+      saveMixDataDebounced();
+      if (sendMidi) {
+        sendCommand(0x23, auxIdx * 3 + 1, chIndex, val);
+      }
+    }
+
     function syncAuxModalFromState(target) {
       if (typeof target !== 'number') return;
       for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
@@ -8462,8 +8543,10 @@
         const auxMix = mixData[auxKey];
         const vol = auxMix ? (auxMix.volumes[target] || 0) : 0;
         const isOn = auxMix ? (auxMix.on[target] === 1) : false;
+        const isPre = (auxMix && auxMix.pre) ? (auxMix.pre[target] === 1) : false;
         updateFxAuxFaderUI(auxIdx, vol);
         updateFxAuxOnUI(auxIdx, isOn);
+        updateFxAuxPrePostUI(auxIdx, isPre);
       }
     }
 
@@ -8481,6 +8564,7 @@
         strip.innerHTML = `
           <div class="fx-aux-strip-title">AUX ${auxIdx + 1}</div>
           <button type="button" class="btn-yamaha-on is-on" id="fxAuxBtnOn_${auxIdx}" title="Alternar Envio AUX ${auxIdx + 1} ON / MUTE">AUX ON</button>
+          <button type="button" class="btn-pre-post" id="fxAuxPrePost_${auxIdx}" title="Alternar Pré/Pós Fader (Post / Pre)">POST</button>
           <div class="fader-section">
             <div class="fader-track-container" id="fxAuxTrack_${auxIdx}">
               <div class="scale-ticks">${auxTicksHtml}</div>
@@ -8503,6 +8587,7 @@
         fxAuxGridEl.appendChild(strip);
 
         const btnOn = strip.querySelector(`#fxAuxBtnOn_${auxIdx}`);
+        const btnPrePost = strip.querySelector(`#fxAuxPrePost_${auxIdx}`);
         const track = strip.querySelector(`#fxAuxTrack_${auxIdx}`);
         const cap = strip.querySelector(`#fxAuxCap_${auxIdx}`);
         const btnZero = strip.querySelector(`#fxAuxZero_${auxIdx}`);
@@ -8513,6 +8598,13 @@
           const auxKey = 'AUX' + (auxIdx + 1);
           const cur = mixData[auxKey] ? mixData[auxKey].on[currentSelectedCh] : 0;
           setFxAuxOn(currentSelectedCh, auxIdx, cur !== 1, true);
+        });
+
+        btnPrePost.addEventListener('click', () => {
+          if (typeof currentSelectedCh !== 'number') return;
+          const auxKey = 'AUX' + (auxIdx + 1);
+          const cur = (mixData[auxKey] && mixData[auxKey].pre) ? (mixData[auxKey].pre[currentSelectedCh] || 0) : 0;
+          setFxAuxPrePost(currentSelectedCh, auxIdx, cur !== 1, true);
         });
 
         btnZero.addEventListener('click', () => {
@@ -8614,6 +8706,25 @@
         if (typeof currentSelectedCh !== 'number') return;
         for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
           setFxAuxOn(currentSelectedCh, auxIdx, false, true);
+        }
+      });
+    }
+
+    const btnFxAuxAllPre = document.getElementById('btnFxAuxAllPre');
+    const btnFxAuxAllPost = document.getElementById('btnFxAuxAllPost');
+    if (btnFxAuxAllPre) {
+      btnFxAuxAllPre.addEventListener('click', () => {
+        if (typeof currentSelectedCh !== 'number') return;
+        for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
+          setFxAuxPrePost(currentSelectedCh, auxIdx, true, true);
+        }
+      });
+    }
+    if (btnFxAuxAllPost) {
+      btnFxAuxAllPost.addEventListener('click', () => {
+        if (typeof currentSelectedCh !== 'number') return;
+        for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
+          setFxAuxPrePost(currentSelectedCh, auxIdx, false, true);
         }
       });
     }

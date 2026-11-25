@@ -515,6 +515,20 @@
       gap: 6px;
     }
 
+    .nav-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .mobile-aux-prepost-row {
+      display: none;
+    }
+
+    body.mix-aux:not(.role-basic) .mobile-aux-prepost-row {
+      display: grid;
+    }
+
     .btn-nav {
       height: 34px;
       background: #161922;
@@ -1330,6 +1344,14 @@
       min-width: 52px;
       font-size: 11px;
       padding: 0 8px;
+    }
+
+    .mobile-aux-card .btn-ch-pre-post {
+      display: flex;
+      height: 26px;
+      min-width: 44px;
+      font-size: 10px;
+      padding: 0 6px;
     }
 
     .mobile-aux-card .card-row-slider {
@@ -2226,6 +2248,12 @@
         <button class="btn-nav btn-action-unmute" id="btnUnmuteAll" type="button">🔔 ON</button>
         <button class="btn-nav btn-action-mute" id="btnMuteAll" type="button">🔇 MUTE</button>
       </div>
+
+      <!-- Linha 5: PRE / POST Global (visível apenas nos modos AUX) -->
+      <div class="nav-grid-2 mobile-aux-prepost-row">
+        <button class="btn-nav" id="btnMobileAllPre" type="button">🔶 Todos PRE</button>
+        <button class="btn-nav" id="btnMobileAllPost" type="button">🔷 Todos POST</button>
+      </div>
     </div>
   </section>
 
@@ -2732,9 +2760,11 @@
       <div class="fx-tab-pane" id="pane_aux">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px;">
           <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">Envios Aux 1 a 8</span>
-          <div style="display: flex; gap: 6px;">
+          <div style="display: flex; gap: 4px; flex-wrap: wrap;">
             <button class="btn-quick-val" id="btnMobileAuxAllOn" type="button" style="padding: 4px 8px; font-size: 10px;">Todos ON</button>
             <button class="btn-quick-val" id="btnMobileAuxAllMute" type="button" style="padding: 4px 8px; font-size: 10px;">Todos MUTE</button>
+            <button class="btn-quick-val" id="btnMobileAuxAllPre" type="button" style="padding: 4px 8px; font-size: 10px;">Todos PRE</button>
+            <button class="btn-quick-val" id="btnMobileAuxAllPost" type="button" style="padding: 4px 8px; font-size: 10px;">Todos POST</button>
           </div>
         </div>
         <div class="mobile-aux-list" id="mobileAuxList"></div>
@@ -3792,6 +3822,9 @@
             if (!state.pre[auxKey]) state.pre[auxKey] = new Array(TOTAL_CHANNELS).fill(0);
             state.pre[auxKey][ch] = val;
             if (currentMix === auxKey) updatePrePostButtonUI(ch, val);
+            if (isEqModalOpen && currentEqTarget === ch) {
+              updateMobileAuxPrePostUI(auxIdx, val);
+            }
           } else if (subParam === 2) {
             // Send Level (Fader)
             state.faders[auxKey][ch] = val;
@@ -4866,6 +4899,22 @@
         });
         showToast('Canais visíveis mutados');
       });
+
+      function setMobileVisiblePrePost(isPre) {
+        const target = MIX_TARGETS[currentMix];
+        if (!target || target.isMaster || target.preParam === undefined) return;
+        if (!state.pre[currentMix]) state.pre[currentMix] = new Array(TOTAL_CHANNELS).fill(0);
+        const val = isPre ? 1 : 0;
+        state.visibleChannels.forEach(ch => {
+          state.pre[currentMix][ch] = val;
+          updatePrePostButtonUI(ch, val);
+          sendCommand(target.faderElement, target.preParam, ch, val, false);
+        });
+        showToast(`${currentMix}: canais visíveis em ${isPre ? 'PRE' : 'POST'}`);
+      }
+
+      document.getElementById('btnMobileAllPre').addEventListener('click', () => setMobileVisiblePrePost(true));
+      document.getElementById('btnMobileAllPost').addEventListener('click', () => setMobileVisiblePrePost(false));
     }
 
     // ==========================================
@@ -6319,6 +6368,18 @@
       }
     }
 
+    function updateMobileAuxPrePostUI(auxIdx, val) {
+      const btn = document.getElementById(`mobileAuxPrePost_${auxIdx}`);
+      if (!btn) return;
+      if (val === 1) {
+        btn.classList.add('is-pre');
+        btn.innerText = 'PRE';
+      } else {
+        btn.classList.remove('is-pre');
+        btn.innerText = 'POST';
+      }
+    }
+
     function setMobileAuxVolume(ch, auxIdx, val, throttle = true) {
       if (typeof ch !== 'number') return;
       val = Math.max(0, Math.min(1023, Math.round(val)));
@@ -6347,14 +6408,29 @@
       sendCommand(0x23, auxIdx * 3, ch, nextVal, false);
     }
 
+    function setMobileAuxPrePost(ch, auxIdx, isPre) {
+      if (typeof ch !== 'number') return;
+      const auxKey = `AUX${auxIdx + 1}`;
+      if (!state.pre[auxKey]) state.pre[auxKey] = new Array(TOTAL_CHANNELS).fill(0);
+      const nextVal = isPre ? 1 : 0;
+      state.pre[auxKey][ch] = nextVal;
+      updateMobileAuxPrePostUI(auxIdx, nextVal);
+      if (currentMix === auxKey) {
+        updatePrePostButtonUI(ch, nextVal);
+      }
+      sendCommand(0x23, auxIdx * 3 + 1, ch, nextVal, false);
+    }
+
     function syncAuxModalUI() {
       if (typeof currentEqTarget !== 'number') return;
       for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
         const auxKey = `AUX${auxIdx + 1}`;
         const vol = state.faders[auxKey] ? (state.faders[auxKey][currentEqTarget] || 0) : 0;
         const onVal = state.mutes[auxKey] ? (state.mutes[auxKey][currentEqTarget] || 0) : 0;
+        const preVal = (state.pre && state.pre[auxKey]) ? (state.pre[auxKey][currentEqTarget] || 0) : 0;
         updateMobileAuxFaderUI(auxIdx, vol);
         updateMobileAuxMuteUI(auxIdx, onVal);
+        updateMobileAuxPrePostUI(auxIdx, preVal);
       }
       updateMobileAuxStatusDot(currentEqTarget);
     }
@@ -6374,6 +6450,7 @@
             <div class="mobile-aux-right">
               <button class="btn-quick-val" id="mobileAuxZero_${auxIdx}" type="button">0</button>
               <button class="btn-quick-val" id="mobileAuxInf_${auxIdx}" type="button">-∞</button>
+              <button class="btn-ch-pre-post" id="mobileAuxPrePost_${auxIdx}" type="button" title="Alternar Pré/Pós Fader">POST</button>
               <button class="btn-ch-mute is-on" id="mobileAuxMute_${auxIdx}" type="button">ON</button>
             </div>
           </div>
@@ -6384,6 +6461,7 @@
         listEl.appendChild(card);
 
         const slider = card.querySelector(`#mobileAuxSlider_${auxIdx}`);
+        const prePostBtn = card.querySelector(`#mobileAuxPrePost_${auxIdx}`);
         const muteBtn = card.querySelector(`#mobileAuxMute_${auxIdx}`);
         const btnZero = card.querySelector(`#mobileAuxZero_${auxIdx}`);
         const btnInf = card.querySelector(`#mobileAuxInf_${auxIdx}`);
@@ -6393,6 +6471,12 @@
         });
         slider.addEventListener('change', (e) => {
           setMobileAuxVolume(currentEqTarget, auxIdx, parseInt(e.target.value, 10), false);
+        });
+        prePostBtn.addEventListener('click', () => {
+          if (typeof currentEqTarget !== 'number') return;
+          const auxKey = `AUX${auxIdx + 1}`;
+          const cur = (state.pre && state.pre[auxKey]) ? (state.pre[auxKey][currentEqTarget] || 0) : 0;
+          setMobileAuxPrePost(currentEqTarget, auxIdx, cur !== 1);
         });
         muteBtn.addEventListener('click', () => {
           if (typeof currentEqTarget !== 'number') return;
@@ -6423,6 +6507,24 @@
           if (typeof currentEqTarget !== 'number') return;
           for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
             setMobileAuxMute(currentEqTarget, auxIdx, false);
+          }
+        });
+      }
+      const btnAllPre = document.getElementById('btnMobileAuxAllPre');
+      const btnAllPost = document.getElementById('btnMobileAuxAllPost');
+      if (btnAllPre) {
+        btnAllPre.addEventListener('click', () => {
+          if (typeof currentEqTarget !== 'number') return;
+          for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
+            setMobileAuxPrePost(currentEqTarget, auxIdx, true);
+          }
+        });
+      }
+      if (btnAllPost) {
+        btnAllPost.addEventListener('click', () => {
+          if (typeof currentEqTarget !== 'number') return;
+          for (let auxIdx = 0; auxIdx < 8; auxIdx++) {
+            setMobileAuxPrePost(currentEqTarget, auxIdx, false);
           }
         });
       }
