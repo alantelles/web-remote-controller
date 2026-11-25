@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "teste-2",
+  "name": "Teste 2",
+  "description": "",
+  "author": "Alan Telles",
+  "created_at": "2026-11-25T20:44:10.761981015Z",
+  "updated_at": "2026-11-25T20:44:10.761981015Z",
+  "rack": {
+    "eq": {
+      "on": 0,
+      "low": {
+        "q": 0,
+        "freq": 46,
+        "gain": 36
+      },
+      "low_mid": {
+        "q": 15,
+        "freq": 70,
+        "gain": 36
+      },
+      "hi_mid": {
+        "q": 15,
+        "freq": 95,
+        "gain": 36
+      },
+      "high": {
+        "q": 0,
+        "freq": 115,
+        "gain": 36
+      },
+      "hpf_on": 0,
+      "lpf_on": 0,
+      "attenuator": 0
+    },
+    "comp": {
+      "on": 0,
+      "position": 0,
+      "threshold": 30,
+      "ratio": 5,
+      "attack": 20,
+      "release": 40,
+      "knee": 1,
+      "gain": 0
+    },
+    "gate": {
+      "on": 0,
+      "threshold": 0,
+      "range": 0,
+      "attack": 0,
+      "hold": 0,
+      "decay": 0
+    }
+  }
+}

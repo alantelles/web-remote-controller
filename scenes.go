@@ -240,6 +240,7 @@ func NewDefaultMixerState() MixerState {
 }
 
 func sanitizeASCIIName(s string, maxLen int) string {
+	s = strings.TrimSpace(s)
 	var b strings.Builder
 	for i := 0; i < len(s) && b.Len() < maxLen; i++ {
 		c := s[i]
@@ -261,7 +262,15 @@ func SetChannelName(chIdx int, shortName, longName string) (string, string) {
 	longClean := sanitizeASCIIName(longName, 16)
 
 	if shortClean == "" && longClean != "" {
-		shortClean = sanitizeASCIIName(longClean, 4)
+		trimmed := strings.TrimSpace(longClean)
+		if len(trimmed) <= 4 {
+			shortClean = trimmed
+		} else {
+			shortClean = trimmed[:2] + trimmed[len(trimmed)-2:]
+		}
+	}
+	if shortClean != "" && longClean == "" {
+		longClean = shortClean
 	}
 	if shortClean == "" {
 		shortClean = fmt.Sprintf("CH %d", chIdx+1)

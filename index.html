@@ -4632,7 +4632,7 @@
   </div>
 
   <!-- MODAL PARA SALVAR PRESET DE CANAL -->
-  <div id="savePresetModalOverlay" class="modal-overlay" style="z-index: 250;">
+  <div id="savePresetModalOverlay" class="modal-overlay" style="z-index: 2000;">
     <div class="modal-card" style="max-width: 440px;">
       <div class="modal-header">
         <span class="modal-icon">💾</span>
@@ -7779,14 +7779,35 @@
       if (fxChNameEditor) fxChNameEditor.style.display = 'none';
     }
 
+    function isDefaultChannelShortName(chIdx, name) {
+      if (!name) return true;
+      const clean = String(name).trim();
+      return clean === `CH ${chIdx + 1}` || clean === `CH ${String(chIdx + 1).padStart(2, '0')}`;
+    }
+
+    if (fxChShortNameInput) {
+      fxChShortNameInput.addEventListener('input', () => {
+        fxChShortNameInput.dataset.manual = '1';
+      });
+    }
+    if (fxChLongNameInput) {
+      fxChLongNameInput.addEventListener('input', () => {
+        fxChLongNameInput.dataset.manual = '1';
+        if (fxChShortNameInput && fxChShortNameInput.dataset.manual !== '1') {
+          fxChShortNameInput.value = '';
+        }
+      });
+    }
+
     function openFxChNameEditor() {
       if (!fxChNameEditor) return;
       if (currentUserRole !== 'ADMIN' && currentUserRole !== 'OPERATOR') return;
+      fxChShortNameInput.dataset.manual = '';
+      fxChLongNameInput.dataset.manual = '';
       if (typeof currentSelectedCh === 'number') {
         const ch = channelsState[currentSelectedCh] || {};
-        const defaultName = `CH ${currentSelectedCh + 1}`;
         fxChShortNameInput.style.display = '';
-        fxChShortNameInput.value = (ch.name && ch.name !== defaultName) ? ch.name : '';
+        fxChShortNameInput.value = !isDefaultChannelShortName(currentSelectedCh, ch.name) ? ch.name : '';
         fxChLongNameInput.placeholder = 'Nome longo (16)';
         fxChLongNameInput.value = ch.longName || '';
       } else if (typeof currentSelectedCh === 'string') {
@@ -7804,7 +7825,11 @@
 
     function submitFxChNameEditor() {
       if (typeof currentSelectedCh !== 'number' && typeof currentSelectedCh !== 'string') return;
-      sendChannelNameUpdate(currentSelectedCh, fxChShortNameInput.value, fxChLongNameInput.value);
+      const sVal = fxChShortNameInput.value;
+      const lVal = (typeof currentSelectedCh === 'number' && fxChShortNameInput.dataset.manual === '1' && fxChLongNameInput.dataset.manual !== '1')
+        ? ''
+        : fxChLongNameInput.value;
+      sendChannelNameUpdate(currentSelectedCh, sVal, lVal);
       hideFxChNameEditor();
     }
 
@@ -7866,9 +7891,16 @@
 
         const shortInp = stripNamePopover.querySelector('#stripShortInput');
         const longInp = stripNamePopover.querySelector('#stripLongInput');
+        shortInp.addEventListener('input', () => { shortInp.dataset.manual = '1'; });
+        longInp.addEventListener('input', () => {
+          longInp.dataset.manual = '1';
+          if (shortInp.dataset.manual !== '1') shortInp.value = '';
+        });
         const saveFn = () => {
           if (typeof stripNameEditingCh !== 'number' && typeof stripNameEditingCh !== 'string') return;
-          sendChannelNameUpdate(stripNameEditingCh, shortInp.value, longInp.value);
+          const sVal = shortInp.value;
+          const lVal = (typeof stripNameEditingCh === 'number' && shortInp.dataset.manual === '1' && longInp.dataset.manual !== '1') ? '' : longInp.value;
+          sendChannelNameUpdate(stripNameEditingCh, sVal, lVal);
           closeStripNamePopover();
         };
         stripNamePopover.querySelector('#stripNameSave').addEventListener('click', saveFn);
@@ -7890,12 +7922,13 @@
       const titleDiv = stripNamePopover.firstElementChild;
       const shortInp = stripNamePopover.querySelector('#stripShortInput');
       const longInp = stripNamePopover.querySelector('#stripLongInput');
+      shortInp.dataset.manual = '';
+      longInp.dataset.manual = '';
       if (typeof chIdx === 'number') {
         if (titleDiv) titleDiv.textContent = `Nome do Canal CH ${chIdx + 1}`;
         const ch = channelsState[chIdx] || {};
-        const defaultName = `CH ${chIdx + 1}`;
         shortInp.style.display = '';
-        shortInp.value = (ch.name && ch.name !== defaultName) ? ch.name : '';
+        shortInp.value = !isDefaultChannelShortName(chIdx, ch.name) ? ch.name : '';
         longInp.placeholder = 'Nome completo (16)';
         longInp.value = ch.longName || '';
       } else {
@@ -7931,6 +7964,13 @@
         if (e.key === 'Escape') {
           e.preventDefault();
           closeAppDialog(false);
+        }
+        return;
+      }
+      if (savePresetModalOverlay && savePresetModalOverlay.classList.contains('open')) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          savePresetModalOverlay.classList.remove('open');
         }
         return;
       }

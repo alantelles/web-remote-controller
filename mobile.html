@@ -1069,6 +1069,26 @@
       text-align: center;
     }
 
+    .channel-aux-badge {
+      display: none;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      color: #38bdf8;
+      background: rgba(6, 182, 212, 0.14);
+      border: 1px solid rgba(6, 182, 212, 0.45);
+      padding: 3px 7px;
+      border-radius: 5px;
+      white-space: nowrap;
+      max-width: 90px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    body.mix-aux .channel-aux-badge {
+      display: inline-block;
+    }
+
     .card-bottom-buttons {
       display: flex;
       align-items: center;
@@ -4091,12 +4111,21 @@
         const title = document.getElementById('masterOutputTitle');
         if (title) title.textContent = clean;
         if (typeof updateCompactBadge === 'function') updateCompactBadge();
+        updateMobileChannelAuxBadges();
       }
 
       if (isEqModalOpen && typeof currentEqTarget === 'string' && currentEqTarget === targetKey) {
         const titleEl = document.getElementById('eqModalChannelName');
         if (titleEl) titleEl.textContent = clean;
       }
+    }
+
+    function updateMobileChannelAuxBadges() {
+      const isAux = !MIX_TARGETS[currentMix]?.isMaster;
+      const auxLabel = isAux ? getMobileOutputDisplayName(currentMix) : '';
+      document.querySelectorAll('.channel-aux-badge').forEach(el => {
+        el.textContent = auxLabel;
+      });
     }
 
     const channelNamesState = Array.from({ length: TOTAL_CHANNELS }, (_, i) => ({
@@ -4161,14 +4190,21 @@
 
         const shortInp = mobileNameEditorOverlay.querySelector('#mobileShortNameInput');
         const longInp = mobileNameEditorOverlay.querySelector('#mobileLongNameInput');
+        shortInp.addEventListener('input', () => { shortInp.dataset.manual = '1'; });
+        longInp.addEventListener('input', () => {
+          longInp.dataset.manual = '1';
+          if (shortInp.dataset.manual !== '1') shortInp.value = '';
+        });
         const saveFn = () => {
           if (typeof mobileNameEditingCh === 'number') {
+            const sVal = (shortInp.value || '').trim().slice(0, 4);
+            const lVal = (shortInp.dataset.manual === '1' && longInp.dataset.manual !== '1') ? '' : (longInp.value || '').trim().slice(0, 16);
             if (ws && ws.readyState === WebSocket.OPEN) {
               ws.send(JSON.stringify({
                 action: 'set_channel_name',
                 channel: mobileNameEditingCh,
-                name: (shortInp.value || '').trim().slice(0, 4),
-                long_name: (longInp.value || '').trim().slice(0, 16)
+                name: sVal,
+                long_name: lVal
               }));
             }
             showToast('Nome do canal salvo');
@@ -4201,12 +4237,15 @@
       const shortLabel = mobileNameEditorOverlay.querySelector('#mobileShortNameLabel');
       const shortInp = mobileNameEditorOverlay.querySelector('#mobileShortNameInput');
       const longInp = mobileNameEditorOverlay.querySelector('#mobileLongNameInput');
+      shortInp.dataset.manual = '';
+      longInp.dataset.manual = '';
       if (typeof chIdx === 'number') {
         const info = channelNamesState[chIdx] || { short: `CH ${chIdx + 1}`, long: '' };
-        const defaultName = `CH ${chIdx + 1}`;
+        const cleanShort = (info.short || '').trim();
+        const isDefault = !cleanShort || cleanShort === `CH ${chIdx + 1}` || cleanShort === `CH ${String(chIdx + 1).padStart(2, '0')}`;
         mobileNameEditorOverlay.querySelector('#mobileNameEditorTitle').textContent = `Nome do Canal CH ${String(chIdx + 1).padStart(2, '0')}`;
         if (shortLabel) shortLabel.style.display = 'flex';
-        shortInp.value = (info.short && info.short !== defaultName) ? info.short : '';
+        shortInp.value = !isDefault ? info.short : '';
         longInp.placeholder = 'Ex: Thom Yorkez';
         longInp.value = info.long || '';
       } else {
@@ -4248,7 +4287,10 @@
             <input type="range" class="fader-horizontal" id="slider_${ch}" min="0" max="1023" value="0">
           </div>
           <div class="card-row-bottom">
-            <div class="db-readout" id="dbText_${ch}">-∞ dB</div>
+            <div style="display: flex; align-items: center; gap: 6px; min-width: 0;">
+              <div class="db-readout" id="dbText_${ch}">-∞ dB</div>
+              <span class="channel-aux-badge" id="auxBadge_${ch}"></span>
+            </div>
             <div class="card-bottom-buttons">
               <button class="btn-quick-val" id="btnZero_${ch}" type="button">0</button>
               <button class="btn-quick-val" id="btnInf_${ch}" type="button">-∞</button>
@@ -4659,6 +4701,7 @@
       // Atualiza card do Master e o badge compacto de saída
       updateMasterFaderCard();
       updateCompactBadge();
+      updateMobileChannelAuxBadges();
       updateMasterSelGlow();
 
       if (isEqModalOpen && typeof currentEqTarget === 'string') {
@@ -7462,6 +7505,55 @@
         }
       };
 
+      // Diálogos customizados não-bloqueantes (Mobile)
+      const mobileAppDialogModal = document.getElementById('mobileAppDialogModal');
+      const mobileAppDialogTitle = document.getElementById('mobileAppDialogTitle');
+      const mobileAppDialogMessage = document.getElementById('mobileAppDialogMessage');
+      const btnMobileAppDialogCancel = document.getElementById('btnMobileAppDialogCancel');
+      const btnMobileAppDialogOk = document.getElementById('btnMobileAppDialogOk');
+      const btnMobileAppDialogClose = document.getElementById('btnMobileAppDialogClose');
+      let _mobileAppDialogResolve = null;
+
+      function closeMobileAppDialog(result) {
+        if (mobileAppDialogModal) mobileAppDialogModal.classList.remove('open');
+        if (_mobileAppDialogResolve) {
+          const res = _mobileAppDialogResolve;
+          _mobileAppDialogResolve = null;
+          res(result);
+        }
+      }
+
+      if (btnMobileAppDialogOk) btnMobileAppDialogOk.addEventListener('click', () => closeMobileAppDialog(true));
+      if (btnMobileAppDialogCancel) btnMobileAppDialogCancel.addEventListener('click', () => closeMobileAppDialog(false));
+      if (btnMobileAppDialogClose) btnMobileAppDialogClose.addEventListener('click', () => closeMobileAppDialog(false));
+      if (mobileAppDialogModal) {
+        mobileAppDialogModal.addEventListener('click', (e) => {
+          if (e.target === mobileAppDialogModal) closeMobileAppDialog(false);
+        });
+      }
+
+      window.showAppAlert = function(message, title = 'ℹ️ Aviso') {
+        if (!mobileAppDialogModal) return Promise.resolve();
+        if (_mobileAppDialogResolve) closeMobileAppDialog(false);
+        if (mobileAppDialogTitle) mobileAppDialogTitle.textContent = title;
+        if (mobileAppDialogMessage) mobileAppDialogMessage.textContent = String(message || '');
+        if (btnMobileAppDialogCancel) btnMobileAppDialogCancel.style.display = 'none';
+        if (btnMobileAppDialogOk) btnMobileAppDialogOk.textContent = 'OK';
+        mobileAppDialogModal.classList.add('open');
+        return new Promise(resolve => { _mobileAppDialogResolve = resolve; });
+      };
+
+      window.showAppConfirm = function(message, title = '⚠️ Confirmação') {
+        if (!mobileAppDialogModal) return Promise.resolve(false);
+        if (_mobileAppDialogResolve) closeMobileAppDialog(false);
+        if (mobileAppDialogTitle) mobileAppDialogTitle.textContent = title;
+        if (mobileAppDialogMessage) mobileAppDialogMessage.textContent = String(message || '');
+        if (btnMobileAppDialogCancel) btnMobileAppDialogCancel.style.display = 'inline-block';
+        if (btnMobileAppDialogOk) btnMobileAppDialogOk.textContent = 'Confirmar';
+        mobileAppDialogModal.classList.add('open');
+        return new Promise(resolve => { _mobileAppDialogResolve = resolve; });
+      };
+
       if (btnApplyMobPreset) {
         btnApplyMobPreset.addEventListener('click', async () => {
           if (currentMobileUserRole !== 'ADMIN' && currentMobileUserRole !== 'OPERATOR') {
@@ -7490,10 +7582,10 @@
               await syncMobileStateFromBackend();
               refreshOpenRackModalUI();
             } else {
-              alert(`Falha ao aplicar preset: ${result.error || 'Erro desconhecido'}`);
+              await showAppAlert(`Falha ao aplicar preset: ${result.error || 'Erro desconhecido'}`, '⚠️ Erro');
             }
           } catch (err) {
-            alert('Erro de conexão ao aplicar preset.');
+            await showAppAlert('Erro de conexão ao aplicar preset.', '⚠️ Erro de Conexão');
           }
         });
       }
@@ -7527,7 +7619,7 @@
           const name = (inputMobPresetName ? inputMobPresetName.value : '').trim();
           const desc = (inputMobPresetDesc ? inputMobPresetDesc.value : '').trim();
           if (!name) {
-            alert('Por favor informe o nome do preset.');
+            await showAppAlert('Por favor informe o nome do preset.', '⚠️ Campo Obrigatório');
             if (inputMobPresetName) inputMobPresetName.focus();
             return;
           }
@@ -7548,10 +7640,10 @@
                 selMobilePreset.value = result.preset.id;
               }
             } else {
-              alert(`Falha ao salvar preset: ${result.error || 'Erro desconhecido'}`);
+              await showAppAlert(`Falha ao salvar preset: ${result.error || 'Erro desconhecido'}`, '⚠️ Erro');
             }
           } catch (err) {
-            alert('Erro ao salvar preset.');
+            await showAppAlert('Erro ao salvar preset.', '⚠️ Erro de Conexão');
           }
         });
       }
