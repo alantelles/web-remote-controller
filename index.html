@@ -4732,9 +4732,11 @@
                 <button type="button" class="btn-filter-toggle" id="btnEqHpf" title="Ativar/Desativar Filtro Passa-Altas (Corte Grave na banda LOW)">HPF: <span id="lbl_hpfStatus">OFF</span></button>
                 <button type="button" class="btn-filter-toggle" id="btnEqLpf" title="Ativar/Desativar Filtro Passa-Baixas (Corte Agudo na banda HIGH)">LPF: <span id="lbl_lpfStatus">OFF</span></button>
               </div>
-              <div class="eq-att-group" id="eqAttContainer" style="display: flex; align-items: center; gap: 8px; background: rgba(15,23,42,0.6); padding: 4px 10px; border-radius: 6px; border: 1px solid #334155;">
+              <div class="eq-att-group" id="eqAttContainer" style="display: flex; align-items: center; gap: 6px; background: rgba(15,23,42,0.6); padding: 4px 10px; border-radius: 6px; border: 1px solid #334155;">
                 <span style="font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 0.5px;">ATT:</span>
-                <input type="range" class="eq-range-input" id="rng_eqAtt" min="-960" max="120" value="0" step="5" style="width: 90px; height: 5px;">
+                <button type="button" id="btnEqAttDec" style="background: #1e293b; border: 1px solid #475569; color: #e2e8f0; font-size: 12px; font-weight: 700; width: 24px; height: 22px; line-height: 1; border-radius: 4px; cursor: pointer;" title="Diminuir Atenuador (-1.0 dB)">-</button>
+                <input type="range" class="eq-range-input" id="rng_eqAtt" min="-960" max="120" value="0" step="10" style="width: 85px; height: 5px;">
+                <button type="button" id="btnEqAttInc" style="background: #1e293b; border: 1px solid #475569; color: #e2e8f0; font-size: 12px; font-weight: 700; width: 24px; height: 22px; line-height: 1; border-radius: 4px; cursor: pointer;" title="Aumentar Atenuador (+1.0 dB)">+</button>
                 <span class="eq-ctrl-val" id="lbl_eqAtt" style="font-size: 11px; min-width: 55px; text-align: right; color: #38bdf8;">0.0 dB</span>
                 <button type="button" class="btn-eq-att-zero" id="btnEqAttZero" style="background: transparent; border: 1px solid #475569; color: #94a3b8; font-size: 10px; padding: 2px 6px; border-radius: 4px; cursor: pointer;" title="Zerar Atenuador para 0.0 dB">0 dB</button>
               </div>
@@ -5672,6 +5674,11 @@
         }
 
         if (data.type === 'init') {
+          const isSimPort = (data.port || '').toLowerCase().includes('simulação');
+          const grWrap = document.querySelector('.comp-gr-meter-wrap');
+          if (grWrap) {
+            grWrap.style.display = isSimPort ? '' : 'none';
+          }
           if (Array.isArray(data.mute_groups) && typeof applyMuteGroupsFromServer === 'function') {
             applyMuteGroupsFromServer(data.mute_groups);
           }
@@ -5694,7 +5701,11 @@
 
         if (data.type === 'state_sync') {
           syncFullStateFromBackend();
-          showToast('Cena carregada e sincronizada! 🎬', '🎬');
+          showToast(data.hex || 'Estado sincronizado! 🔄', '🔄');
+        }
+
+        if (data.type === 'fx_sync') {
+          syncFullStateFromBackend();
         }
 
         if (data.type === 'channel_preset_applied') {
@@ -8351,9 +8362,9 @@
       const lblEqAtt = document.getElementById('lbl_eqAtt');
       if (typeof target === 'number') {
         if (attContainer) attContainer.style.display = 'flex';
-        const attVal = (eq.attenuator !== undefined) ? eq.attenuator : 0;
+        const attVal = Math.max(-960, Math.min(120, Number.isFinite(eq.attenuator) ? eq.attenuator : 0));
         if (rngEqAtt) rngEqAtt.value = attVal;
-        if (lblEqAtt) lblEqAtt.textContent = (attVal >= 0 ? '+' : '') + (attVal / 10).toFixed(1) + ' dB';
+        if (lblEqAtt) lblEqAtt.textContent = (attVal > 0 ? '+' : '') + (attVal / 10).toFixed(1) + ' dB';
       } else {
         if (attContainer) attContainer.style.display = 'none';
       }
@@ -8467,19 +8478,30 @@
       requestEqRedraw();
     });
 
-    // Reset Flat
+    // Reset Flat (zera ganhos e coloca bandas LOW e HIGH em Bell/Peaking como na 01V96)
     btnEqFlat.addEventListener('click', () => {
       const eq = getChannelEq(currentSelectedCh);
       ['low', 'lomid', 'himid', 'high'].forEach(bKey => {
         eq[bKey].gain = 180;
       });
+      eq.low.type = 'peaking';
+      eq.hpf = 0;
+      eq.high.type = 'peaking';
+      eq.lpf = 0;
+
       syncEqModalFromState(currentSelectedCh);
+      requestEqRedraw();
+
+      sendEqParam(0x04, 0); // HPF OFF
+      sendEqParam(0x01, 40 - eq.low.q); // LOW Bell
+      sendEqParam(0x0E, 0); // LPF OFF
+      sendEqParam(0x0B, 40 - eq.high.q); // HIGH Bell
       sendEqParam(0x03, 0);
       sendEqParam(0x07, 0);
       sendEqParam(0x0A, 0);
       sendEqParam(0x0D, 0);
       const chLabel = typeof currentSelectedCh === 'number' ? `CH ${currentSelectedCh + 1}` : currentSelectedCh;
-      showToast(`EQ de ${chLabel} zerado (Flat 0.0 dB) ⚡`, '⚡');
+      showToast(`EQ de ${chLabel} zerado (Flat / Bell 0.0 dB) ⚡`, '⚡');
     });
 
     // Tipos de Filtro LOW (LOW: 0x01 [44=hpf (0x2C), 41=shelf (0x29), 40-q=peaking]; Chave Filtro: 0x04; Ganho: 0x03)
@@ -8532,26 +8554,43 @@
     const rngEqAtt = document.getElementById('rng_eqAtt');
     const lblEqAtt = document.getElementById('lbl_eqAtt');
     const btnEqAttZero = document.getElementById('btnEqAttZero');
+    const btnEqAttDec = document.getElementById('btnEqAttDec');
+    const btnEqAttInc = document.getElementById('btnEqAttInc');
+    function applyDesktopAttValue(rawVal) {
+      const val = Math.max(-960, Math.min(120, Math.round(rawVal / 5) * 5));
+      const eq = getChannelEq(currentSelectedCh);
+      if (eq) eq.attenuator = val;
+      if (rngEqAtt) rngEqAtt.value = val;
+      if (lblEqAtt) lblEqAtt.textContent = (val > 0 ? '+' : '') + (val / 10).toFixed(1) + ' dB';
+      if (typeof currentSelectedCh === 'number') {
+        sendCommand(0x1D, 0x00, currentSelectedCh, val);
+      }
+    }
     if (rngEqAtt) {
       rngEqAtt.addEventListener('input', (e) => {
-        const val = parseInt(e.target.value, 10);
+        applyDesktopAttValue(parseInt(e.target.value, 10));
+      });
+      rngEqAtt.addEventListener('change', (e) => {
+        applyDesktopAttValue(parseInt(e.target.value, 10));
+      });
+    }
+    if (btnEqAttDec) {
+      btnEqAttDec.addEventListener('click', () => {
         const eq = getChannelEq(currentSelectedCh);
-        if (eq) eq.attenuator = val;
-        if (lblEqAtt) lblEqAtt.textContent = (val >= 0 ? '+' : '') + (val / 10).toFixed(1) + ' dB';
-        if (typeof currentSelectedCh === 'number') {
-          sendCommand(0x1D, 0x00, currentSelectedCh, val);
-        }
+        const cur = (eq && Number.isFinite(eq.attenuator)) ? eq.attenuator : 0;
+        applyDesktopAttValue(cur - 10);
+      });
+    }
+    if (btnEqAttInc) {
+      btnEqAttInc.addEventListener('click', () => {
+        const eq = getChannelEq(currentSelectedCh);
+        const cur = (eq && Number.isFinite(eq.attenuator)) ? eq.attenuator : 0;
+        applyDesktopAttValue(cur + 10);
       });
     }
     if (btnEqAttZero) {
       btnEqAttZero.addEventListener('click', () => {
-        const eq = getChannelEq(currentSelectedCh);
-        if (eq) eq.attenuator = 0;
-        if (rngEqAtt) rngEqAtt.value = 0;
-        if (lblEqAtt) lblEqAtt.textContent = '0.0 dB';
-        if (typeof currentSelectedCh === 'number') {
-          sendCommand(0x1D, 0x00, currentSelectedCh, 0);
-        }
+        applyDesktopAttValue(0);
       });
     }
 
@@ -10069,10 +10108,20 @@
             const seq = st.stereo_master.eq;
             meq.on = seq.on;
             meq.attenuator = seq.attenuator !== undefined ? seq.attenuator : 0;
-            if (seq.low) { meq.low.gain = seq.low.gain + 180; meq.low.freq = seq.low.freq; meq.low.q = Math.max(0, Math.min(40, 40 - seq.low.q)); }
+            if (seq.low) {
+              meq.low.gain = seq.low.gain + 180;
+              meq.low.freq = seq.low.freq;
+              meq.low.q = Math.max(0, Math.min(40, 40 - seq.low.q));
+              meq.low.type = (seq.hpf_on === 1 || seq.low.q === 44) ? 'hpf' : (seq.low.q === 41 ? 'shelf' : 'peaking');
+            }
             if (seq.low_mid) { meq.lomid.gain = seq.low_mid.gain + 180; meq.lomid.freq = seq.low_mid.freq; meq.lomid.q = Math.max(0, Math.min(40, 40 - seq.low_mid.q)); }
             if (seq.hi_mid) { meq.himid.gain = seq.hi_mid.gain + 180; meq.himid.freq = seq.hi_mid.freq; meq.himid.q = Math.max(0, Math.min(40, 40 - seq.hi_mid.q)); }
-            if (seq.high) { meq.high.gain = seq.high.gain + 180; meq.high.freq = seq.high.freq; meq.high.q = Math.max(0, Math.min(40, 40 - seq.high.q)); }
+            if (seq.high) {
+              meq.high.gain = seq.high.gain + 180;
+              meq.high.freq = seq.high.freq;
+              meq.high.q = Math.max(0, Math.min(40, 40 - seq.high.q));
+              meq.high.type = (seq.lpf_on === 1 || seq.high.q === 43) ? 'lpf' : (seq.high.q === 42 ? 'shelf' : 'peaking');
+            }
             meq.hpf = seq.hpf_on;
             meq.lpf = seq.lpf_on;
           }
@@ -10101,10 +10150,20 @@
                 const aeq = mixData[auxKey].eq;
                 aeq.on = aux.eq.on;
                 aeq.attenuator = aux.eq.attenuator !== undefined ? aux.eq.attenuator : 0;
-                if (aux.eq.low) { aeq.low.gain = aux.eq.low.gain + 180; aeq.low.freq = aux.eq.low.freq; aeq.low.q = Math.max(0, Math.min(40, 40 - aux.eq.low.q)); }
+                if (aux.eq.low) {
+                  aeq.low.gain = aux.eq.low.gain + 180;
+                  aeq.low.freq = aux.eq.low.freq;
+                  aeq.low.q = Math.max(0, Math.min(40, 40 - aux.eq.low.q));
+                  aeq.low.type = (aux.eq.hpf_on === 1 || aux.eq.low.q === 44) ? 'hpf' : (aux.eq.low.q === 41 ? 'shelf' : 'peaking');
+                }
                 if (aux.eq.low_mid) { aeq.lomid.gain = aux.eq.low_mid.gain + 180; aeq.lomid.freq = aux.eq.low_mid.freq; aeq.lomid.q = Math.max(0, Math.min(40, 40 - aux.eq.low_mid.q)); }
                 if (aux.eq.hi_mid) { aeq.himid.gain = aux.eq.hi_mid.gain + 180; aeq.himid.freq = aux.eq.hi_mid.freq; aeq.himid.q = Math.max(0, Math.min(40, 40 - aux.eq.hi_mid.q)); }
-                if (aux.eq.high) { aeq.high.gain = aux.eq.high.gain + 180; aeq.high.freq = aux.eq.high.freq; aeq.high.q = Math.max(0, Math.min(40, 40 - aux.eq.high.q)); }
+                if (aux.eq.high) {
+                  aeq.high.gain = aux.eq.high.gain + 180;
+                  aeq.high.freq = aux.eq.high.freq;
+                  aeq.high.q = Math.max(0, Math.min(40, 40 - aux.eq.high.q));
+                  aeq.high.type = (aux.eq.lpf_on === 1 || aux.eq.high.q === 43) ? 'lpf' : (aux.eq.high.q === 42 ? 'shelf' : 'peaking');
+                }
                 aeq.hpf = aux.eq.hpf_on;
                 aeq.lpf = aux.eq.lpf_on;
               }
@@ -10149,9 +10208,11 @@
               // Equalizador de Canal
               if (typeof eqState !== 'undefined' && eqState[i] && inp.eq) {
                 eqState[i].on = inp.eq.on;
+                eqState[i].attenuator = (inp.eq.attenuator !== undefined) ? inp.eq.attenuator : 0;
                 eqState[i].low.gain = inp.eq.low.gain + 180;
                 eqState[i].low.freq = inp.eq.low.freq;
                 eqState[i].low.q = Math.max(0, Math.min(40, 40 - inp.eq.low.q));
+                eqState[i].low.type = (inp.eq.hpf_on === 1 || inp.eq.low.q === 44) ? 'hpf' : (inp.eq.low.q === 41 ? 'shelf' : 'peaking');
                 eqState[i].lomid.gain = inp.eq.low_mid.gain + 180;
                 eqState[i].lomid.freq = inp.eq.low_mid.freq;
                 eqState[i].lomid.q = Math.max(0, Math.min(40, 40 - inp.eq.low_mid.q));
@@ -10161,6 +10222,7 @@
                 eqState[i].high.gain = inp.eq.high.gain + 180;
                 eqState[i].high.freq = inp.eq.high.freq;
                 eqState[i].high.q = Math.max(0, Math.min(40, 40 - inp.eq.high.q));
+                eqState[i].high.type = (inp.eq.lpf_on === 1 || inp.eq.high.q === 43) ? 'lpf' : (inp.eq.high.q === 42 ? 'shelf' : 'peaking');
                 eqState[i].hpf = inp.eq.hpf_on;
                 eqState[i].lpf = inp.eq.lpf_on;
               }
@@ -10208,9 +10270,16 @@
           applyMuteGroupsFromServer(json.mute_groups);
         }
 
-        if (fxModalOverlay && fxModalOverlay.classList.contains('open') && typeof currentSelectedCh === 'number') {
+        if (fxModalOverlay && fxModalOverlay.classList.contains('open') && typeof currentSelectedCh !== 'undefined') {
+          if (typeof syncEqModalFromState === 'function') syncEqModalFromState(currentSelectedCh);
+          if (typeof syncCompModalFromState === 'function') syncCompModalFromState(currentSelectedCh);
+          if (typeof syncGateModalFromState === 'function') syncGateModalFromState(currentSelectedCh);
+          if (typeof syncPanModalFromState === 'function') syncPanModalFromState(currentSelectedCh);
           if (typeof syncAuxModalFromState === 'function') syncAuxModalFromState(currentSelectedCh);
           if (typeof updateTabStatusDots === 'function') updateTabStatusDots(currentSelectedCh);
+          if (currentFxTab === 'eq') requestEqRedraw();
+          else if (currentFxTab === 'comp') requestCompRedraw();
+          else if (currentFxTab === 'gate') requestGateRedraw();
         }
 
         saveMixDataDebounced();

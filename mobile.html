@@ -2507,11 +2507,12 @@
         <!-- Ações do EQ (ON / FLAT / ATT) -->
         <div class="eq-actions-bar">
           <button class="btn-eq-toggle is-on" id="btnEqToggleOn" type="button">EQ: ON</button>
-          <div class="eq-att-mobile-group" id="eqAttMobileGroup" style="display: flex; align-items: center; gap: 6px; background: rgba(15,23,42,0.6); padding: 3px 8px; border-radius: 6px; border: 1px solid #334155;">
+          <div class="eq-att-mobile-group" id="eqAttMobileGroup" style="display: flex; align-items: center; gap: 4px; background: rgba(15,23,42,0.6); padding: 3px 6px; border-radius: 6px; border: 1px solid #334155;">
             <span style="font-size: 10px; font-weight: 700; color: #94a3b8;">ATT:</span>
-            <input type="range" class="param-slider" id="rngEqAttMobile" min="-960" max="120" value="0" step="5" style="width: 70px; height: 4px;">
-            <span class="param-value-badge" id="lblEqAttMobile" style="font-size: 10px; min-width: 44px; text-align: right; color: #38bdf8;">0.0 dB</span>
-            <button class="btn-quick-val" id="btnZeroEqAttMobile" type="button" style="font-size: 9px; padding: 2px 4px;" title="Zerar Atenuador">0 dB</button>
+            <button class="btn-quick-val" id="btnDecEqAttMobile" type="button" style="font-size: 13px; font-weight: 800; padding: 2px 8px; min-width: 28px;" title="Diminuir Atenuador (-1.0 dB)">-</button>
+            <span class="param-value-badge" id="lblEqAttMobile" style="font-size: 10px; min-width: 46px; text-align: center; color: #38bdf8;">0.0 dB</span>
+            <button class="btn-quick-val" id="btnIncEqAttMobile" type="button" style="font-size: 13px; font-weight: 800; padding: 2px 8px; min-width: 28px;" title="Aumentar Atenuador (+1.0 dB)">+</button>
+            <button class="btn-quick-val" id="btnZeroEqAttMobile" type="button" style="font-size: 9px; padding: 2px 5px;" title="Zerar Atenuador">0 dB</button>
           </div>
           <button class="btn-eq-flat" id="btnEqFlat" type="button">⚡ FLAT</button>
         </div>
@@ -2620,7 +2621,7 @@
         </div>
 
         <!-- Medidor de Gain Reduction (sob demanda) -->
-        <div style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #0f172a; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; margin-bottom: 8px;">
+        <div id="compGrMeterMobile" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #0f172a; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; margin-bottom: 8px;">
           <span style="font-size: 10px; font-weight: 800; color: #94a3b8; letter-spacing: 0.4px; white-space: nowrap;">GR</span>
           <div style="flex: 1; height: 8px; background: #020617; border-radius: 999px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06);">
             <div id="compGrFillMobile" style="width: 0%; height: 100%; background: linear-gradient(90deg, #f59e0b, #ef4444); transition: width 70ms linear;"></div>
@@ -3564,6 +3565,11 @@
 
           if (msg.type === 'init') {
             document.getElementById('headerPortName').innerText = msg.port || 'MIDI Conectado';
+            const isSimPort = (msg.port || '').toLowerCase().includes('simulação');
+            const grMeterEl = document.getElementById('compGrMeterMobile');
+            if (grMeterEl) {
+              grMeterEl.style.display = isSimPort ? 'flex' : 'none';
+            }
             if (msg.simulation_running !== undefined) {
               updateSimButton(msg.simulation_running);
             }
@@ -3583,7 +3589,12 @@
 
           if (msg.type === 'state_sync') {
             syncMobileStateFromBackend();
-            showToast('Cena sincronizada! 🎬');
+            showToast(msg.hex || 'Estado sincronizado! 🔄');
+            return;
+          }
+
+          if (msg.type === 'fx_sync') {
+            syncMobileStateFromBackend();
             return;
           }
 
@@ -3678,8 +3689,8 @@
             meq.high.q = Math.max(0, Math.min(40, 40 - st.stereo_master.eq.high.q));
             meq.hpf = st.stereo_master.eq.hpf_on;
             meq.lpf = st.stereo_master.eq.lpf_on;
-            meq.low.type = st.stereo_master.eq.hpf_on === 1 ? 'hpf' : 'shelf';
-            meq.high.type = st.stereo_master.eq.lpf_on === 1 ? 'lpf' : 'shelf';
+            meq.low.type = (st.stereo_master.eq.hpf_on === 1 || st.stereo_master.eq.low.q === 44) ? 'hpf' : (st.stereo_master.eq.low.q === 41 ? 'shelf' : 'peaking');
+            meq.high.type = (st.stereo_master.eq.lpf_on === 1 || st.stereo_master.eq.high.q === 43) ? 'lpf' : (st.stereo_master.eq.high.q === 42 ? 'shelf' : 'peaking');
           }
         }
 
@@ -3709,8 +3720,8 @@
               aeq.high.q = Math.max(0, Math.min(40, 40 - aux.eq.high.q));
               aeq.hpf = aux.eq.hpf_on;
               aeq.lpf = aux.eq.lpf_on;
-              aeq.low.type = aux.eq.hpf_on === 1 ? 'hpf' : 'shelf';
-              aeq.high.type = aux.eq.lpf_on === 1 ? 'lpf' : 'shelf';
+              aeq.low.type = (aux.eq.hpf_on === 1 || aux.eq.low.q === 44) ? 'hpf' : (aux.eq.low.q === 41 ? 'shelf' : 'peaking');
+              aeq.high.type = (aux.eq.lpf_on === 1 || aux.eq.high.q === 43) ? 'lpf' : (aux.eq.high.q === 42 ? 'shelf' : 'peaking');
             }
           });
         }
@@ -3748,8 +3759,8 @@
                 eqState[i].high.q = Math.max(0, Math.min(40, 40 - inp.eq.high.q));
                 eqState[i].hpf = inp.eq.hpf_on;
                 eqState[i].lpf = inp.eq.lpf_on;
-                eqState[i].low.type = inp.eq.hpf_on === 1 ? 'hpf' : 'shelf';
-                eqState[i].high.type = inp.eq.lpf_on === 1 ? 'lpf' : 'shelf';
+                eqState[i].low.type = (inp.eq.hpf_on === 1 || inp.eq.low.q === 44) ? 'hpf' : (inp.eq.low.q === 41 ? 'shelf' : 'peaking');
+                eqState[i].high.type = (inp.eq.lpf_on === 1 || inp.eq.high.q === 43) ? 'lpf' : (inp.eq.high.q === 42 ? 'shelf' : 'peaking');
                 state.eqOn[i] = (inp.eq.on === 1);
               }
 
@@ -3801,6 +3812,10 @@
 
         if (Array.isArray(json.mute_groups) && typeof applyMobileMuteGroups === 'function') {
           applyMobileMuteGroups(json.mute_groups);
+        }
+
+        if (isEqModalOpen && typeof refreshOpenRackModalUI === 'function') {
+          refreshOpenRackModalUI();
         }
 
         if (isEqModalOpen) {
@@ -6868,13 +6883,11 @@
 
       // Sincroniza Atenuador Digital (Elemento 0x1D) - apenas canais de entrada
       const attGroup = document.getElementById('eqAttMobileGroup');
-      const rngAtt = document.getElementById('rngEqAttMobile');
       const lblAtt = document.getElementById('lblEqAttMobile');
       if (typeof currentEqTarget === 'number') {
         if (attGroup) attGroup.style.display = 'flex';
-        const attVal = (eq.attenuator !== undefined) ? eq.attenuator : 0;
-        if (rngAtt) rngAtt.value = attVal;
-        if (lblAtt) lblAtt.textContent = (attVal >= 0 ? '+' : '') + (attVal / 10).toFixed(1) + ' dB';
+        const attVal = Math.max(-960, Math.min(120, Number.isFinite(eq.attenuator) ? eq.attenuator : 0));
+        if (lblAtt) lblAtt.textContent = (attVal > 0 ? '+' : '') + (attVal / 10).toFixed(1) + ' dB';
       } else {
         if (attGroup) attGroup.style.display = 'none';
       }
@@ -7648,19 +7661,30 @@
         });
       }
 
-      // Botão Flat (Zera as 4 bandas para 0.0 dB)
+      // Botão Flat (Zera as 4 bandas para 0.0 dB e coloca LOW e HIGH em Bell/Peaking como na 01V96)
       document.getElementById('btnEqFlat').addEventListener('click', () => {
         const eq = getEqData(currentEqTarget);
         eq.low.gain = 180;
         eq.lomid.gain = 180;
         eq.himid.gain = 180;
         eq.high.gain = 180;
+        eq.low.type = 'peaking';
+        eq.hpf = 0;
+        eq.high.type = 'peaking';
+        eq.lpf = 0;
+
+        sendEqParam(0x04, 0, false); // HPF OFF
+        sendEqParam(0x01, 40 - eq.low.q, false); // LOW Bell
+        sendEqParam(0x0E, 0, false); // LPF OFF
+        sendEqParam(0x0B, 40 - eq.high.q, false); // HIGH Bell
         sendEqParam(0x03, 0, false);
         sendEqParam(0x07, 0, false);
         sendEqParam(0x0A, 0, false);
         sendEqParam(0x0D, 0, false);
+        syncEqModalUI();
         switchEqBand(currentEqBand);
-        showToast('EQ zerado (Flat 0.0 dB) ⚡');
+        requestEqRedrawMobile();
+        showToast('EQ zerado (Flat / Bell 0.0 dB) ⚡');
       });
 
       // Tipo de Filtro (LOW e HIGH via Q)
@@ -7706,36 +7730,37 @@
         requestEqRedrawMobile();
       });
 
-      // Eventos do Atenuador Digital Mobile (Elemento 0x1D)
-      const rngEqAttMobile = document.getElementById('rngEqAttMobile');
+      // Eventos do Atenuador Digital Mobile (Elemento 0x1D) com botões de passo (-1.0 / +1.0 dB)
       const lblEqAttMobile = document.getElementById('lblEqAttMobile');
+      const btnDecEqAttMobile = document.getElementById('btnDecEqAttMobile');
+      const btnIncEqAttMobile = document.getElementById('btnIncEqAttMobile');
       const btnZeroEqAttMobile = document.getElementById('btnZeroEqAttMobile');
-      if (rngEqAttMobile) {
-        rngEqAttMobile.addEventListener('input', (e) => {
-          const val = parseInt(e.target.value, 10);
+      function applyMobileAttValue(rawVal) {
+        const val = Math.max(-960, Math.min(120, Math.round(rawVal / 5) * 5));
+        const eq = getEqData(currentEqTarget);
+        if (eq) eq.attenuator = val;
+        if (lblEqAttMobile) lblEqAttMobile.textContent = (val > 0 ? '+' : '') + (val / 10).toFixed(1) + ' dB';
+        if (typeof currentEqTarget === 'number') {
+          sendCommand(0x1D, 0x00, currentEqTarget, val, false);
+        }
+      }
+      if (btnDecEqAttMobile) {
+        btnDecEqAttMobile.addEventListener('click', () => {
           const eq = getEqData(currentEqTarget);
-          if (eq) eq.attenuator = val;
-          if (lblEqAttMobile) lblEqAttMobile.textContent = (val >= 0 ? '+' : '') + (val / 10).toFixed(1) + ' dB';
-          if (typeof currentEqTarget === 'number') {
-            sendCommand(0x1D, 0x00, currentEqTarget, val, true);
-          }
+          const cur = (eq && Number.isFinite(eq.attenuator)) ? eq.attenuator : 0;
+          applyMobileAttValue(cur - 10);
         });
-        rngEqAttMobile.addEventListener('change', (e) => {
-          const val = parseInt(e.target.value, 10);
-          if (typeof currentEqTarget === 'number') {
-            sendCommand(0x1D, 0x00, currentEqTarget, val, false);
-          }
+      }
+      if (btnIncEqAttMobile) {
+        btnIncEqAttMobile.addEventListener('click', () => {
+          const eq = getEqData(currentEqTarget);
+          const cur = (eq && Number.isFinite(eq.attenuator)) ? eq.attenuator : 0;
+          applyMobileAttValue(cur + 10);
         });
       }
       if (btnZeroEqAttMobile) {
         btnZeroEqAttMobile.addEventListener('click', () => {
-          const eq = getEqData(currentEqTarget);
-          if (eq) eq.attenuator = 0;
-          if (rngEqAttMobile) rngEqAttMobile.value = 0;
-          if (lblEqAttMobile) lblEqAttMobile.textContent = '0.0 dB';
-          if (typeof currentEqTarget === 'number') {
-            sendCommand(0x1D, 0x00, currentEqTarget, 0, false);
-          }
+          applyMobileAttValue(0);
         });
       }
 

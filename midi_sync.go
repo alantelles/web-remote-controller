@@ -684,13 +684,17 @@ func generateChannelFXTargets(targetKey string) []paramTarget {
 
 	if chIdx >= 0 && chIdx < 32 {
 		ch := byte(chIdx)
+		targets = append(targets, paramTarget{element: 0x1C, param: 0x00, channel: ch}) // Fader
+		targets = append(targets, paramTarget{element: 0x1A, param: 0x00, channel: ch}) // ON / MUTE
+		targets = append(targets, paramTarget{element: 0x1B, param: 0x00, channel: ch}) // PAN
 		targets = append(targets, paramTarget{element: 0x1D, param: 0x00, channel: ch}) // Attenuator
 		targets = append(targets, generateEQTargets(0x20, ch)...)
 		targets = append(targets, generateCompTargets(0x1F, ch)...)
 		targets = append(targets, generateGateTargets(0x21, ch)...)
-		// Envios Auxiliares 1 a 8 do canal (ON e Nível)
+		// Envios Auxiliares 1 a 8 do canal (ON, PRE/POST e Nível)
 		for auxIdx := 0; auxIdx < 8; auxIdx++ {
 			targets = append(targets, paramTarget{element: 0x23, param: byte(auxIdx * 3), channel: ch})     // Aux ON
+			targets = append(targets, paramTarget{element: 0x23, param: byte(auxIdx*3 + 1), channel: ch}) // Aux PRE/POST
 			targets = append(targets, paramTarget{element: 0x23, param: byte(auxIdx*3 + 2), channel: ch}) // Aux Level
 		}
 	}
@@ -811,6 +815,10 @@ func RequestChannelFXSync(targetKey string, paceDelay time.Duration) error {
 	log.Printf("[SYNC-FX] Sincronizando Rack de Efeitos para '%s' (%d itens)...", targetKey, len(targets))
 	_, err := executeSyncQueue(targets, fmt.Sprintf("Rack Efeitos %s", targetKey), paceDelay, 150*time.Millisecond)
 	FlushStateToDiskIfDirty()
+	broadcastWS(WSMessage{
+		Type:   "fx_sync",
+		Target: targetKey,
+	})
 	return err
 }
 
@@ -956,24 +964,10 @@ func runGRPoller(stopChan chan struct{}) {
 	midiLock.Unlock()
 
 	if hasMIDI {
-		// Na 01V96 cada Meter Request mantém o stream por ~10s; renovamos a cada 8s enquanto houver tela aberta.
-		sendGRMeterRequestsForTargets(getUniqueGRTargets())
-		ticker := time.NewTicker(8 * time.Second)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-stopChan:
-				return
-			case <-grPollRefreshChan:
-				sendGRMeterRequestsForTargets(getUniqueGRTargets())
-			case <-ticker.C:
-				targets := getUniqueGRTargets()
-				if len(targets) > 0 {
-					sendGRMeterRequestsForTargets(targets)
-				}
-			}
-		}
+		// A 01V96 física não emite GR via Remote Meter 0x21 fora do Studio Manager;
+		// evitamos tráfego MIDI desnecessário aguardando apenas o encerramento da subscrição.
+		<-stopChan
+		return
 	}
 
 	// Modo simulação (-sim / sem porta física): gera telemetria sintética apenas para canais com tela aberta
